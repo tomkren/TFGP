@@ -11,7 +11,6 @@ import java.util.List;
 
 public class Vertex {
 
-
     private final int id;
     private final String name;
     private final JSONObject params;
@@ -19,14 +18,17 @@ public class Vertex {
     private int nextFreeSlot;
     private double x, y;
 
+    private TypedDag innerDag;
+
     private static int nextId = 1; // todo pak udělat míň haxově
 
 
-    public Vertex(String boxName, JSONObject params) {
+    public Vertex(String boxName, JSONObject params, TypedDag innerDag) {
         id = nextId++;
         name = boxName;
 
         this.params = params;
+        this.innerDag = innerDag;
 
         successors = new ArrayList<>();
         nextFreeSlot = 0;
@@ -36,7 +38,7 @@ public class Vertex {
     }
 
     public Vertex(String boxName) {
-        this(boxName, new JSONObject());
+        this(boxName, new JSONObject(),null);
     }
 
     public Vertex pseudoCopy() {return new Vertex(this);}
@@ -46,6 +48,8 @@ public class Vertex {
         name = v.name;
 
         params = v.params;  // TODO může bejt nebezpečný, kdyby někdo měnil ty parametry!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+        innerDag = v.innerDag == null ? null : v.innerDag.copy();
 
         int n = v.successors.size();
         successors = new ArrayList<>(n); // ty nekopírujeme, pač tam chceme hluboký kopie
@@ -105,6 +109,17 @@ public class Vertex {
         sb.append("] ]");
     }
 
+    public static String indent(int i, String str) {
+        StringBuilder sb = new StringBuilder();
+        String[] parts = str.split("\\n");
+        for (String part : parts) {
+            for (int j = 0; j < i; j++) {sb.append(' ');}
+            sb.append(part);
+            sb.append('\n');
+        }
+        return sb.toString();
+    }
+
     public void toJson(StringBuilder sb) {
         int numInputs  = Math.max(1, nextFreeSlot);
         int numOutputs = Math.max(1, successors.size());
@@ -120,7 +135,10 @@ public class Vertex {
 
         String paramsStr = params.toString(); //"{}"; // TODO ??
 
-        sb.append("], [\"").append(name).append("\", ").append(paramsStr).append("], [");
+        String innerDagJson = innerDag == null ? "" : ",\n" + indent(6,innerDag.toJson()) ;
+
+
+        sb.append("], [\"").append(name).append("\", ").append(paramsStr).append(innerDagJson).append("], [");
 
         int i = 0;
         for (AB<Vertex,Integer> p : successors) {
@@ -145,14 +163,23 @@ public class Vertex {
         int numOutputs = Math.max(1, successors.size());
 
         sb.append("<o id=\"").append(getKutilId()).append("\"")
-                .append(" shape=\"f ").append(numInputs).append(' ').append(numOutputs).append(' ').append(name);
+                .append(" shape=\"f").append(innerDag == null ? "" : "_b").append(" ").append(numInputs).append(' ').append(numOutputs).append(' ').append(name);
 
         for (AB<Vertex,Integer> p : successors) {
             Vertex s = p._1();
             int port = p._2();
             sb.append(' ').append(s.getKutilId()).append(':').append(port);
         }
-        sb.append("\"").append("\t pos=\"").append(xPos).append(' ').append(yPos).append("\"").append("/>");
+        sb.append("\"").append("\t pos=\"").append(xPos).append(' ').append(yPos).append("\"").append(innerDag == null ? "/" : "").append(">");
+
+        if (innerDag != null) {
+
+            sb.append( indent(2,innerDag.toKutilXML(100,100)) );
+
+            sb.append("</o>");
+        }
+
+
     }
 
 

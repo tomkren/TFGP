@@ -8,11 +8,8 @@ import cz.tomkren.fishtron.terms.SmartSymbolWithParams;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.TypeTerm;
 import cz.tomkren.fishtron.types.Types;
-
 import cz.tomkren.utils.*;
-
 import org.json.JSONObject;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -26,13 +23,12 @@ public class TypedDag {
     private Type inType, outType;
     private int width, height;
 
-
-    public TypedDag(String name, Type inType, Type outType, JSONObject params) {
+    public TypedDag(String name, Type inType, Type outType, JSONObject params, TypedDag innerDag) {
 
         this.inType = inType;
         this.outType = outType;
 
-        Vertex v = new Vertex(name, params);
+        Vertex v = new Vertex(name, params, innerDag);
 
         ins  = makeInterfaceList(inType, v);
         outs = makeInterfaceList(outType, v);
@@ -42,7 +38,7 @@ public class TypedDag {
     }
 
     public TypedDag(String name, Type inType, Type outType) {
-        this(name, inType, outType, new JSONObject());
+        this(name, inType, outType, new JSONObject(), null);
     }
 
 
@@ -145,6 +141,54 @@ public class TypedDag {
     public static TypedDag split(TypedDag dag, MyList dagList) {
         return dag.copy().seri(fromMyList(dagList));
     }
+
+
+    // -- new in 0.5 --
+
+    public static TypedDag stacking(TypedDag stacker, TypedDag method) {
+        return stacker.copy().seri(method.copy());
+    }
+
+
+    /*
+
+    TypedDag.boosting( TypedDag: D => Boo , MyList: V (Boo => Boo) n , TypedDag : Boo => LD ) : D => LD",
+    booBegin : D => Boo
+    booEnd   : Boo => LD
+    booster  : Boo => Boo
+    */
+
+    public static TypedDag boosting(TypedDag booBegin, MyList boosterList, TypedDag booEnd) {
+        TypedDag boosterChain = fromBoosterList(boosterList);
+        return booBegin.copy().seri(boosterChain).seri(booEnd.copy());
+    }
+
+    public static final Type BooType = Types.parse("Boo");
+
+    public static TypedDag booster(TypedDag innerMethod) {
+        return new TypedDag("booster", BooType, BooType, new JSONObject(), innerMethod);
+    }
+
+    private static TypedDag fromBoosterList(MyList boosterList) {
+        List<TypedDag> boosters = boosterList.toList(TypedDag.class);
+        return serialList(boosters);
+    }
+
+    private static TypedDag serialList(List<TypedDag> dags) {
+        if (dags.isEmpty()) {return null;}
+
+        Iterator<TypedDag> it = dags.iterator();
+        TypedDag acc = it.next().copy();
+
+        while (it.hasNext()) {
+            acc = acc.seri(it.next().copy());
+        }
+        return acc;
+    }
+
+
+    // -- (end) new in 0.5
+
 
     public static TypedDag fromMyList(MyList dagList) {
         List<TypedDag> dags = dagList.toList(TypedDag.class);
@@ -304,7 +348,7 @@ public class TypedDag {
         Function<JSONObject,Comb0> params2comb = params -> (haxTypeInput -> {
             Type t = (Type) haxTypeInput.get(0);
             AA<Type> p = TypedDag.getBoxInOutTypes(t);
-            return new TypedDag(name, p._1(), p._2(), params);
+            return new TypedDag(name, p._1(), p._2(), params, null);
         });
 
 
