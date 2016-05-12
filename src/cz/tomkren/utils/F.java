@@ -14,8 +14,8 @@ import java.util.stream.Stream;
 
 public class F {
 
-    public static <A,B,C> Function<A,C> dot(Function<B,C> g,  Function<A,B> f) {
-        return x -> g.apply( f.apply(x) );
+    public static <A, B, C> Function<A, C> dot(Function<B, C> g, Function<A, B> f) {
+        return x -> g.apply(f.apply(x));
     }
 
 

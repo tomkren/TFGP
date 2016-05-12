@@ -1,0 +1,41 @@
+{
+
+  "serverUrl" : "http://127.0.0.1:8080",
+  "killServer": true,
+
+  "dataset" : "winequality-white.csv",
+
+  "numGenerations": 10,
+  "populationSize": 3,
+
+  "generatingMaxTreeSize":  15,
+
+  "tournamentBetterWinsProbability" : 0.8,
+  "saveBest" : true,
+
+  "basicTypedXover" : {"probability": 0.3 , "maxTreeSize": 50},
+  "sameSizeSubtreeMutation" : {"probability": 0.3, "maxSubtreeSize": 10},
+  "oneParamMutation" : {"probability" : 0.3, "shiftsWithProbabilities": [[-2, 0.1], [-1, 0.4], [1, 0.4], [2, 0.1]]},
+  "copyOp" : {"probability": 0.1},
+
+
+  "goalType" : "D => LD",
+
+  "lib" : [
+    "TypedDag.dia( TypedDag: D => D , TypedDag: D => (V LD n) , TypedDag: (V LD n) => LD ) : D => LD",
+    "TypedDag.dia0( TypedDag: D => (V LD n) , TypedDag: (V LD n) => LD ) : D => LD",
+    "TypedDag.split( TypedDag: D => (V D n) , MyList: V (D => LD) n ) : D => (V LD n)",
+    "MyList.cons( Object: a , MyList: V a n ) : V a (S n)",
+    "MyList.nil : V a 0",
+    "PCA : D => D",
+    "kBest : D => D",
+    "kMeans : D => (V D (S(S n)))",
+    "copy : D => (V D (S(S n)))",
+    "SVC        : D => LD",
+    "logR       : D => LD",
+    "gaussianNB : D => LD",
+    "DT         : D => LD",
+    "vote : (V LD (S(S n))) => LD"
+  ]
+
+}
