@@ -13,6 +13,7 @@ import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
 import cz.tomkren.fishtron.operators.RandomParamsPolyTreeGenerator;
 import cz.tomkren.fishtron.reusegen.QuerySolver;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -76,12 +77,15 @@ public class DagEvaTester {
             List<Object> objs = F.map(trees, PolyTree::computeValue);
             List<TypedDag> dags = F.map(objs, o -> (TypedDag)o);
             List<String> jsonTrees = F.map(dags, dag -> dag.toJson());
+            List<JSONArray> kutilJsonTrees = F.map(dags, dag -> dag.toKutilJson(0,0));
 
 
             logList("json", jsonTrees);
             logList("trees", trees);
             Log.it("num trees: "+ trees.size());
 
+
+            logList("Kutil json", kutilJsonTrees);
             //KutilMain.showDags(dags);
 
 

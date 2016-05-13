@@ -9,6 +9,7 @@ import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.TypeTerm;
 import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.utils.*;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -531,6 +532,12 @@ public class TypedDag {
         });
 
         return sb.toString();
+    }
+
+    public JSONArray toKutilJson(int xx, int yy) {
+        JSONArray ret = new JSONArray();
+        forEachVertex(v -> ret.put(v.toKutilJson(xx, yy)));
+        return ret;
     }
 
     public static String toJson(List<TypedDag> dags) {

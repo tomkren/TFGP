@@ -154,6 +154,41 @@ public class Vertex {
         sb.append("] ]");
     }
 
+    public JSONObject toKutilJson(int xx, int yy) {
+
+        JSONObject ret = new JSONObject();
+
+        int xPos = (int)((0.6+x) * X_1SIZE ) + xx;
+        int yPos = (int)((0.5+y) * Y_1SIZE ) + yy;
+
+        int numInputs  = Math.max(1, nextFreeSlot);
+        int numOutputs = Math.max(1, successors.size());
+
+        StringBuilder shape = new StringBuilder();
+
+        shape.append("f").append(" ").append(numInputs).append(' ').append(numOutputs).append(' ').append(name);
+
+        if (innerDag != null) {
+            shape.append(":#999999");
+        }
+
+        for (AB<Vertex,Integer> p : successors) {
+            Vertex s = p._1();
+            int port = p._2();
+            shape.append(' ').append(s.getKutilId()).append(':').append(port);
+        }
+
+        ret.put("id", getKutilId());
+        ret.put("shape", shape.toString());
+        ret.put("pos", xPos+" "+yPos);
+
+        if (innerDag != null) {
+            ret.put("inside", innerDag.toKutilJson(100,100));
+        }
+
+        return ret;
+    }
+
     public void toKutilXML(StringBuilder sb, int xx, int yy) {
 
         int xPos = (int)((0.6+x) * X_1SIZE ) + xx;
