@@ -89,9 +89,8 @@ public class DagEvaTester {
 
             //KutilMain.showDags(dags);
 
-            VisualisationClient visClient = new VisualisationClient("127.0.0.1", 4223);
-
-            visClient.showDags(dags);
+            //new VisualisationClient("127.0.0.1", 4223).showDags(dags);
+            new VisualisationClient("192.168.0.12", 4223).showDags(dags);
 
 
 
