@@ -5,6 +5,8 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
@@ -33,7 +35,7 @@ public class VisualisationClient {
     private String serverUrl;
     private int port;
 
-    private VisualisationClient(String serverUrl, int port) {
+    public VisualisationClient(String serverUrl, int port) {
         this.serverUrl = serverUrl;
         this.port = port;
     }
@@ -74,6 +76,45 @@ public class VisualisationClient {
         return serverState.toString();
     }
 
+
+
+    public void showDags(List<TypedDag> dags) {
+
+
+
+        int width = (int)( 18000 / Math.sqrt(1000) * Math.sqrt(dags.size()) ) ; //16000;
+        int okraj = 20;
+        int init  = 3*okraj;
+
+        int x = init;
+        int y = init;
+
+        int maxHeight = 0;
+
+        try {
+
+            sendCmd("clearInside $main");
+
+            for (TypedDag dag : dags) {
+
+                addArray( dag.toKutilJson(x,y) );
+
+                x += dag.getPxWidth() + okraj;
+
+                if (dag.getPxHeight() > maxHeight) {
+                    maxHeight = dag.getPxHeight();
+                }
+
+                if (x > width) {
+                    x = init;
+                    y += maxHeight + okraj;
+                }
+            }
+
+        } catch (Exception e) {
+            Log.err("(!!!) VisualisationClint exception : " + e.getMessage());
+        }
+    }
 
 
 }

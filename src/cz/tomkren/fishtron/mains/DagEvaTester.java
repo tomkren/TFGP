@@ -8,6 +8,7 @@ import cz.tomkren.fishtron.terms.SmartLibrary;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.fishtron.workflows.TypedDag;
+import cz.tomkren.fishtron.workflows.VisualisationClient;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
@@ -82,12 +83,15 @@ public class DagEvaTester {
 
             logList("json", jsonTrees);
             logList("trees", trees);
+            logList("kutil-json", kutilJsonTrees);
+
             Log.it("num trees: "+ trees.size());
 
-
-            logList("Kutil json", kutilJsonTrees);
             //KutilMain.showDags(dags);
 
+            VisualisationClient visClient = new VisualisationClient("127.0.0.1", 4223);
+
+            visClient.showDags(dags);
 
 
 

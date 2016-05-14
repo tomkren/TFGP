@@ -439,6 +439,19 @@ public class F {
         return new JSONArray(objs);
     }
 
+    public static JSONArray concat(List<JSONArray> arrs) {
+
+        JSONArray ret = new JSONArray();
+
+        for (JSONArray arr : arrs) {
+
+            for (int i = 0; i < arr.length(); i++) {
+                ret.put(arr.get(i));
+            }
+        }
+
+        return ret;
+    }
 
     public static int plus(int x,int y) {
         return x+y;
@@ -515,6 +528,8 @@ public class F {
 
 
         check.it( F.obj("key1","foo", "key2",42), "{\"key1\":\"foo\",\"key2\":42}" );
+
+        check.it( F.concat(list(F.arr(1,2,3),F.arr(4,5),F.arr(6,7,8)).get()) ,"[1,2,3,4,5,6,7,8]");
 
         check.results();
     }
