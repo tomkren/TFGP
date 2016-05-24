@@ -58,7 +58,7 @@ public class YampaAnt {
 
         int numRuns  = 1;
         int numGens  = 51;
-        int popSize  = 2000; // 1024
+        int popSize  = 1024; //2000; // 1024
 
         Selection<PolyTree> tournament2 = new Selection.Tournament<>(0.8, r);
 
