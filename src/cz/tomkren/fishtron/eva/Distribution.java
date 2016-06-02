@@ -22,6 +22,35 @@ public class Distribution<T extends Weighted> {
     private double pBest;
     private List<Consumer<T>> bestListeners;
 
+    //-- worst related stuff ---------------------------
+    // TODO není vhodná struktura pro takovou operaci, používá Population<Indiv> kerá by si zasloužila svou implementaci
+    // TODO nijak nemění best, tzn i když se zmenší na empty
+    public void removeWorst() {
+        int iWorst = getWorstIndex();
+        if (iWorst != -1) {
+            len--;
+            sum -= xs.get(iWorst).getWeight();
+            xs.remove(iWorst);
+        }
+    }
+
+    private int getWorstIndex() {
+        double wWorst = Double.MAX_VALUE;
+        int iWorst = -1;
+        int i = 0;
+        for (T x : xs) {
+            if (x.getWeight() < wWorst) {
+                wWorst = x.getWeight();
+                iWorst = i;
+            }
+            i++;
+        }
+        return iWorst;
+    }
+
+    //-----------------------------
+
+
 
 
     public List<T> getList() {
@@ -167,6 +196,8 @@ public class Distribution<T extends Weighted> {
             }
         }
     }
+
+
 
     private void checkP(double p) {
         if (p < 0) {

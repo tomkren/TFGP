@@ -6,7 +6,7 @@ import java.util.Random;
 
 /** Created by tom on 1. 6. 2016. */
 
-public class Evolver2<Indiv extends FitIndiv> implements PopulationSolver2<Indiv> {
+public abstract class BasicEvolverOpts<Indiv extends FitIndiv> implements EvolverOpts<Indiv> {
 
     private Random rand;
 
@@ -17,6 +17,7 @@ public class Evolver2<Indiv extends FitIndiv> implements PopulationSolver2<Indiv
     private Logger<Indiv> logger;
 
     private IndivGenerator<Indiv> generator;
+
 
 
 
