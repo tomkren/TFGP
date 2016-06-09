@@ -11,7 +11,6 @@ public abstract class BasicEvolverOpts<Indiv extends FitIndiv> implements Evolve
     private Random rand;
 
     private int numEvaluations;
-    private int popSize;
     private Selection<Indiv> selection;
     private Distribution<Operator<Indiv>> operators;
     private Logger<Indiv> logger;
@@ -23,7 +22,7 @@ public abstract class BasicEvolverOpts<Indiv extends FitIndiv> implements Evolve
 
     @Override public Random getRandom() {return rand;}
 
-    @Override public int getPopSize() {return popSize;}
+
     @Override public int getNumEvaluations() {return numEvaluations;}
     @Override public Selection<Indiv> getSelection() {return selection;}
     @Override public Distribution<Operator<Indiv>> getOperators() {return operators;}
