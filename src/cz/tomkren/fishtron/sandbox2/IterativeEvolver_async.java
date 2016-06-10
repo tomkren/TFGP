@@ -8,25 +8,26 @@ import cz.tomkren.utils.TODO;
 
 /** Created by user on 2. 6. 2016. */
 
-public class IterativeEvolver_async<Indiv extends FitIndiv> implements EvalCallback<Indiv> {
+public abstract class IterativeEvolver_async<Indiv extends FitIndiv> implements EvalCallback<Indiv> {
 
+    /*
     private EvolverOpts<Indiv> opts;
     private Population<Indiv> population;
     private int populationMaxSize;
 
     public IterativeEvolver_async(EvolverOpts<Indiv> opts) {
         this.opts = opts;
-        populationMaxSize = opts.maxPopulationSize();
+        populationMaxSize = opts.getMaxPopulationSize();
     }
 
-    /*
+
     public void run() {
 
         // TODO : načíst numEvaluations a oříznout podle toho evalPoolSize
 
         population = new Population<>(opts.getPopSize());
         opts.getGenerator().generate(opts.getEvalPoolSize()).forEach(this::evalIndividual);
-    }*/
+    }
 
 
     private void evalIndividual(Indiv indiv) {
@@ -52,4 +53,5 @@ public class IterativeEvolver_async<Indiv extends FitIndiv> implements EvalCallb
         Log.err(error);
         throw new Error(error);
     }
+    */
 }

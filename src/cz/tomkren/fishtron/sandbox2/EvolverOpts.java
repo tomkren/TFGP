@@ -9,30 +9,21 @@ import java.util.Random;
 
 interface EvolverOpts<Indiv extends FitIndiv> {
 
-    Random getRandom();
+    // Parameters
     int getNumEvaluations();
+    int getMinPopulationSize();
+    int getMaxPopulationSize();
+    boolean isUniquenessCheckPerform();
 
-    int maxPopulationSize();
-    int getMinPopulationSizeToOperate();
-
-    int getEvalPoolSize();
-
-    boolean performUniquenessCheck();
-    Selection<Indiv> getSelection();
-    Distribution<Operator<Indiv>> getOperators();
-
-    Logger<Indiv> getLogger();
-
+    // Generator
     IndivGenerator<Indiv> getGenerator();
 
-    void evalIndividual_async(Indiv indiv, EvalCallback<Indiv> callback);
+    // Evaluation
+    EvalManager<Indiv> getEvalManager();
 
-    void evalIndividual(Indiv indiv);
-
-    List<EvalResult<Indiv>> evalIndividuals(List<Indiv> indivs);
-
-
-    //default
-
+    // Selection, operators etc.
+    Selection<Indiv> getParentSelection();
+    Distribution<Operator<Indiv>> getOperators();
+    Random getRandom();
 
 }

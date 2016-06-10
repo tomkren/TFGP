@@ -8,26 +8,39 @@ import java.util.Random;
 
 public abstract class BasicEvolverOpts<Indiv extends FitIndiv> implements EvolverOpts<Indiv> {
 
+    private int numEvaluations ;
+    private int minPopulationSize ;
+    private int maxPopulationSize ;
+    private boolean isUniquenessCheckPerformed ;
+    private IndivGenerator<Indiv> generator;
+    private EvalManager<Indiv> evalManager;
+    private Selection<Indiv> parentSelection;
+    private Distribution<Operator<Indiv>> operators;
     private Random rand;
 
-    private int numEvaluations;
-    private Selection<Indiv> selection;
-    private Distribution<Operator<Indiv>> operators;
-    private Logger<Indiv> logger;
-
-    private IndivGenerator<Indiv> generator;
-
-
-
-
-    @Override public Random getRandom() {return rand;}
-
+    public BasicEvolverOpts(int numEvaluations, int minPopulationSize, int maxPopulationSize,
+                            boolean isUniquenessCheckPerformed, IndivGenerator<Indiv> generator,
+                            EvalManager<Indiv> evalManager, Selection<Indiv> parentSelection,
+                            Distribution<Operator<Indiv>> operators, Random rand) {
+        this.numEvaluations = numEvaluations;
+        this.minPopulationSize = minPopulationSize;
+        this.maxPopulationSize = maxPopulationSize;
+        this.isUniquenessCheckPerformed = isUniquenessCheckPerformed;
+        this.generator = generator;
+        this.evalManager = evalManager;
+        this.parentSelection = parentSelection;
+        this.operators = operators;
+        this.rand = rand;
+    }
 
     @Override public int getNumEvaluations() {return numEvaluations;}
-    @Override public Selection<Indiv> getSelection() {return selection;}
-    @Override public Distribution<Operator<Indiv>> getOperators() {return operators;}
-    @Override public Logger<Indiv> getLogger() {return logger;}
-
+    @Override public int getMinPopulationSize() {return minPopulationSize;}
+    @Override public int getMaxPopulationSize() {return maxPopulationSize;}
+    @Override public boolean isUniquenessCheckPerform() {return isUniquenessCheckPerformed;}
     @Override public IndivGenerator<Indiv> getGenerator() {return generator;}
+    @Override public EvalManager<Indiv> getEvalManager() {return evalManager;}
+    @Override public Selection<Indiv> getParentSelection() {return parentSelection;}
+    @Override public Distribution<Operator<Indiv>> getOperators() {return operators;}
+    @Override public Random getRandom() {return rand;}
 
 }
