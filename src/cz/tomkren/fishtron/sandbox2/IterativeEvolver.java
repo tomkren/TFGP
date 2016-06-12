@@ -24,47 +24,50 @@ public class IterativeEvolver<Indiv extends FitIndiv> {
         this.opts = opts;
     }
 
-    public void run() { // TODO promyslet esli fakt funguje...
+    // todo ještě to zkontrolovat ....
+    public void run() {
+        checkOptions();
 
         numSentIndividuals = 0;
         numEvaluatedIndividuals = 0;
-
         makeEmptyPopulation();
+        EvalResult<Indiv> evalResult = null;
 
-        EvalResult<Indiv> evalResult;
 
-        do {
-            evalResult = sendToEval(generateIndividuals());
-            updatePopulation(evalResult);
-        } while(isGeneratingNeeded());
-
-        while (isOperatingNeeded()) {
-            boolean makeMoreChildren = isPopulationLargeEnough() && isSendingNeeded();
-            evalResult = makeMoreChildren ? sendToEval(makeChildren(evalResult)) : justAskForResults();
+        while (isEvaluationUnfinished()) {
+            if (isGeneratingNeeded()) {
+                evalResult = sendToEval(generateIndividuals(evalResult));
+            } else if (isPopulationLargeEnoughForOperating() && isSendingNeeded()) {
+                evalResult = sendToEval(makeChildren(evalResult));
+            } else {
+                evalResult = justAskForResults();
+            }
             updatePopulation(evalResult);
         }
 
-
     }
 
-
+    private void checkOptions() {
+        if (opts.getNumIndividualsToGenerate() < opts.getMinPopulationSizeToOperate()) {
+            throw new Error("Evolver Options Check FAIL: numIndividualsToGenerate < minPopulationSizeToOperate");
+        }
+    }
+    
     private void makeEmptyPopulation() {
         population = new Population<>(opts.isUniquenessCheckPerform());
     }
 
-    private List<Indiv> generateIndividuals() {
-        int yetToGenerate = opts.getMinPopulationSize() - numSentIndividuals;
-        int numToGenerate = Math.min(opts.getEvalManager().getEvalPoolSize(yetToGenerate), yetToGenerate);
+    private List<Indiv> generateIndividuals(EvalResult<Indiv> evalResult) {
+        int yetToGenerate = opts.getNumIndividualsToGenerate() - numSentIndividuals;
+        int evaluatorCapabilities = evalResult == null ? opts.getEvalManager().getEvalPoolSize(yetToGenerate) : evalResult.getNumRequestedIndividuals();
+        int numToGenerate = Math.min(evaluatorCapabilities, yetToGenerate);
         return opts.getGenerator().generate(numToGenerate);
     }
 
-    private boolean isGeneratingNeeded() {return numSentIndividuals < opts.getMinPopulationSize();}
-
-    private boolean isOperatingNeeded() {return numEvaluatedIndividuals < opts.getNumEvaluations();}
-
-    private boolean isSendingNeeded() {return numSentIndividuals < opts.getNumEvaluations();}
-
-    private boolean isPopulationLargeEnough() {return numEvaluatedIndividuals >= opts.getMinPopulationSize();}
+    private boolean isEvaluationUnfinished()              {return numEvaluatedIndividuals < opts.getNumEvaluations();}
+    private boolean isGeneratingNeeded()                  {return numSentIndividuals < opts.getNumIndividualsToGenerate();}
+    private boolean isPopulationLargeEnoughForOperating() {return numEvaluatedIndividuals >= opts.getMinPopulationSizeToOperate();}
+    private boolean isSendingNeeded()                     {return numSentIndividuals < opts.getNumEvaluations();}
 
     private EvalResult<Indiv> sendToEval(List<Indiv> indivs) {
         numSentIndividuals += indivs.size();
@@ -89,17 +92,6 @@ public class IterativeEvolver<Indiv extends FitIndiv> {
         }
     }
 
-    private List<Indiv> selectParents(int numParents) {
-        List<Indiv> parents = new ArrayList<>(numParents);
-
-        Distribution<Indiv> popDistrib = population.getDistribution();
-        for (int i=0; i<numParents; i++) {
-            parents.add(opts.getParentSelection().select(popDistrib));
-        }
-
-        return parents;
-    }
-
     private List<Indiv> makeChildren(EvalResult<Indiv> evalResult) {
 
         int requestedByEvaluator = evalResult.getNumRequestedIndividuals();
@@ -117,6 +109,16 @@ public class IterativeEvolver<Indiv extends FitIndiv> {
         return F.take(numChildren, children);
     }
 
+    private List<Indiv> selectParents(int numParents) {
+        List<Indiv> parents = new ArrayList<>(numParents);
+
+        Distribution<Indiv> popDistribution = population.getDistribution();
+        for (int i=0; i<numParents; i++) {
+            parents.add(opts.getParentSelection().select(popDistribution));
+        }
+
+        return parents;
+    }
 
 
 

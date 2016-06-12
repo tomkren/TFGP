@@ -6,10 +6,11 @@ import java.util.Random;
 
 /** Created by tom on 1. 6. 2016. */
 
-public abstract class BasicEvolverOpts<Indiv extends FitIndiv> implements EvolverOpts<Indiv> {
+public class BasicEvolverOpts<Indiv extends FitIndiv> implements EvolverOpts<Indiv> {
 
     private int numEvaluations ;
-    private int minPopulationSize ;
+    private int minPopulationSizeToOperate;
+    private int numIndividualsToGenerate;
     private int maxPopulationSize ;
     private boolean isUniquenessCheckPerformed ;
     private IndivGenerator<Indiv> generator;
@@ -18,12 +19,13 @@ public abstract class BasicEvolverOpts<Indiv extends FitIndiv> implements Evolve
     private Distribution<Operator<Indiv>> operators;
     private Random rand;
 
-    public BasicEvolverOpts(int numEvaluations, int minPopulationSize, int maxPopulationSize,
+    public BasicEvolverOpts(int numEvaluations, int minPopulationSizeToOperate, int numIndividualsToGenerate, int maxPopulationSize,
                             boolean isUniquenessCheckPerformed, IndivGenerator<Indiv> generator,
                             EvalManager<Indiv> evalManager, Selection<Indiv> parentSelection,
                             Distribution<Operator<Indiv>> operators, Random rand) {
         this.numEvaluations = numEvaluations;
-        this.minPopulationSize = minPopulationSize;
+        this.minPopulationSizeToOperate = minPopulationSizeToOperate;
+        this.numIndividualsToGenerate = numIndividualsToGenerate;
         this.maxPopulationSize = maxPopulationSize;
         this.isUniquenessCheckPerformed = isUniquenessCheckPerformed;
         this.generator = generator;
@@ -34,7 +36,8 @@ public abstract class BasicEvolverOpts<Indiv extends FitIndiv> implements Evolve
     }
 
     @Override public int getNumEvaluations() {return numEvaluations;}
-    @Override public int getMinPopulationSize() {return minPopulationSize;}
+    @Override public int getMinPopulationSizeToOperate() {return minPopulationSizeToOperate;}
+    @Override public int getNumIndividualsToGenerate() {return numIndividualsToGenerate;}
     @Override public int getMaxPopulationSize() {return maxPopulationSize;}
     @Override public boolean isUniquenessCheckPerform() {return isUniquenessCheckPerformed;}
     @Override public IndivGenerator<Indiv> getGenerator() {return generator;}

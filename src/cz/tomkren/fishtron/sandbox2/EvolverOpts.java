@@ -11,7 +11,8 @@ interface EvolverOpts<Indiv extends FitIndiv> {
 
     // Parameters
     int getNumEvaluations();
-    int getMinPopulationSize();
+    int getNumIndividualsToGenerate();
+    int getMinPopulationSizeToOperate();
     int getMaxPopulationSize();
     boolean isUniquenessCheckPerform();
 
