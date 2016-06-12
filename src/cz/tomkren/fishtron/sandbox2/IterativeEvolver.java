@@ -25,6 +25,7 @@ public class IterativeEvolver<Indiv extends FitIndiv> {
     }
 
     public void run() { // TODO promyslet esli fakt funguje...
+
         numSentIndividuals = 0;
         numEvaluatedIndividuals = 0;
 
@@ -37,30 +38,13 @@ public class IterativeEvolver<Indiv extends FitIndiv> {
             updatePopulation(evalResult);
         } while(isGeneratingNeeded());
 
-        while (isEvaluationNeeded()) {
-            boolean doMakeChildren = isPopulationLargeEnough() && isSendingNeeded();
-            evalResult = doMakeChildren ? sendToEval(makeChildren(evalResult)) : justAskForResults();
+        while (isOperatingNeeded()) {
+            boolean makeMoreChildren = isPopulationLargeEnough() && isSendingNeeded();
+            evalResult = makeMoreChildren ? sendToEval(makeChildren(evalResult)) : justAskForResults();
             updatePopulation(evalResult);
         }
 
 
-    }
-
-    public void run_old() {
-
-        numSentIndividuals = 0;
-        numEvaluatedIndividuals = 0;
-
-        makeEmptyPopulation();
-
-        EvalResult<Indiv> evalResult = sendToEval(generateIndividuals());
-        updatePopulation(evalResult);
-
-        while (isEvaluationNeeded()) {
-            boolean doMakeChildren = isPopulationLargeEnough() && isSendingNeeded();
-            evalResult = doMakeChildren ? sendToEval(makeChildren(evalResult)) : justAskForResults();
-            updatePopulation(evalResult);
-        }
     }
 
 
@@ -69,30 +53,18 @@ public class IterativeEvolver<Indiv extends FitIndiv> {
     }
 
     private List<Indiv> generateIndividuals() {
-        int yetToGenerate = opts.getMinPopulationSize() - population.size();
+        int yetToGenerate = opts.getMinPopulationSize() - numSentIndividuals;
         int numToGenerate = Math.min(opts.getEvalManager().getEvalPoolSize(yetToGenerate), yetToGenerate);
         return opts.getGenerator().generate(numToGenerate);
     }
 
-    private boolean isGeneratingNeeded() {
-        return !isPopulationLargeEnough();
-    }
+    private boolean isGeneratingNeeded() {return numSentIndividuals < opts.getMinPopulationSize();}
 
-    private boolean isEvaluationNeeded() {
-        return numEvaluatedIndividuals < opts.getNumEvaluations();
-    }
+    private boolean isOperatingNeeded() {return numEvaluatedIndividuals < opts.getNumEvaluations();}
 
-    // TODO | může nastat, že už se mi vrátili všecky evaluovaný, ale initalPoolSize byl debilně nastavenej
-    // todo | pod minPopulationSize a tak to bude v nekonečnym loopu, tady se to dá opravit tim,
-    // todo | že si spočtem pokud už se všecky vrátili, tak má cenu porušit minPopulation limit
-    // todo | Ještě Lépe však: dogenerovat!
-    private boolean isPopulationLargeEnough() {
-        return population.size() >= opts.getMinPopulationSize();
-    }
+    private boolean isSendingNeeded() {return numSentIndividuals < opts.getNumEvaluations();}
 
-    private boolean isSendingNeeded() {
-        return numSentIndividuals < opts.getNumEvaluations();
-    }
+    private boolean isPopulationLargeEnough() {return numEvaluatedIndividuals >= opts.getMinPopulationSize();}
 
     private EvalResult<Indiv> sendToEval(List<Indiv> indivs) {
         numSentIndividuals += indivs.size();
