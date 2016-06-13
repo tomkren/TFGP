@@ -17,13 +17,29 @@ import java.util.Random;
 public class YampaAnt2 {
 
     public static void main(String[] args) {
+        main2(args);
+    }
+
+    public static void main2(String[] args) {
+
+        EvolutionOpts<PolyTree> opts = new JsonEvolutionOpts();
+        Logger<PolyTree> logger = new Logger.Basic<>(opts);
+        Evolution<PolyTree> eva = new Evolution<>(opts, logger);
+
+        eva.startIterativeEvolution(1);
+        //eva.startGenerationsEvolution(1);
+
+    }
+
+    public static void main1(String[] args) {
+
         Checker ch = new Checker(); // was nice seed : -3867518765423581920L
         Random r = ch.getRandom();
 
-        String serverUrl = "http://localhost:4242";
+        String evalServerUrl = "http://localhost:4242/";
 
         SmartLibrary lib = AntLibs.koza;
-        EvalManager<PolyTree> eval = new NetworkEvalManager<>("getEvalPoolSize","evalAnts_2", "http://localhost:4242/", x->x);
+        EvalManager<PolyTree> eval = new NetworkEvalManager<>("getEvalPoolSize","evalAnts_2", evalServerUrl, x->x);
 
         //int numRuns  = 1;
         int numGens  = 51;
