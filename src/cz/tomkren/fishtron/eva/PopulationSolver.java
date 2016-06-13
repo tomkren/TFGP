@@ -1,11 +1,10 @@
 package cz.tomkren.fishtron.eva;
 
 import cz.tomkren.utils.F;
-import cz.tomkren.utils.Weighted;
 
 import java.util.*;
 
-public interface PopulationSolver<Indiv extends Weighted> {
+public interface PopulationSolver<Indiv extends FitIndiv> {
 
     Random getRandom();
     int getNumRuns();

@@ -1,17 +1,38 @@
 package cz.tomkren.fishtron.eva;
 
+import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
 import cz.tomkren.utils.Log;
 import cz.tomkren.utils.Weighted;
 
 import java.util.List;
 
-public interface Logger<Indiv extends Weighted> {
+public interface Logger<Indiv extends FitIndiv> {
     void logPop(int run, int generation, EvaledPop<Indiv> pop);
     void logErrorIndivs(int generation, List<Object> errorIndivs);
     default void logRun(int run) {}
+    default void iterativeLog(int run, int evaluationIndex, EvaledPop<Indiv> pop) {}
 
 
-    class Basic<Indiv extends Weighted> implements Logger<Indiv> {
+    class Basic<Indiv extends FitIndiv> implements Logger<Indiv> {
+
+        private EvolutionOpts<Indiv> opts;
+
+        public Basic(EvolutionOpts<Indiv> opts) {
+            this.opts = opts;
+        }
+
+        public Basic() {
+            this(null);
+        }
+
+        @Override
+        public void iterativeLog(int run, int evaluationIndex, EvaledPop<Indiv> pop) {
+
+            Indiv best = pop.getBestIndividual();
+            Log.it("eval # "+evaluationIndex+ (opts==null ? "" : " / "+opts.getNumEvaluations() ) +", best :"+best.getWeight());
+            Log.itln("  "+best.toString());
+
+        }
 
         @Override
         public void logRun(int run) {

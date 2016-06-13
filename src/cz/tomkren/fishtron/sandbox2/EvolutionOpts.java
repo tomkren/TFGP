@@ -7,14 +7,15 @@ import java.util.Random;
 
 /** Created by tom on 1. 6. 2016.*/
 
-interface EvolverOpts<Indiv extends FitIndiv> {
+public interface EvolutionOpts<Indiv extends FitIndiv> {
 
-    // Parameters
+    // Simple Parameters
     int getNumEvaluations();
     int getNumIndividualsToGenerate();
     int getMinPopulationSizeToOperate();
     int getMaxPopulationSize();
     boolean isUniquenessCheckPerform();
+    boolean saveBest();
 
     // Generator
     IndivGenerator<Indiv> getGenerator();
