@@ -50,10 +50,10 @@ public class JsonEvolutionOpts implements EvolutionOpts<PolyTree>  {
         if (seed == null) {config.put("seed", checker.getSeed());}
         Random rand = checker.getRandom();
 
-        // TODO !!! ....................................................................................................
+
+        //--------------------------------------------
 
         String problem = getString(config, "problem", "YampaAnt"); // todo TEMPORARY HAX
-
 
         SmartLibrary lib;
         IndivGenerator<PolyTree> generator;
@@ -75,12 +75,12 @@ public class JsonEvolutionOpts implements EvolutionOpts<PolyTree>  {
 
         } else {
 
-            // TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            evalManager = new NetworkEvalManager<>("getEvalPoolSize","fakeIterativeEval", evalServerUrl, x->x);
+
+            evalManager = new NetworkEvalManager<>("getEvalPoolSize","fakeIterativeEval", evalServerUrl, x->x); // TODO !!!!!!!!!!!!!!      !!!!!!!!!!!!!!!
 
 
             String classPrefix = "cz.tomkren.fishtron.workflows."; //TODO přesunout do configu
-            JSONObject allParamsInfo = DagEvaTester.testParamsInfo; // TODO !!!!  fake data need to download
+            JSONObject allParamsInfo = DagEvaTester.testParamsInfo; // TODO !!!!  fake data, need to download the real one ----- !!!
 
             String goalTypeStr = getString(config, "goalType", "D => LD");
 
