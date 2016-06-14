@@ -35,8 +35,14 @@ public class OneParamMutation extends PolyTreeMutation {
         this(operatorProbability, rand, parseShiftsWithProbabilities(shiftsWithProbabilities_json));
     }
 
+    // todo odpreparovat..
+    @Deprecated
     public OneParamMutation(JSONObject config,Random rand) {
         this(config.getJSONObject("oneParamMutation").getDouble("probability"),rand, config.getJSONObject("oneParamMutation").getJSONArray("shiftsWithProbabilities"));
+    }
+
+    public OneParamMutation(Random rand, JSONObject opts) {
+        this(opts.getDouble("probability"),rand, opts.getJSONArray("shiftsWithProbabilities"));
     }
 
 

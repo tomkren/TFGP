@@ -35,8 +35,14 @@ public class SameSizeSubtreeMutation extends PolyTreeMutation {
         rand = querySolver.getRand();
     }
 
+    // TODO odpreparovat tento konstruktor...
+    @Deprecated
     public SameSizeSubtreeMutation(JSONObject config, QuerySolver querySolver) {
         this(config.getJSONObject("sameSizeSubtreeMutation").getDouble("probability"), querySolver, config.getJSONObject("sameSizeSubtreeMutation").getInt("maxSubtreeSize"));
+    }
+
+    public SameSizeSubtreeMutation(QuerySolver querySolver, JSONObject opts) {
+        this(opts.getDouble("probability"), querySolver, opts.getInt("maxSubtreeSize"));
     }
 
     public PolyTree mutate(PolyTree tree) {

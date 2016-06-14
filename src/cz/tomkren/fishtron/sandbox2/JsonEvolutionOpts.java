@@ -10,6 +10,8 @@ import cz.tomkren.fishtron.terms.SmartLibrary;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.utils.Checker;
+import cz.tomkren.utils.F;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.Arrays;
@@ -80,18 +82,69 @@ public class JsonEvolutionOpts implements EvolutionOpts<PolyTree>  {
             String classPrefix = "cz.tomkren.fishtron.workflows."; //TODO přesunout do configu
             JSONObject allParamsInfo = DagEvaTester.testParamsInfo; // TODO !!!!  fake data need to download
 
-            lib = SmartLibrary.mk(classPrefix, allParamsInfo, config.getJSONArray("lib"));
+            String goalTypeStr = getString(config, "goalType", "D => LD");
 
-            Type goalType = Types.parse(config.getString("goalType"));
+            JSONArray jsonLib = getJSONArray(config, "lib", F.arr(
+                    "TypedDag.dia( TypedDag: D => D , TypedDag: D => (V LD n) , TypedDag: (V LD n) => LD ) : D => LD",
+                    "TypedDag.dia0( TypedDag: D => (V LD n) , TypedDag: (V LD n) => LD ) : D => LD",
+                    "TypedDag.split( TypedDag: D => (V D n) , MyList: V (D => LD) n ) : D => (V LD n)",
+                    "MyList.cons( Object: a , MyList: V a n ) : V a (S n)",
+                    "MyList.nil : V a 0",
+
+                    "PCA : D => D",
+                    "kBest : D => D",
+                    "kMeans : D => (V D (S(S n)))",
+                    "copy : D => (V D (S(S n)))",
+                    "SVC        : D => LD",
+                    "logR       : D => LD",
+                    "gaussianNB : D => LD",
+                    "DT         : D => LD",
+                    "vote : (V LD (S(S n))) => LD",
+
+                    "TypedDag.stacking( TypedDag: (V LD n) => D , TypedDag: D => LD ) : (V LD n) => LD",
+                    "stacker : (V LD (S(S n))) => D",
+
+                    "TypedDag.boosting( TypedDag: D => Boo , MyList: V (Boo => Boo) (S(S n)) , TypedDag : Boo => LD ) : D => LD",
+                    "booBegin : D => Boo",
+                    "TypedDag.booster( TypedDag : D => LD ) : Boo => Boo",
+                    "booEnd   : Boo => LD"
+            ));
+
+            int generatingMaxTreeSize = getInt(config, "generatingMaxTreeSize", 37);
+            double tournamentBetterWinsProbability = getDouble(config, "tournamentBetterWinsProbability", 0.8);
+
+            JSONObject basicTypedXoverOpts = getJSONObject(config, "basicTypedXover", F.obj(
+                    "probability", 0.3,
+                    "maxTreeSize", 50
+            )); // TODO předělat na xoverOpts, typ nemusí bejt takle debilně v názvu položky přece, obdobně u následujících několika
+
+            JSONObject sameSizeSubtreeMutationOpts = getJSONObject(config, "sameSizeSubtreeMutation", F.obj(
+                    "probability", 0.3,
+                    "maxSubtreeSize", 10
+            ));
+
+            JSONObject oneParamMutationOpts = getJSONObject(config, "oneParamMutation", F.obj(
+                    "probability", 0.3,
+                    "shiftsWithProbabilities", F.arr(F.arr(-2, 0.1), F.arr(-1, 0.4), F.arr(1, 0.4), F.arr(2, 0.1))
+            ));
+
+            JSONObject copyOpOpts = getJSONObject(config, "copyOp", F.obj(
+                    "probability", 0.1
+            ));
+
+
+            lib = SmartLibrary.mk(classPrefix, allParamsInfo, jsonLib);
+
+            Type goalType = Types.parse(goalTypeStr);
             QuerySolver querySolver = new QuerySolver(lib, rand);
 
-            generator = new RandomParamsPolyTreeGenerator(goalType, config.getInt("generatingMaxTreeSize"), querySolver);
-            parentSelection = new Selection.Tournament<>(config.getDouble("tournamentBetterWinsProbability"), rand);
+            generator = new RandomParamsPolyTreeGenerator(goalType, generatingMaxTreeSize, querySolver);
+            parentSelection = new Selection.Tournament<>(tournamentBetterWinsProbability, rand);
             operators = new Distribution<>(Arrays.asList(
-                    new BasicTypedXover(config, rand),
-                    new SameSizeSubtreeMutation(config, querySolver),
-                    new OneParamMutation(config, rand),
-                    new CopyOp<>(config)
+                    new BasicTypedXover(rand, basicTypedXoverOpts),
+                    new SameSizeSubtreeMutation(querySolver, sameSizeSubtreeMutationOpts),
+                    new OneParamMutation(rand, oneParamMutationOpts),
+                    CopyOp.mk(copyOpOpts)
             ));
 
         }
@@ -115,8 +168,20 @@ public class JsonEvolutionOpts implements EvolutionOpts<PolyTree>  {
         return getValue(config,key,defaultValue, JSONObject::getInt);
     }
 
+    private static double getDouble(JSONObject config, String key, double defaultValue) {
+        return getValue(config,key,defaultValue, JSONObject::getDouble);
+    }
+
     private static boolean getBoolean(JSONObject config, String key, boolean defaultValue) {
         return getValue(config,key,defaultValue, JSONObject::getBoolean);
+    }
+
+    private static JSONObject getJSONObject(JSONObject config, String key, JSONObject defaultValue) {
+        return getValue(config,key,defaultValue, JSONObject::getJSONObject);
+    }
+
+    private static JSONArray getJSONArray(JSONObject config, String key, JSONArray defaultValue) {
+        return getValue(config,key,defaultValue, JSONObject::getJSONArray);
     }
 
     private static <A> A getValue(JSONObject config, String key, A defaultValue, BiFunction<JSONObject, String, A> accessFun) {

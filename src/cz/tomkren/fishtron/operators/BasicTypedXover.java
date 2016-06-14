@@ -32,9 +32,20 @@ public class BasicTypedXover implements Operator<PolyTree> {
         this.rand = rand;
     }
 
+    // TODO : nesmyslně předávat celej konfig, lepší předat jen ten opts JsonObject, aby se nerozbil starej kód tak dočasně vyřešíme
+    // todo : prohozenim parametrů
+
+    @Deprecated
     public BasicTypedXover(JSONObject config, Random rand) {
         this(config.getJSONObject("basicTypedXover").getDouble("probability"),config.getJSONObject("basicTypedXover").getInt("maxTreeSize"),rand);
     }
+
+    // Preferovaná verze, todo odebrat tu starou deprekovanou !
+    public BasicTypedXover(Random rand, JSONObject opts) {
+        this(opts.getDouble("probability"),opts.getInt("maxTreeSize"),rand);
+    }
+
+
 
     public AA<PolyTree> xover(PolyTree mum, PolyTree dad) {
 
