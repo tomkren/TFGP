@@ -2,6 +2,7 @@ package cz.tomkren.fishtron.server;
 
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
+import cz.tomkren.utils.ResourceLoader;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
@@ -54,19 +55,22 @@ public class EvolutionServer extends AbstractHandler {
         String encodedQueryString = request.getQueryString();
 
         Object responseToCmd;
+        String cmdNameStr = CmdName.getHtml.name();
 
         if (encodedQueryString != null) {
 
             String decodedQueryStr = URLDecoder.decode(encodedQueryString, "UTF-8");
             try {
                 JSONArray jsonCmd = new JSONArray(decodedQueryStr);
-                responseToCmd = runCmd(jsonCmd.getString(0), jsonCmd.get(1));
+                cmdNameStr = jsonCmd.getString(0);
+                responseToCmd = runCmd(cmdNameStr, jsonCmd.get(1));
             } catch (Exception e) {
-                responseToCmd = runCmd(decodedQueryStr, new JSONObject());
+                cmdNameStr = decodedQueryStr;
+                responseToCmd = runCmd(cmdNameStr, new JSONObject());
             }
 
         } else {
-            responseToCmd = defaultResponse();
+            responseToCmd = defaultResponse(new JSONObject());
         }
 
         String finalResponseStr;
@@ -75,7 +79,10 @@ public class EvolutionServer extends AbstractHandler {
             response.setContentType("application/json;charset=utf-8");
         } else {
             finalResponseStr = responseToCmd.toString();
-            response.setContentType("text/plain;charset=utf-8");
+
+            if (cmdNameStr.equals(CmdName.getHtml.name())) {
+                response.setContentType("text/html;charset=utf-8");
+            }
         }
 
         response.setStatus(HttpServletResponse.SC_OK);
@@ -83,17 +90,17 @@ public class EvolutionServer extends AbstractHandler {
         response.getWriter().println(finalResponseStr);
     }
 
-    private Object defaultResponse() {
-        return runCmd(CmdName.getApi, null);
+    private Object defaultResponse(Object arg) {
+        return runCmd(CmdName.getHtml, arg);
     }
 
-    private enum CmdName {getApi, makeJob, jobInfo, jobsInfo, jobLog};
+    private enum CmdName {getApi, makeJob, jobInfo, jobsInfo, jobLog, getHtml};
 
     private Object runCmd(String cmdName, Object arg) {
         try {
             return runCmd(CmdName.valueOf(cmdName), arg);
         } catch (IllegalArgumentException e) {
-            return defaultResponse();
+            return defaultResponse(arg);
         }
     }
 
@@ -104,8 +111,9 @@ public class EvolutionServer extends AbstractHandler {
             case jobInfo:  return jobInfo(arg);
             case jobsInfo: return jobsInfo(arg);
             case jobLog:   return jobLog(arg);
+            case getHtml:  return getHtml(arg);
             case getApi:   return getApi();
-            default :      return defaultResponse();
+            default :      return defaultResponse(arg);
         }
     }
 
@@ -116,6 +124,7 @@ public class EvolutionServer extends AbstractHandler {
                 CmdName.jobInfo.toString() , F.obj("info", "Returns info about the requested job."),
                 CmdName.jobsInfo.toString(), F.obj("info", "Returns info about all created jobs."),
                 CmdName.jobLog.toString()  , F.obj("info", "Returns log for the requested job."),
+                CmdName.getHtml.toString() , F.obj("info", "Returns html control page."),
                 CmdName.getApi.toString()  , F.obj("info", "Returns this api.")
         ));
     }
@@ -197,6 +206,14 @@ public class EvolutionServer extends AbstractHandler {
         } else {
             return "error: You must specify an (int) jobId, instead you supplied: "+arg;
         }
+    }
+
+    public static final String HTML_HOME = "/cz/tomkren/fishtron/server/index.html";
+
+    private String getHtml(Object arg){
+
+        return new ResourceLoader().loadString(HTML_HOME);
+
     }
 
     public static void main(String[] args) throws Exception {
