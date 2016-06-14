@@ -27,6 +27,8 @@ import java.util.Random;
 
 public class DagEvaTester {
 
+    public static final JSONObject testParamsInfo = new JSONObject("{\"DT\": {\"min_samples_split\": [1, 2, 5, 10, 20], \"criterion\": [\"gini\", \"entropy\"], \"max_features\": [0.05, 0.1, 0.25, 0.5, 0.75, 1], \"min_samples_leaf\": [1, 2, 5, 10, 20], \"max_depth\": [1, 2, 5, 10, 15, 25, 50, 100]}, \"gaussianNB\": {}, \"SVC\": {\"gamma\": [0.0, 0.0001, 0.001, 0.01, 0.1, 0.5], \"C\": [0.1, 0.5, 1.0, 2, 5, 10, 15], \"tol\": [0.0001, 0.001, 0.01]}, \"union\": {}, \"copy\": {}, \"PCA\": {\"feat_frac\": [0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1], \"whiten\": [false, true]}, \"logR\": {\"penalty\": [\"l1\", \"l2\"], \"C\": [0.1, 0.5, 1.0, 2, 5, 10, 15], \"tol\": [0.0001, 0.001, 0.01]}, \"kMeans\": {}, \"kBest\": {\"feat_frac\": [0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1]}, \"vote\": {}}");
+
 
     public static void main(String[] args) {
 
@@ -36,8 +38,8 @@ public class DagEvaTester {
         //String jsonConfigFilename =  "configs/dageva/config_stacking2.json" ;
         //String jsonConfigFilename =  "configs/dageva/config_stackAndBoo.json" ;
         //String jsonConfigFilename =  "configs/dageva/config_stackAndBoo2.json" ;
-        String jsonConfigFilename =  "configs/dageva/config_stackAndBoo3.json" ;
-        //String jsonConfigFilename =  "configs/dageva/config_stackAndBoo4.json" ;
+        //String jsonConfigFilename =  "configs/dageva/config_stackAndBoo3.json" ;
+        String jsonConfigFilename =  "configs/dageva/config_stackAndBoo4.json" ;
 
 
         try {
@@ -54,12 +56,11 @@ public class DagEvaTester {
                 config.put("seed", checker.getSeed());
             }
 
-            String testParamsInfoStr = "{\"DT\": {\"min_samples_split\": [1, 2, 5, 10, 20], \"criterion\": [\"gini\", \"entropy\"], \"max_features\": [0.05, 0.1, 0.25, 0.5, 0.75, 1], \"min_samples_leaf\": [1, 2, 5, 10, 20], \"max_depth\": [1, 2, 5, 10, 15, 25, 50, 100]}, \"gaussianNB\": {}, \"SVC\": {\"gamma\": [0.0, 0.0001, 0.001, 0.01, 0.1, 0.5], \"C\": [0.1, 0.5, 1.0, 2, 5, 10, 15], \"tol\": [0.0001, 0.001, 0.01]}, \"union\": {}, \"copy\": {}, \"PCA\": {\"feat_frac\": [0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1], \"whiten\": [false, true]}, \"logR\": {\"penalty\": [\"l1\", \"l2\"], \"C\": [0.1, 0.5, 1.0, 2, 5, 10, 15], \"tol\": [0.0001, 0.001, 0.01]}, \"kMeans\": {}, \"kBest\": {\"feat_frac\": [0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1]}, \"vote\": {}}";
-            JSONObject allParamsInfo = new JSONObject(testParamsInfoStr);
+
 
             String classPrefix = "cz.tomkren.fishtron.workflows.";
 
-            SmartLibrary lib = SmartLibrary.mk(classPrefix, allParamsInfo, config.getJSONArray("lib"));
+            SmartLibrary lib = SmartLibrary.mk(classPrefix, testParamsInfo, config.getJSONArray("lib"));
             String goalTypeStr = config.getString("goalType");
             Type goalType = Types.parse(goalTypeStr);
             QuerySolver querySolver = new QuerySolver(lib, rand);
@@ -81,7 +82,7 @@ public class DagEvaTester {
             List<JSONArray> kutilJsonTrees = F.map(dags, dag -> dag.toKutilJson(0,0));
 
 
-            logList("json", jsonTrees);
+            logJsonTrees("json", jsonTrees);
             logList("trees", trees);
             logList("kutil-json", kutilJsonTrees);
 
@@ -89,8 +90,8 @@ public class DagEvaTester {
 
             //KutilMain.showDags(dags);
 
-            //new VisualisationClient("127.0.0.1", 4223).showDags(dags);
-            new VisualisationClient("192.168.0.12", 4223).showDags(dags);
+            new VisualisationClient("127.0.0.1", 4223).showDags(dags);
+            //new VisualisationClient("192.168.0.12", 4223).showDags(dags);
 
 
 
@@ -112,6 +113,33 @@ public class DagEvaTester {
         Log.it("<"+tag+" end>\n");
     }
 
+    private static void logJsonTrees(String tag, List<String> jsonTrees) {
+
+        StringBuilder sb = new StringBuilder();
+
+        int i = 1;
+        sb.append("[\n");
+        for (String s : jsonTrees) {
+
+            sb.append(s);
+
+            if (i<jsonTrees.size()) {
+                sb.append(",\n");
+            } else {
+                sb.append("\n]\n");
+            }
+
+            i++;
+        }
+
+        String res = sb.toString();
+
+        F.writeFile("dagz.json", res);
+
+        Log.it("<"+tag+" begin>");
+        Log.it(res);
+        Log.it("<"+tag+" end>\n");
+    }
 
 
 

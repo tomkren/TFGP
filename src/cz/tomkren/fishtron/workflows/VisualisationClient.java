@@ -61,7 +61,8 @@ public class VisualisationClient {
 
     private String sendCmd(String cmdStr) throws Exception {
 
-        URL url = new URL("http://"+ serverUrl +":"+ port +"/?resultFormat=json&cmd=" + URLEncoder.encode(cmdStr, "UTF-8"));
+        URL url = new URL("http://"+ serverUrl +":"+ port +
+                "/?emptyResponse=true&resultFormat=json&cmd=" + URLEncoder.encode(cmdStr, "UTF-8"));
 
         URLConnection conn = url.openConnection();
         BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));

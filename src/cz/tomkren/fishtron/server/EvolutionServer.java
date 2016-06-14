@@ -6,7 +6,6 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.ServletException;
@@ -113,9 +112,11 @@ public class EvolutionServer extends AbstractHandler {
     private JSONObject getApi() {
         return F.obj(
             "api", F.obj(
-                CmdName.makeJob.toString(), "TODO",
-                CmdName.jobInfo.toString(), "TODO2",
-                CmdName.getApi.toString() , "TODO0"
+                CmdName.makeJob.toString() , F.obj("info", "Creates new job, returns jobId."),
+                CmdName.jobInfo.toString() , F.obj("info", "Returns info about the requested job."),
+                CmdName.jobsInfo.toString(), F.obj("info", "Returns info about all created jobs."),
+                CmdName.jobLog.toString()  , F.obj("info", "Returns log for the requested job."),
+                CmdName.getApi.toString()  , F.obj("info", "Returns this api.")
         ));
     }
 

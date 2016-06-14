@@ -72,8 +72,8 @@ public class NetworkEvalManager<Indiv extends FitIndiv> implements EvalManager<I
     private Indiv getIndivBack(Object evalRes) {
         Object[] evalResArr = (Object[]) evalRes;
 
-        int    id    = (int)         evalResArr[0];
-        double score = (double)(int) evalResArr[1]; // TODO čekat v doublu!
+        int    id    = (int)    evalResArr[0];
+        double score = (double) evalResArr[1];
 
         FitVal fitVal = new FitVal.Basic(score, isPerfect(score));
         Indiv indiv = id2indiv.remove(id);

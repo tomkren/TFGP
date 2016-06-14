@@ -2,11 +2,13 @@ package cz.tomkren.fishtron.sandbox2;
 
 import cz.tomkren.fishtron.apps.AntLibs;
 import cz.tomkren.fishtron.eva.*;
-import cz.tomkren.fishtron.operators.CopyOp;
-import cz.tomkren.fishtron.operators.UntypedKozaXover;
-import cz.tomkren.fishtron.operators.UntypedRampedHalfAndHalf;
+import cz.tomkren.fishtron.mains.DagEvaTester;
+import cz.tomkren.fishtron.operators.*;
+import cz.tomkren.fishtron.reusegen.QuerySolver;
 import cz.tomkren.fishtron.terms.PolyTree;
 import cz.tomkren.fishtron.terms.SmartLibrary;
+import cz.tomkren.fishtron.types.Type;
+import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.utils.Checker;
 import org.json.JSONObject;
 
@@ -28,6 +30,7 @@ public class JsonEvolutionOpts implements EvolutionOpts<PolyTree>  {
 
         String evalServerUrl = getString(config, "evalServerUrl", "http://localhost:4242/");
 
+
         // for default purposes...
         int numGens  = 51;
         int popSize  = 1024;
@@ -47,14 +50,53 @@ public class JsonEvolutionOpts implements EvolutionOpts<PolyTree>  {
 
         // TODO !!! ....................................................................................................
 
-        SmartLibrary lib = AntLibs.koza;
-        IndivGenerator<PolyTree> generator = new UntypedRampedHalfAndHalf(lib, rand, true);
-        EvalManager<PolyTree> evalManager = new NetworkEvalManager<>("getEvalPoolSize","evalAnts_2", evalServerUrl, x->x);
-        Selection<PolyTree> parentSelection = new Selection.Tournament2<>(7, rand);
-        Distribution<Operator<PolyTree>> operators = new Distribution<>(Arrays.asList(
-                new UntypedKozaXover(0.9, rand),
-                new CopyOp<>(0.1)
-        ));
+        String problem = getString(config, "problem", "YampaAnt"); // todo TEMPORARY HAX
+
+
+        SmartLibrary lib;
+        IndivGenerator<PolyTree> generator;
+        EvalManager<PolyTree> evalManager;
+        Selection<PolyTree> parentSelection;
+        Distribution<Operator<PolyTree>> operators;
+
+        if (problem.equals("YampaAnt")) {
+
+            evalManager = new NetworkEvalManager<>("getEvalPoolSize","evalAnts_2", evalServerUrl, x->x);
+
+            lib = AntLibs.koza;
+            generator = new UntypedRampedHalfAndHalf(lib, rand, true);
+            parentSelection = new Selection.Tournament2<>(7, rand);
+            operators = new Distribution<>(Arrays.asList(
+                    new UntypedKozaXover(0.9, rand),
+                    new CopyOp<>(0.1)
+            ));
+
+        } else {
+
+            // TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            evalManager = new NetworkEvalManager<>("getEvalPoolSize","fakeIterativeEval", evalServerUrl, x->x);
+
+
+            String classPrefix = "cz.tomkren.fishtron.workflows."; //TODO přesunout do configu
+            JSONObject allParamsInfo = DagEvaTester.testParamsInfo; // TODO !!!!  fake data need to download
+
+            lib = SmartLibrary.mk(classPrefix, allParamsInfo, config.getJSONArray("lib"));
+
+            Type goalType = Types.parse(config.getString("goalType"));
+            QuerySolver querySolver = new QuerySolver(lib, rand);
+
+            generator = new RandomParamsPolyTreeGenerator(goalType, config.getInt("generatingMaxTreeSize"), querySolver);
+            parentSelection = new Selection.Tournament<>(config.getDouble("tournamentBetterWinsProbability"), rand);
+            operators = new Distribution<>(Arrays.asList(
+                    new BasicTypedXover(config, rand),
+                    new SameSizeSubtreeMutation(config, querySolver),
+                    new OneParamMutation(config, rand),
+                    new CopyOp<>(config)
+            ));
+
+        }
+
+
 
         opts = new BasicEvolutionOpts<>(
                 numEvaluations, minPopulationSizeToOperate, numIndividualsToGenerate, maxPopulationSize, isUniquenessCheckPerformed, saveBest,

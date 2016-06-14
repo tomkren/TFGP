@@ -7,7 +7,7 @@
 
   "numGenerations": 10,
 
-  "populationSize": 64,
+  "populationSize": 1024,
   "generatingMaxTreeSize":  37,
 
   "tournamentBetterWinsProbability" : 0.8,
