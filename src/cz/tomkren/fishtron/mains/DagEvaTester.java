@@ -33,14 +33,16 @@ public class DagEvaTester {
     public static void main(String[] args) {
 
 
-        //String jsonConfigFilename =  "configs/dageva/config.json" ;
-        //String jsonConfigFilename =  "configs/dageva/config_stacking.json" ;
-        //String jsonConfigFilename =  "configs/dageva/config_stacking2.json" ;
-        //String jsonConfigFilename =  "configs/dageva/config_stackAndBoo.json" ;
-        //String jsonConfigFilename =  "configs/dageva/config_stackAndBoo2.json" ;
-        //String jsonConfigFilename =  "configs/dageva/config_stackAndBoo3.json" ;
-        String jsonConfigFilename =  "configs/dageva/config_stackAndBoo4.json" ;
-
+        //String jsonConfigFilename = "configs/dageva/config.json" ;
+        //String jsonConfigFilename = "configs/dageva/config_stacking.json" ;
+        //String jsonConfigFilename = "configs/dageva/config_stacking2.json" ;
+        //String jsonConfigFilename = "configs/dageva/config_stackAndBoo.json" ;
+        //String jsonConfigFilename = "configs/dageva/config_stackAndBoo2.json" ;
+        //String jsonConfigFilename = "configs/dageva/config_stackAndBoo3.json" ;
+        //String jsonConfigFilename = "configs/dageva/config_stackAndBoo4.json" ;
+        //String jsonConfigFilename = "configs/dageva/config_stacking_ListAnot.json" ;
+        //String jsonConfigFilename = "configs/dageva/config_stacking_ListAnot2.json" ;
+        String jsonConfigFilename = "configs/dageva/config_stackAndBoo_ListAnot.json" ;
 
         try {
 

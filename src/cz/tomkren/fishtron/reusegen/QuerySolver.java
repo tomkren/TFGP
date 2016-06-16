@@ -96,11 +96,11 @@ public class QuerySolver {
     }
 
     public List<PolyTree> uniformGenerateWithRandomizedParams(String goalType, int maxTreeSize, int numToGenerate) {
-        return uniformGenerate(this::generateOneWithRandomizedParams, goalType, maxTreeSize, numToGenerate);
+        return uniformGenerateWithRandomizedParams(Types.parse(goalType), maxTreeSize, numToGenerate);
     }
 
     public List<PolyTree> uniformGenerateWithRandomizedParams(Type goalType, int maxTreeSize, int numToGenerate) {
-        return uniformGenerate(this::generateOneWithRandomizedParams, goalType, maxTreeSize, numToGenerate);
+        return uniformGenerate(this::generateOneWithRandomizedParams/*_notNull*/, goalType, maxTreeSize, numToGenerate);
     }
 
     public List<PolyTree> uniformGenerateWithParams(SkeletonTree skeletonTree, Type goalType, int maxTreeSize, int numToGenerate) {
@@ -132,9 +132,6 @@ public class QuerySolver {
         return new ArrayList<>(treeSet);
     }
 
-    public List<PolyTree> uniformGenerate(BiFunction<Type,Integer,PolyTree> genOneFun, String goalType, int maxTreeSize, int numToGenerate) {
-        return uniformGenerate(genOneFun, Types.parse(goalType), maxTreeSize, numToGenerate);
-    }
 
 
     public PolyTree generateOneWithParams(SkeletonTree skeletonTree, Type goalType, int treeSize) {
@@ -142,14 +139,21 @@ public class QuerySolver {
         return treeWithDefaultParams == null ? null : treeWithDefaultParams.randomizeAllParams(rand);
     }
 
+    // todo #dirtySolve
+    public PolyTree generateOneWithRandomizedParams_notNull(Type goalType, int treeSize) {
+        PolyTree ret = null;
+        while (ret == null) {
+            ret = generateOneWithRandomizedParams(goalType, treeSize);
+        }
+        return ret;
+    }
+
     public PolyTree generateOneWithRandomizedParams(Type goalType, int treeSize) {
         PolyTree treeWithDefaultParams = query(goalType, treeSize).generateOne();
         return treeWithDefaultParams == null ? null : treeWithDefaultParams.randomizeAllParams(rand);
     }
 
-    public PolyTree generateOneWithRandomizedParams(String goalType, int treeSize) {
-        return generateOneWithRandomizedParams(Types.parse(goalType), treeSize);
-    }
+
 
     public PolyTree generateOne(Type goalType, int treeSize) {
         return query(goalType, treeSize).generateOne();

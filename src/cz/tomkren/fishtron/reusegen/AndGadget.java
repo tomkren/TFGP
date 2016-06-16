@@ -9,6 +9,7 @@ import cz.tomkren.fishtron.types.TMap;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Listek;
+import cz.tomkren.utils.Log;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -100,7 +101,13 @@ public class AndGadget {
 
             PolyTree sonTree = getSolver().query(sonQuery).generateOne();
 
-            if (sonTree == null) {throw new Error("Should be unreachable!");}
+            if (sonTree == null) {
+                Log.err("Warning! (#dyrtySolve) sonQuery returning null sonTree: "+ sonQuery);
+                //todo #dyrtySolve
+                return null;
+
+                //throw new Error("Should be unreachable!");
+            }
 
             Type moreSpecificType = sonTree.getType();
             Sub sonSpecificSub = Sub.mgu(moreSpecificType, sonQuery.getType());

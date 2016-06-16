@@ -69,7 +69,7 @@ public class SameSizeSubtreeMutation extends PolyTreeMutation {
         // generate new subtree with same size and type
         Type goalType = subTree.getType();
         int treeSize  = subTree.getSize();
-        PolyTree newSubtree = querySolver.generateOneWithRandomizedParams(goalType, treeSize);
+        PolyTree newSubtree = querySolver.generateOneWithRandomizedParams_notNull(goalType, treeSize);
 
         //Log.it("sub: "+subTree);
         //Log.it("new: "+newSubtree);
