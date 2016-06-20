@@ -47,12 +47,11 @@ public class EvolutionJob implements Logger<PolyTree> {
     }
 
     public synchronized Status getStatus() {return status;}
+    private synchronized void setStatus(Status newStatus) {status = newStatus;}
 
     public String getLog() {
         return output.toString();
     }
-
-    private synchronized void setStatus(Status newStatus) {status = newStatus;}
 
 
 

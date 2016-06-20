@@ -1,8 +1,10 @@
 package cz.tomkren.fishtron.server;
 
+import cz.tomkren.fishtron.mains.DagEvaTester;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
 import cz.tomkren.utils.ResourceLoader;
+import cz.tomkren.utils.TODO;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
@@ -26,12 +28,18 @@ public class EvolutionServer extends AbstractHandler {
     private Map<Integer, EvolutionJob> jobs;
     private int nextJobId;
 
+    private Map<Integer, DagEvaTester> tests;
+    private int nextTestId;
+
     public EvolutionServer(int port) {
         server = new Server(port);
         server.setHandler(this);
 
         jobs = new HashMap<>();
         nextJobId = 1;
+
+        tests = new HashMap<>();
+        nextTestId = 1;
     }
 
     public void startServer() {
@@ -85,6 +93,11 @@ public class EvolutionServer extends AbstractHandler {
             }
         }
 
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
+        response.addHeader("Access-Control-Allow-Headers", "X-Unity-Version, X-PINGOTHER, Origin, X-Requested-With, Content-Type, Accept");
+        response.addHeader("Access-Control-Max-Age", "1728000");
+
         response.setStatus(HttpServletResponse.SC_OK);
         baseRequest.setHandled(true);
         response.getWriter().println(finalResponseStr);
@@ -94,7 +107,7 @@ public class EvolutionServer extends AbstractHandler {
         return runCmd(CmdName.getHtml, arg);
     }
 
-    private enum CmdName {getApi, makeJob, jobInfo, jobsInfo, jobLog, getHtml};
+    private enum CmdName {getApi, makeJob, jobInfo, jobsInfo, jobLog, getHtml, runTest, testInfo};
 
     private Object runCmd(String cmdName, Object arg) {
         try {
@@ -112,6 +125,8 @@ public class EvolutionServer extends AbstractHandler {
             case jobsInfo: return jobsInfo(arg);
             case jobLog:   return jobLog(arg);
             case getHtml:  return getHtml(arg);
+            case runTest:  return runTest(arg);
+            case testInfo: return testInfo(arg);
             case getApi:   return getApi();
             default :      return defaultResponse(arg);
         }
@@ -127,6 +142,43 @@ public class EvolutionServer extends AbstractHandler {
                 CmdName.getHtml.toString() , F.obj("info", "Returns html control page."),
                 CmdName.getApi.toString()  , F.obj("info", "Returns this api.")
         ));
+    }
+
+    private JSONObject runTest(Object arg) {
+
+        int testId = nextTestId;
+        nextTestId++;
+        JSONObject jsonResponse = F.obj("testId", testId);
+
+        DagEvaTester tester = new DagEvaTester();
+        tests.put(testId, tester);
+
+        new Thread(tester::runTest).start();
+
+        return jsonResponse;
+    }
+
+    private JSONObject testInfo(Object arg) {
+
+        JSONObject jsonResponse;
+        if (arg instanceof Integer) {
+
+            int testId = (int)arg;
+            DagEvaTester tester = tests.get(testId);
+
+            if (tester != null) {
+                jsonResponse = tester.getTestInfo();
+            } else {
+                jsonResponse = F.obj("error", "There is no test with that testId.");
+            }
+
+            jsonResponse.put("testId", testId);
+
+        } else {
+            jsonResponse = F.obj("error", "You must specify an (int) testId, instead you supplied: "+arg);
+        }
+
+        return jsonResponse;
     }
 
     private JSONObject makeJob(Object arg) {

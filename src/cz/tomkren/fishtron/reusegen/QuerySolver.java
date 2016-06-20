@@ -163,6 +163,10 @@ public class QuerySolver {
         return generateOne(Types.parse(goalType), treeSize);
     }
 
+    public TMap<PolyTree> generateAll(String goalType, int treeSize) {
+        return query(goalType, treeSize).generateAll();
+    }
+
     public TMap<PolyTree> generateAllUpTo(String goalType, int upToTreeSize) {
         Log.it("generateAllUpTo("+goalType+", "+upToTreeSize+")");
         TMap<PolyTree> ret = new TMap<>();

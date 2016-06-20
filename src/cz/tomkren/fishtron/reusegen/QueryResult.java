@@ -11,6 +11,7 @@ import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.utils.ABC;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Listek;
+import cz.tomkren.utils.Log;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -28,6 +29,11 @@ public class QueryResult {
 
 
     public QueryResult(Query query) {
+
+        /*if (query.toString().equals("((V LD (S (S 0)) Disj) => LD) ; 3")) {
+            Log.it("BONDOVKA!");
+        }*/
+
         this.query = query;
 
         andGadgets = new ArrayList<>();
@@ -73,11 +79,15 @@ public class QueryResult {
         }
 
         num = AndGadget.sum(nums);
+
+
     }
 
     public PolyTree generateOne() {
 
-        if (F.isZero(num)) {return null;}
+        if (F.isZero(num)) {
+            return null;
+        }
 
         BigInteger index = F.nextBigInteger(num, query.getRand());
 
