@@ -3,6 +3,7 @@ package cz.tomkren.fishtron.mains;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import cz.tomkren.fishtron.eva.IndivGenerator;
+import cz.tomkren.fishtron.reusegen2.QSolver;
 import cz.tomkren.fishtron.terms.PolyTree;
 import cz.tomkren.fishtron.terms.SmartLibrary;
 import cz.tomkren.fishtron.types.TMap;
@@ -21,6 +22,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
@@ -92,14 +94,19 @@ public class DagEvaTester {
 
             IndivGenerator<PolyTree> generator = new RandomParamsPolyTreeGenerator(goalType, config.getInt("generatingMaxTreeSize"), querySolver);
 
+
             /*int upToTreeSize = 20;
             TMap<PolyTree> treeTMap = querySolver.generateAllUpTo(goalTypeStr, upToTreeSize);
             List<PolyTree> trees = treeTMap.get(goalType);*/
 
             // todo #LeDEBUG
-            //TMap<PolyTree> treesTMap = querySolver.generateAllUpTo(goalTypeStr, 32);
-            TMap<PolyTree> treesTMap = querySolver.generateAll("((V LD (S (S 0)) Disj) => LD)", 3);
-            Log.it(treesTMap);
+            //TMap<PolyTree> treesTMap = querySolver.generateAll("((V LD (S (S 0)) Disj) => LD)", 3);
+            //Log.it(treesTMap);
+
+            //TMap<PolyTree> treesTMap = querySolver.generateAllUpTo(goalTypeStr, 20);
+
+
+
 
 
             List<PolyTree> trees = generator.generate(config.getInt("populationSize"));

@@ -15,4 +15,10 @@ public interface Type {
 
     void getVarIds(Set<Integer> ret);
 
+    int getNextVarId(int acc);
+
+    default int getNextVarId() {
+        return getNextVarId(0);
+    }
+
 }

@@ -1,5 +1,6 @@
 package cz.tomkren.fishtron.types;
 
+import cz.tomkren.utils.AA;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Checker;
 
@@ -14,8 +15,37 @@ public class Types {
     public static final TypeSym SUCC   = new TypeSym("S");
     public static final TypeSym ZERO   = new TypeSym("0");
 
+    public static final TypeSym FUN_ARROW = new TypeSym("->");
     public static final TypeSym BOX_ARROW = new TypeSym("=>");
 
+    public static Type mkFunType(Type argType, Type returnType) {
+        return new TypeTerm(Types.FUN_ARROW, argType, returnType);
+    }
+
+    public static AA<Type> splitFunType(Type funType) {
+        if (funType instanceof TypeTerm) {
+            List<Type> args = ((TypeTerm) funType).getArgs();
+
+            if (args.size() == 3) {
+
+                Type arrowSym   = args.get(0);
+                Type argType    = args.get(1);
+                Type returnType = args.get(2);
+
+                if (arrowSym instanceof TypeSym && arrowSym.equals(FUN_ARROW)) {
+
+                    return new AA<>(argType, returnType);
+
+                } else {
+                    throw new Error("funType's 1st arg must be TypeSym '"+FUN_ARROW+"'; funType: "+funType);
+                }
+            } else {
+                throw new Error("funType must have 3 parts; funType: "+funType);
+            }
+        } else {
+            throw new Error("funType must be TypeTerm, but it is: "+funType);
+        }
+    }
 
     public static void main(String[] args) {
         Checker ch = new Checker();

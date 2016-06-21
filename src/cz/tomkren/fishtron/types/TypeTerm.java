@@ -50,6 +50,14 @@ public class TypeTerm implements Type {
     }
 
     @Override
+    public int getNextVarId(int acc) {
+        for (Type arg : args) {
+            acc = arg.getNextVarId(acc);
+        }
+        return acc;
+    }
+
+    @Override
     public void getVarIds(Set<Integer> ret) {
         args.forEach(t->t.getVarIds(ret));
     }

@@ -24,6 +24,11 @@ public class TypeSym implements Type {
     }
 
     @Override
+    public int getNextVarId(int acc) {
+        return acc;
+    }
+
+    @Override
     public void getVarIds(Set<Integer> ret) {}
 
     public String toString() {return sym;}

@@ -36,6 +36,11 @@ public class TypeVar implements Type {
     }
 
     @Override
+    public int getNextVarId(int acc) {
+        return Math.max(acc,id+1);
+    }
+
+    @Override
     public void getVarIds(Set<Integer> ret) {
         ret.add(id);
     }

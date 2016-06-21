@@ -158,6 +158,15 @@ public class F {
     }
 
 
+    public static <K,V> V getOrMkAndPut(Map<K,V> mapa, K key, Supplier<V> mkFun) {
+        V value = mapa.get(key);
+        if (value == null) {
+            value = mkFun.get();
+            mapa.put(key, value);
+        }
+        return value;
+    }
+
     public static void adjustArray(int[] xs, Function<Integer,Integer> f) {
         int len = xs.length;
         for (int i = 0; i < len; i++) {
@@ -281,6 +290,15 @@ public class F {
         }
         return sum;
     }
+
+    public static BigInteger sumBigInteger(List<BigInteger> xs) {
+        BigInteger sum = BigInteger.ZERO;
+        for (BigInteger x : xs) {
+            sum = sum.add(x);
+        }
+        return sum;
+    }
+
 
     public static int sumInt(List<Integer> xs) {
         int sum = 0;
