@@ -1,5 +1,6 @@
 package cz.tomkren.fishtron.types;
 
+import com.google.common.base.Joiner;
 import cz.tomkren.utils.AA;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Checker;
@@ -20,6 +21,20 @@ public class Types {
 
     public static Type mkFunType(Type argType, Type returnType) {
         return new TypeTerm(Types.FUN_ARROW, argType, returnType);
+    }
+
+    public static String prettyPrint(Type t) {
+        if (t instanceof TypeTerm) {
+            TypeTerm tt = (TypeTerm) t;
+            List<Type> args = tt.getArgs();
+            if (args.size() == 3 && args.get(0).equals(FUN_ARROW)) {
+                return "("+ prettyPrint(args.get(1)) +" "+ FUN_ARROW +" "+ prettyPrint(args.get(2))+")";
+            } else {
+                return "("+ Joiner.on(' ').join(args)+")";
+            }
+        } else {
+            return t.toString();
+        }
     }
 
     public static AA<Type> splitFunType(Type funType) {

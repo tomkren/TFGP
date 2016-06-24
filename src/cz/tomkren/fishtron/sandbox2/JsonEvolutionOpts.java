@@ -29,13 +29,17 @@ public class JsonEvolutionOpts implements EvolutionOpts<PolyTree>  {
     }
 
     public JsonEvolutionOpts(JSONObject config) {
+        this(config, null);
+    }
+
+    public JsonEvolutionOpts(JSONObject config, Checker checker) {
 
         String evalServerUrl = getString(config, "evalServerUrl", "http://localhost:4242/");
 
-
         // for default purposes...
-        int numGens  = 51;
-        int popSize  = 1024;
+        int numGens  = getInt(config, "numGenerations", 51);
+        int popSize  = getInt(config, "populationSize", 1024);
+
 
         int numEvaluations             = getInt(config,"numEvaluations",             popSize * numGens );
         int minPopulationSizeToOperate = getInt(config,"minPopulationSizeToOperate", popSize / 2       );
@@ -46,14 +50,13 @@ public class JsonEvolutionOpts implements EvolutionOpts<PolyTree>  {
         boolean saveBest                    = getBoolean(config,"saveBest", true);
 
         Long seed = config.has("seed") ? config.getLong("seed") : null;
-        Checker checker = new Checker(seed);
-        if (seed == null) {config.put("seed", checker.getSeed());}
+        if (checker == null) {checker = new Checker(seed);}
+        if (seed    == null) {config.put("seed", checker.getSeed());}
         Random rand = checker.getRandom();
-
 
         //--------------------------------------------
 
-        String problem = getString(config, "problem", "YampaAnt"); // todo TEMPORARY HAX
+        String problem = getString(config, "problem", "GP-ML"); // todo TEMPORARY HAX
 
         SmartLibrary lib;
         IndivGenerator<PolyTree> generator;
@@ -75,36 +78,42 @@ public class JsonEvolutionOpts implements EvolutionOpts<PolyTree>  {
 
         } else {
 
+            Dag_EvalManager<PolyTree> dagEvalManager = new Dag_EvalManager<>(
+                    "get_param_sets", "get_core_count","submit", "get_evaluated", evalServerUrl);
 
-            evalManager = new NetworkEvalManager<>("getEvalPoolSize","fakeIterativeEval", evalServerUrl, x->x); // TODO !!!!!!!!!!!!!!      !!!!!!!!!!!!!!!
+            //evalManager = new NetworkEvalManager<>("getEvalPoolSize","fakeIterativeEval", evalServerUrl, x->x);
+            evalManager = dagEvalManager;
 
+            String datasetFilename = getString(config, "dataset", "winequality-white.csv");
+
+            //JSONObject allParamsInfo = DagEvaTester.testParamsInfo;
+            JSONObject allParamsInfo = dagEvalManager.getAllParamsInfo(datasetFilename);
 
             String classPrefix = "cz.tomkren.fishtron.workflows."; //TODO přesunout do configu
-            JSONObject allParamsInfo = DagEvaTester.testParamsInfo; // TODO !!!!  fake data, need to download the real one ----- !!!
 
             String goalTypeStr = getString(config, "goalType", "D => LD");
 
             JSONArray jsonLib = getJSONArray(config, "lib", F.arr(
-                    "TypedDag.dia( TypedDag: D => D , TypedDag: D => (V LD n) , TypedDag: (V LD n) => LD ) : D => LD",
-                    "TypedDag.dia0( TypedDag: D => (V LD n) , TypedDag: (V LD n) => LD ) : D => LD",
-                    "TypedDag.split( TypedDag: D => (V D n) , MyList: V (D => LD) n ) : D => (V LD n)",
-                    "MyList.cons( Object: a , MyList: V a n ) : V a (S n)",
-                    "MyList.nil : V a 0",
+                    "TypedDag.dia( TypedDag: D => D , TypedDag: D => (V LD n an) , TypedDag: (V LD n an) => LD ) : D => LD",
+                    "TypedDag.dia0( TypedDag: D => (V LD n an) , TypedDag: (V LD n an) => LD ) : D => LD",
+                    "TypedDag.split( TypedDag: D => (V D n an) , MyList: V (D => LD) n an ) : D => (V LD n an)",
+                    "MyList.cons( Object: a , MyList: V a n an ) : V a (S n) an",
+                    "MyList.nil : V a 0 an",
 
-                    "PCA : D => D",
+                    "PCA   : D => D",
                     "kBest : D => D",
-                    "kMeans : D => (V D (S(S n)))",
-                    "copy : D => (V D (S(S n)))",
+                    "kMeans : D => (V D (S(S n)) Disj)",
+                    "copy   : D => (V D (S(S n)) Copy)",
                     "SVC        : D => LD",
                     "logR       : D => LD",
                     "gaussianNB : D => LD",
                     "DT         : D => LD",
-                    "vote : (V LD (S(S n))) => LD",
+                    "vote : (V LD (S(S n)) an) => LD",
 
-                    "TypedDag.stacking( TypedDag: (V LD n) => D , TypedDag: D => LD ) : (V LD n) => LD",
-                    "stacker : (V LD (S(S n))) => D",
+                    "TypedDag.stacking( TypedDag: (V LD n Copy) => D , TypedDag: D => LD ) : (V LD n Copy) => LD",
+                    "stacker : (V LD (S(S n)) Copy) => D",
 
-                    "TypedDag.boosting( TypedDag: D => Boo , MyList: V (Boo => Boo) (S(S n)) , TypedDag : Boo => LD ) : D => LD",
+                    "TypedDag.boosting( TypedDag: D => Boo , MyList: V (Boo => Boo) (S(S n)) an , TypedDag : Boo => LD ) : D => LD",
                     "booBegin : D => Boo",
                     "TypedDag.booster( TypedDag : D => LD ) : Boo => Boo",
                     "booEnd   : Boo => LD"

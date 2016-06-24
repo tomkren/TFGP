@@ -1,5 +1,7 @@
 package cz.tomkren.utils;
 
+import org.json.JSONObject;
+
 import java.util.List;
 import java.util.Random;
 
@@ -12,6 +14,10 @@ public class Checker {
     private long startTime;
     private long seed;
     private Random rand;
+
+    public static Checker mk(JSONObject config) {
+        return new Checker( config.has("seed") ? config.getLong("seed") : null, false);
+    }
 
     public Checker(Long seed) {
         this(seed, false);

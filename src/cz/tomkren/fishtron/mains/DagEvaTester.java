@@ -86,7 +86,6 @@ public class DagEvaTester {
 
 
             String classPrefix = "cz.tomkren.fishtron.workflows.";
-
             SmartLibrary lib = SmartLibrary.mk(classPrefix, testParamsInfo, config.getJSONArray("lib"));
             String goalTypeStr = config.getString("goalType");
             Type goalType = Types.parse(goalTypeStr);
@@ -101,9 +100,9 @@ public class DagEvaTester {
 
             // todo #LeDEBUG
             //TMap<PolyTree> treesTMap = querySolver.generateAll("((V LD (S (S 0)) Disj) => LD)", 3);
-            //Log.it(treesTMap);
 
-            //TMap<PolyTree> treesTMap = querySolver.generateAllUpTo(goalTypeStr, 20);
+            TMap<PolyTree> treesTMap = querySolver.generateAllUpTo(goalTypeStr, 20);
+            Log.it(treesTMap);
 
 
 

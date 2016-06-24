@@ -26,8 +26,11 @@ public class QSolver {
     }
 
     public AppTree generateOne(Type t, int treeSize) {
-        TypeGadget tg = getTypeGadget(t);
-        return tg.generateOne(treeSize, this);
+        return getTypeGadget(t).generateOne(treeSize, this);
+    }
+
+    public List<AppTree> generateAll(Type t, int treeSize) {
+        return getTypeGadget(t).generateAll(treeSize, this);
     }
 
     public BigInteger getNum(Type t, int treeSize) {
@@ -52,7 +55,7 @@ public class QSolver {
         return F.getOrMkAndPut(gadgets, tNormalized.toString(), ()-> new TypeGadget(tNormalized));
     }
 
-    private static Type normalizeType(Type t) {
+    static Type normalizeType(Type t) {
         return t.freshenVars(0, new Sub())._1();
     }
 

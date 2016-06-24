@@ -6,6 +6,7 @@ import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.utils.AB;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /** Created by tom on 21. 6. 2016.*/
@@ -23,7 +24,7 @@ public interface AppTree {
 
         @Override
         public String toString() {
-            return sym.toString();
+            return sym.getName();
         }
     }
 
@@ -56,6 +57,7 @@ public interface AppTree {
                 acc = app.funTree;
             }
 
+            Collections.reverse(argTrees);
             return new AB<>((Leaf)acc, argTrees);
         }
     }

@@ -9,6 +9,7 @@ import cz.tomkren.fishtron.terms.SmartLibrary;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.utils.Checker;
+import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,7 +32,7 @@ public class QSolverTester {
     }
 
 
-    public static SmartLibrary lib = SymProvider.mkLib(
+    public static SmartLibrary lib_0 = SymProvider.mkLib(
             new TComb1<>("f", "X", "X", QSolverTester::f),
             new TComb3<>("seri", "-> a b", "-> b c", "a", "c", QSolverTester::seri)
     );
@@ -40,9 +41,20 @@ public class QSolverTester {
         try {
 
 
-            String jsonConfigFilename = "configs/dageva/config_QSolverTest_1.json";
+            //String jsonConfigFilename = "configs/dageva/config_QSolverTest_1.json";
+            String jsonConfigFilename = "configs/dageva/config_stacking_ListAnot2.json";
+
             String configStr = Files.toString(new File(jsonConfigFilename), Charsets.UTF_8);
             JSONObject config = new JSONObject(configStr);
+
+            //Type goalType = Types.parse("-> X X");
+            Type goalType = Types.parse(config.getString("goalType"));
+
+            String classPrefix = "cz.tomkren.fishtron.workflows.";
+            SmartLibrary lib = SmartLibrary.mk(classPrefix, DagEvaTester.testParamsInfo, config.getJSONArray("lib"));
+
+
+
 
             Long seed = config.has("seed") ? config.getLong("seed") : null;
             Checker checker = new Checker(seed);
@@ -52,29 +64,33 @@ public class QSolverTester {
 
 
 
-            Type goalType = Types.parse("-> X X");
+
 
 
             // --------------------
 
-            int toTreeSize = 20;
+            int toTreeSize = 8;
 
             QSolver qSolver = new QSolver(lib, rand);
 
-            int i = 3;
-            BigInteger num = qSolver.getNum(goalType, i);
-            Log.it( "\n\ngetNum(" + goalType + ", " + i + ") = " + num );
+            //int i = 3;
 
-            Log.it("----------------------------------------------------------------------");
-            AppTree ti = qSolver.generateOne(goalType, i);
-            Log.it(" ... "+ti);
+            //BigInteger num = qSolver.getNum(goalType, i);
+            //Log.it( "\n\ngetNum(" + goalType + ", " + i + ") = " + num );
 
-            /*
+            //Log.it("----------------------------------------------------------------------");
+            //AppTree ti = qSolver.generateOne(goalType, i);
+            //Log.it(" ... "+ti);
+            //AppTree ti2 = qSolver.generateOne(goalType, i);
+            //Log.it(" ... "+ti2);
+
+
             Log.it("\n\nQSolver\n---------");
             for (int i = 1; i <= toTreeSize; i++) {
                 BigInteger num = qSolver.getNum(goalType, i);
                 Log.it("getNum(" + goalType + ", " + i + ") = " + num);
-            }*/
+                Log.list(F.map(qSolver.generateAll(goalType, i), x->"  "+x));
+            }
 
 
         } catch (IOException e) {

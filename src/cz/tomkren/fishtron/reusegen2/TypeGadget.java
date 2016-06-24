@@ -31,12 +31,24 @@ class TypeGadget {
         return F.getOrMkAndPut(infos, treeSize, ()-> mkQueryInfosAndNum(treeSize,qs));
     }
 
+    List<AppTree> generateAll(int treeSize, QSolver qs) {
+
+        List<AppTree> ret = new ArrayList<>();
+
+        for (SubTypeInfo info : getInfos(treeSize, qs)) {
+            ret.addAll(info.generateAll(qs));
+        }
+
+        return ret;
+
+    }
+
     AppTree generateOne(int treeSize, QSolver qs) {
 
         AB<List<SubTypeInfo>,BigInteger> infoPair = query(treeSize, qs);
 
         if (infoPair == null) {
-            throw new Error("TypedGadget.generateOne: TypeGadget("+type+") for treeSize="+treeSize+"\n"+
+            throw new Error("TypedGadget.generateOne: TypeGadget("+Types.prettyPrint(type)+") for treeSize="+treeSize+"\n"+
                             "is supposed to have same infos, but it has none.");
         }
 
@@ -61,9 +73,6 @@ class TypeGadget {
     }
 
     private AB<List<SubTypeInfo>,BigInteger> mkQueryInfosAndNum(int treeSize, QSolver qs) {
-
-        Log.it("Making infos for: ("+type+", "+treeSize+")");
-
         List<SubTypeInfo> infos = mkQueryInfos(treeSize, qs);
         BigInteger num = computeNum(infos);
         return new AB<>(infos, num);
@@ -88,10 +97,10 @@ class TypeGadget {
             Type symType = mkSymType(sym, type.getNextVarId());
             Sub sub = Sub.mgu(symType, type);
 
-            Log.it("  Trying to match: "+symType+" with "+type+" ... "+sub);
+            //log("  Trying to match: "+symType+" with "+type+" ... "+sub);
 
             if (!sub.isFail()) {
-                Type newType = sub.apply(symType); // TODO pořádně promyslet zda je potřeba provadet sub
+                Type newType = QSolver.normalizeType(sub.apply(symType)); // TODO pořádně promyslet
                 ret.add(new SubTypeInfo.Leaf(newType, BigInteger.ONE, Collections.singletonList(sym)));
             }
 
@@ -99,8 +108,8 @@ class TypeGadget {
 
         ret = mergeSameTypes(ret);
 
-        if (!ret.isEmpty()) {Log.it("  Created Infos:");}
-        Log.list(F.map(ret,s->"   "+s));
+        log("Making infos for: ("+Types.prettyPrint(type)+", "+1+")");
+        logList(F.map(ret,s->"   "+s));
 
         return ret;
     }
@@ -122,8 +131,11 @@ class TypeGadget {
             for (SubTypeInfo funSubInfo : funSubInfos) {
                 Type funSubtype = funSubInfo.getReturnType();
 
-                Sub sub = Sub.mgu(funSubtype, funType);
-                Type argSubtype = sub.apply(argType);
+                // todo promyslet...
+                //Sub sub = Sub.mgu(funSubtype, funType);
+                //Type argSubtype = sub.apply(argType);
+                Type argSubtype = Types.splitFunType(funSubtype)._1();
+
 
                 List<SubTypeInfo> argSubInfos = qs.getInfos(argSubtype, argTreeSize);
 
@@ -131,13 +143,18 @@ class TypeGadget {
 
                 for (SubTypeInfo argSubInfo : argSubInfos) {
                     BigInteger newNum = numFuns.multiply(argSubInfo.getNum());
-                    Type newType = sub.apply(funSubtype); // TODO pořádně promyslet zda potřeba aplikovat substituci
-                    ret.add(new SubTypeInfo.App(newType, funTreeSize, argTreeSize, newNum));
+                    //Type newType = sub.apply(funSubtype); // TODO pořádně promyslet
+                    ret.add(new SubTypeInfo.App(/*newType*/funSubtype, funTreeSize, argTreeSize, newNum));
                 }
             }
         }
 
-        return mergeSameTypes(ret);
+        ret = mergeSameTypes(ret);
+
+        log("Making infos for: ("+Types.prettyPrint(type)+", "+treeSize+")");
+        logList(F.map(ret,s->"   "+s));
+
+        return ret;
     }
 
 
@@ -169,5 +186,12 @@ class TypeGadget {
         return acc;
     }
 
+    private static void log(Object x) {
+        //Log.it(x);
+    }
+
+    private static void logList(List<?> xs) {
+        //Log.list(xs);
+    }
 
 }
