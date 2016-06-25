@@ -34,7 +34,7 @@ public class JsonEvolutionOpts implements EvolutionOpts<PolyTree>  {
 
     public JsonEvolutionOpts(JSONObject config, Checker checker) {
 
-        String evalServerUrl = getString(config, "evalServerUrl", "http://localhost:4242/");
+        String evalServerUrl = getString(config, "serverUrl", "http://localhost:8080/");
 
         // for default purposes...
         int numGens  = getInt(config, "numGenerations", 51);
@@ -78,13 +78,14 @@ public class JsonEvolutionOpts implements EvolutionOpts<PolyTree>  {
 
         } else {
 
+            String datasetFilename = getString(config, "dataset", "winequality-white.csv");
+
             Dag_EvalManager<PolyTree> dagEvalManager = new Dag_EvalManager<>(
-                    "get_param_sets", "get_core_count","submit", "get_evaluated", evalServerUrl);
+                    "get_param_sets", "get_core_count","submit", "get_evaluated", evalServerUrl, datasetFilename);
 
             //evalManager = new NetworkEvalManager<>("getEvalPoolSize","fakeIterativeEval", evalServerUrl, x->x);
             evalManager = dagEvalManager;
 
-            String datasetFilename = getString(config, "dataset", "winequality-white.csv");
 
             //JSONObject allParamsInfo = DagEvaTester.testParamsInfo;
             JSONObject allParamsInfo = dagEvalManager.getAllParamsInfo(datasetFilename);

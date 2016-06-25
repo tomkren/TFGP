@@ -1,6 +1,7 @@
 package cz.tomkren.fishtron.sandbox2;
 
 import cz.tomkren.fishtron.eva.FitIndiv;
+import cz.tomkren.utils.Log;
 
 import java.util.Collections;
 import java.util.List;
@@ -13,6 +14,15 @@ public interface Dag_IEvalManager<Indiv extends FitIndiv> extends EvalManager<In
     Object submit(List<Indiv> indivs);
     EvalResult<Indiv> getEvaluated();
 
+
+    @Override
+    default EvalResult<Indiv> justAskForResults() {
+        EvalResult<Indiv> results = getEvaluated();
+
+
+
+        return results;
+    }
 
     @Override
     default EvalResult<Indiv> evalIndividuals(List<Indiv> indivs) {

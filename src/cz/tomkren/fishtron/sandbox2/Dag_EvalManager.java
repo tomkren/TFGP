@@ -5,9 +5,11 @@ import cz.tomkren.fishtron.eva.FitVal;
 import cz.tomkren.fishtron.workflows.TypedDag;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
+import org.apache.xmlrpc.XmlRpcException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,17 +25,21 @@ public class Dag_EvalManager<Indiv extends FitIndiv> implements Dag_IEvalManager
     private String getEvaluatedMethodName;
     private String getCoreCountMethodName;
 
+    private String datasetFilename;
+
     //private Function<Object,Object> toJsonObject;
 
     private Map<Integer, Indiv> id2indiv;
     private int nextId;
 
 
-    public Dag_EvalManager(String getParamSetsMethodName, String getCoreCountMethodName, String submitMethodName, String getEvaluatedMethodName, String evaluatorURL) {
+    public Dag_EvalManager(String getParamSetsMethodName, String getCoreCountMethodName, String submitMethodName, String getEvaluatedMethodName, String evaluatorURL, String datasetFilename) {
         this.getParamSetsMethodName = getParamSetsMethodName;
         this.getCoreCountMethodName = getCoreCountMethodName;
         this.submitMethodName = submitMethodName;
         this.getEvaluatedMethodName = getEvaluatedMethodName;
+
+        this.datasetFilename = datasetFilename;
 
         //this.toJsonObject = toJsonObject;
         dagEvaluator = new Dag_JsonEvalInterface(evaluatorURL);
@@ -53,11 +59,12 @@ public class Dag_EvalManager<Indiv extends FitIndiv> implements Dag_IEvalManager
         return dagEvaluator.getInt(getCoreCountMethodName);
     }
 
-    private JSONArray dagToJson(Object indivValue) {
+    private JSONObject dagToJson(Object indivValue) {
 
         TypedDag dag = (TypedDag) indivValue;
         String jsonStr = dag.toJson(); // todo prasarna..
-        return new JSONArray(jsonStr);
+
+        return new JSONObject(jsonStr);
     }
 
     @Override
@@ -82,22 +89,49 @@ public class Dag_EvalManager<Indiv extends FitIndiv> implements Dag_IEvalManager
         }
 
         //return () -> someEvaluatedIndivs;
-        return dagEvaluator.submit(submitMethodName, jsonIndivs); // returns submitMsg
+        return dagEvaluator.submit(submitMethodName, jsonIndivs, datasetFilename); // returns submitMsg
     }
 
     @Override
     public EvalResult<Indiv> getEvaluated() {
-        List<Indiv> evaluatedIndividuals = dagEvaluator.getEvaluated(getEvaluatedMethodName, this::getIndivBack);
+        JSONArray json = dagEvaluator.getEvaluated(getEvaluatedMethodName);
+
+        int len = json.length();
+        List<Indiv> evaluatedIndividuals = new ArrayList<>(len);
+
+        for (int i = 0; i < len; i++) {
+            JSONArray evalRes = json.getJSONArray(i);
+            evaluatedIndividuals.add(getIndivBack(evalRes));
+        }
+
+
+        if (evaluatedIndividuals.size() > 0) {
+            Log.it("\nEvaluated individuals: ");
+
+            Log.list(F.map(evaluatedIndividuals, ind -> {
+                String indivCode = new JSONObject(((TypedDag) ind.computeValue()).toJson()).toString();
+                return "  " + ind.getWeight() + "\t" + indivCode;
+            }));
+
+        } else {
+            Log.it_noln("=");
+        }
+
         return () -> evaluatedIndividuals;
     }
 
-    private Indiv getIndivBack(Object evalRes) {
-        Object[] evalResArr = (Object[]) evalRes;
+    private Indiv getIndivBack(JSONArray evalResJsonArr) {
 
-        int    id       = (int)      evalResArr[0];
-        double[] scores = (double[]) evalResArr[1];
 
-        double score = (scores.length > 0) ? scores[0] : mkErrorScore();
+        //Object[] evalResArr = (Object[]) evalRes;
+        //int    id       = (int)      evalResArr[0];
+        //double[] scores = (double[]) evalResArr[1];
+
+        int id = evalResJsonArr.getInt(0);
+        JSONArray scores = evalResJsonArr.getJSONArray(1);
+
+
+        double score = (scores.length() > 0) ? scores.getDouble(0) : mkErrorScore();
 
         // todo udělat aby umělo i záporný skóre !!! !!! !!!
         score = Math.max(0.0, score);
@@ -116,8 +150,9 @@ public class Dag_EvalManager<Indiv extends FitIndiv> implements Dag_IEvalManager
         return false;
     }
 
+
     private static double mkErrorScore(){
-        return -1000;
+        return - Double.MAX_VALUE;
     }
 
 

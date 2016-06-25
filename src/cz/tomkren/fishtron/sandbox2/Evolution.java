@@ -32,6 +32,48 @@ public class Evolution<Indiv extends FitIndiv> {
 
     // -- ITERATIVE EVOLUTION ------------------------------------------------------------------------
 
+    public void startIterativeEvolution_2(int run) {
+        checkOptions_IE();
+
+        makeEmptyPopulation();
+        EvalResult<Indiv> evalResult = null;
+        long sleepTime = 2000;
+
+        while (isEvaluationUnfinished_IE()) {
+            if (isGeneratingNeeded_IE()) {
+                evalResult = sendToEval(generateIndividuals_max(evalResult));
+            } else if (isPopulationLargeEnoughForOperating_IE() && isSendingNeeded_IE()) {
+
+                List<Indiv> children = makeChildren(evalResult,population,opts.getNumEvaluations());
+                evalResult = children.size() > 0 ? sendToEval(children) : justAskForResults_sleep(sleepTime);
+
+            } else {
+                evalResult = justAskForResults_sleep(sleepTime);
+            }
+
+            updatePopulation_IE(evalResult);
+            logger.iterativeLog(run, numEvaluatedIndividuals, population);
+
+
+
+        }
+
+    }
+
+
+    private EvalResult<Indiv> justAskForResults_sleep(long millis) {
+        sleep(millis);
+        return opts.getEvalManager().justAskForResults();
+    }
+
+    private static void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch(InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
     public void startIterativeEvolution(int run) {
         checkOptions_IE();
 
@@ -40,7 +82,7 @@ public class Evolution<Indiv extends FitIndiv> {
 
         while (isEvaluationUnfinished_IE()) {
             if (isGeneratingNeeded_IE()) {
-                evalResult = sendToEval(generateIndividuals(evalResult));
+                evalResult = sendToEval(generateIndividuals_min(evalResult));
             } else if (isPopulationLargeEnoughForOperating_IE() && isSendingNeeded_IE()) {
                 evalResult = sendToEval(makeChildren(evalResult,population,opts.getNumEvaluations()));
             } else {
@@ -106,7 +148,7 @@ public class Evolution<Indiv extends FitIndiv> {
 
     private EvalResult<Indiv> generateGeneration_GE() {
         makeEmptyPopulation();
-        return fillPopulation_GE(null, this::generateIndividuals);
+        return fillPopulation_GE(null, this::generateIndividuals_min);
     }
 
     private EvalResult<Indiv> transformGeneration_GE(EvalResult<Indiv> evalResult) {
@@ -155,10 +197,18 @@ public class Evolution<Indiv extends FitIndiv> {
         numEvaluatedIndividuals = 0;
     }
 
-    private List<Indiv> generateIndividuals(EvalResult<Indiv> evalResult) {
+    private List<Indiv> generateIndividuals_max(EvalResult<Indiv> evalResult) {
         int yetToGenerate = opts.getNumIndividualsToGenerate() - numSentIndividuals;
         int evaluatorCapabilities = evalResult == null ? opts.getEvalManager().getEvalPoolSize(yetToGenerate)
-                                                       : evalResult.getNumRequestedIndividuals();
+                : evalResult.getNumEvaluatedIndividuals();
+        int numToGenerate = Math.max(evaluatorCapabilities, yetToGenerate);
+        return opts.getGenerator().generate(numToGenerate);
+    }
+
+    private List<Indiv> generateIndividuals_min(EvalResult<Indiv> evalResult) {
+        int yetToGenerate = opts.getNumIndividualsToGenerate() - numSentIndividuals;
+        int evaluatorCapabilities = evalResult == null ? opts.getEvalManager().getEvalPoolSize(yetToGenerate)
+                                                       : evalResult.getNumEvaluatedIndividuals();
         int numToGenerate = Math.min(evaluatorCapabilities, yetToGenerate);
         return opts.getGenerator().generate(numToGenerate);
     }
@@ -175,7 +225,7 @@ public class Evolution<Indiv extends FitIndiv> {
 
     private List<Indiv> makeChildren(EvalResult<Indiv> evalResult, Population<Indiv> parentPop, int maxNumToMake) {
 
-        int requestedByEvaluator = evalResult.getNumRequestedIndividuals();
+        int requestedByEvaluator = evalResult.getNumEvaluatedIndividuals();
         int yetToBeSent = maxNumToMake - numSentIndividuals;
         int numChildren = Math.min(requestedByEvaluator, yetToBeSent);
 

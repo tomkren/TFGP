@@ -14,6 +14,7 @@ public interface EvalManager<Indiv extends FitIndiv> {
 
 
     default EvalResult<Indiv> justAskForResults() {
+        Log.it("JUST ASKING !!! EMPTY --------------------------------------------------------------");
         return evalIndividuals(Collections.emptyList());
     }
 

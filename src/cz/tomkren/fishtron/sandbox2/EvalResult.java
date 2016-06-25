@@ -10,7 +10,7 @@ public interface EvalResult<Indiv extends FitIndiv> {
 
     List<Indiv> getSomeEvaluatedIndividuals();
 
-    default int getNumRequestedIndividuals() {
+    default int getNumEvaluatedIndividuals() {
         return getSomeEvaluatedIndividuals().size();
     }
 

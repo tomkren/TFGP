@@ -50,7 +50,7 @@ public class DagEva2 {
 
             Evolution<PolyTree> eva = new Evolution<>(opts, dagLogger);
 
-            eva.startIterativeEvolution(1); // todo numRuns ??
+            eva.startIterativeEvolution_2(1); // todo numRuns ??
 
             /* TODO
             if (config.getBoolean("killServer")) {
@@ -63,7 +63,9 @@ public class DagEva2 {
         } catch (IOException e) {
             Log.itln("Config file error: "+e.getMessage());
         } catch (JSONException e) {
-            Log.itln("JSON error: " + e.getMessage());
+            Log.err("JSON error: " + e.getMessage());
+            throw new Error(e);
+
         } /*catch (XmlRpcException e) {
             Log.it("Dag-evaluate server error: Server is probably not running (or it is starting right now). Start the server and try again, please.");
         }*/
