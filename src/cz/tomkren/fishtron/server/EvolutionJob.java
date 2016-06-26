@@ -2,6 +2,7 @@ package cz.tomkren.fishtron.server;
 
 import cz.tomkren.fishtron.eva.EvaledPop;
 import cz.tomkren.fishtron.eva.Logger;
+import cz.tomkren.fishtron.sandbox2.EvalResult;
 import cz.tomkren.fishtron.sandbox2.Evolution;
 import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
 import cz.tomkren.fishtron.sandbox2.JsonEvolutionOpts;
@@ -40,7 +41,7 @@ public class EvolutionJob implements Logger<PolyTree> {
         setStatus(Status.running);
 
         (new Thread(()->{
-            eva.startIterativeEvolution(1);
+            eva.startIterativeEvolution_old(1);
             setStatus(Status.finished);
         })).start();
 
@@ -66,7 +67,7 @@ public class EvolutionJob implements Logger<PolyTree> {
 
 
     @Override
-    public void iterativeLog(int run, int evaluationIndex, EvaledPop<PolyTree> pop) {
+    public void iterativeLog(int run, int evaluationIndex, EvaledPop<PolyTree> pop, EvalResult<PolyTree> evalResult) {
 
         PolyTree best = pop.getBestIndividual();
         log("eval # "+evaluationIndex+ (opts==null ? "" : " / "+opts.getNumEvaluations() ) +", best: "+ best.getWeight());

@@ -4,6 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import cz.tomkren.fishtron.eva.Logger;
 import cz.tomkren.fishtron.sandbox2.Evolution;
+import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
 import cz.tomkren.fishtron.sandbox2.JsonEvolutionOpts;
 import cz.tomkren.fishtron.terms.PolyTree;
 import cz.tomkren.fishtron.workflows.DagEvolutionLogger;
@@ -21,7 +22,7 @@ public class DagEva2 {
 
     public static void main(String[] args) {
 
-        Log.it("dageva2 [v0.1 beta]");
+        Log.it("dageva2 [v0.2 beta]");
 
         if (args.length < 2 || args[0].equals("--help")) {
             Log.it("You must provide two program arguments: <json-config-filename> <log-dir-path>");
@@ -42,15 +43,15 @@ public class DagEva2 {
 
             Checker checker = Checker.mk(config);
 
-            JsonEvolutionOpts opts = new JsonEvolutionOpts(config, checker);
-            Logger<PolyTree> dagLogger = new DagEvolutionLogger(config,logPath,checker);
+            EvolutionOpts<PolyTree> opts = new JsonEvolutionOpts(config, checker);
+            Logger<PolyTree> dagLogger = new DagEvolutionLogger(config, logPath, checker, opts);
 
             Log.it("Config [OK] ...");
             Log.it("Generating initial population...");
 
             Evolution<PolyTree> eva = new Evolution<>(opts, dagLogger);
 
-            eva.startIterativeEvolution_2(1); // todo numRuns ??
+            eva.startIterativeEvolution(1); // todo numRuns ??
 
             /* TODO
             if (config.getBoolean("killServer")) {

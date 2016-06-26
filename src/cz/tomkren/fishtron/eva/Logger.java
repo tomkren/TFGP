@@ -1,5 +1,6 @@
 package cz.tomkren.fishtron.eva;
 
+import cz.tomkren.fishtron.sandbox2.EvalResult;
 import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
 import cz.tomkren.utils.Log;
 import cz.tomkren.utils.Weighted;
@@ -10,7 +11,7 @@ public interface Logger<Indiv extends FitIndiv> {
     void logPop(int run, int generation, EvaledPop<Indiv> pop);
     void logErrorIndivs(int generation, List<Object> errorIndivs);
     default void logRun(int run) {}
-    default void iterativeLog(int run, int evaluationIndex, EvaledPop<Indiv> pop) {}
+    default void iterativeLog(int run, int evaluationIndex, EvaledPop<Indiv> pop, EvalResult<Indiv> evalResult) {}
 
 
     class Basic<Indiv extends FitIndiv> implements Logger<Indiv> {
@@ -26,7 +27,7 @@ public interface Logger<Indiv extends FitIndiv> {
         }
 
         @Override
-        public void iterativeLog(int run, int evaluationIndex, EvaledPop<Indiv> pop) {
+        public void iterativeLog(int run, int evaluationIndex, EvaledPop<Indiv> pop, EvalResult<Indiv> evalResult) {
 
             Indiv best = pop.getBestIndividual();
             Log.it("eval # "+evaluationIndex+ (opts==null ? "" : " / "+opts.getNumEvaluations() ) +", best :"+best.getWeight());

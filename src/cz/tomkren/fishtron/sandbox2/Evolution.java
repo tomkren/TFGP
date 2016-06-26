@@ -32,12 +32,12 @@ public class Evolution<Indiv extends FitIndiv> {
 
     // -- ITERATIVE EVOLUTION ------------------------------------------------------------------------
 
-    public void startIterativeEvolution_2(int run) {
+    public void startIterativeEvolution(int run) {
         checkOptions_IE();
 
         makeEmptyPopulation();
         EvalResult<Indiv> evalResult = null;
-        long sleepTime = 2000;
+        long sleepTime = 2000; // TODO dát do configu...
 
         while (isEvaluationUnfinished_IE()) {
             if (isGeneratingNeeded_IE()) {
@@ -45,26 +45,25 @@ public class Evolution<Indiv extends FitIndiv> {
             } else if (isPopulationLargeEnoughForOperating_IE() && isSendingNeeded_IE()) {
 
                 List<Indiv> children = makeChildren(evalResult,population,opts.getNumEvaluations());
-                evalResult = children.size() > 0 ? sendToEval(children) : justAskForResults_sleep(sleepTime);
+                evalResult = children.size() > 0 ? sendToEval(children) : justAskForResults();
 
             } else {
-                evalResult = justAskForResults_sleep(sleepTime);
+                evalResult = justAskForResults();
             }
 
             updatePopulation_IE(evalResult);
-            logger.iterativeLog(run, numEvaluatedIndividuals, population);
+            logger.iterativeLog(run, numEvaluatedIndividuals, population, evalResult);
 
-
+            if (evalResult.isEmpty()) {
+                sleep(sleepTime);
+            }
 
         }
 
     }
 
 
-    private EvalResult<Indiv> justAskForResults_sleep(long millis) {
-        sleep(millis);
-        return opts.getEvalManager().justAskForResults();
-    }
+
 
     private static void sleep(long millis) {
         try {
@@ -74,7 +73,7 @@ public class Evolution<Indiv extends FitIndiv> {
         }
     }
 
-    public void startIterativeEvolution(int run) {
+    public void startIterativeEvolution_old(int run) {
         checkOptions_IE();
 
         makeEmptyPopulation();
@@ -90,7 +89,7 @@ public class Evolution<Indiv extends FitIndiv> {
             }
 
             updatePopulation_IE(evalResult);
-            logger.iterativeLog(run, numEvaluatedIndividuals, population);
+            logger.iterativeLog(run, numEvaluatedIndividuals, population, evalResult);
         }
 
     }
@@ -109,7 +108,7 @@ public class Evolution<Indiv extends FitIndiv> {
     }
 
     private void updatePopulation_IE(EvalResult<Indiv> evalResult) {
-        List<Indiv> evaluatedIndividuals = evalResult.getSomeEvaluatedIndividuals();
+        List<Indiv> evaluatedIndividuals = evalResult.getIndividuals();
         numEvaluatedIndividuals += evaluatedIndividuals.size();
         for (Indiv indiv : evaluatedIndividuals) {
             population.addIndividual(indiv);
@@ -176,7 +175,7 @@ public class Evolution<Indiv extends FitIndiv> {
                 evalResult = justAskForResults();
             }
 
-            List<Indiv> evaledIndivs = evalResult.getSomeEvaluatedIndividuals();
+            List<Indiv> evaledIndivs = evalResult.getIndividuals();
             numEvaluatedIndividuals += evaledIndivs.size();
             population.addIndividuals(evaledIndivs);
         }

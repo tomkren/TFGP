@@ -109,11 +109,11 @@ public class NetworkEvalManager<Indiv extends FitIndiv> implements EvalManager<I
 
         EvalResult<Test_FakeAnt> res = em.evalIndividuals(ants);
 
-        for(Test_FakeAnt ind : res.getSomeEvaluatedIndividuals()) {
+        for(Test_FakeAnt ind : res.getIndividuals()) {
             Log.it("score:"+ ind.getWeight() + " indiv: "+ind.computeValue());
         }
 
-        ch.it( F.map(res.getSomeEvaluatedIndividuals(), Test_FakeAnt::getWeight), "[11.0, 89.0]");
+        ch.it( F.map(res.getIndividuals(), Test_FakeAnt::getWeight), "[11.0, 89.0]");
         ch.it(em.id2indiv.size() , 0);
         ch.it(em.nextId, 3);
 

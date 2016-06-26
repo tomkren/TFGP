@@ -5,7 +5,6 @@ import cz.tomkren.fishtron.eva.FitVal;
 import cz.tomkren.fishtron.workflows.TypedDag;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
-import org.apache.xmlrpc.XmlRpcException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -104,7 +103,7 @@ public class Dag_EvalManager<Indiv extends FitIndiv> implements Dag_IEvalManager
             evaluatedIndividuals.add(getIndivBack(evalRes));
         }
 
-
+        /*
         if (evaluatedIndividuals.size() > 0) {
             Log.it("\nEvaluated individuals: ");
 
@@ -115,7 +114,7 @@ public class Dag_EvalManager<Indiv extends FitIndiv> implements Dag_IEvalManager
 
         } else {
             Log.it_noln("=");
-        }
+        }*/
 
         return () -> evaluatedIndividuals;
     }

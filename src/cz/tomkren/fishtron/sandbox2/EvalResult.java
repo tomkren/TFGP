@@ -8,10 +8,14 @@ import java.util.List;
 
 public interface EvalResult<Indiv extends FitIndiv> {
 
-    List<Indiv> getSomeEvaluatedIndividuals();
+    List<Indiv> getIndividuals();
 
     default int getNumEvaluatedIndividuals() {
-        return getSomeEvaluatedIndividuals().size();
+        return getIndividuals().size();
+    }
+
+    default boolean isEmpty() {
+        return getIndividuals().isEmpty();
     }
 
 }

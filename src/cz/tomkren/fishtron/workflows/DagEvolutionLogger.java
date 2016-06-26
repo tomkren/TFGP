@@ -1,7 +1,10 @@
 package cz.tomkren.fishtron.workflows;
 
+import com.google.common.base.Strings;
 import cz.tomkren.fishtron.eva.EvaledPop;
 import cz.tomkren.fishtron.eva.Logger;
+import cz.tomkren.fishtron.sandbox2.EvalResult;
+import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
 import cz.tomkren.fishtron.terms.PolyTree;
 
 import cz.tomkren.utils.Checker;
@@ -22,7 +25,18 @@ public class DagEvolutionLogger implements Logger<PolyTree> {
     //private final File parsableSubDir; // TODO zase zprovoznit !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     private final Checker checker;
 
+    private EvolutionOpts<PolyTree> opts;
+
+    private double bestValSoFar;
+
     public DagEvolutionLogger(JSONObject config, String logPath, Checker checker) {
+        this(config, logPath, checker, null);
+    }
+
+    public DagEvolutionLogger(JSONObject config, String logPath, Checker checker, EvolutionOpts<PolyTree> opts) {
+
+        this.opts = opts;
+        bestValSoFar = - Double.MAX_VALUE;
 
         this.checker = checker;
 
@@ -87,6 +101,53 @@ public class DagEvolutionLogger implements Logger<PolyTree> {
     public DagEvolutionLogger() {
         this(null,null,null);
     }
+
+
+    @Override
+    public void iterativeLog(int run, int evaluationIndex, EvaledPop<PolyTree> pop, EvalResult<PolyTree> evalResult) {
+
+        if (evalResult.isEmpty()) {
+            Log.it_noln("=");
+        } else {
+
+            Log.it("\neval #"+evaluationIndex+ (opts==null ? "" : "/"+opts.getNumEvaluations() ) );
+
+            PolyTree best = pop.getBestIndividual();
+            String bestLabel = "previous best so far";
+            if (bestValSoFar < best.getWeight()) {
+                bestValSoFar = best.getWeight();
+                bestLabel = "FOUND NEW BEST";
+            }
+
+            Log.it(showIndivRow(1, bestLabel, best));
+            Log.it(" Evaluated individuals:");
+            Log.list(F.map(evalResult.getIndividuals(), indiv -> showIndivRow(2,"",indiv) ));
+
+
+            JSONObject evalInfo = F.obj(
+                    "bestSoFar", dagTreeIndividualToJson(best),
+                    "evalResults", evalResultToJson(evalResult)
+            );
+
+            writeToFile("eval_" + evaluationIndex + ".json" , evalInfo.toString(2));
+
+        }
+    }
+
+    private static String showIndivRow(int ods, String label, PolyTree ind) {
+        String indivCode = new JSONObject(((TypedDag) ind.computeValue()).toJson()).toString();
+        return Strings.repeat(" ",ods)+ label +(label.length()>0?": ":"")+ ind.getWeight() + "\t" + indivCode;
+    }
+
+    private JSONArray evalResultToJson(EvalResult<PolyTree> evalResult) {
+        List<JSONObject> jsons = F.map( evalResult.getIndividuals(), DagEvolutionLogger::dagTreeIndividualToJson);
+        return F.arr(jsons);
+    }
+
+
+
+
+
 
     @Override
     public void logPop(int run, int generation, EvaledPop<PolyTree> pop) {

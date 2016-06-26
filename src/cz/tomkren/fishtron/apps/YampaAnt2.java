@@ -26,7 +26,7 @@ public class YampaAnt2 {
         Logger<PolyTree> logger = new Logger.Basic<>(opts);
         Evolution<PolyTree> eva = new Evolution<>(opts, logger);
 
-        eva.startIterativeEvolution(1);
+        eva.startIterativeEvolution_old(1);
         //eva.startGenerationsEvolution(1);
 
     }
@@ -64,7 +64,7 @@ public class YampaAnt2 {
 
         Evolution<PolyTree> eva = new Evolution<>(opts, logger);
         //eva.startGenerationsEvolution(1);
-        eva.startIterativeEvolution(1);
+        eva.startIterativeEvolution_old(1);
 
     }
 
