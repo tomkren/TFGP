@@ -3,6 +3,7 @@ package cz.tomkren.fishtron.sandbox2;
 import cz.tomkren.fishtron.eva.FitIndiv;
 import cz.tomkren.fishtron.eva.FitVal;
 import cz.tomkren.fishtron.workflows.TypedDag;
+import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
 import org.json.JSONArray;
@@ -44,7 +45,7 @@ public class Dag_EvalManager<Indiv extends FitIndiv> implements Dag_IEvalManager
         dagEvaluator = new Dag_JsonEvalInterface(evaluatorURL);
 
         id2indiv = new HashMap<>();
-        nextId = 1;
+        nextId = 0;
     }
 
     public JSONObject getAllParamsInfo(String datasetFilename) {
@@ -96,35 +97,18 @@ public class Dag_EvalManager<Indiv extends FitIndiv> implements Dag_IEvalManager
         JSONArray json = dagEvaluator.getEvaluated(getEvaluatedMethodName);
 
         int len = json.length();
-        List<Indiv> evaluatedIndividuals = new ArrayList<>(len);
+        List<AB<Integer,Indiv>> evaluatedIndividuals = new ArrayList<>(len);
 
         for (int i = 0; i < len; i++) {
             JSONArray evalRes = json.getJSONArray(i);
             evaluatedIndividuals.add(getIndivBack(evalRes));
         }
 
-        /*
-        if (evaluatedIndividuals.size() > 0) {
-            Log.it("\nEvaluated individuals: ");
-
-            Log.list(F.map(evaluatedIndividuals, ind -> {
-                String indivCode = new JSONObject(((TypedDag) ind.computeValue()).toJson()).toString();
-                return "  " + ind.getWeight() + "\t" + indivCode;
-            }));
-
-        } else {
-            Log.it_noln("=");
-        }*/
 
         return () -> evaluatedIndividuals;
     }
 
-    private Indiv getIndivBack(JSONArray evalResJsonArr) {
-
-
-        //Object[] evalResArr = (Object[]) evalRes;
-        //int    id       = (int)      evalResArr[0];
-        //double[] scores = (double[]) evalResArr[1];
+    private AB<Integer,Indiv> getIndivBack(JSONArray evalResJsonArr) {
 
         int id = evalResJsonArr.getInt(0);
         JSONArray scores = evalResJsonArr.getJSONArray(1);
@@ -141,7 +125,7 @@ public class Dag_EvalManager<Indiv extends FitIndiv> implements Dag_IEvalManager
         if (indiv == null) {throw new Error("EvalResult for individual with non-existing id "+id+"!");}
 
         indiv.setFitVal(fitVal);
-        return indiv;
+        return new AB<>(id,indiv);
     }
 
     /* TODO score == perfectScore*/

@@ -67,10 +67,10 @@ public class EvolutionJob implements Logger<PolyTree> {
 
 
     @Override
-    public void iterativeLog(int run, int evaluationIndex, EvaledPop<PolyTree> pop, EvalResult<PolyTree> evalResult) {
+    public void iterativeLog(int run, int numEvaluatedIndivs, EvaledPop<PolyTree> pop, EvalResult<PolyTree> evalResult) {
 
         PolyTree best = pop.getBestIndividual();
-        log("eval # "+evaluationIndex+ (opts==null ? "" : " / "+opts.getNumEvaluations() ) +", best: "+ best.getWeight());
+        log("eval # "+ numEvaluatedIndivs + (opts==null ? "" : " / "+opts.getNumEvaluations() ) +", best: "+ best.getWeight());
         log("  "+best.toString()+"\n");
 
     }

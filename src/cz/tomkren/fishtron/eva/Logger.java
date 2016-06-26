@@ -11,7 +11,7 @@ public interface Logger<Indiv extends FitIndiv> {
     void logPop(int run, int generation, EvaledPop<Indiv> pop);
     void logErrorIndivs(int generation, List<Object> errorIndivs);
     default void logRun(int run) {}
-    default void iterativeLog(int run, int evaluationIndex, EvaledPop<Indiv> pop, EvalResult<Indiv> evalResult) {}
+    default void iterativeLog(int run, int numEvaluatedIndivs, EvaledPop<Indiv> pop, EvalResult<Indiv> evalResult) {}
 
 
     class Basic<Indiv extends FitIndiv> implements Logger<Indiv> {
@@ -27,10 +27,10 @@ public interface Logger<Indiv extends FitIndiv> {
         }
 
         @Override
-        public void iterativeLog(int run, int evaluationIndex, EvaledPop<Indiv> pop, EvalResult<Indiv> evalResult) {
+        public void iterativeLog(int run, int numEvaluatedIndivs, EvaledPop<Indiv> pop, EvalResult<Indiv> evalResult) {
 
             Indiv best = pop.getBestIndividual();
-            Log.it("eval # "+evaluationIndex+ (opts==null ? "" : " / "+opts.getNumEvaluations() ) +", best :"+best.getWeight());
+            Log.it("eval # "+ numEvaluatedIndivs + (opts==null ? "" : " / "+opts.getNumEvaluations() ) +", best :"+best.getWeight());
             Log.itln("  "+best.toString());
 
         }

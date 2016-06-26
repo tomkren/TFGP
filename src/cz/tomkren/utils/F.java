@@ -135,12 +135,6 @@ public class F {
         return xs.stream().map(f).collect(Collectors.toList());
     }
 
-
-
-    /*public static <A,B> List<B> map(List<A> xs, Function<A,B> f) {
-        return xs.stream().map(f).collect(Collectors.toList());
-    }*/
-
     public static <A,B> List<B> map(Collection<A> xs, Function<A,B> f) {
         return xs.stream().map(f).collect(Collectors.toList());
     }
@@ -456,6 +450,13 @@ public class F {
     public static JSONArray arr(Object... objs) {
         return new JSONArray(objs);
     }
+
+    public static <A> JSONArray jsonMap(Collection<A> xs, Function<A,Object> f) {
+        JSONArray ret = new JSONArray();
+        xs.stream().map(f).forEach(ret::put);
+        return ret;
+    }
+
 
     public static JSONArray concat(List<JSONArray> arrs) {
 

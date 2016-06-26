@@ -22,11 +22,15 @@ import java.io.*;
 public class DagEvolutionLogger implements Logger<PolyTree> {
 
     private final File runLogDir;
+    private File evalsLogDir;
+
     //private final File parsableSubDir; // TODO zase zprovoznit !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     private final Checker checker;
 
     private EvolutionOpts<PolyTree> opts;
 
+    private int bestEvalIdSoFar;
+    private int bestIndivIdSoFar;
     private double bestValSoFar;
 
     public DagEvolutionLogger(JSONObject config, String logPath, Checker checker) {
@@ -37,6 +41,8 @@ public class DagEvolutionLogger implements Logger<PolyTree> {
 
         this.opts = opts;
         bestValSoFar = - Double.MAX_VALUE;
+        bestEvalIdSoFar = -1;
+
 
         this.checker = checker;
 
@@ -59,14 +65,9 @@ public class DagEvolutionLogger implements Logger<PolyTree> {
             i++;
         }
 
-        runLogDir = new File(logPath,"run_"+i);
-        //parsableSubDir = new File(runLogDir, "parsable");
-
-
-        boolean success1 = runLogDir.mkdir();
-        //boolean success2 = parsableSubDir.mkdir();
-
-        if (!success1 /*|| !success2*/) {
+        runLogDir = new File(logPath,"run_"+i); // + parsableSubDir = new File(runLogDir, "parsable");
+        boolean success1 = runLogDir.mkdir();   // + boolean success2 = parsableSubDir.mkdir();
+        if (!success1) {                        // + || !success2
             throw new Error("Unable to create log directory!");
         }
 
@@ -75,6 +76,17 @@ public class DagEvolutionLogger implements Logger<PolyTree> {
 
         writeToFile("config.json", config.toString(2));
 
+
+        evalsLogDir = mkDir("evals");
+    }
+
+    private File mkDir(String dirName) {
+        File dir = new File(runLogDir,dirName);
+        boolean success = dir.mkdir();
+        if (!success) {
+            throw new Error("Unable to create dir "+dirName+" inside run-log directory!");
+        }
+        return dir;
     }
 
     @Override
@@ -84,7 +96,11 @@ public class DagEvolutionLogger implements Logger<PolyTree> {
     }
 
     private void writeToFile(String filename, String str) {
-        writeToFile(new File(runLogDir, filename),str);
+        writeToFile(runLogDir, filename, str);
+    }
+
+    private void writeToFile(File dir, String filename, String str) {
+        writeToFile(new File(dir, filename),str);
     }
 
     private void writeToFile(File file, String str) {
@@ -104,19 +120,26 @@ public class DagEvolutionLogger implements Logger<PolyTree> {
 
 
     @Override
-    public void iterativeLog(int run, int evaluationIndex, EvaledPop<PolyTree> pop, EvalResult<PolyTree> evalResult) {
+    public void iterativeLog(int run, int numEvaluatedIndivs, EvaledPop<PolyTree> pop, EvalResult<PolyTree> evalResult) {
 
         if (evalResult.isEmpty()) {
             Log.it_noln("=");
         } else {
 
-            Log.it("\neval #"+evaluationIndex+ (opts==null ? "" : "/"+opts.getNumEvaluations() ) );
+            int evalId = numEvaluatedIndivs-1;
+
+
+            Log.it("\neval #"+ evalId + (opts==null ? "" : "/"+opts.getNumEvaluations() ) );
 
             PolyTree best = pop.getBestIndividual();
             String bestLabel = "previous best so far";
+            boolean bestInThisResult = false;
             if (bestValSoFar < best.getWeight()) {
                 bestValSoFar = best.getWeight();
                 bestLabel = "FOUND NEW BEST";
+                bestInThisResult = true;
+                bestIndivIdSoFar =evalResult.getBestInResult()._1();
+                bestEvalIdSoFar = evalId;
             }
 
             Log.it(showIndivRow(1, bestLabel, best));
@@ -125,11 +148,17 @@ public class DagEvolutionLogger implements Logger<PolyTree> {
 
 
             JSONObject evalInfo = F.obj(
-                    "bestSoFar", dagTreeIndividualToJson(best),
-                    "evalResults", evalResultToJson(evalResult)
+                    "evalId", evalId,
+                    "bestSoFar", F.obj(
+                            "indivId", bestIndivIdSoFar,
+                            "evalId", bestEvalIdSoFar,
+                            "fitness", bestValSoFar,
+                            "isInThisResult", bestInThisResult
+                    ),
+                    "evalResult", evalResultToJson(evalResult)
             );
 
-            writeToFile("eval_" + evaluationIndex + ".json" , evalInfo.toString(2));
+            writeToFile(evalsLogDir, "eval_" + evalId + ".json" , evalInfo.toString(2));
 
         }
     }
@@ -140,8 +169,23 @@ public class DagEvolutionLogger implements Logger<PolyTree> {
     }
 
     private JSONArray evalResultToJson(EvalResult<PolyTree> evalResult) {
-        List<JSONObject> jsons = F.map( evalResult.getIndividuals(), DagEvolutionLogger::dagTreeIndividualToJson);
-        return F.arr(jsons);
+        return F.jsonMap(evalResult.getEvalResult(), p -> dagPolyTreeToJson(p._1(), p._2()));
+    }
+
+    private static JSONObject dagPolyTreeToJson(int indivId, PolyTree tree) {
+
+        TypedDag dag = (TypedDag) tree.computeValue();
+
+        return F.obj(
+            "indivId", indivId,
+            "fitness", tree.getFitVal().getVal(),
+            "descriptions", F.obj(
+                "fullTree", tree.toString().replace('"', '\''),
+                "shortTree", tree.toStringWithoutParams(),
+                "evalJson", new JSONObject(dag.toJson()),
+                "kutilJson", dag.toKutilJson(0,0)
+            )
+        );
     }
 
 

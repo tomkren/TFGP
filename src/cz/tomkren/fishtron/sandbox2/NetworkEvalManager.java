@@ -9,10 +9,7 @@ import cz.tomkren.utils.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 /** Created by user on 10. 6. 2016.*/
@@ -47,6 +44,7 @@ public class NetworkEvalManager<Indiv extends FitIndiv> implements EvalManager<I
     public EvalResult<Indiv> evalIndividuals(List<Indiv> indivs) {
 
         JSONArray jsonIndivs = new JSONArray();
+        List<Integer> ids = new ArrayList<>(indivs.size());
 
         for (Indiv indiv : indivs) {
 
@@ -60,13 +58,17 @@ public class NetworkEvalManager<Indiv extends FitIndiv> implements EvalManager<I
                 "code", jsonCode
             );
 
+            ids.add(nextId);
             jsonIndivs.put(indivData);
+
             nextId++;
         }
 
+
+
         List<Indiv> someEvaluatedIndivs = evaluator.eval(evalMethodName, jsonIndivs, this::getIndivBack);
 
-        return () -> someEvaluatedIndivs;
+        return () -> F.zip(ids,someEvaluatedIndivs);
     }
 
     private Indiv getIndivBack(Object evalRes) {
