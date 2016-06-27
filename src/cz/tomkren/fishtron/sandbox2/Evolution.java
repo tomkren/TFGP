@@ -1,10 +1,9 @@
 package cz.tomkren.fishtron.sandbox2;
 
-import cz.tomkren.fishtron.eva.Distribution;
-import cz.tomkren.fishtron.eva.FitIndiv;
-import cz.tomkren.fishtron.eva.Logger;
-import cz.tomkren.fishtron.eva.Operator;
+import cz.tomkren.fishtron.eva.*;
+import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
+import org.json.JSONObject;
 
 import java.util.*;
 import java.util.function.Function;
@@ -44,7 +43,7 @@ public class Evolution<Indiv extends FitIndiv> {
                 evalResult = sendToEval(generateIndividuals_max(evalResult));
             } else if (isPopulationLargeEnoughForOperating_IE() && isSendingNeeded_IE()) {
 
-                List<Indiv> children = makeChildren(evalResult,population,opts.getNumEvaluations());
+                List<AB<Indiv,JSONObject>> children = makeChildren(evalResult,population,opts.getNumEvaluations());
                 evalResult = children.size() > 0 ? sendToEval(children) : justAskForResults();
 
             } else {
@@ -164,12 +163,12 @@ public class Evolution<Indiv extends FitIndiv> {
         return fillPopulation_GE(evalResult, eRes -> makeChildren(eRes, parentPop, getGenerationSize_GE()));
     }
 
-    private EvalResult<Indiv> fillPopulation_GE(EvalResult<Indiv> evalResult, Function<EvalResult<Indiv>,List<Indiv>> mkIndivsBatch) {
+    private EvalResult<Indiv> fillPopulation_GE(EvalResult<Indiv> evalResult, Function<EvalResult<Indiv>,List<AB<Indiv,JSONObject>>> mkIndivsBatch) {
 
         while (isBelowGenSize_GE(numEvaluatedIndividuals)) {
 
             if (isBelowGenSize_GE(numSentIndividuals)) {
-                List<Indiv> indivsToEval = mkIndivsBatch.apply(evalResult);
+                List<AB<Indiv,JSONObject>> indivsToEval = mkIndivsBatch.apply(evalResult);
                 evalResult = sendToEval(indivsToEval);
             } else {
                 evalResult = justAskForResults();
@@ -196,24 +195,28 @@ public class Evolution<Indiv extends FitIndiv> {
         numEvaluatedIndividuals = 0;
     }
 
-    private List<Indiv> generateIndividuals_max(EvalResult<Indiv> evalResult) {
+    private List<AB<Indiv,JSONObject>> generateIndividuals_max(EvalResult<Indiv> evalResult) {
         int yetToGenerate = opts.getNumIndividualsToGenerate() - numSentIndividuals;
         int evaluatorCapabilities = evalResult == null ? opts.getEvalManager().getEvalPoolSize(yetToGenerate)
                 : evalResult.getNumEvaluatedIndividuals();
         int numToGenerate = Math.max(evaluatorCapabilities, yetToGenerate);
-        return opts.getGenerator().generate(numToGenerate);
+
+        List<Indiv> genIndivs = opts.getGenerator().generate(numToGenerate);
+        return F.map(genIndivs, indiv -> new AB<>(indiv, mkIndivJson_forGenerated()));
     }
 
-    private List<Indiv> generateIndividuals_min(EvalResult<Indiv> evalResult) {
+    private List<AB<Indiv,JSONObject>> generateIndividuals_min(EvalResult<Indiv> evalResult) {
         int yetToGenerate = opts.getNumIndividualsToGenerate() - numSentIndividuals;
         int evaluatorCapabilities = evalResult == null ? opts.getEvalManager().getEvalPoolSize(yetToGenerate)
                                                        : evalResult.getNumEvaluatedIndividuals();
         int numToGenerate = Math.min(evaluatorCapabilities, yetToGenerate);
-        return opts.getGenerator().generate(numToGenerate);
+
+        List<Indiv> genIndivs = opts.getGenerator().generate(numToGenerate);
+        return F.map(genIndivs, indiv -> new AB<>(indiv, mkIndivJson_forGenerated()));
     }
 
 
-    private EvalResult<Indiv> sendToEval(List<Indiv> indivs) {
+    private EvalResult<Indiv> sendToEval(List<AB<Indiv,JSONObject>> indivs) {
         numSentIndividuals += indivs.size();
         return opts.getEvalManager().evalIndividuals(indivs);
     }
@@ -222,18 +225,20 @@ public class Evolution<Indiv extends FitIndiv> {
         return opts.getEvalManager().justAskForResults();
     }
 
-    private List<Indiv> makeChildren(EvalResult<Indiv> evalResult, Population<Indiv> parentPop, int maxNumToMake) {
+    private List<AB<Indiv,JSONObject>> makeChildren(EvalResult<Indiv> evalResult, Population<Indiv> parentPop, int maxNumToMake) {
 
         int requestedByEvaluator = evalResult.getNumEvaluatedIndividuals();
         int yetToBeSent = maxNumToMake - numSentIndividuals;
         int numChildren = Math.min(requestedByEvaluator, yetToBeSent);
 
-        List<Indiv> children = new ArrayList<>();
+        List<AB<Indiv,JSONObject>> children = new ArrayList<>();
 
         while (children.size() < numChildren) {
             Operator<Indiv> operator = opts.getOperators().get(opts.getRandom());
             List<Indiv> parents = selectParents(operator.getNumInputs(), parentPop);
-            children.addAll(operator.operate(parents));
+
+            List<Indiv> chs = operator.operate(parents);
+            children.addAll(F.map(chs, ch -> new AB<>(ch, mkIndivJson(operator, parents))));
         }
 
         return F.take(numChildren, children);
@@ -248,6 +253,42 @@ public class Evolution<Indiv extends FitIndiv> {
         }
 
         return parents;
+    }
+
+
+
+
+    private JSONObject mkIndivJson_forGenerated() {
+        return F.obj(
+            "operator", F.obj("generated",true),
+            "parents",  F.arr()
+        );
+    }
+
+    private JSONObject mkIndivJson(Operator<Indiv> operator, List<Indiv> parents) {
+        return F.obj(
+            "operator", mkOperatorInfo(operator),
+            "parents", F.jsonMap(parents, this::mkParentInfo)
+        );
+    }
+
+    private JSONObject mkOperatorInfo(Operator<Indiv> operator) {
+        return F.obj("toString",operator.toString());
+    }
+
+
+    private JSONObject mkParentInfo(Indiv parent) {
+
+        FitVal parentFitVal = parent.getFitVal();
+
+        JSONObject parentInfo = F.obj("fitness", parentFitVal.getVal());
+
+        if (parentFitVal instanceof FitVal.WithId) {
+            FitVal.WithId parentFitValWithId = (FitVal.WithId) parentFitVal;
+            parentInfo.put("id", parentFitValWithId.getIndivId());
+        }
+
+        return parentInfo;
     }
 
 

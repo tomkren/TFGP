@@ -4,14 +4,13 @@
   "dataset" : "winequality-white.csv",
   "killServer": false,
 
+  "numEvaluations": 4096,
+  "numIndividualsToGenerate": 128,
+  "minPopulationSizeToOperate": 64,
+  "maxPopulationSize": 256,
 
-  "numEvaluations": 512,
-  "numIndividualsToGenerate": 64,
-  "minPopulationSizeToOperate": 32,
-  "maxPopulationSize": 128,
 
-
-  "generatingMaxTreeSize":  20,
+  "generatingMaxTreeSize":  15,
 
   "tournamentBetterWinsProbability" : 0.8,
   "saveBest" : true,

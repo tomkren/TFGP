@@ -3,6 +3,7 @@ package cz.tomkren.fishtron.sandbox2;
 import cz.tomkren.fishtron.eva.FitIndiv;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
+import org.json.JSONObject;
 
 import java.util.List;
 
@@ -10,14 +11,14 @@ import java.util.List;
 
 public interface EvalResult<Indiv extends FitIndiv> {
 
-    List<AB<Integer,Indiv>> getEvalResult();
+    List<AB<Indiv,JSONObject>> getEvalResult();
 
     default List<Indiv> getIndividuals() {
-        return F.map(getEvalResult(), AB::_2);
+        return F.map(getEvalResult(), AB::_1);
     }
 
     default List<Integer> getIndivIds() {
-        return F.map(getEvalResult(), AB::_1);
+        return F.map(getEvalResult(), p -> p._2().getInt("id") );
     }
 
     default int getNumEvaluatedIndividuals() {
@@ -28,11 +29,11 @@ public interface EvalResult<Indiv extends FitIndiv> {
         return getIndividuals().isEmpty();
     }
 
-    default AB<Integer,Indiv> getBestInResult() {
-        AB<Integer,Indiv> best = null;
+    default AB<Indiv,JSONObject> getBestInResult() {
+        AB<Indiv,JSONObject> best = null;
         double wBest = - Double.MAX_VALUE;
-        for (AB<Integer,Indiv> r : getEvalResult()) {
-            double w = r._2().getWeight();
+        for (AB<Indiv,JSONObject> r : getEvalResult()) {
+            double w = r._1().getWeight();
             if (w > wBest) {
                 wBest = w;
                 best = r;

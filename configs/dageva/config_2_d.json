@@ -4,10 +4,9 @@
   "dataset" : "winequality-white.csv",
   "killServer": false,
 
-
   "numEvaluations": 512,
-  "numIndividualsToGenerate": 64,
-  "minPopulationSizeToOperate": 32,
+  "numIndividualsToGenerate": 8,
+  "minPopulationSizeToOperate": 4,
   "maxPopulationSize": 128,
 
 

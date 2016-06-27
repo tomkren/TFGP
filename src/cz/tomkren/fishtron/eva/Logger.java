@@ -4,6 +4,7 @@ import cz.tomkren.fishtron.sandbox2.EvalResult;
 import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
 import cz.tomkren.utils.Log;
 import cz.tomkren.utils.Weighted;
+import org.json.JSONObject;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ public interface Logger<Indiv extends FitIndiv> {
     default void logRun(int run) {}
     default void iterativeLog(int run, int numEvaluatedIndivs, EvaledPop<Indiv> pop, EvalResult<Indiv> evalResult) {}
 
+    default void logCreation(int indivId, JSONObject creationInfo) {}
 
     class Basic<Indiv extends FitIndiv> implements Logger<Indiv> {
 

@@ -3,6 +3,7 @@ package cz.tomkren.fishtron.sandbox2;
 import cz.tomkren.fishtron.eva.FitIndiv;
 import cz.tomkren.fishtron.eva.FitVal;
 import cz.tomkren.fishtron.sandbox.JsonEvalInterface;
+import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
@@ -21,7 +22,7 @@ public class NetworkEvalManager<Indiv extends FitIndiv> implements EvalManager<I
     private String poolSizeMethodName;
     private Function<Object,Object> toJsonObject;
 
-    private Map<Integer, Indiv> id2indiv;
+    private Map<Integer, AB<Indiv,JSONObject>> id2indiv;
     private int nextId;
 
 
@@ -41,25 +42,29 @@ public class NetworkEvalManager<Indiv extends FitIndiv> implements EvalManager<I
     }
 
     @Override
-    public EvalResult<Indiv> evalIndividuals(List<Indiv> indivs) {
+    public EvalResult<Indiv> evalIndividuals(List<AB<Indiv,JSONObject>> indivs) {
 
         JSONArray jsonIndivs = new JSONArray();
-        List<Integer> ids = new ArrayList<>(indivs.size());
+        List<JSONObject> indivObjs = new ArrayList<>(indivs.size());
 
-        for (Indiv indiv : indivs) {
+        for (AB<Indiv,JSONObject> indivData : indivs) {
 
-            id2indiv.put(nextId, indiv);
+            Indiv      indiv     = indivData._1();
+            JSONObject indivJson = indivData._2();
+
+            id2indiv.put(nextId, indivData);
+            indivJson.put("id",nextId);
 
             Object indivValue = indiv.computeValue();
             Object jsonCode = toJsonObject.apply(indivValue);
 
-            JSONObject indivData = F.obj(
+            JSONObject indivDataToSubmit = F.obj(
                 "id",   nextId,
                 "code", jsonCode
             );
 
-            ids.add(nextId);
-            jsonIndivs.put(indivData);
+            indivObjs.add(indivJson);
+            jsonIndivs.put(indivDataToSubmit);
 
             nextId++;
         }
@@ -68,7 +73,7 @@ public class NetworkEvalManager<Indiv extends FitIndiv> implements EvalManager<I
 
         List<Indiv> someEvaluatedIndivs = evaluator.eval(evalMethodName, jsonIndivs, this::getIndivBack);
 
-        return () -> F.zip(ids,someEvaluatedIndivs);
+        return () -> F.zip(someEvaluatedIndivs, indivObjs);
     }
 
     private Indiv getIndivBack(Object evalRes) {
@@ -78,11 +83,16 @@ public class NetworkEvalManager<Indiv extends FitIndiv> implements EvalManager<I
         double score = (double) evalResArr[1];
 
         FitVal fitVal = new FitVal.Basic(score, isPerfect(score));
-        Indiv indiv = id2indiv.remove(id);
+        AB<Indiv,JSONObject> indivData = id2indiv.remove(id);
 
-        if (indiv == null) {throw new Error("EvalResult for individual with non-existing id "+id+"!");}
+        if (indivData == null) {throw new Error("EvalResult for individual with non-existing id "+id+"!");}
 
+        Indiv indiv = indivData._1();
+        JSONObject indivJson = indivData._2();
+
+        indivJson.put("fitness", score);
         indiv.setFitVal(fitVal);
+
         return indiv;
     }
 
@@ -107,7 +117,7 @@ public class NetworkEvalManager<Indiv extends FitIndiv> implements EvalManager<I
         Test_FakeAnt ant1 = new Test_FakeAnt(antStr1);
         Test_FakeAnt ant2 = new Test_FakeAnt(antStr2);
 
-        List<Test_FakeAnt> ants = Arrays.asList(ant1,ant2);
+        List<AB<Test_FakeAnt,JSONObject>> ants = Arrays.asList(new AB<>(ant1, F.obj()),new AB<>(ant2, F.obj()));
 
         EvalResult<Test_FakeAnt> res = em.evalIndividuals(ants);
 

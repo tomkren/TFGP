@@ -29,7 +29,7 @@ public class Dag_EvalManager<Indiv extends FitIndiv> implements Dag_IEvalManager
 
     //private Function<Object,Object> toJsonObject;
 
-    private Map<Integer, Indiv> id2indiv;
+    private Map<Integer, AB<Indiv,JSONObject>> id2indivData;
     private int nextId;
 
 
@@ -44,7 +44,7 @@ public class Dag_EvalManager<Indiv extends FitIndiv> implements Dag_IEvalManager
         //this.toJsonObject = toJsonObject;
         dagEvaluator = new Dag_JsonEvalInterface(evaluatorURL);
 
-        id2indiv = new HashMap<>();
+        id2indivData = new HashMap<>();
         nextId = 0;
     }
 
@@ -68,24 +68,28 @@ public class Dag_EvalManager<Indiv extends FitIndiv> implements Dag_IEvalManager
     }
 
     @Override
-    public Object submit(List<Indiv> indivs) {
+    public Object submit(List<AB<Indiv,JSONObject>> indivs) {
 
         JSONArray jsonIndivs = new JSONArray();
 
-        for (Indiv indiv : indivs) {
+        for (AB<Indiv,JSONObject> indivData : indivs) {
 
-            id2indiv.put(nextId, indiv);
+            Indiv      indiv     = indivData._1();
+            JSONObject indivJson = indivData._2();
+
+            id2indivData.put(nextId, indivData);
+            indivJson.put("id",nextId);
 
             Object indivValue = indiv.computeValue();
             Object jsonCode = dagToJson(indivValue);
 
-            JSONObject indivData = F.obj(
+            JSONObject indivDataToSubmit = F.obj(
                 "id",   nextId,
                 "code", jsonCode
             );
 
             nextId++;
-            jsonIndivs.put(indivData);
+            jsonIndivs.put(indivDataToSubmit);
         }
 
         //return () -> someEvaluatedIndivs;
@@ -97,7 +101,7 @@ public class Dag_EvalManager<Indiv extends FitIndiv> implements Dag_IEvalManager
         JSONArray json = dagEvaluator.getEvaluated(getEvaluatedMethodName);
 
         int len = json.length();
-        List<AB<Integer,Indiv>> evaluatedIndividuals = new ArrayList<>(len);
+        List<AB<Indiv,JSONObject>> evaluatedIndividuals = new ArrayList<>(len);
 
         for (int i = 0; i < len; i++) {
             JSONArray evalRes = json.getJSONArray(i);
@@ -108,24 +112,38 @@ public class Dag_EvalManager<Indiv extends FitIndiv> implements Dag_IEvalManager
         return () -> evaluatedIndividuals;
     }
 
-    private AB<Integer,Indiv> getIndivBack(JSONArray evalResJsonArr) {
+    private AB<Indiv,JSONObject> getIndivBack(JSONArray evalResJsonArr) {
 
-        int id = evalResJsonArr.getInt(0);
+        int       id     = evalResJsonArr.getInt(0);
         JSONArray scores = evalResJsonArr.getJSONArray(1);
-
 
         double score = (scores.length() > 0) ? scores.getDouble(0) : mkErrorScore();
 
         // todo udělat aby umělo i záporný skóre !!! !!! !!!
-        score = Math.max(0.0, score);
-        FitVal fitVal = new FitVal.Basic(score, isPerfect(score));
+        double myScore = Math.max(0.0, score);
 
-        Indiv indiv = id2indiv.remove(id);
+        AB<Indiv,JSONObject> indivData = id2indivData.remove(id);
+        if (indivData == null) {throw new Error("EvalResult for individual with non-existing id "+id+"!");}
 
-        if (indiv == null) {throw new Error("EvalResult for individual with non-existing id "+id+"!");}
+        Indiv indiv = indivData._1();
+        JSONObject indivJson = indivData._2();
+
+        FitVal fitVal = new FitVal.WithId(myScore, isPerfect(myScore), id);
+
+        /*if (indiv.getFitVal() instanceof FitVal.HaxFamilyInfo) {
+            FitVal.HaxFamilyInfo haxFitVal = (FitVal.HaxFamilyInfo) indiv.getFitVal();
+            haxFitVal.updateFamilyInfo(obj -> obj.put("id", id));
+            haxFitVal.setFitVal(fitVal);
+        } else {
+            indiv.setFitVal(fitVal);
+        }*/
 
         indiv.setFitVal(fitVal);
-        return new AB<>(id,indiv);
+        indivJson.put("fitness", myScore);
+        indivJson.put("rawScores", scores);
+
+
+        return indivData;
     }
 
     /* TODO score == perfectScore*/

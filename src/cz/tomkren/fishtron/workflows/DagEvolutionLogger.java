@@ -138,7 +138,7 @@ public class DagEvolutionLogger implements Logger<PolyTree> {
                 bestValSoFar = best.getWeight();
                 bestLabel = "FOUND NEW BEST";
                 bestInThisResult = true;
-                bestIndivIdSoFar =evalResult.getBestInResult()._1();
+                bestIndivIdSoFar =evalResult.getBestInResult()._2().getInt("id");
                 bestEvalIdSoFar = evalId;
             }
 
@@ -172,13 +172,12 @@ public class DagEvolutionLogger implements Logger<PolyTree> {
         return F.jsonMap(evalResult.getEvalResult(), p -> dagPolyTreeToJson(p._1(), p._2()));
     }
 
-    private static JSONObject dagPolyTreeToJson(int indivId, PolyTree tree) {
+    private static JSONObject dagPolyTreeToJson(PolyTree tree, JSONObject indivData) {
 
         TypedDag dag = (TypedDag) tree.computeValue();
 
         return F.obj(
-            "indivId", indivId,
-            "fitness", tree.getFitVal().getVal(),
+            "indivData", indivData,
             "descriptions", F.obj(
                 "fullTree", tree.toString().replace('"', '\''),
                 "shortTree", tree.toStringWithoutParams(),
