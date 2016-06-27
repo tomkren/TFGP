@@ -2,7 +2,6 @@ package cz.tomkren.fishtron.sandbox2;
 
 import cz.tomkren.fishtron.apps.AntLibs;
 import cz.tomkren.fishtron.eva.*;
-import cz.tomkren.fishtron.mains.DagEvaTester;
 import cz.tomkren.fishtron.operators.*;
 import cz.tomkren.fishtron.reusegen.QuerySolver;
 import cz.tomkren.fishtron.terms.PolyTree;
@@ -99,53 +98,12 @@ public class JsonEvolutionOpts implements EvolutionOpts<PolyTree>  {
 
             String goalTypeStr = getString(config, "goalType", "D => LD");
 
-            JSONArray jsonLib = getJSONArray(config, "lib", F.arr(
-                    "TypedDag.dia( TypedDag: D => D , TypedDag: D => (V LD n an) , TypedDag: (V LD n an) => LD ) : D => LD",
-                    "TypedDag.dia0( TypedDag: D => (V LD n an) , TypedDag: (V LD n an) => LD ) : D => LD",
-                    "TypedDag.split( TypedDag: D => (V D n an) , MyList: V (D => LD) n an ) : D => (V LD n an)",
-                    "MyList.cons( Object: a , MyList: V a n an ) : V a (S n) an",
-                    "MyList.nil : V a 0 an",
-
-                    "PCA   : D => D",
-                    "kBest : D => D",
-                    "kMeans : D => (V D (S(S n)) Disj)",
-                    "copy   : D => (V D (S(S n)) Copy)",
-                    "SVC        : D => LD",
-                    "logR       : D => LD",
-                    "gaussianNB : D => LD",
-                    "DT         : D => LD",
-                    "vote : (V LD (S(S n)) an) => LD",
-
-                    "TypedDag.stacking( TypedDag: (V LD n Copy) => D , TypedDag: D => LD ) : (V LD n Copy) => LD",
-                    "stacker : (V LD (S(S n)) Copy) => D",
-
-                    "TypedDag.boosting( TypedDag: D => Boo , MyList: V (Boo => Boo) (S(S n)) an , TypedDag : Boo => LD ) : D => LD",
-                    "booBegin : D => Boo",
-                    "TypedDag.booster( TypedDag : D => LD ) : Boo => Boo",
-                    "booEnd   : Boo => LD"
-            ));
+            JSONArray jsonLib = getJSONArray(config, "lib", defaultLibJson);
 
             int generatingMaxTreeSize = getInt(config, "generatingMaxTreeSize", 37);
             double tournamentBetterWinsProbability = getDouble(config, "tournamentBetterWinsProbability", 0.8);
 
-            JSONObject basicTypedXoverOpts = getJSONObject(config, "basicTypedXover", F.obj(
-                    "probability", 0.3,
-                    "maxTreeSize", 50
-            )); // TODO předělat na xoverOpts, typ nemusí bejt takle debilně v názvu položky přece, obdobně u následujících několika
 
-            JSONObject sameSizeSubtreeMutationOpts = getJSONObject(config, "sameSizeSubtreeMutation", F.obj(
-                    "probability", 0.3,
-                    "maxSubtreeSize", 10
-            ));
-
-            JSONObject oneParamMutationOpts = getJSONObject(config, "oneParamMutation", F.obj(
-                    "probability", 0.3,
-                    "shiftsWithProbabilities", F.arr(F.arr(-2, 0.1), F.arr(-1, 0.4), F.arr(1, 0.4), F.arr(2, 0.1))
-            ));
-
-            JSONObject copyOpOpts = getJSONObject(config, "copyOp", F.obj(
-                    "probability", 0.1
-            ));
 
 
             lib = SmartLibrary.mk(classPrefix, allParamsInfo, jsonLib);
@@ -156,12 +114,12 @@ public class JsonEvolutionOpts implements EvolutionOpts<PolyTree>  {
             generator = new RandomParamsPolyTreeGenerator(goalType, generatingMaxTreeSize, querySolver);
             parentSelection = new Selection.Tournament<>(tournamentBetterWinsProbability, rand);
 
-            operators = new Distribution<>(Arrays.asList(
-                    new BasicTypedXover(rand, basicTypedXoverOpts),
-                    new SameSizeSubtreeMutation(querySolver, sameSizeSubtreeMutationOpts),
-                    new OneParamMutation(rand, oneParamMutationOpts),
-                    CopyOp.mk(copyOpOpts)
-            ));
+            if (config.has("operators")) {
+              operators = OperatorFactory.mkOperators(config.getJSONArray("operators"), rand, querySolver);
+            } else {
+                operators = mkOperators_oldSchool(config, rand, querySolver);
+                Log.err("\n!!!\nWarning! You are using deprecated format of operators !!!\n!!!\n\n");
+            }
 
         }
 
@@ -170,6 +128,34 @@ public class JsonEvolutionOpts implements EvolutionOpts<PolyTree>  {
         opts = new BasicEvolutionOpts<>(
                 numEvaluations, minPopulationSizeToOperate, numIndividualsToGenerate, maxPopulationSize, isUniquenessCheckPerformed, saveBest,
                 generator, evalManager, parentSelection, operators, rand);
+    }
+
+    private Distribution<Operator<PolyTree>> mkOperators_oldSchool(JSONObject config, Random rand, QuerySolver qs) {
+        JSONObject basicTypedXoverOpts = getJSONObject(config, "basicTypedXover", F.obj(
+                "probability", 0.3,
+                "maxTreeSize", 50
+        )); // TODO předělat na xoverOpts, typ nemusí bejt takle debilně v názvu položky přece, obdobně u následujících několika
+
+        JSONObject sameSizeSubtreeMutationOpts = getJSONObject(config, "sameSizeSubtreeMutation", F.obj(
+                "probability", 0.3,
+                "maxSubtreeSize", 10
+        ));
+
+        JSONObject oneParamMutationOpts = getJSONObject(config, "oneParamMutation", F.obj(
+                "probability", 0.3,
+                "shiftsWithProbabilities", F.arr(F.arr(-2, 0.1), F.arr(-1, 0.4), F.arr(1, 0.4), F.arr(2, 0.1))
+        ));
+
+        JSONObject copyOpOpts = getJSONObject(config, "copyOp", F.obj(
+                "probability", 0.1
+        ));
+
+        return new Distribution<>(Arrays.asList(
+            new BasicTypedXover(rand, basicTypedXoverOpts),
+            new SameSizeSubtreeMutation(qs, sameSizeSubtreeMutationOpts),
+            new OneParamMutation(rand, oneParamMutationOpts),
+            CopyOp.mk(copyOpOpts)
+        ));
     }
 
     public String quitServer() {
@@ -181,6 +167,32 @@ public class JsonEvolutionOpts implements EvolutionOpts<PolyTree>  {
             return "Unsupported quitServer call.";
         }
     }
+
+    private static final JSONArray defaultLibJson = F.arr(
+            "TypedDag.dia( TypedDag: D => D , TypedDag: D => (V LD n an) , TypedDag: (V LD n an) => LD ) : D => LD",
+            "TypedDag.dia0( TypedDag: D => (V LD n an) , TypedDag: (V LD n an) => LD ) : D => LD",
+            "TypedDag.split( TypedDag: D => (V D n an) , MyList: V (D => LD) n an ) : D => (V LD n an)",
+            "MyList.cons( Object: a , MyList: V a n an ) : V a (S n) an",
+            "MyList.nil : V a 0 an",
+
+            "PCA   : D => D",
+            "kBest : D => D",
+            "kMeans : D => (V D (S(S n)) Disj)",
+            "copy   : D => (V D (S(S n)) Copy)",
+            "SVC        : D => LD",
+            "logR       : D => LD",
+            "gaussianNB : D => LD",
+            "DT         : D => LD",
+            "vote : (V LD (S(S n)) an) => LD",
+
+            "TypedDag.stacking( TypedDag: (V LD n Copy) => D , TypedDag: D => LD ) : (V LD n Copy) => LD",
+            "stacker : (V LD (S(S n)) Copy) => D",
+
+            "TypedDag.boosting( TypedDag: D => Boo , MyList: V (Boo => Boo) (S(S n)) an , TypedDag : Boo => LD ) : D => LD",
+            "booBegin : D => Boo",
+            "TypedDag.booster( TypedDag : D => LD ) : Boo => Boo",
+            "booEnd   : Boo => LD"
+    );
 
     //public
 

@@ -16,11 +16,6 @@
   "tournamentBetterWinsProbability" : 0.8,
   "saveBest" : true,
 
-  "basicTypedXover" : {"probability": 0.3 , "maxTreeSize": 50},
-  "sameSizeSubtreeMutation" : {"probability": 0.3, "maxSubtreeSize": 10},
-  "oneParamMutation" : {"probability" : 0.3, "shiftsWithProbabilities": [[-2, 0.1], [-1, 0.4], [1, 0.4], [2, 0.1]]},
-  "copyOp" : {"probability": 0.1},
-
   "operators" : [
     {"name": "basicTypedXover", "probability": 0.3 , "maxTreeSize": 50},
     {"name": "sameSizeSubtreeMutation", "probability": 0.3, "maxSubtreeSize": 10},

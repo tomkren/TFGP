@@ -257,15 +257,10 @@ public class Evolution<Indiv extends FitIndiv> {
 
     private JSONObject mkIndivJson(Operator<Indiv> operator, List<Indiv> parents) {
         return F.obj(
-            "operator", mkOperatorInfo(operator),
+            "operator", operator.getOperatorInfo(),
             "parents", F.jsonMap(parents, this::mkParentInfo)
         );
     }
-
-    private JSONObject mkOperatorInfo(Operator<Indiv> operator) {
-        return F.obj("toString",operator.toString());
-    }
-
 
     private JSONObject mkParentInfo(Indiv parent) {
 
