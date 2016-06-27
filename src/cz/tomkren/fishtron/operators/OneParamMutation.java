@@ -41,8 +41,13 @@ public class OneParamMutation extends PolyTreeMutation {
         this(config.getJSONObject("oneParamMutation").getDouble("probability"),rand, config.getJSONObject("oneParamMutation").getJSONArray("shiftsWithProbabilities"));
     }
 
+
+    private JSONObject opts;
+    @Override public JSONObject getOperatorInfo() {return opts;}
+
     public OneParamMutation(Random rand, JSONObject opts) {
         this(opts.getDouble("probability"),rand, opts.getJSONArray("shiftsWithProbabilities"));
+        this.opts = opts;
     }
 
 

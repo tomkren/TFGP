@@ -40,12 +40,14 @@ public class BasicTypedXover implements Operator<PolyTree> {
         this(config.getJSONObject("basicTypedXover").getDouble("probability"),config.getJSONObject("basicTypedXover").getInt("maxTreeSize"),rand);
     }
 
+    private JSONObject opts;
+    @Override public JSONObject getOperatorInfo() {return opts;}
+
     // Preferovaná verze, todo odebrat tu starou deprekovanou !
     public BasicTypedXover(Random rand, JSONObject opts) {
         this(opts.getDouble("probability"),opts.getInt("maxTreeSize"),rand);
+        this.opts = opts;
     }
-
-
 
     public AA<PolyTree> xover(PolyTree mum, PolyTree dad) {
 

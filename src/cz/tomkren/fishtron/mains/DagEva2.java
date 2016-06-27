@@ -23,7 +23,7 @@ public class DagEva2 {
 
     public static void main(String[] args) {
 
-        Log.it("dageva2 [v0.5 beta]");
+        Log.it("dageva2 [v0.6 beta]");
 
         if (args.length < 2 || args[0].equals("--help")) {
             Log.it("You must provide two program arguments: <json-config-filename> <log-dir-path>");
