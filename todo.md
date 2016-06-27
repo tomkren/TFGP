@@ -2,6 +2,11 @@ High-level TODO
 ===============
 
 
+  numIndividualsToGenerate >= coreCount + minPopulationSizeToOperate ,
+  "numEvaluations" = 32768
+  
+  
+
 Fakt důležitejch věci
 ---------------------
 

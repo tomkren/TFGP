@@ -4,12 +4,13 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import cz.tomkren.fishtron.eva.Logger;
 import cz.tomkren.fishtron.sandbox2.Evolution;
-import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
 import cz.tomkren.fishtron.sandbox2.JsonEvolutionOpts;
 import cz.tomkren.fishtron.terms.PolyTree;
 import cz.tomkren.fishtron.workflows.DagEvolutionLogger;
 import cz.tomkren.utils.Checker;
+import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
+import org.apache.xmlrpc.XmlRpcException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -22,7 +23,7 @@ public class DagEva2 {
 
     public static void main(String[] args) {
 
-        Log.it("dageva2 [v0.4 beta]");
+        Log.it("dageva2 [v0.5 beta]");
 
         if (args.length < 2 || args[0].equals("--help")) {
             Log.it("You must provide two program arguments: <json-config-filename> <log-dir-path>");
@@ -43,7 +44,7 @@ public class DagEva2 {
 
             Checker checker = Checker.mk(config);
 
-            EvolutionOpts<PolyTree> opts = new JsonEvolutionOpts(config, checker);
+            JsonEvolutionOpts opts = new JsonEvolutionOpts(config, checker);
             Logger<PolyTree> dagLogger = new DagEvolutionLogger(config, logPath, checker, opts);
 
             Log.it("Config [OK] ...");
@@ -53,10 +54,10 @@ public class DagEva2 {
 
             eva.startIterativeEvolution(1); // todo numRuns ??
 
-            /* TODO
             if (config.getBoolean("killServer")) {
-                fitness.killServer();
-            }*/
+                String quitMsg = opts.quitServer();
+                Log.it("\n\nKilling server, server kill response: "+ quitMsg);
+            }
 
             checker.results();
 
@@ -67,9 +68,17 @@ public class DagEva2 {
             Log.err("JSON error: " + e.getMessage());
             throw new Error(e);
 
-        } /*catch (XmlRpcException e) {
-            Log.it("Dag-evaluate server error: Server is probably not running (or it is starting right now). Start the server and try again, please.");
-        }*/
+        } catch (XmlRpcException e) {
+            Log.it("Dag-evaluate server error: Server is probably not running (or it is starting right now).");
+            // "Start the server and try again, please."
+
+            long sleepTime = 5000;
+            Log.it("Sleeping for "+ (sleepTime/1000) +" seconds...");
+
+            F.sleep(sleepTime);
+            main(args);
+
+        }
 
     }
 

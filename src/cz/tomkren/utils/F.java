@@ -143,6 +143,14 @@ public class F {
         return Arrays.asList(xs).stream().map(f).collect(Collectors.toList());
     }
 
+    public static <B> List<B> map(JSONArray jsonArr, Function<Object,B> f) {
+        int n = jsonArr.length();
+        List<B> ret = new ArrayList<B>(n);
+        for (int i = 0; i < n; i++) {
+            ret.add(f.apply(jsonArr.get(i)));
+        }
+        return ret;
+    }
 
     public static <A,B> B foldr(List<A> xs, B z, BiFunction<A,B,B> f) {
         ListIterator<A> li = xs.listIterator(xs.size());
@@ -475,6 +483,15 @@ public class F {
     public static int plus(int x,int y) {
         return x+y;
     }
+
+    public static void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch(InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
 
     public static void main(String[] args) {
 

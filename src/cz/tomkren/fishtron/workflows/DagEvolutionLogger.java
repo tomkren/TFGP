@@ -120,14 +120,11 @@ public class DagEvolutionLogger implements Logger<PolyTree> {
 
 
     @Override
-    public void iterativeLog(int run, int numEvaluatedIndivs, EvaledPop<PolyTree> pop, EvalResult<PolyTree> evalResult) {
+    public void iterativeLog(int run, int evalId, EvaledPop<PolyTree> pop, EvalResult<PolyTree> evalResult) {
 
         if (evalResult.isEmpty()) {
             Log.it_noln("=");
         } else {
-
-            int evalId = numEvaluatedIndivs-1;
-
 
             Log.it("\neval #"+ evalId + (opts==null ? "" : "/"+opts.getNumEvaluations() ) );
 

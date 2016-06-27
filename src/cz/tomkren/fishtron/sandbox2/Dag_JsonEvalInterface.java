@@ -35,8 +35,8 @@ class Dag_JsonEvalInterface {
         }
     }
 
-    String getMethodParams(String methodName, String datasetFilename) {
-        try {
+    String getMethodParams(String methodName, String datasetFilename) throws XmlRpcException {
+        //try {
             Checker checker = new Checker(true);
 
 
@@ -47,18 +47,26 @@ class Dag_JsonEvalInterface {
 
             return (String) result;
 
-        } catch (XmlRpcException e) {
+        /*} catch (XmlRpcException e) {
 
             Log.it("\nDag-evaluate server error: Server is probably not running (or it is starting right now). Start the server and try again, please.\n");
 
             throw new Error("Dag-evaluate server error: Server is probably not running (or it is starting right now). Start the server and try again, please.");
-        }
+        }*/
 
         /*} catch (Exception e) {
             System.err.println("JavaClient(2): " + e);
             //throw new Error(e);
             return null;
         }*/
+    }
+
+    String quitServer() {
+        try {
+            return (String) client.execute("quit", Collections.emptyList());
+        } catch (Exception ignored) {
+            return "Server probably refused to be executed.";
+        }
     }
 
     Object submit(String methodName, JSONArray indivs, String datasetFilename) {

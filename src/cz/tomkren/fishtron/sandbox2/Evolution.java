@@ -54,23 +54,13 @@ public class Evolution<Indiv extends FitIndiv> {
             logger.iterativeLog(run, numEvaluatedIndividuals, population, evalResult);
 
             if (evalResult.isEmpty()) {
-                sleep(sleepTime);
+                F.sleep(sleepTime);
             }
 
         }
 
     }
 
-
-
-
-    private static void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch(InterruptedException ex) {
-            Thread.currentThread().interrupt();
-        }
-    }
 
     public void startIterativeEvolution_old(int run) {
         checkOptions_IE();

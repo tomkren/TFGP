@@ -21,14 +21,18 @@ public class YampaAnt2 {
     }
 
     public static void main2(String[] args) {
+        try {
 
-        EvolutionOpts<PolyTree> opts = new JsonEvolutionOpts();
-        Logger<PolyTree> logger = new Logger.Basic<>(opts);
-        Evolution<PolyTree> eva = new Evolution<>(opts, logger);
+            EvolutionOpts<PolyTree> opts = new JsonEvolutionOpts();
+            Logger<PolyTree> logger = new Logger.Basic<>(opts);
+            Evolution<PolyTree> eva = new Evolution<>(opts, logger);
 
-        eva.startIterativeEvolution_old(1);
-        //eva.startGenerationsEvolution(1);
+            eva.startIterativeEvolution_old(1);
+            //eva.startGenerationsEvolution(1);
 
+        } catch (Exception e) {
+            throw new Error(e);
+        }
     }
 
     public static void main1(String[] args) {

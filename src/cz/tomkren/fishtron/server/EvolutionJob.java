@@ -7,6 +7,7 @@ import cz.tomkren.fishtron.sandbox2.Evolution;
 import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
 import cz.tomkren.fishtron.sandbox2.JsonEvolutionOpts;
 import cz.tomkren.fishtron.terms.PolyTree;
+import org.apache.xmlrpc.XmlRpcException;
 import org.json.JSONObject;
 
 import java.util.List;
@@ -26,13 +27,19 @@ public class EvolutionJob implements Logger<PolyTree> {
 
     public EvolutionJob(JSONObject jsonOpts) {
 
-        setStatus(Status.beforeStart);
-        output = new StringBuffer();
+        try {
 
-        opts = new JsonEvolutionOpts(jsonOpts).getDirectOpts();
-        //Logger<PolyTree> logger = new Logger.Basic<>(opts);
+            setStatus(Status.beforeStart);
+            output = new StringBuffer();
 
-        eva = new Evolution<>(opts, this);
+            opts = new JsonEvolutionOpts(jsonOpts).getDirectOpts();
+            //Logger<PolyTree> logger = new Logger.Basic<>(opts);
+
+            eva = new Evolution<>(opts, this);
+
+        } catch (XmlRpcException e) {
+            throw new Error(e);
+        }
 
     }
 

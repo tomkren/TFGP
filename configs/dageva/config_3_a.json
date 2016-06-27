@@ -2,10 +2,10 @@
 
   "serverUrl" : "http://127.0.0.1:8080",
   "dataset" : "winequality-white.csv",
-  "killServer": false,
+  "killServer": true,
 
 
-  "numEvaluations": 512,
+  "numEvaluations": 5,
   "numIndividualsToGenerate": 64,
   "minPopulationSizeToOperate": 32,
   "maxPopulationSize": 128,
@@ -21,8 +21,13 @@
   "oneParamMutation" : {"probability" : 0.3, "shiftsWithProbabilities": [[-2, 0.1], [-1, 0.4], [1, 0.4], [2, 0.1]]},
   "copyOp" : {"probability": 0.1},
 
-
-
+  "operators" : [
+    {"name": "basicTypedXover", "probability": 0.3 , "maxTreeSize": 50},
+    {"name": "sameSizeSubtreeMutation", "probability": 0.3, "maxSubtreeSize": 10},
+    {"name": "oneParamMutation", "probability" : 0.3, "shiftsWithProbabilities": [[-2, 0.1], [-1, 0.4], [1, 0.4], [2, 0.1]]},
+    {"name": "copyOp", "probability": 0.1}
+  ],
+  
 
   "goalType" : "D => LD",
 

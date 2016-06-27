@@ -6,6 +6,7 @@ import cz.tomkren.fishtron.workflows.TypedDag;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
+import org.apache.xmlrpc.XmlRpcException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -48,10 +49,14 @@ public class Dag_EvalManager<Indiv extends FitIndiv> implements Dag_IEvalManager
         nextId = 0;
     }
 
-    public JSONObject getAllParamsInfo(String datasetFilename) {
+    public JSONObject getAllParamsInfo(String datasetFilename) throws XmlRpcException {
         String json = dagEvaluator.getMethodParams(getParamSetsMethodName, datasetFilename);
         Log.itln("allParamsInfo = "+ json);
         return new JSONObject(json);
+    }
+
+    public String quitServer() {
+        return dagEvaluator.quitServer();
     }
 
     @Override
@@ -92,7 +97,6 @@ public class Dag_EvalManager<Indiv extends FitIndiv> implements Dag_IEvalManager
             jsonIndivs.put(indivDataToSubmit);
         }
 
-        //return () -> someEvaluatedIndivs;
         return dagEvaluator.submit(submitMethodName, jsonIndivs, datasetFilename); // returns submitMsg
     }
 
@@ -107,7 +111,6 @@ public class Dag_EvalManager<Indiv extends FitIndiv> implements Dag_IEvalManager
             JSONArray evalRes = json.getJSONArray(i);
             evaluatedIndividuals.add(getIndivBack(evalRes));
         }
-
 
         return () -> evaluatedIndividuals;
     }
@@ -130,18 +133,9 @@ public class Dag_EvalManager<Indiv extends FitIndiv> implements Dag_IEvalManager
 
         FitVal fitVal = new FitVal.WithId(myScore, isPerfect(myScore), id);
 
-        /*if (indiv.getFitVal() instanceof FitVal.HaxFamilyInfo) {
-            FitVal.HaxFamilyInfo haxFitVal = (FitVal.HaxFamilyInfo) indiv.getFitVal();
-            haxFitVal.updateFamilyInfo(obj -> obj.put("id", id));
-            haxFitVal.setFitVal(fitVal);
-        } else {
-            indiv.setFitVal(fitVal);
-        }*/
-
         indiv.setFitVal(fitVal);
         indivJson.put("fitness", myScore);
         indivJson.put("rawScores", scores);
-
 
         return indivData;
     }

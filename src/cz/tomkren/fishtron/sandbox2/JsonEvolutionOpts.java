@@ -11,6 +11,8 @@ import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.F;
+import cz.tomkren.utils.Log;
+import org.apache.xmlrpc.XmlRpcException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -22,17 +24,20 @@ import java.util.function.BiFunction;
 
 public class JsonEvolutionOpts implements EvolutionOpts<PolyTree>  {
 
+    // todo narychlo hax aby šlo vypínat server
+    private EvalManager<PolyTree> evalManager;
+
     private BasicEvolutionOpts<PolyTree> opts;
 
-    public JsonEvolutionOpts() {
+    public JsonEvolutionOpts() throws XmlRpcException {
         this(new JSONObject());
     }
 
-    public JsonEvolutionOpts(JSONObject config) {
+    public JsonEvolutionOpts(JSONObject config) throws XmlRpcException  {
         this(config, null);
     }
 
-    public JsonEvolutionOpts(JSONObject config, Checker checker) {
+    public JsonEvolutionOpts(JSONObject config, Checker checker) throws XmlRpcException {
 
         String evalServerUrl = getString(config, "serverUrl", "http://localhost:8080/");
 
@@ -60,7 +65,7 @@ public class JsonEvolutionOpts implements EvolutionOpts<PolyTree>  {
 
         SmartLibrary lib;
         IndivGenerator<PolyTree> generator;
-        EvalManager<PolyTree> evalManager;
+        //EvalManager<PolyTree> evalManager;
         Selection<PolyTree> parentSelection;
         Distribution<Operator<PolyTree>> operators;
 
@@ -150,6 +155,7 @@ public class JsonEvolutionOpts implements EvolutionOpts<PolyTree>  {
 
             generator = new RandomParamsPolyTreeGenerator(goalType, generatingMaxTreeSize, querySolver);
             parentSelection = new Selection.Tournament<>(tournamentBetterWinsProbability, rand);
+
             operators = new Distribution<>(Arrays.asList(
                     new BasicTypedXover(rand, basicTypedXoverOpts),
                     new SameSizeSubtreeMutation(querySolver, sameSizeSubtreeMutationOpts),
@@ -165,6 +171,20 @@ public class JsonEvolutionOpts implements EvolutionOpts<PolyTree>  {
                 numEvaluations, minPopulationSizeToOperate, numIndividualsToGenerate, maxPopulationSize, isUniquenessCheckPerformed, saveBest,
                 generator, evalManager, parentSelection, operators, rand);
     }
+
+    public String quitServer() {
+        if (evalManager instanceof Dag_EvalManager) {
+
+            return ((Dag_EvalManager)evalManager).quitServer();
+
+        } else {
+            return "Unsupported quitServer call.";
+        }
+    }
+
+    //public
+
+
 
     public EvolutionOpts<PolyTree> getDirectOpts() {
         return opts;
