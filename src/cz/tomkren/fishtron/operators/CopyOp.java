@@ -15,9 +15,22 @@ public class CopyOp<Ind> implements Operator<Ind> {
         this(config.getJSONObject("copyOp").getDouble("probability"));
     }
 
-    public static <Indiv> CopyOp<Indiv> mk(JSONObject opts) {
-        return new CopyOp<>(opts.getDouble("probability"));
+
+    private JSONObject opts;
+    @Override public JSONObject getOperatorInfo() {return opts;}
+
+    private CopyOp(JSONObject opts, boolean fake_arg) {
+        this(opts.getDouble("probability"));
+        this.opts = opts;
     }
+
+    public static <Indiv> CopyOp<Indiv> mk(JSONObject opts) {
+        return new CopyOp<>(opts, true);
+    }
+
+
+
+
 
     @Override public int getNumInputs() {return 1;}
     @Override public List<Ind> operate(List<Ind> parents) {return parents;}

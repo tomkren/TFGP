@@ -5,10 +5,10 @@
   "killServer": true,
 
 
-  "numEvaluations": 32768,
-  "numIndividualsToGenerate": 256,
-  "minPopulationSizeToOperate": 64,
-  "maxPopulationSize": 512,
+  "numEvaluations": 32,
+  "numIndividualsToGenerate": 8,
+  "minPopulationSizeToOperate": 4,
+  "maxPopulationSize": 16,
 
 
   "generatingMaxTreeSize":  20,

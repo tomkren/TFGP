@@ -250,7 +250,7 @@ public class Evolution<Indiv extends FitIndiv> {
 
     private JSONObject mkIndivJson_forGenerated() {
         return F.obj(
-            "operator", F.obj("generated",true),
+            "operator", F.obj("name","generator", "generated",true),
             "parents",  F.arr()
         );
     }

@@ -26,11 +26,13 @@ public class OperatorFactory {
     public static Operator<PolyTree> mkOperator(JSONObject opOpts, Random rand, QuerySolver qs) {
         String opName = opOpts.getString("name");
         switch (opName) {
-            case "basicTypedXover" : return new BasicTypedXover(rand, opOpts);
-            case "sameSizeSubtreeMutation" : return new SameSizeSubtreeMutation(qs, opOpts);
-            case "oneParamMutation" : return new OneParamMutation(rand, opOpts);
-            case "copyOp" : return CopyOp.mk(opOpts);
-            default: throw new Error("Unsupported operator.name: "+opName);
+
+            case "basicTypedXover"           : return new BasicTypedXover(rand, opOpts);
+            case "sameSizeSubtreeMutation"   : return new SameSizeSubtreeMutation(qs, opOpts);
+            case "oneParamMutation"          : return new OneParamMutation(rand, opOpts);
+            case "copyOp"                    : return CopyOp.mk(opOpts);
+
+            default : throw new Error("Unsupported operator.name: "+opName);
         }
     }
 
