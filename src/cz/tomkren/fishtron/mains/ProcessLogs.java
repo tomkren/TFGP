@@ -1,5 +1,6 @@
 package cz.tomkren.fishtron.mains;
 
+import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
@@ -23,57 +24,114 @@ import java.util.Map;
 public class ProcessLogs {
 
 
+    private static final String resultsDir = "results";
 
-    public static void main_(String[] args) {
 
-        List<Double> fs = readDataFile("fitnesses.txt",1);
+    public static void main(String[] args) {
+        Checker checker = new Checker();
 
-        writeNumList("fitnesses-best.txt",bestSoFar(fs));
+        String runDirPath = "C:/Users/pejsek/Desktop/wine-5/media/logs/tom/run_1";
+        String experimentId = "wine-5";
+
+
+        processLogs(runDirPath, experimentId);
+        mkDerivedFiles(experimentId);
+
+
+        checker.results();
+    }
+
+    private static void mkDerivedFiles(String experimentId) {
+        mkDerivedFiles(experimentId, "fitness", 2);
+        mkDerivedFiles(experimentId, "generator", 1);
+        mkDerivedFiles(experimentId, "basicTypedXover", 1);
+        mkDerivedFiles(experimentId, "sameSizeSubtreeMutation", 1);
+        mkDerivedFiles(experimentId, "oneParamMutation", 1);
+    }
+
+    private static void mkDerivedFiles(String experimentId, String tableName, int dataColIndex) {
+
+        String experimentPrefix = resultsDir+"/"+experimentId+"/";
+        String dir = experimentPrefix +"derived";
+        mkDir(dir);
+
+
+
+        List<AB<Integer,Double>> fitness = readDataFile(experimentPrefix + tableName+".txt", dataColIndex);
+
+        //Log.list(fitness);
+
+        writeNumList(dir+"/"+tableName+"-best.txt", bestSoFar(fitness));
+        writeNumList(dir+"/"+tableName+"-w1.txt", movingAvg(fitness,1));
+        writeNumList(dir+"/"+tableName+"-w10.txt", movingAvg(fitness,10));
+        writeNumList(dir+"/"+tableName+"-w100.txt", movingAvg(fitness,100));
+        writeNumList(dir+"/"+tableName+"-w1000.txt", movingAvg(fitness,1000));
+        writeNumList(dir+"/"+tableName+"-w10000.txt", movingAvg(fitness,10000));
+
 
     }
 
-    private static void writeNumList(String path, List<Double> xs) {
+    private static void writeNumList(String path, List<AB<Integer,Double>> xs) {
+
+        if (xs == null) {
+            Log.it("  ! File "+path+" will not be created.");
+            return;
+        }
+
         StringBuilder sb = new StringBuilder();
 
-        for (int i = 0; i < xs.size(); i++) {
-            sb.append(i+1).append("\t").append(xs.get(i)).append("\n");
+        for (AB<Integer,Double> x : xs) {
+
+            int evalId = x._1();
+            double val = x._2();
+
+            sb.append(evalId).append("\t").append(val).append("\n");
         }
 
         F.writeFile(path, sb.toString());
     }
 
 
-    private static List<Double> bestSoFar(List<Double> xs) {
-        List<Double> ret = new ArrayList<>(xs.size());
+    private static List<AB<Integer,Double>> bestSoFar(List<AB<Integer,Double>> xs) {
+        List<AB<Integer,Double>> ret = new ArrayList<>(xs.size());
         double best = - Double.MAX_VALUE;
-        for (double x : xs) {
-            if (x > best) {best = x;}
-            ret.add(best);
+        for (AB<Integer,Double> x : xs) {
+            if (x._2() > best) {best = x._2();}
+            ret.add(new AB<>(x._1(),best));
         }
         return ret;
     }
 
-    private static List<Double> movingAvg(List<Double> xs, int window) {
-        List<Double> ret = new ArrayList<>(xs.size()-window+1);
+    private static List<AB<Integer,Double>> movingAvg(List<AB<Integer,Double>> xs, int window) {
+
+        if (window >= xs.size()) {
+            return null;
+        }
+
+        List<AB<Integer,Double>> ret = new ArrayList<>(xs.size()-window+1);
         for (int i = 0; i <= xs.size()-window; i++) {
             double sum = 0.0;
             for (int j=0; j<window; j++) {
-                sum += xs.get(i+j);
+                sum += xs.get(i+j)._2();
             }
-            ret.add(sum/window);
+            int firstEvalIdInWindow = xs.get(i)._1();
+            ret.add(new AB<>(firstEvalIdInWindow,sum/window));
         }
         return ret;
     }
 
-    private static List<Double> readDataFile(String path, int col) {
+    private static List<AB<Integer,Double>> readDataFile(String path, int col) {
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-            List<Double> ret = new ArrayList<>();
+            List<AB<Integer,Double>> ret = new ArrayList<>();
             String line;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
                 if (!line.equals("") && line.charAt(0) != '#') {
                     String[] parts = line.split("\\s+");
-                    ret.add(Double.parseDouble(parts[col]));
+
+                    int evalId = Integer.parseInt(parts[0]);
+                    double val = Double.parseDouble(parts[col]);
+                    ret.add(new AB<>(evalId,val));
                 }
             }
             return ret;
@@ -82,19 +140,9 @@ public class ProcessLogs {
         }
     }
 
-    public static void main(String[] args) {
-        Checker checker = new Checker();
 
-        String runDirPath = "C:/Users/user/Desktop/logs.wine.1/media/logs/tom/run_1";
 
-        String experimentId = "wine-1";
-
-        process(runDirPath, experimentId);
-
-        checker.results();
-    }
-
-    private static void process(String runDirPath, String experimentId) {
+    private static void processLogs(String runDirPath, String experimentId) {
         String evalsDirPath = runDirPath + "/evals";
         String configFilePath = runDirPath + "/config.json";
 
@@ -170,7 +218,6 @@ public class ProcessLogs {
 
         //Log.it(fitnesses.toString());
 
-        String resultsDir = "results";
         mkDir(resultsDir);
 
         String experimentDir = resultsDir+"/"+experimentId;
@@ -186,6 +233,8 @@ public class ProcessLogs {
         }
 
     }
+
+
 
     private static String readFile(String path) {
         try {
