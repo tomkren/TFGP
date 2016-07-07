@@ -1,0 +1,187 @@
+\documentclass[a4paper,oneside]{memoir}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{lmodern}
+
+%\usepackage[czech]{babel}
+\usepackage{amsmath,amssymb,mathtools,amsthm,bm}
+
+\usepackage{xspace}
+
+
+\usepackage{lipsum}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+
+\title{TFGP readme}
+
+\author{Tomáš Křen}
+
+\hyphenation{vě-dec-ká}
+
+\begin{document}
+
+\theoremstyle{plain} 
+\newtheorem{theorem}{Theorem} 
+\newtheorem{proposition}{Proposition} 
+\newtheorem{lemma}{Lemma} 
+\newtheorem{preLemma}{Pre-Lemma} 
+\newtheorem*{corollary}{Corollary}
+
+\theoremstyle{definition} 
+\newtheorem*{definition}{Definition} 
+\newtheorem*{preDefinition}{Pre-Definition} 
+\newtheorem{conjecture}{Conjecture}
+\newtheorem*{example}{Example} 
+
+\theoremstyle{remark} 
+\newtheorem*{remark}{Remark} 
+\newtheorem*{note}{Note} 
+\newtheorem{case}{Case}
+
+\frontmatter
+\mainmatter
+\maketitle
+
+%\renewcommand{\chaptername}{Akt}
+
+\tableofcontents*
+%\clearpage
+
+\chapter{Generating}
+
+\section{General notions}
+
+\begin{definition}
+A $\mathit{term:type}$ statement $\mathit{M}:\mathit{\tau}$ states that (program) term $M$ has type $\tau$.   
+A \textit{declaration} is a statement $s : \tau$ where $s$ is a term symbol and $\tau$ is a type.
+Often we will write $s : \tau_s$ to emphasize that $\tau_s$ is the type of symbol $s$ in the supposed context.
+A \textit{context} is set of declarations with distinct term symbols.\footnote{Interestingly, the definition of a \textit{context} and definition of a \textit{substitution} are almost the same. The difference is that "keys" in a context are term symbols/variables, whereas substitution "keys" are type variables. Maybe this fact could be utilized in an interesting way...}
+\end{definition}
+
+\newcommand{\then}{\Rightarrow}
+\newcommand{\E}[2]{(\exists #1)\ #2}
+\newcommand{\A}[2]{(\forall #1)\ #2}
+\newcommand{\Ain}[3]{(\forall #1 \in #2)\ #3}
+
+
+\newcommand{\op}{\operatorname}
+
+\newcommand{\ar}{\rightarrow}
+\newcommand{\ap}[2]{(#1\,#2)}
+\newcommand{\defi}{\coloneqq}
+\newcommand{\defe}{\mathrel{\vcentcolon\equiv}}
+
+\newcommand{\binRule}[3]{\dfrac{#1\ ,\ #2}{#3}}
+\newcommand{\triRule}[4]{\dfrac{#1\ ,\ #2\ , \ #3}{#4}}
+\newcommand{\isSub}[1]{#1\ \mathit{substitution}}
+\newcommand{\MGU}[2]{\op{MGU}(#1,#2)}
+
+\newcommand{\subAx}{\textit{SUB-AX}\xspace}
+\newcommand{\mguMp}{\textit{MGU-MP}\xspace}
+\newcommand{\abs}[1]{\lvert #1 \rvert}
+
+Suppose we have a context $\Gamma$. Let us consider $\mathit{term:type}$ statements derivable from the following rules (let us call them \subAx and \mguMp):
+
+~
+
+$\binRule{(s,\tau_s) \in \Gamma}{\isSub{\sigma}}{s : \sigma(\tau_s)}$
+~~~
+$\triRule{F : \tau_1 \ar \tau_2}{X : \tau^\prime_1}{\sigma = \MGU{\tau_1}{\tau^\prime_1}}{\ap{F}{X} : \sigma(\tau_2)}$
+
+
+\begin{definition}
+Let $M$ be a term. Term size $\abs{M}$ is the number of symbols in $M$; e.g. $\abs{\ap{f}{\ap{\ap{g}{h}}{f}}} = 4$. 
+\end{definition}
+
+\section{Reusable generating}
+
+\newcommand{\inhab}[1]{\op{I}(#1)}
+\newcommand{\sigmaPr}{\sigma^\prime}
+\newcommand{\tauPr}{\tau^\prime}
+\newcommand{\xPr}{x^\prime}
+\newcommand{\subOrd}[2]{#1 \preccurlyeq #2}
+\newcommand{\strictSubOrd}[2]{#1 \prec #2}
+
+
+
+\begin{align*}
+\op{I}_\tau(\sigma)   &\defe \E{M}{M : \sigma(\tau)}  \\
+\subOrd{\tauPr}{\tau} &\defe \E{\sigma}{\tauPr = \sigma(\tau)} \\
+\strictSubOrd{\tauPr}{\tau} &\defe \subOrd{\tauPr}{\tau} \wedge \neg (\subOrd{\tau}{\tauPr}) \\
+\tauPr \nsucc \tau &\ \equiv \subOrd{\tauPr}{\tau} \vee  \neg ( \subOrd{\tau}{\tauPr})   \\   
+\op{MGI}_\tau(\sigma) &\defe \op{I}_\tau(\sigma) \wedge \Ain{\sigmaPr}{\op{I}_\tau}{\sigmaPr(\tau) \nsucc \sigma(\tau)}\\
+~\\
+\op{I}_\tau &\defi \{ \sigma \mid \op{I}_\tau(\sigma)  \}  \\
+ &= \{ \sigma \mid \E{M}{M : \sigma(\tau)}  \} \\
+\op{MGI}_\tau &\defi \{ \sigma \mid \op{MGI}_\tau(\sigma)  \}  \\
+ &= \{ \sigma \mid \op{I}_\tau(\sigma)\ ,\ \Ain{\sigmaPr}{\op{I}_\tau}{\subOrd{\sigmaPr(\tau)}{ \sigma(\tau)}}  \} \\
+ &= \{ \sigma \mid \sigma \in \op{I}_\tau,\Ain{\sigmaPr}{\op{I}_\tau}{\subOrd{\sigmaPr(\tau)}{ \sigma(\tau)}}  \}
+\end{align*}
+
+I is for Inhabitator. MG is for Most General. In general the Most General relation can be stated as:
+
+$$\op{MGx}(X,\preceq) \defi \{ x \mid x \in X, \Ain{\xPr}{X}{\xPr \preceq x} \}$$
+
+
+
+\begin{align*}
+\tauPr \nsucc \tau &\equiv \neg (\strictSubOrd{\tau}{\tauPr})   \\
+  &\equiv \neg ( \subOrd{\tau}{\tauPr} \wedge \neg (\subOrd{\tauPr}{\tau}) )   \\
+  &\equiv \neg ( \subOrd{\tau}{\tauPr}) \vee \subOrd{\tauPr}{\tau}   \\  
+  &\equiv \subOrd{\tauPr}{\tau} \vee  \neg ( \subOrd{\tau}{\tauPr})    
+\end{align*}
+
+~
+
+~
+
+\newcommand{\subs}[2]{\op{subs}_{#2}(#1)}
+
+\begin{preDefinition}
+$ \subs{\tau_g}{n} \defi \{ \sigma_g \mid \E{M}{M : \sigma_g(\tau_g)}, \abs{M} = n \}$
+\end{preDefinition}
+
+Problem s touhle starou definicí: asi zahrnuje i zbytečně konkrétní substituce.
+
+Kdybych měl $\Gamma = \{id : \alpha \ar \alpha \}$
+
+Tak $\{\alpha \mapsto Int, \beta \mapsto  Int\} \in \subs{\alpha \ar \beta}{1}$
+
+Čili chceme něco jako Most General Subs který pokrejvá všecky Mka.. 
+
+
+
+~
+
+
+
+
+
+
+
+
+
+
+$ \op{weakSubs}(\tau_g) \defi \{ \sigma_g \mid \inhab{\sigma_g(\tau_g)} \}$
+
+
+\begin{preLemma} 
+$ \subs{\tau_g}{1} = \{ \sigma_g \mid (s,\tau_s) \in \Gamma, \sigma_g = \MGU{\tau_g}{\tau^\mathit{fresh}_s}  \} $
+\end{preLemma} 
+
+
+
+
+\backmatter
+\end{document}
+
