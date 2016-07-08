@@ -57,6 +57,9 @@
 \tableofcontents*
 %\clearpage
 
+\newcommand{\red}[1]{{\color{red} #1}}
+
+
 \chapter{Generating}
 
 \section{General notions}
@@ -109,41 +112,153 @@ Let $M$ be a term. Term size $\abs{M}$ is the number of symbols in $M$; e.g. $\a
 \newcommand{\sigmaPr}{\sigma^\prime}
 \newcommand{\tauPr}{\tau^\prime}
 \newcommand{\xPr}{x^\prime}
-\newcommand{\subOrd}[2]{#1 \preccurlyeq #2}
-\newcommand{\strictSubOrd}[2]{#1 \prec #2}
 
+\newcommand{\tord}{\preccurlyeq}
+\newcommand{\stord}{\prec}
+\newcommand{\ordt}{\tord_\tau}
+\newcommand{\tek}{\sim}
+\newcommand{\ntek}{\nsim}
+\newcommand{\ekt}{\tek_\tau}
+\newcommand{\nekt}{\ntek_\tau}
+\newcommand{\nsucct}{\nsucc_\tau}
+
+
+\newcommand{\MGI}[1]{\op{MGI}_{#1}}
+\newcommand{\MGIt}{\MGI{\tau}}
+\newcommand{\It}{\op{I}_{\tau}}
+
+\newcommand{\ids}{\sigma_{\op{id}}}
 
 
 \begin{align*}
-\op{I}_\tau(\sigma)   &\defe \E{M}{M : \sigma(\tau)}  \\
-\subOrd{\tauPr}{\tau} &\defe \E{\sigma}{\tauPr = \sigma(\tau)} \\
-\strictSubOrd{\tauPr}{\tau} &\defe \subOrd{\tauPr}{\tau} \wedge \neg (\subOrd{\tau}{\tauPr}) \\
-\tauPr \nsucc \tau &\ \equiv \subOrd{\tauPr}{\tau} \vee  \neg ( \subOrd{\tau}{\tauPr})   \\   
-\op{MGI}_\tau(\sigma) &\defe \op{I}_\tau(\sigma) \wedge \Ain{\sigmaPr}{\op{I}_\tau}{\sigmaPr(\tau) \nsucc \sigma(\tau)}\\
-~\\
+\op{I}_\tau(\sigma)  &\defe \E{M}{M : \sigma(\tau)}  \\
+\tauPr \tord  \tau   &\defe \E{\sigma}{\tauPr = \sigma(\tau)} \\
+\tauPr \stord \tau   &\defe \tauPr \tord \tau \wedge \neg (\tau \tord \tauPr) \\
+\tauPr \nsucc \tau &\ \equiv \tauPr \tord \tau \vee  \neg ( \tau \tord \tauPr)   \\   
+\MGI{\tau}(\sigma) &\defe \op{I}_\tau(\sigma) \wedge \Ain{\sigmaPr}{\op{I}_\tau}{\sigmaPr(\tau) \nsucc \sigma(\tau)}\\
+\\
 \op{I}_\tau &\defi \{ \sigma \mid \op{I}_\tau(\sigma)  \}  \\
- &= \{ \sigma \mid \E{M}{M : \sigma(\tau)}  \} \\
-\op{MGI}_\tau &\defi \{ \sigma \mid \op{MGI}_\tau(\sigma)  \}  \\
- &= \{ \sigma \mid \op{I}_\tau(\sigma)\ ,\ \Ain{\sigmaPr}{\op{I}_\tau}{\subOrd{\sigmaPr(\tau)}{ \sigma(\tau)}}  \} \\
- &= \{ \sigma \mid \sigma \in \op{I}_\tau,\Ain{\sigmaPr}{\op{I}_\tau}{\subOrd{\sigmaPr(\tau)}{ \sigma(\tau)}}  \}
+ &\ = \{ \sigma \mid \E{M}{M : \sigma(\tau)}  \} \\
+\MGI{\tau} &\defi \{ \sigma \mid \op{MGI}_\tau(\sigma)  \}  \\
+ &\ = \{ \sigma \in \op{I}_\tau \mid \Ain{\sigmaPr}{\op{I}_\tau}{\sigmaPr \nsucct \sigma}  \}\\
+\\
+\tauPr   \tek         \tau     &\defe   \tauPr \tord \tau \wedge \tau \tord \tauPr \\
+\sigmaPr \square_\tau \sigma   &\defe   \sigmaPr(\tau)\ \square\ \sigma(\tau)\text{ , e.g.:}\\
+\sigmaPr \ordt   \sigma  &\defe  \sigmaPr(\tau) \tord \sigma(\tau)\\
+\sigmaPr \nsucct \sigma  &\defe  \sigmaPr(\tau) \nsucc \sigma(\tau)\\
+\sigmaPr \ekt    \sigma  &\defe  \sigmaPr(\tau) \tek \sigma(\tau) \\
 \end{align*}
 
-I is for Inhabitator. MG is for Most General. In general the Most General relation can be stated as:
-
-$$\op{MGx}(X,\preceq) \defi \{ x \mid x \in X, \Ain{\xPr}{X}{\xPr \preceq x} \}$$
+I is for Inhabitator. MG is for Most General. 
 
 
 
+\begin{lemma}
+Let $\sigma \in \MGIt$, $\sigmaPr \in \It$ such that $\sigma \ordt \sigmaPr$,
+then $\sigmaPr \ekt \sigma$.
+\end{lemma}
+\begin{proof}
+$\sigmaPr \nsucct \sigma$, since $\sigmaPr(\tau) \nsucct \sigma(\tau)$, from definition of $\MGIt$.\\
+Thus $\sigmaPr \ordt \sigma \vee \neg( \sigma \ordt \sigmaPr )$.
+Thus $\sigmaPr \ordt \sigma$.
+Therefore $\sigmaPr \ekt \sigma$.
+\end{proof}
+
+\begin{lemma}
+
+Let $\sigma_1, \sigma_2 \in \MGIt$ such that $\sigma_1 \nekt \sigma_2$. \\
+Then $\neg (\sigma_1 \ordt \sigma_2) \wedge \neg (\sigma_2 \ordt \sigma_1)$.  
+
+\end{lemma}
+\begin{proof}
+\red{todo ale mam na papiře}
+\end{proof}
+
+
+
+
+\begin{definition}
+A substitution $\rho$ is called a renaming, if it is a permutation on the set of all variables.
+\end{definition}
+
+\begin{lemma}
+$\tauPr \tek \tau \Leftrightarrow$ $\E{\text{ renaming } \rho}{\tauPr = \rho(\tau)}$.
+\end{lemma}
+\begin{proof}
+From lemmas \ref{lem:ren1} and \ref{lem:ren2}.
+\end{proof}
+
+
+\begin{conjecture}
+Let $\sigma_1, \sigma_2 \in \MGIt$ such that $\sigma_1 \nekt \sigma_2$. \\
+Then $\A{M_1,M_2}{ M_1 : \sigma_1(\tau) \wedge M_2 : \sigma_2(\tau) \then M_1 \neq M_2}$.  
+\end{conjecture}
+\begin{proof}
+\red{TODO}
+\end{proof}
+
+
+
+~
+
+~
+
+\section{Notes}
+
+\begin{lemma}
+\label{lem:ren1}
+If $\tauPr \tek \tau$, then there is a \textit{renaming} $\rho$ such that $\tauPr = \rho(\tau)$.
+\end{lemma}
+\begin{proof}
+\red{Roughly:}
+$\tauPr \tord \tau \wedge \tau \tord \tauPr$, thus $\E{\rho_1, \rho_2}{\tauPr = \rho_1(\tau), \tau = \rho_2(\tauPr)}$.
+$\tauPr = \rho_1(\rho_2(\tauPr))$, $\tau = \rho_2(\rho_1(\tau))$.
+Take $\rho_a$ restriction of $\rho_1$ on vars of $\tau$,
+Take $\rho_b$ restriction of $\rho_2$ on vars of $\tauPr$.
+Thus $\rho_a \circ \rho_b = \rho_b \circ \rho_a = \ids$ 
+\red{Todo pořádně..}
+\end{proof}
+
+\begin{lemma}
+\label{lem:ren2}
+If there is a \textit{renaming} $\rho$ such that $\tauPr = \rho(\tau)$, then $\tauPr \tek \tau$.
+\end{lemma}
+\begin{proof}
+From $\tauPr = \rho(\tau)$ follows $\tauPr \tord \tau$. We show that $\tau \tord \tauPr$ by proving $\tau = \rho^{-1}(\tauPr)$. Since $\rho$ is renaming it is a permutation, therefore $\rho$ has inverse and $\rho$ is injective. $\rho \circ \rho^{-1} = \ids$, thus $\rho(\rho^{-1}(\tauPr)) = \tauPr = \rho(\tau)$. From injectivity we have $\rho^{-1}(\tauPr) = \tau$.
+\end{proof}
+
+In general the Most General set can be stated as:
+$$\op{MG}(X,\leq) \defi \{ x \in X \mid \Ain{\xPr}{X}{\xPr \leq x \vee \neg(x \leq \xPr)} \}$$
+
+
+\begin{definition}
+$\ids = \{\}$ is the \textit{identity} substitution. 
+\end{definition}
+\begin{remark}
+$\sigma \ordt \ids$ for any $\sigma$, since $\sigma(\tau) \tord \tau$ via $\sigma$, because $\sigma(\tau) = \sigma(\tau)$.
+\end{remark}
+
+~
+
+More detailed analysis of $\nsucc$:
 \begin{align*}
-\tauPr \nsucc \tau &\equiv \neg (\strictSubOrd{\tau}{\tauPr})   \\
-  &\equiv \neg ( \subOrd{\tau}{\tauPr} \wedge \neg (\subOrd{\tauPr}{\tau}) )   \\
-  &\equiv \neg ( \subOrd{\tau}{\tauPr}) \vee \subOrd{\tauPr}{\tau}   \\  
-  &\equiv \subOrd{\tauPr}{\tau} \vee  \neg ( \subOrd{\tau}{\tauPr})    
+\tauPr \nsucc \tau &\equiv \neg (\tau \stord \tauPr)   \\
+  &\equiv \neg (\tau \tord \tauPr \wedge \neg (\tauPr \tord \tau) )   \\
+  &\equiv \neg (\tau \tord \tauPr) \vee \tauPr \tord \tau   \\  
+  &\equiv \tauPr \tord \tau \vee  \neg (\tau \tord \tauPr)    \\
+  &\equiv \tau \tord \tauPr \then \tauPr \tord \tau   \\  
+  &\equiv \tau \tord \tauPr \then \tauPr \tek \tau   \\ 
+  &\equiv \tauPr \succcurlyeq \tau \then \tauPr \tek \tau   \\ 
 \end{align*}
 
+
+
+
 ~
 
 ~
+
+\section{Probably abandoned stuff}
 
 \newcommand{\subs}[2]{\op{subs}_{#2}(#1)}
 
