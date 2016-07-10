@@ -71,6 +71,16 @@ Often we will write $s : \tau_s$ to emphasize that $\tau_s$ is the type of symbo
 A \textit{context} is set of declarations with distinct term symbols.\footnote{Interestingly, the definition of a \textit{context} and definition of a \textit{substitution} are almost the same. The difference is that "keys" in a context are term symbols/variables, whereas substitution "keys" are type variables. Maybe this fact could be utilized in an interesting way...}
 \end{definition}
 
+\newcommand{\sigmaPr}{\sigma^\prime}
+\newcommand{\tauPr}{\tau^\prime}
+\newcommand{\xPr}{x^\prime}
+\newcommand{\s}{\sigma}
+\newcommand{\Th}{\theta}
+\newcommand{\sPr}{\sigmaPr}
+\newcommand{\thPr}{\theta^\prime}
+
+
+
 \newcommand{\then}{\Rightarrow}
 \newcommand{\E}[2]{(\exists #1)\ #2}
 \newcommand{\A}[2]{(\forall #1)\ #2}
@@ -99,7 +109,7 @@ Suppose we have a context $\Gamma$. Let us consider $\mathit{term:type}$ stateme
 
 $\binRule{(s,\tau_s) \in \Gamma}{\isSub{\sigma}}{s : \sigma(\tau_s)}$
 ~~~
-$\triRule{F : \tau_1 \ar \tau_2}{X : \tau^\prime_1}{\sigma = \MGU{\tau_1}{\tau^\prime_1}}{\ap{F}{X} : \sigma(\tau_2)}$
+$\triRule{F : \tau_1 \ar \tau_2}{X : \tau^\prime_1}{\sigma \in \MGU{\tau_1}{\tau^\prime_1}}{\ap{F}{X} : \sigma(\tau_2)}$
 
 
 \begin{definition}
@@ -109,9 +119,7 @@ Let $M$ be a term. Term size $\abs{M}$ is the number of symbols in $M$; e.g. $\a
 \section{Reusable generating}
 
 \newcommand{\inhab}[1]{\op{I}(#1)}
-\newcommand{\sigmaPr}{\sigma^\prime}
-\newcommand{\tauPr}{\tau^\prime}
-\newcommand{\xPr}{x^\prime}
+
 
 \newcommand{\tord}{\preccurlyeq}
 \newcommand{\stord}{\prec}
@@ -123,55 +131,82 @@ Let $M$ be a term. Term size $\abs{M}$ is the number of symbols in $M$; e.g. $\a
 \newcommand{\nsucct}{\nsucc_\tau}
 
 
-\newcommand{\MGI}[1]{\op{MGI}_{#1}}
+\newcommand{\MGI}[1]{\op{MGI}(#1)}
 \newcommand{\MGIt}{\MGI{\tau}}
-\newcommand{\It}{\op{I}_{\tau}}
+\newcommand{\It}{\op{I}(\tau)}
 
 \newcommand{\ids}{\sigma_{\op{id}}}
 
+\newcommand{\U}[2]{\op{U}(#1,#2)}
+\newcommand{\Utt}{\U{\tau}{\tauPr}}
+\newcommand{\MGUtt}{\MGU{\tau}{\tauPr}}
 
+
+\begin{definition}
 \begin{align*}
-\op{I}_\tau(\sigma)  &\defe \E{M}{M : \sigma(\tau)}  \\
 \tauPr \tord  \tau   &\defe \E{\sigma}{\tauPr = \sigma(\tau)} \\
 \tauPr \stord \tau   &\defe \tauPr \tord \tau \wedge \neg (\tau \tord \tauPr) \\
 \tauPr \nsucc \tau &\ \equiv \tauPr \tord \tau \vee  \neg ( \tau \tord \tauPr)   \\   
-\MGI{\tau}(\sigma) &\defe \op{I}_\tau(\sigma) \wedge \Ain{\sigmaPr}{\op{I}_\tau}{\sigmaPr(\tau) \nsucc \sigma(\tau)}\\
 \\
-\op{I}_\tau &\defi \{ \sigma \mid \op{I}_\tau(\sigma)  \}  \\
- &\ = \{ \sigma \mid \E{M}{M : \sigma(\tau)}  \} \\
-\MGI{\tau} &\defi \{ \sigma \mid \op{MGI}_\tau(\sigma)  \}  \\
- &\ = \{ \sigma \in \op{I}_\tau \mid \Ain{\sigmaPr}{\op{I}_\tau}{\sigmaPr \nsucct \sigma}  \}\\
+\tau_1 \tek      \tau_2  &\defe  (\tau_1 \tord \tau_2) \wedge (\tau_2 \tord \tau_1) \\
+\tau_1 \perp     \tau_2  &\defe  (\tau_1 \tord \tau_2) \vee (\tau_2 \tord \tau_1) \\
+\tau_1 \parallel \tau_2  &\defe  \neg (\tau_1 \perp  \tau_2) \\
 \\
-\tauPr   \tek         \tau     &\defe   \tauPr \tord \tau \wedge \tau \tord \tauPr \\
-\sigmaPr \square_\tau \sigma   &\defe   \sigmaPr(\tau)\ \square\ \sigma(\tau)\text{ , e.g.:}\\
-\sigmaPr \ordt   \sigma  &\defe  \sigmaPr(\tau) \tord \sigma(\tau)\\
-\sigmaPr \nsucct \sigma  &\defe  \sigmaPr(\tau) \nsucc \sigma(\tau)\\
-\sigmaPr \ekt    \sigma  &\defe  \sigmaPr(\tau) \tek \sigma(\tau) \\
+\sigmaPr \square_\tau \sigma   &\defe   \sigmaPr(\tau)\ \square\ \sigma(\tau)\\
+%\sigmaPr \ordt   \sigma  &\defe  \sigmaPr(\tau) \tord \sigma(\tau)\\
+\text{E.g.:~~} \sigmaPr \nsucct \sigma  &\defe  \sigmaPr(\tau) \nsucc \sigma(\tau)\\
+%\sigmaPr \ekt    \sigma  &\defe  \sigmaPr(\tau) \tek \sigma(\tau) \\
+\\
+\Utt &\defi \{ \s \mid \s(\tau) = \s(\tauPr) \}\\
+\MGUtt &\defi \{ \s \in \Utt \mid \A{\sPr \in \Utt}{\sPr \nsucct \s}  \}\\
+\\
+\It &\defi \{ \sigma \mid \E{M}{M : \sigma(\tau)}  \} \\
+\MGI{\tau} &\defi \{ \sigma \in \It \mid \Ain{\sigmaPr}{\It}{\sigmaPr \nsucct \sigma}  \}\\
 \end{align*}
+\end{definition}
 
-I is for Inhabitator. MG is for Most General. 
 
+U is for Unificator. I is for Inhabitator. MG is for Most General. 
 
+In general a set of Most General elements can be stated as:
+$$\op{MG}(X,\leq) \defi \{ x \in X \mid \Ain{\xPr}{X}{\xPr \leq x \vee \neg(x \leq \xPr)} \}$$
+
+Therefore 
+$$\MGUtt = \op{MG}(\Utt,\ordt)$$
+$$\MGIt  = \op{MG}(\It, \ordt)$$
+
+~
 
 \begin{lemma}
 Let $\sigma \in \MGIt$, $\sigmaPr \in \It$ such that $\sigma \ordt \sigmaPr$,
 then $\sigmaPr \ekt \sigma$.
 \end{lemma}
 \begin{proof}
-$\sigmaPr \nsucct \sigma$, since $\sigmaPr(\tau) \nsucct \sigma(\tau)$, from definition of $\MGIt$.\\
+$\sigmaPr \nsucct \sigma$, since $\sigmaPr(\tau) \nsucc \sigma(\tau)$, from definition of $\MGIt$.\\
 Thus $\sigmaPr \ordt \sigma \vee \neg( \sigma \ordt \sigmaPr )$.
 Thus $\sigmaPr \ordt \sigma$.
 Therefore $\sigmaPr \ekt \sigma$.
 \end{proof}
 
 \begin{lemma}
-
-Let $\sigma_1, \sigma_2 \in \MGIt$ such that $\sigma_1 \nekt \sigma_2$. \\
-Then $\neg (\sigma_1 \ordt \sigma_2) \wedge \neg (\sigma_2 \ordt \sigma_1)$.  
-
+Let $\sigma_1, \sigma_2 \in \MGIt$ such that $\sigma_1 \nekt \sigma_2$,
+then $\sigma_1 \parallel_\tau \sigma_2$.  
 \end{lemma}
 \begin{proof}
-\red{todo ale mam na papiře}
+$\sigma_1 \nsucct \sigma_2$ and $\sigma_2 \nsucct \sigma_1$ , 
+since $\sigma_1, \sigma_2 \in \MGIt$.
+
+$\s_1 \nsucct \s_2 \iff \s_1 \ordt \s_2 \vee \neg(\s_2 \ordt \s_1)$,~~~~~ \textit{(a)}
+
+$\s_2 \nsucct \s_1 \iff \s_2 \ordt \s_1 \vee \neg(\s_1 \ordt \s_2)$,~~~~~ \textit{(b)}
+
+$\s_1 \nekt \s_2 \iff \neg(\s_1 \ordt \s_2) \vee \neg(\s_2 \ordt \s_1)$. \textit{(c)}
+
+\textit{(a)~$\wedge$~(c)~} $\Longrightarrow \neg(\sigma_2 \ordt \sigma_1)$
+
+\textit{(b)~$\wedge$~(c)~} $\Longrightarrow \neg(\sigma_1 \ordt \sigma_2)$
+
+Therefore $\neg(\sigma_1 \ordt \sigma_2) \wedge \neg(\sigma_2 \ordt \sigma_1)$.
 \end{proof}
 
 
@@ -182,10 +217,121 @@ A substitution $\rho$ is called a renaming, if it is a permutation on the set of
 \end{definition}
 
 \begin{lemma}
-$\tauPr \tek \tau \Leftrightarrow$ $\E{\text{ renaming } \rho}{\tauPr = \rho(\tau)}$.
+$\tauPr \tek \tau \iff$ $\E{\text{ renaming } \rho}{\tauPr = \rho(\tau)}$.
 \end{lemma}
 \begin{proof}
 From lemmas \ref{lem:ren1} and \ref{lem:ren2}.
+\end{proof}
+
+
+%\begin{lemma} BLBOST
+%If $\tauPr \tord \tau_1, \tau_2$, then there is $\s$ such that $\s(\tau_1) = \s(\tau_2) = \tauPr$.
+%\end{lemma}
+%\begin{proof} 
+%$\tauPr \tord \tau_1$ via $\s_1$, $\tauPr \tord \tau_2$ via $\s_2$.
+%$\s$ is constructed as $\s = \sPr_1 \cup \sPr_2$, where $\sPr_1, \sPr_2$ are modifications of $\s_1,\s_2$ with renamed (domain) variables.
+%Construct $\rho_1, \rho_2$ renaming variables of $\tau_1, \tau_2$ to completely new variables to ensure  that $\op{vars}(\rho_1(\tau_1)) \cap \op{vars}(\rho_2(\tau_2)) = \emptyset$.
+%Let $\sPr_1, \sPr_2$
+%\end{proof}
+
+
+\begin{lemma}
+\label{lem:muInIt}
+Let $(s,\tau_s) \in \Gamma$. Let $\s$ be substitution. Let $\mu \in \U{\tau}{\s(\tau_s)}$.\\ 
+Then $\mu \in \It$.  
+\end{lemma}
+\begin{proof}
+$\mu \circ \s$ is substitution, 
+thus from \subAx rule we have $s : \mu(\s(\tau_s))$.
+$\mu(\tau) = \mu(\s(\tau_s))$, therefore $s : \mu(\tau)$. 
+
+\red{Zkusit pak zobecnit na původní silnější důsledek: $\mu \in \MGIt$. }
+\end{proof}
+
+
+\begin{lemma}
+Let $\sigma_1, \sigma_2 \in \MGIt$.
+If there is symbol $s$ in $\Gamma$ such that
+$s : \s_1(\tau) $ and $ s : \s_2(\tau)$, then
+$\s_1 \ekt \s_2$.  
+\end{lemma}
+\begin{proof}~
+
+Let $(s,\tau_s) \in \Gamma$. 
+Let $i \in \{1,2\}$.
+
+Statements $s : \s_i(\tau) $ must be produced by \subAx rule. 
+
+Thus there must be $\Th_i$ such that 
+
+$\tau_i = \s_i(\tau) = \Th_i(\tau_s)$.
+
+Construct renaming $\rho$ variables of $\tau_s$ to completely new variables,
+
+to ensure that $\op{vars}(\tau) \cap \op{vars}(\rho(\tau_s)) = \emptyset$. 
+
+Let $\tauPr_s = \rho(\tau_s)$.
+
+Let $\thPr_i = \Th_i \circ \rho^{-1}$.
+
+%$\tau_i \tord \tauPr_s$ via $\thPr_i$
+$\tau_i = \thPr_i(\tauPr_s)$.
+
+We can define substitution $\upsilon_i = \s_i \cup \thPr_i$, because their domains do not clash. 
+
+Furthermore $\tau_i = \upsilon_i(\tau) = \upsilon_i(\tauPr_s)$.
+
+Thus $\upsilon_i \in \U{\tau}{\tauPr_s}$.
+
+Therefore there is $\mu \in \MGU{\tau}{\tauPr_s}$.
+
+Thus $\upsilon_i \nsucct \mu$.
+
+$\upsilon_i \nsucct \mu \iff \upsilon_i \ordt \mu \vee \neg(\mu \ordt \upsilon_i)$.
+
+
+Furthermore \red{$\upsilon_i \ordt \mu$}, since MGU is unique up to $\ekt$. \red{TODO pořádně}
+
+And from lemma \ref{lem:muInIt} we have $\mu \in \It$.
+
+But $\sigma_i \in \MGIt$, thus $\mu \nsucct \sigma_i$.
+
+$\mu \nsucct \s_i \iff \mu \ordt \s_i \vee \neg(\s_i \ordt \mu)$.
+
+From $\upsilon_i \ordt \mu$, we have $\upsilon_i(\tau) \tord \mu(\tau)$, 
+but $\upsilon_i(\tau) = \s_i(\tau)$,
+thus $\s_i \ordt \mu$.
+
+So from $\mu \nsucct \s_i$ and from $\s_i \ordt \mu$ we have $\mu \ordt \s_i$.
+
+Now we have both $\mu \ordt \s_i$ and $\s_i \ordt \mu$, thus $\s_i \ekt \mu$.
+
+Finally $\s_1 \ekt \mu \ekt \s_2$.
+
+~
+
+\red{Předělat znění tvrzení a následně i důkazu, protože ten důkaz dokazuje obecnější věc, která se navíc bude velice hodit u důkazu správnosti algoritmu. Staré znění pak formulovat jako důsledek. Nové znění asi něco jako učesanější verze následujícího:}
+
+Let $\sigma \in \MGIt$.
+If there is symbol $s$ in $\Gamma$ such that
+$s : \s(\tau) $, then $\s \in \MGU{\tau}{\tauPr_s}$.  
+
+~
+
+\red{Formalnějc okecat definici $\upsilon_i$ a ošetřit zbytečně velký domény $\s_i$ - to jde tak že vemem v tý definici $\s_i$ (a klidně i $\thPr_i$) restriktlý na správný proměnný. Druhá věc co se dá rozvést/je dobrý ji referencnou, je to s tim že MGU is unique up to $\ekt$.}
+\end{proof}
+
+
+\begin{lemma}
+Let $\sigma_1, \sigma_2 \in \MGIt$.
+If there is term $\ap{F}{X}$ such that
+$\ap{F}{X} : \s_1(\tau) $ and $\ap{F}{X} : \s_2(\tau)$, then
+$\s_1 \ekt \s_2$.  
+\end{lemma}
+\begin{proof}~
+
+\red{TODO now!}
+
 \end{proof}
 
 
@@ -194,7 +340,9 @@ Let $\sigma_1, \sigma_2 \in \MGIt$ such that $\sigma_1 \nekt \sigma_2$. \\
 Then $\A{M_1,M_2}{ M_1 : \sigma_1(\tau) \wedge M_2 : \sigma_2(\tau) \then M_1 \neq M_2}$.  
 \end{conjecture}
 \begin{proof}
-\red{TODO}
+By induction on complexity of terms $M_1,M_2$.
+
+\red{TODO case lemmas..}
 \end{proof}
 
 
@@ -227,8 +375,6 @@ If there is a \textit{renaming} $\rho$ such that $\tauPr = \rho(\tau)$, then $\t
 From $\tauPr = \rho(\tau)$ follows $\tauPr \tord \tau$. We show that $\tau \tord \tauPr$ by proving $\tau = \rho^{-1}(\tauPr)$. Since $\rho$ is renaming it is a permutation, therefore $\rho$ has inverse and $\rho$ is injective. $\rho \circ \rho^{-1} = \ids$, thus $\rho(\rho^{-1}(\tauPr)) = \tauPr = \rho(\tau)$. From injectivity we have $\rho^{-1}(\tauPr) = \tau$.
 \end{proof}
 
-In general the Most General set can be stated as:
-$$\op{MG}(X,\leq) \defi \{ x \in X \mid \Ain{\xPr}{X}{\xPr \leq x \vee \neg(x \leq \xPr)} \}$$
 
 
 \begin{definition}
@@ -251,7 +397,13 @@ More detailed analysis of $\nsucc$:
   &\equiv \tauPr \succcurlyeq \tau \then \tauPr \tek \tau   \\ 
 \end{align*}
 
+~
 
+Not so much used predicate definitions:
+\begin{align*}
+\op{I}_\tau(\sigma)  &\defe \E{M}{M : \sigma(\tau)}  \\
+\MGI{\tau}(\sigma) &\defe \op{I}_\tau(\sigma) \wedge \A{\sigmaPr}{(\op{I}_\tau(\sigmaPr) \then\sigmaPr(\tau) \nsucc \sigma(\tau))}\\
+\end{align*}
 
 
 ~
