@@ -116,10 +116,7 @@ $\triRule{F : \tau_1 \ar \tau_2}{X : \tau^\prime_1}{\sigma \in \MGU{\tau_1}{\tau
 Let $M$ be a term. Term size $\abs{M}$ is the number of symbols in $M$; e.g. $\abs{\ap{f}{\ap{\ap{g}{h}}{f}}} = 4$. 
 \end{definition}
 
-\section{Reusable generating}
-
 \newcommand{\inhab}[1]{\op{I}(#1)}
-
 
 \newcommand{\tord}{\preccurlyeq}
 \newcommand{\stord}{\prec}
@@ -141,6 +138,24 @@ Let $M$ be a term. Term size $\abs{M}$ is the number of symbols in $M$; e.g. $\a
 \newcommand{\Utt}{\U{\tau}{\tauPr}}
 \newcommand{\MGUtt}{\MGU{\tau}{\tauPr}}
 
+
+
+\section{Reusable generating}
+
+\newcommand{\e}[2]{\op{E}_{#1}(#2)}
+\newcommand{\restrict}[2]{#1_{\mid #2}}
+
+\begin{definition}
+\begin{align*}
+\e{k}{\tau}   &\defe \{ M \mid \abs{M} = k, \E{\s}{ M : \s(\tau) } \}   \\
+\op{ss}(\tau) &\defe \{ (s,\restrict{\mu}{\tau}) \mid (s,\tau_s) \in   \}
+\end{align*}
+\end{definition}
+
+
+\section{Most General Inhabitors}
+
+Asi trochu zbytečná obklika, ale možná se bude pak hodit.. Plus z tho vycházej některý uvahy použitý výše.
 
 \begin{definition}
 \begin{align*}
