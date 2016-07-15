@@ -143,17 +143,76 @@ Let $M$ be a term. Term size $\abs{M}$ is the number of symbols in $M$; e.g. $\a
 \section{Reusable generating}
 
 \newcommand{\e}[2]{\op{E}_{#1}(#2)}
-\newcommand{\restrict}[2]{#1_{\mid #2}}
+\newcommand{\restrict}[2]{{#1}_{\mid #2}}
+\newcommand{\fresh}[2]{\op{fresh}_{#1}(#2)}
+\newcommand{\newVar}[1]{\op{newVar}(#1)}
+\newcommand{\Ss}[1]{\op{ss}(#1)}
+\newcommand{\TS}[2]{\op{ts}_{#1}(#2)}
+\newcommand{\TSij}[3]{\op{ts}_{#1,#2}(#3)}
+\newcommand{\trees}[2]{\op{trees}_{#1}(#2)}
+\newcommand{\FX}{\ap{F}{X}}
+\newcommand{\sF}{\s_{F}}
+\newcommand{\sX}{\s_{X}}
+\newcommand{\vars}[1]{\op{vars}(#1)}
+
 
 \begin{definition}
 \begin{align*}
-\e{k}{\tau}   &\defe \{ M \mid \abs{M} = k, \E{\s}{ M : \s(\tau) } \}   \\
-\op{ss}(\tau) &\defe \{ (s,\restrict{\mu}{\tau}) \mid (s,\tau_s) \in   \}
+\e{k}{\tau} &\defi \{ M \mid \abs{M} = k, \E{\s}{ M : \s(\tau) } \}   \\
+\Ss{\tau}   &\defi \{ (s,\restrict{\mu}{\tau}) \mid (s,\tau_s) \in \Gamma, \mu = \MGU{\tau}{\fresh{\tau}{\tau_s}}  \} \\
+\TSij{i}{j}{\tau} &\defi \{ \FX,\restrict{(\sX \circ \sF)}{\tau}) \mid \alpha = \newVar{\tau}, \\
+  & ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ (F,\sF) = \TS{i}{\alpha \ar \tau}, \\
+  & ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ (X,\sX) = \TS{j}{\sF(\alpha)} \} \\
+\TS{k}{\tau} &\defi
+\begin{cases*}
+  \Ss{\tau} & $k = 1$  \\
+  \bigcup\limits_{i=1}^{k-1}  \TSij{i}{k-1}{\tau}  & $k > 1$
+\end{cases*}\\
+\trees{k}{\tau} &\defi \{ M \mid (M,\_) \in \TS{k}{\tau} \}
 \end{align*}
 \end{definition}
 
+\begin{proposition}
 
-\section{Most General Inhabitors}
+\begin{equation}\label{eq:treesEqE}
+\trees{k}{\tau} = \e{k}{\tau}
+\end{equation}
+\begin{equation}\label{eq:mostGenSub}
+(M,\s) \in \TS{k}{\tau} \then (M : \s(\tau) \wedge \A{\sPr}{(M : \sPr(\tau) \then \sPr(\tau) \tord \s(\tau))})
+\end{equation}
+\begin{proof}
+
+First we show that $\trees{k}{\tau} \subseteq \e{k}{\tau}$ by induction on $k$ (size of term).
+
+Let $k = 1$. 
+
+Let $M \in \trees{1}{\tau}$, we shall show that $M \in \e{1}{\tau}$.
+
+$(M,\mu) \in \Ss{\tau}$, thus $M = s, (s,\tau_s) \in \Gamma, \mu = \MGU{\tau}{\tauPr_s}$,
+
+where $\tauPr_s = \rho(\tau_s)$, where $\rho$ is \textit{renaming} 
+such that $\vars{\tau} \cap \vars{\tau_s} = \emptyset$.
+
+To show that $s \in \e{1}{\tau}$ we shall show that 
+
+$\abs{s} = 1$ and 
+
+find $\s$ such that $ s : \s(\tau)$. 
+
+Since s is symbol we have $\abs{s} = 1$.
+
+
+
+\red{TODO Diagram konstrukce $\mu \circ \rho$}
+
+\red{todo}
+\end{proof}
+
+\end{proposition}
+
+
+
+\section{Most General Inhabitators}
 
 Asi trochu zbytečná obklika, ale možná se bude pak hodit.. Plus z tho vycházej některý uvahy použitý výše.
 
