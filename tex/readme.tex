@@ -154,6 +154,8 @@ Let $M$ be a term. Term size $\abs{M}$ is the number of symbols in $M$; e.g. $\a
 \newcommand{\sF}{\s_{F}}
 \newcommand{\sX}{\s_{X}}
 \newcommand{\vars}[1]{\op{vars}(#1)}
+\newcommand{\IH}{induction hypothesis\xspace}
+\newcommand{\discup}{~\mathbin{\dot{\cup}}~}
 
 
 \begin{definition}
@@ -166,23 +168,23 @@ Let $M$ be a term. Term size $\abs{M}$ is the number of symbols in $M$; e.g. $\a
 \TS{k}{\tau} &\defi
 \begin{cases*}
   \Ss{\tau} & $k = 1$  \\
-  \bigcup\limits_{i=1}^{k-1}  \TSij{i}{k-1}{\tau}  & $k > 1$
+  \bigcup\limits_{i=1}^{k-1}  \TSij{i}{k-i}{\tau}  & $k > 1$
 \end{cases*}\\
 \trees{k}{\tau} &\defi \{ M \mid (M,\_) \in \TS{k}{\tau} \}
 \end{align*}
 \end{definition}
 
 \begin{proposition}
-
 \begin{equation}\label{eq:treesEqE}
 \trees{k}{\tau} = \e{k}{\tau}
 \end{equation}
 \begin{equation}\label{eq:mostGenSub}
 (M,\s) \in \TS{k}{\tau} \then (M : \s(\tau) \wedge \A{\sPr}{(M : \sPr(\tau) \then \sPr(\tau) \tord \s(\tau))})
 \end{equation}
-\begin{proof}
 
+\begin{proof}
 First we show that $\trees{k}{\tau} \subseteq \e{k}{\tau}$ by induction on $k$ (size of term).
+Together with it we also show the proposition \ref{eq:mostGenSub}.
 
 Let $k = 1$. 
 
@@ -190,7 +192,7 @@ Let $M \in \trees{1}{\tau}$, we shall show that $M \in \e{1}{\tau}$.
 
 $(M,\mu) \in \Ss{\tau}$, thus $M = s, (s,\tau_s) \in \Gamma, \mu = \MGU{\tau}{\tauPr_s}$,
 
-where $\tauPr_s = \rho(\tau_s)$, where $\rho$ is \textit{renaming} 
+where $\tauPr_s = \fresh{\tau}{\tau_s} = \rho(\tau_s)$, where $\rho$ is \textit{renaming} 
 such that $\vars{\tau} \cap \vars{\tau_s} = \emptyset$.
 
 To show that $s \in \e{1}{\tau}$ we shall show that 
@@ -201,9 +203,104 @@ find $\s$ such that $ s : \s(\tau)$.
 
 Since s is symbol we have $\abs{s} = 1$.
 
-
-
 \red{TODO Diagram konstrukce $\mu \circ \rho$}
+
+In order to produce term : type statement with symbol as term, we need to use \subAx rule:
+
+~
+
+$\binRule{(s,\tau_s) \in \Gamma}{\isSub{\mu \circ \rho}}{s : \mu(\rho(\tau_s))}$
+
+~
+
+Since $\mu(\rho(\tau_s)) = \mu(\tau_s) = \mu(\tau)$, we have $s : \mu(\tau)$.
+Thus the desired $\s = \mu$.
+
+Now we follow with proof of proposition \ref{eq:mostGenSub} for $k = 1$.
+Since $\sigma = \mu$ we have the first part of the consequent $s : \mu(\tau)$. 
+For the second part let us assume that we have substitution $\sPr$ such that 
+statement $s : \sPr(\tau)$ holds. This statement had to be produced by \subAx rule:
+
+~
+
+$\binRule{(s,\tau_s) \in \Gamma}{\isSub{\theta}}{s : \theta(\tau_s)}$
+
+~
+
+where $\theta(\tau_s) = \sPr(\tau)$.
+ 
+Our approach to showing that $\sPr(\tau) \tord \mu(\tau)$ is by showing that 
+$\sPr$ is unification of types $\tau$ and $\tauPr_s$ (fresh variant of $\tau_s$), 
+since $\mu = \MGU{\tau}{\tauPr_s}$ (and therefore more general then an ordinary unification).
+\red{todo do general notions dát stručně vlastnosti unifikací a vstah k MGU}
+
+We show this by constructing the unification $\nu$ (of $\tau$ and $\tauPr_s$) from substitutions $\sPr$ and $\theta$ 
+(since $\sPr(\tau) = \theta(\tau_s)$). First we construct $\thPr$ such that $\thPr(\tauPr_s) = \Th(\tau_s) = \sPr(\tau)$.
+
+\red{todo diagram}
+
+Since $\rho = \fresh{\tau}{\tau_s}$ is renaming we can use its inverse $\rho^{-1}$ to translate variables of $\tauPr_s$ back to variables of $\tau_s$. Thus $\thPr \defi \theta \circ \rho^{-1}$ satisfies our needs, because $\theta(\rho^{-1}(\tauPr_s)) = \theta(\tau_s) = \sPr(\tau)$. 
+
+We can merge substitutions $\restrict{\sPr}{\tau}$ with $\thPr$ since their variables cannot clash. 
+Let us define $\nu \defi \restrict{\sPr}{\tau} \discup \thPr$.
+$\nu(\tau) = \sPr(\tau) = \theta(\tau_s) = \thPr(\tauPr_s) = \nu(\tauPr_s)$, 
+thus $\nu$ is unification of $\tau$ and $\tauPr_s$, and therefore $\sPr(\tau) \tord \mu(\tau)$.
+We have proven proposition \ref{eq:mostGenSub} for $k = 1$. 
+Let us continue with proof of $\trees{k}{\tau} \subseteq \e{k}{\tau}$.
+
+Let $k > 1$.
+
+Let $M \in \trees{k}{\tau}$, we shall show that $M \in \e{k}{\tau}$.
+
+$(M,\s) \in \TS{k}{\tau} = \bigcup_{i=1}^{k-1}  \TSij{i}{k-i}{\tau}$.
+
+Therefore there must be $i,j > 0$ where $i + j = k$ such that $(M,\s) \in \TSij{i}{j}{\tau}$.
+
+Thus $(M,\s) = (\FX,\restrict{\sX \circ \sF}{\tau})$, where
+
+$\alpha = \newVar{\tau}$,
+$(F,\sF) \in \TS{i}{\alpha \ar \tau}$,
+$(X,\sX) \in \TS{j}{\sF(\alpha)}$.
+
+Due to \IH of proposition \ref{eq:treesEqE}, 
+$(F,\sF) \in \TS{i}{\alpha \ar \tau}$ implies $F \in \e{i}{\alpha \ar \tau}$.
+Similarly, $(X,\sX) \in \TS{j}{\sF(\alpha)}$ implies $X \in \e{j}{\sF(\alpha)}$. 
+Therefore $\abs{F} = i$ and $\abs{X} = j$.
+
+Due to \IH of proposition \ref{eq:mostGenSub}, 
+$(F,\sF) \in \TS{i}{\alpha \ar \tau}$ implies $F : \sF(\alpha \ar \tau) = \sF(\alpha) \ar \sF(\tau)$.
+Similarly, $(X,\sX) \in \TS{j}{\sF(\alpha)}$ implies $X : \sX(\sF(\alpha))$.
+Therefore we can use \mguMp in the following way:
+
+~
+
+$\triRule{F : \sF(\alpha) \ar \sF(\tau)}{X : \sX(\sF(\alpha))}{\sX \in \MGU{\sF(\alpha)}{\sX(\sF(\alpha))}}{\ap{F}{X} : \sX(\sF(\tau))}$
+
+~
+
+\red{todo okomentovat $\sX \in \MGU{\sF(\alpha)}{\sX(\sF(\alpha))}$ a referencnout pozorování že MGU je indempotentní.}
+
+Since $\abs{\FX} = \abs{F} + \abs{X} = i + j = k$, 
+
+and $\FX : \sX(\sF(\tau)) = \restrict{(\sX \circ \sF)}{\tau}(\tau)$,
+
+we have shown that $M \in \e{k}{\tau}$.
+
+Now we follow with proof of proposition \ref{eq:mostGenSub} for $k > 1$.
+
+Let $(\FX,\restrict{(\sX \circ \sF)}{\tau}) \in \TS{k}{\tau}$.
+
+Again, the first part of consequent is proven above and we must prove the second part.
+Let us assume that we have substitution $\sPr$ such that 
+statement $\FX : \sPr(\tau)$ holds. We shall show that $\sPr(\tau) \tord (\restrict{(\sX \circ \sF)}{\tau})(\tau)$.
+
+
+
+
+%thus $M = s, (s,\tau_s) \in \Gamma, \mu = \MGU{\tau}{\tauPr_s}$,
+
+
+
 
 \red{todo}
 \end{proof}
