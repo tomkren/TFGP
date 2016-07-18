@@ -5,6 +5,7 @@ import cz.tomkren.utils.AA;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Checker;
 
+import java.util.Arrays;
 import java.util.List;
 
 /** Created by tom on 7.11.2015.*/
@@ -21,6 +22,20 @@ public class Types {
 
     public static Type mkFunType(Type argType, Type returnType) {
         return new TypeTerm(Types.FUN_ARROW, argType, returnType);
+    }
+
+    public static List<Type> fromSyntaxSugar(List<Type> ts) {
+        if (ts.size() == 3 && ts.get(1).equals(FUN_ARROW)) {
+            return Arrays.asList(ts.get(1), ts.get(0), ts.get(2));
+        }
+        return ts;
+    }
+
+    public static List<Type> toSyntaxSugar(List<Type> ts) {
+        if (ts.size() == 3 && ts.get(0).equals(FUN_ARROW)) {
+            return Arrays.asList(ts.get(1), ts.get(0), ts.get(2));
+        }
+        return ts;
     }
 
     public static String prettyPrint(Type t) {

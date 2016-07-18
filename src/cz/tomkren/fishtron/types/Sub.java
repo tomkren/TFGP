@@ -4,6 +4,7 @@ import cz.tomkren.utils.AA;
 import cz.tomkren.utils.Log;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /** Created by tom on 7.11.2015.*/
@@ -50,6 +51,88 @@ public class Sub implements Function<Type,Type> {
             }
         }
     }
+
+
+    public void forEach(BiConsumer<Integer,Type> action) {
+        for(Map.Entry<Integer,Type> e : table.entrySet()) {
+            action.accept(e.getKey(),e.getValue());
+        }
+    }
+
+    public Sub inverse() {
+        Sub ret = new Sub();
+
+        if (isFail()) {
+            ret.setFail("source fail: "+getFailMsg());
+            return ret;
+        }
+
+        for(Map.Entry<Integer,Type> e : table.entrySet()) {
+
+            int varId = e.getKey();
+            Type type = e.getValue();
+
+            if (type instanceof TypeVar) {
+                int varId2 = ((TypeVar)type).getId();
+                if (varId != varId2) {
+
+                    if (ret.get(varId2) == null) {
+                        ret.add(varId2, new TypeVar(varId));
+                    } else {
+                        ret.setFail("inverse fail: x"+varId2+" is more times in codomain");
+                        return ret;
+                    }
+                }
+            } else {
+                ret.setFail("inverse fail: "+type+" is not TypeVar");
+                return ret;
+            }
+        }
+
+        return ret;
+    }
+
+    public Sub toRenaming() {
+
+        Sub ret = new Sub();
+
+        if (isFail()) {
+            ret.setFail("source fail: "+getFailMsg());
+            return ret;
+        }
+
+        for(Map.Entry<Integer,Type> e : table.entrySet()) {
+
+            int varId = e.getKey();
+            Type type = e.getValue();
+
+            if (type instanceof TypeVar) {
+                int varId2 = ((TypeVar) type).getId();
+                if (varId != varId2) {
+
+                    if (ret.get(varId) == null) {
+                        ret.add(varId, type);
+                    } else {
+                        ret.setFail("toRenaming fail: x"+varId+" is in both domain and codomain");
+                    }
+
+                    if (ret.get(varId2) == null) {
+                        ret.add(varId2,new TypeVar(varId));
+                    } else {
+                        ret.setFail("toRenaming fail: x"+varId2+" is in both domain and codomain or more times in codomain");
+                    }
+
+                }
+            } else {
+                ret.setFail("toRenaming fail: "+type+" is not TypeVar");
+                return ret;
+            }
+
+        }
+
+        return ret;
+    }
+
 
 
     // TODO otestovat dot nějak pořádně generativně :

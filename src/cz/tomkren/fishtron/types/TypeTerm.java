@@ -1,5 +1,6 @@
 package cz.tomkren.fishtron.types;
 
+import com.google.common.base.Joiner;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
 
@@ -7,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 /** Created by tom on 7.11.2015.*/
 
@@ -49,6 +51,10 @@ public class TypeTerm implements Type {
         return new AB<>(new TypeTerm(args2), nextId);
     }
 
+    public <T> T fold(Function<List<T>, T> fNode, Function<Type,T> fLeaf) {
+        return fNode.apply(F.map(t -> t instanceof TypeTerm ? ((TypeTerm)t).fold(fNode,fLeaf) : fLeaf.apply(t) , args));
+    }
+
     @Override
     public int getNextVarId(int acc) {
         for (Type arg : args) {
@@ -64,19 +70,8 @@ public class TypeTerm implements Type {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append('(');
-
-        for (Type t : args) {
-            sb.append(t).append(' ');
-        }
-
-        sb.deleteCharAt(sb.length()-1);
-
-        sb.append(')');
-
-        return sb.toString();
+        List<Type> sugaredArgs = Types.toSyntaxSugar(args);
+        return "("+ Joiner.on(' ').join(sugaredArgs) +")";
     }
 
     @Override

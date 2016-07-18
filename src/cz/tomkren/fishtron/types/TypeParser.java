@@ -4,10 +4,7 @@ package cz.tomkren.fishtron.types;
 
 import cz.tomkren.utils.Checker;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 // todo | zobecnit aby šlo použít i pro parsování termovejch stromů
 
@@ -82,7 +79,9 @@ public class TypeParser {
             t = stack.empty() ? null : stack.pop() ;
         }
 
-        return new TypeTerm(ts);
+        List<Type> permutedTs = Types.fromSyntaxSugar(ts);
+
+        return new TypeTerm(permutedTs);
     }
 
     private int idFromVarStr(String name) {
