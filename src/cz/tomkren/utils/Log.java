@@ -69,6 +69,12 @@ public class Log {
         return log;
     }
 
+    public static Log listLn(List<?> list) {
+        list.forEach(System.out::println);
+        System.out.println();
+        return log;
+    }
+
     public static Log collection (Collection<?> list) {
         list.forEach(System.out::println);
         return log;

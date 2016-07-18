@@ -13,6 +13,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 
 /** Created by tom on 18. 7. 2016.*/
@@ -21,11 +22,23 @@ public class LSolver {
 
     private static List<AB<Sub,BigInteger>> subs_1(List<AB<String,Type>> gamma, Type t) {
 
-        //Map<> todo
+        List<AB<String,Sub>> allSubs = ts_1(gamma, t);
 
-        ts_1(gamma, t);
+        Map<String,AB<Sub,BigInteger>> subsMap = new TreeMap<>();
+        for (AB<String,Sub> p : allSubs) {
+            Sub sub = p._2();
 
-        throw new TODO();
+            String key = sub.toString();
+            AB<Sub,BigInteger> val = subsMap.get(key);
+
+            if (val == null) {
+                subsMap.put(key, new AB<>(sub, BigInteger.ONE));
+            } else {
+                val.set_2(val._2().add(BigInteger.ONE));
+            }
+        }
+
+        return new ArrayList<>(subsMap.values());
     }
 
     private static List<AB<String,Sub>> ts_1(List<AB<String,Type>> gamma, Type t) {
@@ -88,10 +101,17 @@ public class LSolver {
 
     private static void testTs1(Checker ch) {
 
-        Type t = Types.parse("x -> y");
+        Log.it("\n-- ts_1 & subs_1 tests ---------------------------------------------------\n");
+
+
+        Type t = Types.parse("x1 -> x0");
         List<AB<String,Type>> gamma = mkGamma(
-            "s","(a -> (b -> c)) -> ((a -> b) -> (a -> c))",
-            "k","a -> (b -> a)"
+                "s", "(a -> (b -> c)) -> ((a -> b) -> (a -> c))",
+                "s2","(x5 -> (x0 -> x1)) -> ((x5 -> x0) -> (x5 -> x1))",
+                "s3","(y5 -> (x0 -> x1)) -> ((y5 -> x0) -> (y5 -> x1))",
+                "k", "a -> (b -> a)",
+                "k2","x1 -> (x0 -> x1)",
+                "+", "Int -> (Int -> Int)"
         );
 
         AB<Type,Sub> nf = normalize(t);
@@ -99,27 +119,29 @@ public class LSolver {
         Sub nf2t  = nf._2();
 
 
-        Log.list(gamma);
+        Log.listLn(gamma);
 
 
         ts_1(gamma, t);
 
         Log.it("t: "+t);
         Log.it("t_nf: "+t_nf);
-        Log.it("nf2t: "+nf2t);
+        Log.itln("nf2t: "+nf2t);
 
         List<AB<String, Sub>> ts1_t = ts_1(gamma, t_nf);
+        Log.listLn(ts1_t);
 
-        Log.list(ts1_t);
-
-
-
+        List<AB<Sub, BigInteger>> subs1_t = subs_1(gamma, t_nf);
+        Log.listLn(subs1_t);
 
 
     }
 
 
     private static void testNormalizations(Checker ch) {
+
+        Log.it("\n-- normalization tests ---------------------------------------------------\n");
+
         Type t1 = Types.parse("(x111 -> (x11 -> x1)) -> ((x111 -> x11) -> (x111 -> x1))");
         Type t2 = Types.parse("(x0 -> (x11 -> x1)) -> ((x0 -> x11) -> (x0 -> x1))");
         Type t3 = Types.parse("(x2 -> (x1 -> x0)) -> ((x2 -> x1) -> (x2 -> x0))");
@@ -132,6 +154,7 @@ public class LSolver {
         checkNormalisation(ch, t2);
         checkNormalisation(ch, t3);
         checkNormalisation(ch, t4);
+
     }
 
     private static void checkNormalisation(Checker ch, Type t) {
