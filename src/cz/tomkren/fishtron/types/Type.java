@@ -3,6 +3,7 @@ package cz.tomkren.fishtron.types;
 import cz.tomkren.utils.AB;
 
 import java.util.Set;
+import java.util.TreeSet;
 
 /** Created by tom on 7.11.2015.*/
 
@@ -19,6 +20,12 @@ public interface Type {
 
     default int getNextVarId() {
         return getNextVarId(0);
+    }
+
+    default Set<Integer> getVarIds() {
+        Set<Integer> ret = new TreeSet<>();
+        getVarIds(ret);
+        return ret;
     }
 
 }

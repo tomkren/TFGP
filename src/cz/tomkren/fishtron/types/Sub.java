@@ -11,14 +11,20 @@ import java.util.function.Function;
 
 public class Sub implements Function<Type,Type> {
 
-    private Map<Integer,Type> table;
+    private TreeMap<Integer,Type> table; // TreeMap aby bylo popořadě
     private String failMsg;
     private Deque<AA<Type>> agenda; // používá se při konstrukci mgu
 
     public Sub() {
-        table = new TreeMap<>(); // aby pak bylo popořadě, dá se ale nahradit HashMapou, pokud by to bylo poznatelně lepší, jen to pak ale rozbije testy.
+        table = new TreeMap<>();
         failMsg = null;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof Sub && toString().equals(o.toString());
+    }
+
 
     public Sub copy() {return new Sub(this);}
 
@@ -57,6 +63,17 @@ public class Sub implements Function<Type,Type> {
         for(Map.Entry<Integer,Type> e : table.entrySet()) {
             action.accept(e.getKey(),e.getValue());
         }
+    }
+
+    public Sub restrict(Type t) {
+        Set<Integer> varIds = t.getVarIds();
+        Sub ret = new Sub();
+        forEach((varId,type) -> {
+            if (varIds.contains(varId)) {
+                ret.add(varId,type);
+            }
+        });
+        return ret;
     }
 
     public Sub inverse() {
