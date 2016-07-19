@@ -1,9 +1,6 @@
 package cz.tomkren.fishtron.latticegen;
 
-import cz.tomkren.fishtron.types.Sub;
-import cz.tomkren.fishtron.types.Type;
-import cz.tomkren.fishtron.types.TypeTerm;
-import cz.tomkren.fishtron.types.Types;
+import cz.tomkren.fishtron.types.*;
 import cz.tomkren.utils.*;
 
 import java.math.BigInteger;
@@ -16,6 +13,46 @@ import java.util.TreeMap;
 /** Created by tom on 18. 7. 2016.*/
 
 public class LSolver {
+
+    private static List<AB<Sub,BigInteger>> subs_k(List<AB<String,Type>> gamma, int k, Type t) {
+        if (k < 1) {
+            throw new Error("k must be > 0, it is "+k);
+        } else if (k == 1) {
+            return subs_1(gamma, t);
+        } else {
+            List<AB<Sub,BigInteger>> subs = new ArrayList<>();
+            for (int i = 1; i < k; k++) {
+                subs.addAll(subs_ij(gamma, i, k-i, t));
+            }
+            return packSubs(subs);
+        }
+    }
+
+    private static List<AB<Sub,BigInteger>> subs_ij(List<AB<String,Type>> gamma, int i, int j, Type t) {
+        List<AB<Sub,BigInteger>> subs = new ArrayList<>();
+
+        Type alpha = newVar(t);
+        Type t_F = Types.mkFunType(alpha, t);
+
+        for (AB<Sub,BigInteger> p_F : subs_k(gamma, i, t_F)) {
+            Sub        s_F = p_F._1();
+            BigInteger n_F = p_F._2();
+
+            Type t_X = s_F.apply(alpha);
+
+            for (AB<Sub,BigInteger> p_X : subs_k(gamma, j, t_X)) {
+                Sub        s_X = p_X._1();
+                BigInteger n_X = p_X._2();
+
+                Sub        s_FX = Sub.dot(s_X, s_F).restrict(t);
+                BigInteger n_FX = n_X.multiply(n_F);
+
+                subs.add(AB.mk(s_FX, n_FX));
+            }
+        }
+        return packSubs(subs);
+    }
+
 
     private static List<AB<Sub,BigInteger>> subs_1(List<AB<String,Type>> gamma, Type t) {
         return packSubs(F.map(ts_1(gamma, t), p -> AB.mk(p._2(), BigInteger.ONE)));
@@ -42,6 +79,45 @@ public class LSolver {
     }
 
 
+    private static List<AB<String,Sub>> ts_k(List<AB<String,Type>> gamma, int k, Type t) {
+        if (k < 1) {
+            throw new Error("k must be > 0, it is "+k);
+        } else if (k == 1) {
+            return ts_1(gamma, t);
+        } else {
+            List<AB<String,Sub>> ts = new ArrayList<>();
+            for (int i = 1; i < k; k++) {
+                ts.addAll(ts_ij(gamma, i, k-i, t));
+            }
+            return ts;
+        }
+    }
+
+    private static List<AB<String,Sub>> ts_ij(List<AB<String,Type>> gamma, int i, int j, Type t) {
+        List<AB<String,Sub>> ts = new ArrayList<>();
+
+        Type alpha = newVar(t);
+        Type t_F = Types.mkFunType(alpha, t);
+
+        for (AB<String,Sub> p_F : ts_k(gamma, i, t_F)) {
+            String F = p_F._1();
+            Sub  s_F = p_F._2();
+
+            Type t_X = s_F.apply(alpha);
+
+            for (AB<String,Sub> p_X : ts_k(gamma, j, t_X)) {
+                String X = p_X._1();
+                Sub  s_X = p_X._2();
+
+                String FX = "("+F+" "+X+")";
+                Sub  s_FX = Sub.dot(s_X, s_F).restrict(t);
+
+                ts.add(AB.mk(FX, s_FX));
+            }
+        }
+        return ts;
+    }
+
     private static List<AB<String,Sub>> ts_1(List<AB<String,Type>> gamma, Type t) {
         List<AB<String,Sub>> ret = new ArrayList<>();
 
@@ -59,8 +135,9 @@ public class LSolver {
         return ret;
     }
 
-
-
+    private static TypeVar newVar(Type t) {
+        return new TypeVar(t.getNextVarId());
+    }
 
     private static Type fresh(Type typeToFresh, Type typeToAvoid) {
         int startVarId = typeToAvoid.getNextVarId();
@@ -77,6 +154,9 @@ public class LSolver {
         return new AB<>(nf,nf2t);
     }
 
+
+
+    // -- TESTING -----------------------------------
 
     public static void main(String[] args) {
         Checker ch = new Checker();
