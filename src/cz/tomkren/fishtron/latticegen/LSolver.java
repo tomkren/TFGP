@@ -4,10 +4,7 @@ import cz.tomkren.fishtron.types.Sub;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.TypeTerm;
 import cz.tomkren.fishtron.types.Types;
-import cz.tomkren.utils.AB;
-import cz.tomkren.utils.Checker;
-import cz.tomkren.utils.Log;
-import cz.tomkren.utils.TODO;
+import cz.tomkren.utils.*;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -21,28 +18,31 @@ import java.util.TreeMap;
 public class LSolver {
 
     private static List<AB<Sub,BigInteger>> subs_1(List<AB<String,Type>> gamma, Type t) {
+        return packSubs(F.map(ts_1(gamma, t), p -> AB.mk(p._2(), BigInteger.ONE)));
+    }
 
-        List<AB<String,Sub>> allSubs = ts_1(gamma, t);
-
+    private static List<AB<Sub,BigInteger>> packSubs(List<AB<Sub,BigInteger>> subs) {
         Map<String,AB<Sub,BigInteger>> subsMap = new TreeMap<>();
-        for (AB<String,Sub> p : allSubs) {
-            Sub sub = p._2();
+
+        for (AB<Sub, BigInteger> p : subs) {
+            Sub sub = p._1();
+            BigInteger num = p._2();
 
             String key = sub.toString();
             AB<Sub,BigInteger> val = subsMap.get(key);
 
             if (val == null) {
-                subsMap.put(key, new AB<>(sub, BigInteger.ONE));
+                subsMap.put(key, p);
             } else {
-                val.set_2(val._2().add(BigInteger.ONE));
+                BigInteger oldNum = val._2();
+                val.set_2(oldNum.add(num));
             }
         }
-
         return new ArrayList<>(subsMap.values());
     }
 
-    private static List<AB<String,Sub>> ts_1(List<AB<String,Type>> gamma, Type t) {
 
+    private static List<AB<String,Sub>> ts_1(List<AB<String,Type>> gamma, Type t) {
         List<AB<String,Sub>> ret = new ArrayList<>();
 
         for (AB<String,Type> p : gamma) {
@@ -56,7 +56,6 @@ public class LSolver {
                 ret.add(new AB<>(s, mu.restrict(t)));
             }
         }
-
         return ret;
     }
 
@@ -83,7 +82,7 @@ public class LSolver {
         Checker ch = new Checker();
 
         testNormalizations(ch);
-        testTs1(ch);
+        tests_ts1_subs1(ch);
 
         ch.results();
     }
@@ -99,48 +98,62 @@ public class LSolver {
     }
 
 
-    private static void testTs1(Checker ch) {
+    private static void tests_ts1_subs1(Checker ch) {
 
-        Log.it("\n-- ts_1 & subs_1 tests ---------------------------------------------------\n");
+        Log.it("\n== ts_1 & subs_1 tests ===================================================\n");
 
 
-        Type t = Types.parse("x1 -> x0");
-        List<AB<String,Type>> gamma = mkGamma(
+        List<AB<String,Type>> gamma1 = mkGamma(
                 "s", "(a -> (b -> c)) -> ((a -> b) -> (a -> c))",
                 "s2","(x5 -> (x0 -> x1)) -> ((x5 -> x0) -> (x5 -> x1))",
                 "s3","(y5 -> (x0 -> x1)) -> ((y5 -> x0) -> (y5 -> x1))",
                 "k", "a -> (b -> a)",
                 "k2","x1 -> (x0 -> x1)",
-                "+", "Int -> (Int -> Int)"
+                "+", "Int -> (Int -> Int)",
+                "42", "Int",
+                "magicVal", "alpha"
         );
+
+
+        testTs1(ch, "Int -> Int", gamma1);
+        testTs1(ch, "x1 -> x0",   gamma1);
+
+
+    }
+    private static void testTs1(Checker ch, String tStr, List<AB<String,Type>> gamma) {
+        testTs1(ch, Types.parse(tStr), gamma);
+    }
+
+    private static void testTs1(Checker ch, Type t, List<AB<String,Type>> gamma) {
 
         AB<Type,Sub> nf = normalize(t);
         Type t_nf = nf._1();
         Sub nf2t  = nf._2();
 
-
+        Log.it();
+        Log.it("-- LIB gamma -------------");
         Log.listLn(gamma);
 
-
-        ts_1(gamma, t);
-
+        Log.it("-- GOAL TYPE t -----");
         Log.it("t: "+t);
         Log.it("t_nf: "+t_nf);
-        Log.itln("nf2t: "+nf2t);
+        Log.it("nf2t: "+nf2t+"\n");
 
         List<AB<String, Sub>> ts1_t = ts_1(gamma, t_nf);
+        Log.it("-- ts_1(gamma, t_nf) ------------");
         Log.listLn(ts1_t);
 
         List<AB<Sub, BigInteger>> subs1_t = subs_1(gamma, t_nf);
+        Log.it("-- subs_1(gamma, t_nf) ----------");
         Log.listLn(subs1_t);
 
-
+        Log.it("-------------------------------------------------------");
     }
 
 
     private static void testNormalizations(Checker ch) {
 
-        Log.it("\n-- normalization tests ---------------------------------------------------\n");
+        Log.it("\n== normalization tests ===================================================\n");
 
         Type t1 = Types.parse("(x111 -> (x11 -> x1)) -> ((x111 -> x11) -> (x111 -> x1))");
         Type t2 = Types.parse("(x0 -> (x11 -> x1)) -> ((x0 -> x11) -> (x0 -> x1))");
