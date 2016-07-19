@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 
 /** Created by tom on 18. 7. 2016.*/
@@ -15,32 +17,44 @@ import java.util.TreeMap;
 public class LSolver {
 
     private static List<AB<Sub,BigInteger>> subs_k(List<AB<String,Type>> gamma, int k, Type t) {
+        return subs_k(k,t,tt->subs_1(gamma,tt), (i,j,tt)->subs_ij(gamma,i,j,tt));
+    }
+
+    private static List<AB<Sub,BigInteger>> subs_ij(List<AB<String,Type>> gamma, int i, int j, Type t) {
+        return subs_ij(i,j,t,(k,tt)->subs_k(gamma,k,tt)  );
+    }
+
+    private static List<AB<Sub,BigInteger>> subs_k(
+            int k, Type t, Function<Type,List<AB<Sub,BigInteger>>> subs_1_fun,
+            TriFun<Integer, Integer, Type, List<AB<Sub,BigInteger>>> subs_ij_fun) {
         if (k < 1) {
             throw new Error("k must be > 0, it is "+k);
         } else if (k == 1) {
-            return subs_1(gamma, t);
+            return subs_1_fun.apply(t);//subs_1(gamma, t);
         } else {
             List<AB<Sub,BigInteger>> subs = new ArrayList<>();
-            for (int i = 1; i < k; k++) {
-                subs.addAll(subs_ij(gamma, i, k-i, t));
+            for (int i = 1; i < k; i++) {
+                subs.addAll(subs_ij_fun.apply(i, k - i, t));
+                //subs.addAll(subs_ij(gamma, i, k-i, t));
             }
             return packSubs(subs);
         }
     }
 
-    private static List<AB<Sub,BigInteger>> subs_ij(List<AB<String,Type>> gamma, int i, int j, Type t) {
+    private static List<AB<Sub,BigInteger>> subs_ij(
+            int i, int j, Type t, BiFunction<Integer,Type,List<AB<Sub,BigInteger>>> subs_k_fun) {
         List<AB<Sub,BigInteger>> subs = new ArrayList<>();
 
         Type alpha = newVar(t);
         Type t_F = Types.mkFunType(alpha, t);
 
-        for (AB<Sub,BigInteger> p_F : subs_k(gamma, i, t_F)) {
+        for (AB<Sub,BigInteger> p_F : subs_k_fun.apply(i, t_F)) {
             Sub        s_F = p_F._1();
             BigInteger n_F = p_F._2();
 
             Type t_X = s_F.apply(alpha);
 
-            for (AB<Sub,BigInteger> p_X : subs_k(gamma, j, t_X)) {
+            for (AB<Sub,BigInteger> p_X : subs_k_fun.apply(j, t_X)) {
                 Sub        s_X = p_X._1();
                 BigInteger n_X = p_X._2();
 
@@ -86,7 +100,7 @@ public class LSolver {
             return ts_1(gamma, t);
         } else {
             List<AB<String,Sub>> ts = new ArrayList<>();
-            for (int i = 1; i < k; k++) {
+            for (int i = 1; i < k; i++) {
                 ts.addAll(ts_ij(gamma, i, k-i, t));
             }
             return ts;
@@ -162,7 +176,8 @@ public class LSolver {
         Checker ch = new Checker();
 
         testNormalizations(ch);
-        tests_ts1_subs1(ch);
+        //tests_subs_1(ch);
+        tests_subs_k(ch);
 
         ch.results();
     }
@@ -177,11 +192,23 @@ public class LSolver {
         return ret;
     }
 
+    private static void tests_subs_k(Checker ch) {
+        Log.it("\n== ts_k & subs_k tests ===================================================\n");
 
-    private static void tests_ts1_subs1(Checker ch) {
+        List<AB<String,Type>> gamma1 = mkGamma(
+                "f", "X -> X",
+                "seri", "(a -> b) -> ((b -> c) -> (a -> c))"
+        );
 
+
+        test_ts_k(ch, 1, "X -> X", gamma1);
+        test_ts_k(ch, 2, "X -> X", gamma1);
+        test_ts_k(ch, 3, "X -> X", gamma1);
+
+    }
+
+    private static void tests_subs_1(Checker ch) {
         Log.it("\n== ts_1 & subs_1 tests ===================================================\n");
-
 
         List<AB<String,Type>> gamma1 = mkGamma(
                 "s", "(a -> (b -> c)) -> ((a -> b) -> (a -> c))",
@@ -194,17 +221,14 @@ public class LSolver {
                 "magicVal", "alpha"
         );
 
-
-        testTs1(ch, "Int -> Int", gamma1);
-        testTs1(ch, "x1 -> x0",   gamma1);
-
-
+        test_ts_k(ch, 1, "Int -> Int", gamma1);
+        test_ts_k(ch, 1, "x1 -> x0",   gamma1);
     }
-    private static void testTs1(Checker ch, String tStr, List<AB<String,Type>> gamma) {
-        testTs1(ch, Types.parse(tStr), gamma);
+    private static void test_ts_k(Checker ch, int k, String tStr, List<AB<String,Type>> gamma) {
+        test_ts_k(ch, k, Types.parse(tStr), gamma);
     }
 
-    private static void testTs1(Checker ch, Type t, List<AB<String,Type>> gamma) {
+    private static void test_ts_k(Checker ch, int k, Type t, List<AB<String,Type>> gamma) {
 
         AB<Type,Sub> nf = normalize(t);
         Type t_nf = nf._1();
@@ -219,16 +243,17 @@ public class LSolver {
         Log.it("t_nf: "+t_nf);
         Log.it("nf2t: "+nf2t+"\n");
 
-        List<AB<String, Sub>> ts1_t = ts_1(gamma, t_nf);
-        Log.it("-- ts_1(gamma, t_nf) ------------");
-        Log.listLn(ts1_t);
+        List<AB<String, Sub>> ts = ts_k(gamma, k, t_nf);
+        Log.it("-- ts_"+k+"(gamma, t_nf) ------------");
+        Log.listLn(ts);
 
-        List<AB<Sub, BigInteger>> subs1_t = subs_1(gamma, t_nf);
-        Log.it("-- subs_1(gamma, t_nf) ----------");
-        Log.listLn(subs1_t);
+        List<AB<Sub, BigInteger>> subs = subs_k(gamma, k, t_nf);
+        Log.it("-- subs_"+k+"(gamma, t_nf) ----------");
+        Log.listLn(subs);
 
         Log.it("-------------------------------------------------------");
     }
+
 
 
     private static void testNormalizations(Checker ch) {
