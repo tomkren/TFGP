@@ -13,6 +13,10 @@ public class AA<A> {
         this.a2 = a2;
     }
 
+    public static <A> AA<A> mk(A x, A y) {
+        return new AA<>(x,y);
+    }
+
     public A _1() {return a1;}
     public A _2() {return a2;}
 

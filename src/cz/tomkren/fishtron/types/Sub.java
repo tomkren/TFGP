@@ -109,9 +109,19 @@ public class Sub implements Function<Type,Type> {
         return ret;
     }
 
-    public Sub toRenaming() {
+    public Sub toRenaming(Type domain) {
 
         Sub ret = new Sub();
+
+        //Set<Integer> domainVars = domain.getVarIds();
+
+        List<AA<Integer>> inverse = new ArrayList<>();
+
+        Set<Integer> domTabu = new HashSet<>();
+        Set<Integer> codomTabu = new HashSet<>();
+
+        List<Integer> domTodo = new ArrayList<>();
+        List<Integer> codomTodo = new ArrayList<>();
 
         if (isFail()) {
             ret.setFail("source fail: "+getFailMsg());
@@ -120,31 +130,63 @@ public class Sub implements Function<Type,Type> {
 
         for(Map.Entry<Integer,Type> e : table.entrySet()) {
 
-            int varId = e.getKey();
+            int var1 = e.getKey();
             Type type = e.getValue();
 
             if (type instanceof TypeVar) {
-                int varId2 = ((TypeVar) type).getId();
-                if (varId != varId2) {
 
-                    if (ret.get(varId) == null) {
-                        ret.add(varId, type);
-                    } else {
-                        ret.setFail("toRenaming fail: x"+varId+" is in both domain and codomain");
-                    }
+                TypeVar tvar2 = (TypeVar) type;
+                int var2 = tvar2.getId();
 
-                    if (ret.get(varId2) == null) {
-                        ret.add(varId2,new TypeVar(varId));
-                    } else {
-                        ret.setFail("toRenaming fail: x"+varId2+" is in both domain and codomain or more times in codomain");
-                    }
+                // so this entry's vars are: var1 -> var2
 
+                if (var1 != var2) {
+                    ret.add(var1, tvar2);
+                    domTabu.add(var1);
+                    codomTabu.add(var2);
+
+                    inverse.add(AA.mk(var2,var1));
                 }
+
             } else {
                 ret.setFail("toRenaming fail: "+type+" is not TypeVar");
                 return ret;
             }
+        }
 
+        Sub retInverse = ret.inverse();
+
+        for (AA<Integer> p : inverse) {
+            int fromId = p._1();
+            int toId   = p._2();
+
+            if (domTabu.contains(fromId)) {
+
+                if (retInverse.get(toId) == null) {
+                    codomTodo.add(toId);
+                }
+
+            } else if (codomTabu.contains(toId)) {
+
+                if (ret.get(fromId) == null) {
+                    domTodo.add(fromId);
+                }
+
+
+            } else {
+                ret.add(fromId, new TypeVar(toId));
+            }
+        }
+
+        if (domTodo.size() != codomTodo.size()) {
+            ret.setFail("toRenaming fail: dom&codom todo lists must have equal size, but: "+domTodo+" vs "+codomTodo);
+            return ret;
+        }
+
+        for (int i = 0; i < domTodo.size(); i++) {
+            int fromId = domTodo.get(i);
+            int toId = codomTodo.get(i);
+            ret.add(fromId, new TypeVar(toId));
         }
 
         return ret;

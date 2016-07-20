@@ -4,10 +4,7 @@ import cz.tomkren.fishtron.types.*;
 import cz.tomkren.utils.*;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -16,33 +13,89 @@ import java.util.function.Function;
 
 public class LSolver {
 
+    private List<AB<String,Type>> gamma;
+
+    private Map<String,TypeData> typeDataMap;
+    private Map<Integer,Sub> id2sub;
+    private Map<String,Integer> sub2id;
+
+
+    public LSolver(List<AB<String,Type>> gamma) {
+        this.gamma = gamma;
+        typeDataMap = new HashMap<>();
+        id2sub = new HashMap<>();
+        sub2id = new HashMap<>();
+    }
+
+    private List<AB<Sub,BigInteger>> sub_k(int k, Type t) {
+
+        AB<Type,Sub> p_nf = normalize(t);
+        Type t_nf = p_nf._1();
+        Sub  t2nf = p_nf._2();
+        String t_nf_str = t_nf.toString();
+
+        TypeData typeData = typeDataMap.computeIfAbsent(t_nf_str, key->new TypeData());
+        SizeData sizeData = typeData.getSizeData(k);
+
+
+        if (!sizeData.isComputed()) {
+
+            //sizeData.setSubsData(  );
+
+            throw new TODO();
+        }
+
+        // TODO ještě potřeba zpět odnormalizovat   !!! !!! !!!   !!! !!! !!!   !!! !!! !!!
+
+        return decodeSubsData(sizeData.getSubsData(), t2nf);
+    }
+
+
+    private List<AB<Sub,BigInteger>> decodeSubsData(List<AB<Integer, BigInteger>> encodedSubs, Sub t2nf) {
+        return F.map(encodedSubs, p -> {
+            int subId = p._1();
+            BigInteger num = p._2();
+
+            Sub sub_nf = id2sub.get(subId);
+            //Sub sub =
+
+            throw new TODO();
+            //return AB.mk(sub,num);
+        });
+    }
+
+
+
+
+
+    // -- STATIC FUNS : core of the method -----------------------------------------------------
+
     private static List<AB<Sub,BigInteger>> subs_k(List<AB<String,Type>> gamma, int k, Type t) {
         return subs_k(k,t,tt->subs_1(gamma,tt), (i,j,tt)->subs_ij(gamma,i,j,tt));
     }
 
     private static List<AB<Sub,BigInteger>> subs_ij(List<AB<String,Type>> gamma, int i, int j, Type t) {
-        return subs_ij(i,j,t,(k,tt)->subs_k(gamma,k,tt)  );
+        return subs_ij(i,j,t,(k,tt)->subs_k(gamma,k,tt));
     }
 
-    private static List<AB<Sub,BigInteger>> subs_k(
-            int k, Type t, Function<Type,List<AB<Sub,BigInteger>>> subs_1_fun,
+    private static List<AB<Sub,BigInteger>> subs_k(int k, Type t,
+            Function<Type,List<AB<Sub,BigInteger>>> subs_1_fun,
             TriFun<Integer, Integer, Type, List<AB<Sub,BigInteger>>> subs_ij_fun) {
         if (k < 1) {
             throw new Error("k must be > 0, it is "+k);
         } else if (k == 1) {
-            return subs_1_fun.apply(t);//subs_1(gamma, t);
+            return subs_1_fun.apply(t);
         } else {
             List<AB<Sub,BigInteger>> subs = new ArrayList<>();
             for (int i = 1; i < k; i++) {
                 subs.addAll(subs_ij_fun.apply(i, k - i, t));
-                //subs.addAll(subs_ij(gamma, i, k-i, t));
             }
             return packSubs(subs);
         }
     }
 
-    private static List<AB<Sub,BigInteger>> subs_ij(
-            int i, int j, Type t, BiFunction<Integer,Type,List<AB<Sub,BigInteger>>> subs_k_fun) {
+    private static List<AB<Sub,BigInteger>> subs_ij(int i, int j, Type t,
+            BiFunction<Integer,Type,List<AB<Sub,BigInteger>>> subs_k_fun) {
         List<AB<Sub,BigInteger>> subs = new ArrayList<>();
 
         Type alpha = newVar(t);
@@ -161,11 +214,16 @@ public class LSolver {
     }
 
     private static AB<Type,Sub> normalize(Type t) {
+
         Sub t2nf = new Sub();
         Type nf = t.freshenVars(0, t2nf)._1();
-        Sub nf2t = t2nf.inverse();
-        if (nf2t.isFail()) {throw new Error("Unable to construct inverse: "+nf2t.getFailMsg());}
-        return new AB<>(nf,nf2t);
+
+        //Sub nf2t = t2nf.inverse();
+
+        Sub rho = t2nf.toRenaming(t);
+        if (rho.isFail()) {throw new Error("Unable to construct renaming: "+rho.getFailMsg());}
+
+        return new AB<>(nf,rho);
     }
 
 
@@ -230,9 +288,9 @@ public class LSolver {
 
     private static void test_ts_k(Checker ch, int k, Type t, List<AB<String,Type>> gamma) {
 
-        AB<Type,Sub> nf = normalize(t);
-        Type t_nf = nf._1();
-        Sub nf2t  = nf._2();
+        AB<Type,Sub> p_nf = normalize(t);
+        Type t_nf = p_nf._1();
+        Sub t2nf  = p_nf._2();
 
         Log.it();
         Log.it("-- LIB gamma -------------");
@@ -241,7 +299,9 @@ public class LSolver {
         Log.it("-- GOAL TYPE t -----");
         Log.it("t: "+t);
         Log.it("t_nf: "+t_nf);
-        Log.it("nf2t: "+nf2t+"\n");
+        Log.it("t2nf: "+t2nf+"\n");
+
+        ch.it(t2nf.apply(t), t_nf.toString());
 
         List<AB<String, Sub>> ts = ts_k(gamma, k, t_nf);
         Log.it("-- ts_"+k+"(gamma, t_nf) ------------");
@@ -264,6 +324,7 @@ public class LSolver {
         Type t2 = Types.parse("(x0 -> (x11 -> x1)) -> ((x0 -> x11) -> (x0 -> x1))");
         Type t3 = Types.parse("(x2 -> (x1 -> x0)) -> ((x2 -> x1) -> (x2 -> x0))");
         Type t4 = Types.parse("(x2 -> (x0 -> x1)) -> ((x2 -> x0) -> (x2 -> x1))");
+        Type t5 = Types.parse("(x1 -> (x4 -> (x4 -> (x5 -> (x66 -> (x0 -> (x0 -> (x3 -> (x77 -> (x4 -> (x66 -> (x5 -> (x77 -> (x88 -> (x -> x2)))))))))))))))");
 
         ch.it(t1);
         ch.it(((TypeTerm)t1).fold(Object::toString, Object::toString) +"\n");
@@ -272,16 +333,21 @@ public class LSolver {
         checkNormalisation(ch, t2);
         checkNormalisation(ch, t3);
         checkNormalisation(ch, t4);
+        checkNormalisation(ch, t5);
+
 
     }
 
     private static void checkNormalisation(Checker ch, Type t) {
         AB<Type,Sub> p = normalize(t);
         Type nf  = p._1();
-        Sub nf2t = p._2();
+        Sub t2nf = p._2();
 
-        ch.it(nf2t.apply(nf),t.toString());
-        ch.it(p);
-        ch.it("");
+        ch.it(t);
+        ch.it(nf);
+        ch.it(t2nf);
+        Log.it("----------------------------------");
+        ch.it(t2nf.apply(t),nf.toString());
+        Log.it();
     }
 }
