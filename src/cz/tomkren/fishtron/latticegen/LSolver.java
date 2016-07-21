@@ -1,12 +1,14 @@
 package cz.tomkren.fishtron.latticegen;
 
+import com.google.common.base.Joiner;
 import cz.tomkren.fishtron.types.*;
 import cz.tomkren.utils.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
-import java.math.BigInteger;
+import java.math.*;
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.function.*;
 
 
 /** Created by tom on 18. 7. 2016.*/
@@ -16,66 +18,138 @@ public class LSolver {
     private List<AB<String,Type>> gamma;
 
     private Map<String,TypeData> typeDataMap;
+
     private Map<Integer,Sub> id2sub;
     private Map<String,Integer> sub2id;
+    private int nextSubId;
 
 
-    public LSolver(List<AB<String,Type>> gamma) {
+    private LSolver(List<AB<String, Type>> gamma) {
         this.gamma = gamma;
         typeDataMap = new HashMap<>();
+
         id2sub = new HashMap<>();
         sub2id = new HashMap<>();
+        nextSubId = 0;
     }
 
-    private List<AB<Sub,BigInteger>> sub_k(int k, Type t) {
-
-        AB<Type,Sub> p_nf = normalize(t);
-        Type t_nf = p_nf._1();
-        Sub  t2nf = p_nf._2();
-        Sub  nf2t = t2nf.inverse();
-        String t_nf_str = t_nf.toString();
-
-        TypeData typeData = typeDataMap.computeIfAbsent(t_nf_str, key->new TypeData());
-        SizeData sizeData = typeData.getSizeData(k);
 
 
-        if (!sizeData.isComputed()) {
+    // -- CORE ---------------------------------------------
 
-            //sizeData.setSubsData(  );
+    private List<AB<Sub,BigInteger>> subs_k(int k, Type t) {
+        AB<Type,Sub> nf = normalize(t);
+        SizeTypeData sizeTypeData = getSizeTypeData(k, nf);
 
-            throw new TODO();
+        if (!sizeTypeData.isComputed()) {
+            List<AB<Sub,BigInteger>> subs = subs_k(k, nf._1(), subs_1(gamma), this::subs_ij);
+            sizeTypeData.setSubsData(encodeSubs(subs));
         }
 
-        // TODO ještě potřeba zpět odnormalizovat   !!! !!! !!!   !!! !!! !!!   !!! !!! !!!
+        return denormalizeSubs(decodeSubs(sizeTypeData.getSubsData()), nf);
+    }
 
-        return decodeSubsData(sizeData.getSubsData(), t2nf, nf2t);
+    private List<AB<Sub,BigInteger>> subs_ij(int i, int j, Type t) {
+        AB<Type,Sub> nfData = normalize(t);
+        List<AB<Sub,BigInteger>> subs = subs_ij(i, j, nfData._1(), this::subs_k);
+        return denormalizeSubs(subs, nfData);
     }
 
 
-    private List<AB<Sub,BigInteger>> decodeSubsData(List<AB<Integer, BigInteger>> encodedSubs, Sub t2nf, Sub nf2t) {
-        return F.map(encodedSubs, p -> {
-            int subId = p._1();
+    // -- Utils for CORE ---------------------------------------------
+
+    private SizeTypeData getSizeTypeData(int k, AB<Type,Sub> nfData) {
+        String nf_str = nfData._1().toString();
+        TypeData typeData = typeDataMap.computeIfAbsent(nf_str, key->new TypeData());
+        return typeData.getSizeTypeData(k);
+    }
+
+    private AB<Integer,BigInteger> encodeSub(AB<Sub, BigInteger> subData) {
+        Sub sub = subData._1();
+        String sub_str = sub.toString();
+        Integer sub_id = sub2id.get(sub_str);
+
+        if (sub_id == null) {
+            sub_id = nextSubId;
+            sub2id.put(sub_str, sub_id);
+            id2sub.put(sub_id, sub);
+            nextSubId ++;
+        }
+
+        BigInteger num = subData._2();
+        return AB.mk(sub_id,num);
+    }
+
+    private List<AB<Integer,BigInteger>> encodeSubs(List<AB<Sub, BigInteger>> subs) {
+        return F.map(subs, this::encodeSub);
+    }
+
+    private List<AB<Sub,BigInteger>> decodeSubs(List<AB<Integer, BigInteger>> encodedSubs) {
+        return F.map(encodedSubs, p -> AB.mk(id2sub.get(p._1()), p._2()));
+    }
+
+    private List<AB<Sub,BigInteger>> denormalizeSubs(List<AB<Sub, BigInteger>> subs, AB<Type,Sub> nfData) {
+        Sub  t2nf = nfData._2();
+        Sub  nf2t = t2nf.inverse();
+        return F.map(subs, p -> {
+            Sub sub_nf = p._1();
             BigInteger num = p._2();
-
-            Sub sub_nf = id2sub.get(subId);
             Sub sub = Sub.dot(nf2t, Sub.dot(sub_nf,t2nf));
-
             return AB.mk(sub,num);
         });
     }
 
+    // -- toString and Serialization to json ----------------------------------------------------------------
 
+    private JSONObject toJson() {
+        return F.obj(
+            "gamma", gammaToJson(gamma),
+            "types", typesToJson(typeDataMap),
+            "subs",  subsToJson()
+        );
+    }
+
+    @Override
+    public String toString() {
+        return F.prettyJson(toJson(),F.obj(
+            "types", 2,
+            "gamma", 1
+        ));
+    }
+
+
+
+    private static JSONArray gammaToJson(List<AB<String,Type>> gamma) {
+        return F.jsonMap(gamma, p -> F.arr(p._1(),p._2().toJson()));
+    }
+
+    private static JSONObject typesToJson(Map<String,TypeData> typeDataMap) {
+        return F.jsonMap(typeDataMap, LSolver::typeDataToJson);
+    }
+
+    private static JSONObject typeDataToJson(TypeData td) {
+        return F.jsonMap(td.getSizeDataMap(), x -> sizeTypeDataToJson(x.getSubsData()) );
+    }
+
+    private static JSONArray sizeTypeDataToJson(List<AB<Integer, BigInteger>> subs) {
+        return F.jsonMap(subs, p -> F.arr(p._1(),p._2().toString()));
+    }
+
+
+    private static JSONArray subsToJson() {
+        return F.arr();
+    }
 
 
 
     // -- STATIC FUNS : core of the method -----------------------------------------------------
 
-    private static List<AB<Sub,BigInteger>> subs_k(List<AB<String,Type>> gamma, int k, Type t) {
-        return subs_k(k,t,tt->subs_1(gamma,tt), (i,j,tt)->subs_ij(gamma,i,j,tt));
+    private static BiFunction<Integer,Type,List<AB<Sub,BigInteger>>> subs_k(List<AB<String,Type>> gamma) {
+        return (k,t) -> subs_k(k,t,subs_1(gamma), subs_ij(gamma));
     }
 
-    private static List<AB<Sub,BigInteger>> subs_ij(List<AB<String,Type>> gamma, int i, int j, Type t) {
-        return subs_ij(i,j,t,(k,tt)->subs_k(gamma,k,tt));
+    private static TriFun<Integer,Integer,Type,List<AB<Sub,BigInteger>>> subs_ij(List<AB<String,Type>> gamma) {
+        return (i,j,t) -> subs_ij(i,j,t,subs_k(gamma));
     }
 
     private static List<AB<Sub,BigInteger>> subs_k(int k, Type t,
@@ -121,8 +195,8 @@ public class LSolver {
     }
 
 
-    private static List<AB<Sub,BigInteger>> subs_1(List<AB<String,Type>> gamma, Type t) {
-        return packSubs(F.map(ts_1(gamma, t), p -> AB.mk(p._2(), BigInteger.ONE)));
+    private static Function<Type,List<AB<Sub,BigInteger>>> subs_1(List<AB<String,Type>> gamma) {
+        return t -> packSubs(F.map(ts_1(gamma, t), p -> AB.mk(p._2(), BigInteger.ONE)));
     }
 
     private static List<AB<Sub,BigInteger>> packSubs(List<AB<Sub,BigInteger>> subs) {
@@ -218,8 +292,6 @@ public class LSolver {
         Sub t2nf = new Sub();
         Type nf = t.freshenVars(0, t2nf)._1();
 
-        //Sub nf2t = t2nf.inverse();
-
         Sub rho = t2nf.toRenaming(t);
         if (rho.isFail()) {throw new Error("Unable to construct renaming: "+rho.getFailMsg());}
 
@@ -234,12 +306,11 @@ public class LSolver {
         Checker ch = new Checker();
 
         testNormalizations(ch);
-        //tests_subs_1(ch);
+        tests_subs_1(ch);
         tests_subs_k(ch);
 
         ch.results();
     }
-
 
     private static List<AB<String,Type>> mkGamma(String... strs) {
         if (strs.length % 2 != 0) {throw new Error("There must be an even number of gamma strings.");}
@@ -258,11 +329,9 @@ public class LSolver {
                 "seri", "(a -> b) -> ((b -> c) -> (a -> c))"
         );
 
-
         test_ts_k(ch, 1, "X -> X", gamma1);
         test_ts_k(ch, 2, "X -> X", gamma1);
         test_ts_k(ch, 3, "X -> X", gamma1);
-
     }
 
     private static void tests_subs_1(Checker ch) {
@@ -307,13 +376,26 @@ public class LSolver {
         Log.it("-- ts_"+k+"(gamma, t_nf) ------------");
         Log.listLn(ts);
 
-        List<AB<Sub, BigInteger>> subs = subs_k(gamma, k, t_nf);
+        List<AB<Sub, BigInteger>> subs = subs_k(gamma).apply(k, t_nf);
         Log.it("-- subs_"+k+"(gamma, t_nf) ----------");
         Log.listLn(subs);
 
+        Log.it("Creating LSolver ... initial state:");
+        LSolver solver = new LSolver(gamma);
+        Log.it(solver);
+
+        List<AB<Sub, BigInteger>> subs2 = solver.subs_k(k, t_nf);
+        Log.it("-- LSolver.subs_"+k+"(gamma, t_nf) ----------");
+        Log.listLn(subs);
+
+        Log.it("... LSolver after subs_k call:");
+        Log.it(solver);
+
+
+        ch.list(subs2,subs);
+
         Log.it("-------------------------------------------------------");
     }
-
 
 
     private static void testNormalizations(Checker ch) {
@@ -334,9 +416,6 @@ public class LSolver {
         checkNormalisation(ch, t4);
         checkNormalisation(ch, "(x1 -> (x4 -> (x4 -> (x5 -> (x66 -> (x0 -> (x0 -> (x3 -> (x77 -> (x4 -> (x66 -> (x5 -> (x77 -> (x88 -> (x1 -> x2)))))))))))))))");
         checkNormalisation(ch, "(x10 -> (x0 -> (x4 -> (x55 -> (x4 -> (x55 -> (x0 -> (x33 -> (x8 -> (x7 -> (x6 -> (x5 -> (x7 -> (x8 -> (x6 -> x2)))))))))))))))");
-
-
-
     }
 
     private static void checkNormalisation(Checker ch, String tStr) {

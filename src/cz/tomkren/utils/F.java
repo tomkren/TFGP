@@ -1,6 +1,7 @@
 package cz.tomkren.utils;
 
 
+import com.google.common.base.Joiner;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -465,6 +466,13 @@ public class F {
         return ret;
     }
 
+    public static <K,V> JSONObject jsonMap(Map<K,V> mapa, Function<V,Object> f) {
+        JSONObject ret = new JSONObject();
+        for (Map.Entry<K,V> e : mapa.entrySet()) {
+            ret.put(e.getKey().toString(), f.apply(e.getValue()));
+        }
+        return ret;
+    }
 
     public static JSONArray concat(List<JSONArray> arrs) {
 
@@ -479,6 +487,133 @@ public class F {
 
         return ret;
     }
+
+    // TODO !!! !!! !!! ... Rozdělané !!!
+
+    public static String prettyJson(Object json, Object indObj) {
+        return prettyJson(json, 0, indObj);
+    }
+
+    public static String prettyJson(Object json, int actInd, Object indObj) {
+        if (json instanceof JSONObject) {
+            return prettyJson_obj((JSONObject) json, actInd, indObj);
+        } else if (json instanceof JSONArray) {
+            return prettyJson_arr((JSONArray) json, actInd, indObj);
+        } else {
+            return prettyJson_default(json);
+        }
+    }
+
+    private static final int deltaInd = 2;
+
+    private static String prettyJson_obj(JSONObject json, int actInd, Object indObj) {
+
+        boolean isIndObjInt = indObj instanceof Integer;
+        Object newIndObj = isIndObjInt ? (int)indObj - 1 : indObj;
+        if (isIndObjInt && (int)indObj <= 0) {
+            return prettyJson_default(json);
+        }
+
+        boolean isIndObjObj = indObj instanceof JSONObject;
+
+        List<String> parts = F.map(json.keySet(), key -> {
+            Object val = json.get(key);
+            //Object subInd = indObj.has(key) ? indObj.get(key) : 0;
+
+            Object iob = newIndObj;
+
+            if (isIndObjObj) {
+                iob = ((JSONObject)indObj).has(key) ? ((JSONObject)indObj).get(key) : newIndObj;
+                Log.it(iob);
+            }
+
+            return indStr(actInd+1)+"\""+key+"\": "+prettyJson(val,actInd+1,iob);
+        });
+
+        if (parts.isEmpty()) {
+            return "{}";
+        } else {
+            return "{\n"+ Joiner.on(",\n").join(parts)+"\n"+indStr(actInd)+"}";
+        }
+
+        /*if (indentationObj instanceof Integer) {
+            int ind = (int) indentationObj;
+            return json.toString(ind);
+        } else if (indentationObj instanceof JSONObject) {
+            JSONObject indObj = (JSONObject) indentationObj;
+
+            List<String> parts = F.map(json.keySet(), key -> {
+                Object val = json.get(key);
+                Object subInd = indObj.has(key) ? indObj.get(key) : 0;
+                return indStr+"\""+key+"\": "+prettyJson(val,actInd+deltaInd,subInd);
+            });
+
+            return "{\n"+ Joiner.on(",\n").join(parts)+"\n}";
+
+        } else {
+            return json.toString();
+        }*/
+
+    }
+
+    private static String prettyJson_default(Object json) {
+        String str = json.toString();
+        return (json instanceof String) ? "\""+str+"\"" : str;
+    }
+
+    private static String indStr(int ind) {
+        return F.fillStr(ind*deltaInd," ");
+    }
+
+    private static String prettyJson_arr(JSONArray json, int actInd, Object indObj) {
+
+        boolean isIndObjInt = indObj instanceof Integer;
+        Object newIndObj = isIndObjInt ? (int)indObj - 1 : indObj;
+        if (isIndObjInt && (int)indObj <= 0) {
+            return prettyJson_default(json);
+        }
+
+        List<String> parts = F.map(json, x -> indStr(actInd+1) + prettyJson(x,actInd+1,newIndObj));
+
+        if (parts.isEmpty()) {
+            return "[]";
+        } else {
+            return "[\n"+Joiner.on(",\n").join(parts)+"\n"+indStr(actInd)+"]";
+        }
+
+
+        /*if (indentationObj instanceof Integer) {
+            int ind = (int) indentationObj;
+            return json.toString(ind);
+        } else if (indentationObj instanceof JSONArray) {
+            JSONArray indArr = (JSONArray) indentationObj;
+
+            if (indArr.length() == 0) {
+                return json.toString();
+            } else {
+
+                int ind = (int) indArr.get(0);
+                JSONArray indArrRest = subArr(indArr, 1);
+
+                List<String> parts = F.map(json, x -> F.fillStr(ind," ") + prettyJson(x,indArrRest));
+
+                return  "[\n"+Joiner.on(",\n").join(parts)+"\n]";
+            }
+
+        } else {
+            return json.toString();
+        }*/
+    }
+
+    public static JSONArray subArr(JSONArray xs, int fromIncluded) {
+        JSONArray ret = new JSONArray();
+        for (int i = fromIncluded; i < xs.length(); i++) {
+            ret.put(xs.get(i));
+        }
+        return ret;
+    }
+
+
 
     public static int plus(int x,int y) {
         return x+y;

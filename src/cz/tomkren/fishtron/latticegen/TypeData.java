@@ -1,23 +1,23 @@
 package cz.tomkren.fishtron.latticegen;
 
-import cz.tomkren.fishtron.types.Sub;
-import cz.tomkren.fishtron.types.Type;
-import cz.tomkren.utils.AB;
-import cz.tomkren.utils.TODO;
-
-import java.math.BigInteger;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 /** Created by tom on 18. 7. 2016. */
 
-public class TypeData {
+class TypeData {
 
-    private Map<Integer,SizeData> sizeDataMap;
+    private Map<Integer,SizeTypeData> sizeDataMap;
 
-    SizeData getSizeData(int k) {
-        return sizeDataMap.computeIfAbsent(k,key -> new SizeData());
+    TypeData() {
+        sizeDataMap = new HashMap<>();
     }
 
+    SizeTypeData getSizeTypeData(int k) {
+        return sizeDataMap.computeIfAbsent(k,_k -> new SizeTypeData());
+    }
 
+    public Map<Integer, SizeTypeData> getSizeDataMap() {
+        return sizeDataMap;
+    }
 }

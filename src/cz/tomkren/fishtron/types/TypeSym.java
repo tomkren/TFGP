@@ -31,7 +31,8 @@ public class TypeSym implements Type {
     @Override
     public void getVarIds(Set<Integer> ret) {}
 
-    public String toString() {return sym;}
+    @Override public String toString() {return sym;}
+    @Override public Object toJson()   {return sym;}
 
     @Override
     public boolean equals(Object o) {

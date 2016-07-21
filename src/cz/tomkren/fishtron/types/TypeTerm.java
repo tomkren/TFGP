@@ -75,6 +75,11 @@ public class TypeTerm implements Type {
     }
 
     @Override
+    public Object toJson() {
+        return F.jsonMap(Types.toSyntaxSugar(args), Type::toJson);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

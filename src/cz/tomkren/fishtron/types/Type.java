@@ -28,4 +28,6 @@ public interface Type {
         return ret;
     }
 
+    Object toJson();
+
 }

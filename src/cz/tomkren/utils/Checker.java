@@ -2,7 +2,9 @@ package cz.tomkren.utils;
 
 import org.json.JSONObject;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 public class Checker {
@@ -99,6 +101,33 @@ public class Checker {
         return this;
     }
 
+    public Checker list(List<?> os, List<?> shouldBes) {
+
+        /*sum++;
+        if (os.size() == shouldBes.size()) {
+            ok++;
+        }else {
+            fail("sizes of lists do not match.");
+            return this;
+        }*/
+
+        boolean sizesMatch = checkCore(os.size() == shouldBes.size(),
+                "LIST CHECK ... (sizes match)",
+                "LIST CHECK fail: sizes of lists do not match ("+os.size()+" vs "+shouldBes.size()+").");
+
+        if (sizesMatch) {
+            for (int i = 0; i < os.size(); i++) {
+                Object o = os.get(i);
+                String shouldBe = shouldBes.get(i).toString();
+
+                check(shouldBe, o);
+            }
+        }
+
+        return this;
+    }
+
+
     public Checker itln(Object o, String shouldBe) {
         check(shouldBe, o);
         Log.it();
@@ -140,10 +169,21 @@ public class Checker {
         return this;
     }
 
-    private void checkCore (boolean shouldBeTrue, String okMsg, String koMsg) {
+    private boolean checkCore (boolean shouldBeTrue, String okMsg, String koMsg) {
         sum++;
-        if (shouldBeTrue) { Log.it("[OK "+sum+"] "+okMsg); ok++; }
-        else  { System.err.println("[KO "+sum+"] "+koMsg); ko++; }
+        if (shouldBeTrue) {
+            Log.it("[OK "+sum+"] "+okMsg);
+            ok++;
+            return true;
+        } else {
+            fail(koMsg);
+            return false;
+        }
+    }
+
+    private void fail(String koMsg) {
+        System.err.println("[KO "+sum+"] "+koMsg);
+        ko++;
     }
 
     public void check( String shouldBe, Object o ) {

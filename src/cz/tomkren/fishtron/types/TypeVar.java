@@ -50,6 +50,11 @@ public class TypeVar implements Type {
         return "x"+id;
     }
 
+    @Override
+    public Object toJson() {
+        return toString();
+    }
+
     public int getId() {
         return id;
     }

@@ -7,11 +7,11 @@ import java.util.List;
 
 /** Created by user on 18. 7. 2016. */
 
-public class SizeData {
+class SizeTypeData {
 
     private List<AB<Integer,BigInteger>> subsData;
 
-    public SizeData() {
+    SizeTypeData() {
         subsData = null;
     }
 
@@ -19,11 +19,11 @@ public class SizeData {
         return subsData != null;
     }
 
-    public void setSubsData(List<AB<Integer, BigInteger>> subsData) {
+    void setSubsData(List<AB<Integer, BigInteger>> subsData) {
         this.subsData = subsData;
     }
 
-    public List<AB<Integer, BigInteger>> getSubsData() {
+    List<AB<Integer, BigInteger>> getSubsData() {
         return subsData;
     }
 }
