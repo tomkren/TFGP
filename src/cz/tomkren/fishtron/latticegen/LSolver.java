@@ -32,6 +32,7 @@ public class LSolver {
         AB<Type,Sub> p_nf = normalize(t);
         Type t_nf = p_nf._1();
         Sub  t2nf = p_nf._2();
+        Sub  nf2t = t2nf.inverse();
         String t_nf_str = t_nf.toString();
 
         TypeData typeData = typeDataMap.computeIfAbsent(t_nf_str, key->new TypeData());
@@ -47,20 +48,19 @@ public class LSolver {
 
         // TODO ještě potřeba zpět odnormalizovat   !!! !!! !!!   !!! !!! !!!   !!! !!! !!!
 
-        return decodeSubsData(sizeData.getSubsData(), t2nf);
+        return decodeSubsData(sizeData.getSubsData(), t2nf, nf2t);
     }
 
 
-    private List<AB<Sub,BigInteger>> decodeSubsData(List<AB<Integer, BigInteger>> encodedSubs, Sub t2nf) {
+    private List<AB<Sub,BigInteger>> decodeSubsData(List<AB<Integer, BigInteger>> encodedSubs, Sub t2nf, Sub nf2t) {
         return F.map(encodedSubs, p -> {
             int subId = p._1();
             BigInteger num = p._2();
 
             Sub sub_nf = id2sub.get(subId);
-            //Sub sub =
+            Sub sub = Sub.dot(nf2t, Sub.dot(sub_nf,t2nf));
 
-            throw new TODO();
-            //return AB.mk(sub,num);
+            return AB.mk(sub,num);
         });
     }
 
@@ -324,7 +324,6 @@ public class LSolver {
         Type t2 = Types.parse("(x0 -> (x11 -> x1)) -> ((x0 -> x11) -> (x0 -> x1))");
         Type t3 = Types.parse("(x2 -> (x1 -> x0)) -> ((x2 -> x1) -> (x2 -> x0))");
         Type t4 = Types.parse("(x2 -> (x0 -> x1)) -> ((x2 -> x0) -> (x2 -> x1))");
-        Type t5 = Types.parse("(x1 -> (x4 -> (x4 -> (x5 -> (x66 -> (x0 -> (x0 -> (x3 -> (x77 -> (x4 -> (x66 -> (x5 -> (x77 -> (x88 -> (x -> x2)))))))))))))))");
 
         ch.it(t1);
         ch.it(((TypeTerm)t1).fold(Object::toString, Object::toString) +"\n");
@@ -333,21 +332,30 @@ public class LSolver {
         checkNormalisation(ch, t2);
         checkNormalisation(ch, t3);
         checkNormalisation(ch, t4);
-        checkNormalisation(ch, t5);
+        checkNormalisation(ch, "(x1 -> (x4 -> (x4 -> (x5 -> (x66 -> (x0 -> (x0 -> (x3 -> (x77 -> (x4 -> (x66 -> (x5 -> (x77 -> (x88 -> (x1 -> x2)))))))))))))))");
+        checkNormalisation(ch, "(x10 -> (x0 -> (x4 -> (x55 -> (x4 -> (x55 -> (x0 -> (x33 -> (x8 -> (x7 -> (x6 -> (x5 -> (x7 -> (x8 -> (x6 -> x2)))))))))))))))");
 
 
+
+    }
+
+    private static void checkNormalisation(Checker ch, String tStr) {
+        checkNormalisation(ch, Types.parse(tStr));
     }
 
     private static void checkNormalisation(Checker ch, Type t) {
         AB<Type,Sub> p = normalize(t);
         Type nf  = p._1();
         Sub t2nf = p._2();
+        Sub nf2t = t2nf.inverse();
 
         ch.it(t);
         ch.it(nf);
         ch.it(t2nf);
         Log.it("----------------------------------");
         ch.it(t2nf.apply(t),nf.toString());
+        ch.it(nf2t.apply(t2nf.apply(t)),t.toString());
+
         Log.it();
     }
 }
