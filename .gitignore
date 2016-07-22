@@ -1,7 +1,16 @@
-/logs/**
-/results/**
+.idea/workspace.xml
+logs/
+out/
+results/
+tex/readme.aux
+tex/readme.dvi
+tex/readme.log
+tex/readme.out
+tex/readme.pdf
+tex/readme.synctex.gz
+tex/readme.toc
 
-*.class
+
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
