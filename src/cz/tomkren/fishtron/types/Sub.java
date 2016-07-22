@@ -2,6 +2,7 @@ package cz.tomkren.fishtron.types;
 
 import cz.tomkren.utils.AA;
 import cz.tomkren.utils.Log;
+import org.json.JSONObject;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -195,6 +196,7 @@ public class Sub implements Function<Type,Type> {
 
 
     // TODO otestovat dot nějak pořádně generativně :
+    // TODO vyčistit komentář, přepsat hezky, bylo este z doby kdy to byla metoda a ne static fun a byla v tom chyba záludná
 
     /*composeSubsti :: Substi -> Substi -> Substi
       composeSubsti new old =
@@ -213,23 +215,23 @@ public class Sub implements Function<Type,Type> {
      * @param f "first to be applied" substitution
      */
 
-    public void dot(Sub f) {
-        for(Map.Entry<Integer,Type> e : f.table.entrySet()) {
-            int varId = e.getKey();
-            Type updated = apply(e.getValue());
-            if (updated instanceof TypeVar && varId == ((TypeVar)updated).getId()) {
-                table.remove(varId);
-            } else {
-                table.put(varId,updated);
-            }
-        }
-    }
-
     public static Sub dot(Sub g, Sub f) {
         Sub ret = g.copy();
-        ret.dot(f);
+
+        for(Map.Entry<Integer,Type> e : f.table.entrySet()) {
+            int varId = e.getKey();
+            Type updated = g.apply(e.getValue());
+            if (updated instanceof TypeVar && varId == ((TypeVar)updated).getId()) {
+                ret.table.remove(varId);
+            } else {
+                ret.table.put(varId,updated);
+            }
+        }
+
         return ret;
     }
+
+
 
     public static Sub mgu(Type type1, Type type2) {
         return new Sub(type1, type2);
@@ -331,6 +333,21 @@ public class Sub implements Function<Type,Type> {
         }
 
         throw new Error("occurCheck : should be unreachable");
+    }
+
+
+    public JSONObject toJson() {
+        if (isFail()) {return null;}
+        JSONObject ret = new JSONObject();
+
+        for(Map.Entry<Integer,Type> entry : table.entrySet()) {
+            int id = entry.getKey();
+            Type type = entry.getValue();
+
+            ret.put("x"+id, type.toString());
+        }
+
+        return ret;
     }
 
     @Override

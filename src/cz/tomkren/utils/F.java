@@ -488,7 +488,6 @@ public class F {
         return ret;
     }
 
-    // TODO !!! !!! !!! ... Rozdělané !!!
 
     public static String prettyJson(Object json, Object indObj) {
         return prettyJson(json, 0, indObj);
@@ -518,13 +517,12 @@ public class F {
 
         List<String> parts = F.map(json.keySet(), key -> {
             Object val = json.get(key);
-            //Object subInd = indObj.has(key) ? indObj.get(key) : 0;
-
             Object iob = newIndObj;
+
+            // TODO tady to zjednodušit
 
             if (isIndObjObj) {
                 iob = ((JSONObject)indObj).has(key) ? ((JSONObject)indObj).get(key) : newIndObj;
-                Log.it(iob);
             }
 
             return indStr(actInd+1)+"\""+key+"\": "+prettyJson(val,actInd+1,iob);
@@ -535,25 +533,6 @@ public class F {
         } else {
             return "{\n"+ Joiner.on(",\n").join(parts)+"\n"+indStr(actInd)+"}";
         }
-
-        /*if (indentationObj instanceof Integer) {
-            int ind = (int) indentationObj;
-            return json.toString(ind);
-        } else if (indentationObj instanceof JSONObject) {
-            JSONObject indObj = (JSONObject) indentationObj;
-
-            List<String> parts = F.map(json.keySet(), key -> {
-                Object val = json.get(key);
-                Object subInd = indObj.has(key) ? indObj.get(key) : 0;
-                return indStr+"\""+key+"\": "+prettyJson(val,actInd+deltaInd,subInd);
-            });
-
-            return "{\n"+ Joiner.on(",\n").join(parts)+"\n}";
-
-        } else {
-            return json.toString();
-        }*/
-
     }
 
     private static String prettyJson_default(Object json) {

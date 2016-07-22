@@ -1,6 +1,5 @@
 package cz.tomkren.fishtron.latticegen;
 
-import com.google.common.base.Joiner;
 import cz.tomkren.fishtron.types.*;
 import cz.tomkren.utils.*;
 import org.json.JSONArray;
@@ -19,18 +18,16 @@ public class LSolver {
 
     private Map<String,TypeData> typeDataMap;
 
-    private Map<Integer,Sub> id2sub;
+    private List<Sub> subsList;
     private Map<String,Integer> sub2id;
-    private int nextSubId;
 
 
     private LSolver(List<AB<String, Type>> gamma) {
         this.gamma = gamma;
         typeDataMap = new HashMap<>();
 
-        id2sub = new HashMap<>();
+        subsList = new ArrayList<>();
         sub2id = new HashMap<>();
-        nextSubId = 0;
     }
 
 
@@ -46,7 +43,9 @@ public class LSolver {
             sizeTypeData.setSubsData(encodeSubs(subs));
         }
 
-        return denormalizeSubs(decodeSubs(sizeTypeData.getSubsData()), nf);
+        List<AB<Integer, BigInteger>> subsData = sizeTypeData.getSubsData();
+        List<AB<Sub, BigInteger>> decodedSubs  = decodeSubs(subsData);
+        return denormalizeSubs(decodedSubs, nf);
     }
 
     private List<AB<Sub,BigInteger>> subs_ij(int i, int j, Type t) {
@@ -70,10 +69,9 @@ public class LSolver {
         Integer sub_id = sub2id.get(sub_str);
 
         if (sub_id == null) {
-            sub_id = nextSubId;
+            sub_id = subsList.size();
+            subsList.add(sub);
             sub2id.put(sub_str, sub_id);
-            id2sub.put(sub_id, sub);
-            nextSubId ++;
         }
 
         BigInteger num = subData._2();
@@ -85,7 +83,7 @@ public class LSolver {
     }
 
     private List<AB<Sub,BigInteger>> decodeSubs(List<AB<Integer, BigInteger>> encodedSubs) {
-        return F.map(encodedSubs, p -> AB.mk(id2sub.get(p._1()), p._2()));
+        return F.map(encodedSubs, p -> AB.mk(subsList.get(p._1()), p._2()));
     }
 
     private List<AB<Sub,BigInteger>> denormalizeSubs(List<AB<Sub, BigInteger>> subs, AB<Type,Sub> nfData) {
@@ -94,50 +92,10 @@ public class LSolver {
         return F.map(subs, p -> {
             Sub sub_nf = p._1();
             BigInteger num = p._2();
-            Sub sub = Sub.dot(nf2t, Sub.dot(sub_nf,t2nf));
+            Sub s1 = Sub.dot(sub_nf,t2nf);
+            Sub sub = Sub.dot(nf2t, s1);
             return AB.mk(sub,num);
         });
-    }
-
-    // -- toString and Serialization to json ----------------------------------------------------------------
-
-    private JSONObject toJson() {
-        return F.obj(
-            "gamma", gammaToJson(gamma),
-            "types", typesToJson(typeDataMap),
-            "subs",  subsToJson()
-        );
-    }
-
-    @Override
-    public String toString() {
-        return F.prettyJson(toJson(),F.obj(
-            "types", 2,
-            "gamma", 1
-        ));
-    }
-
-
-
-    private static JSONArray gammaToJson(List<AB<String,Type>> gamma) {
-        return F.jsonMap(gamma, p -> F.arr(p._1(),p._2().toJson()));
-    }
-
-    private static JSONObject typesToJson(Map<String,TypeData> typeDataMap) {
-        return F.jsonMap(typeDataMap, LSolver::typeDataToJson);
-    }
-
-    private static JSONObject typeDataToJson(TypeData td) {
-        return F.jsonMap(td.getSizeDataMap(), x -> sizeTypeDataToJson(x.getSubsData()) );
-    }
-
-    private static JSONArray sizeTypeDataToJson(List<AB<Integer, BigInteger>> subs) {
-        return F.jsonMap(subs, p -> F.arr(p._1(),p._2().toString()));
-    }
-
-
-    private static JSONArray subsToJson() {
-        return F.arr();
     }
 
 
@@ -175,13 +133,15 @@ public class LSolver {
         Type alpha = newVar(t);
         Type t_F = Types.mkFunType(alpha, t);
 
-        for (AB<Sub,BigInteger> p_F : subs_k_fun.apply(i, t_F)) {
+        List<AB<Sub,BigInteger>> p_Fs = subs_k_fun.apply(i, t_F);
+        for (AB<Sub,BigInteger> p_F : p_Fs) {
             Sub        s_F = p_F._1();
             BigInteger n_F = p_F._2();
 
             Type t_X = s_F.apply(alpha);
 
-            for (AB<Sub,BigInteger> p_X : subs_k_fun.apply(j, t_X)) {
+            List<AB<Sub,BigInteger>> p_Xs = subs_k_fun.apply(j, t_X);
+            for (AB<Sub,BigInteger> p_X : p_Xs) {
                 Sub        s_X = p_X._1();
                 BigInteger n_X = p_X._2();
 
@@ -299,26 +259,89 @@ public class LSolver {
     }
 
 
+    // -- toString and Serialization to json ----------------------------------------------------------------
+
+    private JSONObject toJson() {
+        return F.obj(
+                "gamma", gammaToJson(gamma),
+                "types", typesToJson(typeDataMap),
+                "subs",  subsToJson(subsList)
+        );
+    }
+
+    @Override
+    public String toString() {
+        return F.prettyJson(toJson(),F.obj(
+                "types", 2,
+                "gamma", 1,
+                "subs",  1
+        ));
+    }
+
+    private static JSONArray gammaToJson(List<AB<String,Type>> gamma) {
+        return F.jsonMap(gamma, p -> F.arr(p._1(),p._2().toString()));
+    }
+
+    private static JSONObject typesToJson(Map<String,TypeData> typeDataMap) {
+        return F.jsonMap(typeDataMap, LSolver::typeDataToJson);
+    }
+
+    private static JSONObject typeDataToJson(TypeData td) {
+        return F.jsonMap(td.getSizeDataMap(), x -> sizeTypeDataToJson(x.getSubsData()) );
+    }
+
+    private static JSONArray sizeTypeDataToJson(List<AB<Integer, BigInteger>> subs) {
+        return F.jsonMap(subs, p -> F.arr(p._1(),p._2().toString()));
+    }
+
+
+    private static JSONArray subsToJson(List<Sub> subsList) {
+        return F.jsonMap(subsList, Sub::toJson);
+    }
+
+    private static JSONObject subsToJson_debugVersion(List<Sub> subsList) {
+        JSONObject ret = new JSONObject();
+        for (int i = 0; i < subsList.size(); i++) {
+            ret.put(Integer.toString(i), subsList.get(i).toJson());
+        }
+        return ret;
+    }
 
     // -- TESTING -----------------------------------
 
     public static void main(String[] args) {
         Checker ch = new Checker();
 
+
         testNormalizations(ch);
         tests_subs_1(ch);
         tests_subs_k(ch);
 
+        tests_lambdaDags(ch);
+
         ch.results();
     }
 
-    private static List<AB<String,Type>> mkGamma(String... strs) {
-        if (strs.length % 2 != 0) {throw new Error("There must be an even number of gamma strings.");}
-        List<AB<String,Type>> ret = new ArrayList<>(strs.length/2);
-        for (int i = 0; i < strs.length; i+=2) {
-            ret.add(new AB<>(strs[i],Types.parse(strs[i+1])));
-        }
-        return ret;
+    private static void tests_lambdaDags(Checker ch) {
+        Log.it("\n== LAMBDA DAGS ===========================================================\n");
+
+        List<AB<String,Type>> gamma = mkGamma(
+            "s",     "(a -> (b -> c)) -> ((a -> b) -> (a -> c))",
+            "k",     "a -> (b -> a)",
+            "seri",  "(Dag a b) -> ((Dag b c) -> (Dag a c))",
+            "para",  "(Dag a b) -> ((Dag c d) -> (Dag (P a c) (P b d))",
+            "mkDag", "(a -> b) -> (Dag a b)",
+            "deDag", "(Dag a b) -> (a -> b)",
+            "mkP",   "a -> (b -> (P a b))",
+            "fst",   "(P a b) -> a",
+            "snd",   "(P a b) -> b"
+        );
+
+        Type t = Types.parse("(P a (P b c)) -> (P c (P b a))");
+
+        test_ts_k(ch, 7, t, gamma);
+
+
     }
 
     private static void tests_subs_k(Checker ch) {
@@ -351,6 +374,7 @@ public class LSolver {
         test_ts_k(ch, 1, "Int -> Int", gamma1);
         test_ts_k(ch, 1, "x1 -> x0",   gamma1);
     }
+
     private static void test_ts_k(Checker ch, int k, String tStr, List<AB<String,Type>> gamma) {
         test_ts_k(ch, k, Types.parse(tStr), gamma);
     }
@@ -368,9 +392,10 @@ public class LSolver {
         Log.it("-- GOAL TYPE t -----");
         Log.it("t: "+t);
         Log.it("t_nf: "+t_nf);
-        Log.it("t2nf: "+t2nf+"\n");
+        Log.it("t2nf: "+t2nf);
 
         ch.it(t2nf.apply(t), t_nf.toString());
+        Log.it();
 
         List<AB<String, Sub>> ts = ts_k(gamma, k, t_nf);
         Log.it("-- ts_"+k+"(gamma, t_nf) ------------");
@@ -397,6 +422,14 @@ public class LSolver {
         Log.it("-------------------------------------------------------");
     }
 
+    private static List<AB<String,Type>> mkGamma(String... strs) {
+        if (strs.length % 2 != 0) {throw new Error("There must be an even number of gamma strings.");}
+        List<AB<String,Type>> ret = new ArrayList<>(strs.length/2);
+        for (int i = 0; i < strs.length; i+=2) {
+            ret.add(new AB<>(strs[i],Types.parse(strs[i+1])));
+        }
+        return ret;
+    }
 
     private static void testNormalizations(Checker ch) {
 
