@@ -31,6 +31,21 @@ public class LSolver {
     }
 
 
+    // -- generate all -------------------------------------
+
+    private List<AB<String,Sub>> ts_k(int k, Type t) {
+        throw new TODO();
+    }
+
+    private static List<AB<String,Sub>> ts_ij(int i, int j, Type t) {
+
+
+
+
+        throw new TODO();
+    }
+
+
 
     // -- CORE ---------------------------------------------
 
@@ -110,6 +125,14 @@ public class LSolver {
         return (i,j,t) -> subs_ij(i,j,t,subs_k(gamma));
     }
 
+    private static BiFunction<Integer,Type,List<AB<String,Sub>>> ts_k(List<AB<String,Type>> gamma) {
+        return (k,t) -> ts_k(k,t,ts_1(gamma), ts_ij(gamma));
+    }
+
+    private static TriFun<Integer,Integer,Type,List<AB<String,Sub>>> ts_ij(List<AB<String,Type>> gamma) {
+        return (i,j,t) -> ts_ij(i, j, t, ts_k(gamma));
+    }
+
     private static List<AB<Sub,BigInteger>> subs_k(int k, Type t,
             Function<Type,List<AB<Sub,BigInteger>>> subs_1_fun,
             TriFun<Integer, Integer, Type, List<AB<Sub,BigInteger>>> subs_ij_fun) {
@@ -123,6 +146,22 @@ public class LSolver {
                 subs.addAll(subs_ij_fun.apply(i, k - i, t));
             }
             return packSubs(subs);
+        }
+    }
+
+    private static List<AB<String,Sub>> ts_k(int k, Type t,
+            Function<Type,List<AB<String,Sub>>> ts_1_fun,
+            TriFun<Integer,Integer,Type,List<AB<String,Sub>>> ts_ij_fun) {
+        if (k < 1) {
+            throw new Error("k must be > 0, it is "+k);
+        } else if (k == 1) {
+            return ts_1_fun.apply(t);
+        } else {
+            List<AB<String,Sub>> ts = new ArrayList<>();
+            for (int i = 1; i < k; i++) {
+                ts.addAll(ts_ij_fun.apply(i, k-i, t));
+            }
+            return ts;
         }
     }
 
@@ -154,6 +193,33 @@ public class LSolver {
         return packSubs(subs);
     }
 
+    private static List<AB<String,Sub>> ts_ij(int i, int j, Type t,
+            BiFunction<Integer,Type,List<AB<String,Sub>>> ts_k_fun) {
+
+        List<AB<String,Sub>> ts = new ArrayList<>();
+
+        Type alpha = newVar(t);
+        Type t_F = Types.mkFunType(alpha, t);
+
+        for (AB<String,Sub> p_F : ts_k_fun.apply(i, t_F)) {
+            String F = p_F._1();
+            Sub  s_F = p_F._2();
+
+            Type t_X = s_F.apply(alpha);
+
+            for (AB<String,Sub> p_X : ts_k_fun.apply(j, t_X)) {
+                String X = p_X._1();
+                Sub  s_X = p_X._2();
+
+                String FX = "("+F+" "+X+")";
+                Sub  s_FX = Sub.dot(s_X, s_F).restrict(t);
+
+                ts.add(AB.mk(FX, s_FX));
+            }
+        }
+        return ts;
+    }
+
 
     private static Function<Type,List<AB<Sub,BigInteger>>> subs_1(List<AB<String,Type>> gamma) {
         return t -> packSubs(F.map(ts_1(gamma, t), p -> AB.mk(p._2(), BigInteger.ONE)));
@@ -180,7 +246,7 @@ public class LSolver {
     }
 
 
-    private static List<AB<String,Sub>> ts_k(List<AB<String,Type>> gamma, int k, Type t) {
+    /*private static List<AB<String,Sub>> ts_k(List<AB<String,Type>> gamma, int k, Type t) {
         if (k < 1) {
             throw new Error("k must be > 0, it is "+k);
         } else if (k == 1) {
@@ -193,30 +259,27 @@ public class LSolver {
             return ts;
         }
     }
-
     private static List<AB<String,Sub>> ts_ij(List<AB<String,Type>> gamma, int i, int j, Type t) {
         List<AB<String,Sub>> ts = new ArrayList<>();
-
         Type alpha = newVar(t);
         Type t_F = Types.mkFunType(alpha, t);
-
         for (AB<String,Sub> p_F : ts_k(gamma, i, t_F)) {
             String F = p_F._1();
             Sub  s_F = p_F._2();
-
             Type t_X = s_F.apply(alpha);
-
             for (AB<String,Sub> p_X : ts_k(gamma, j, t_X)) {
                 String X = p_X._1();
                 Sub  s_X = p_X._2();
-
                 String FX = "("+F+" "+X+")";
                 Sub  s_FX = Sub.dot(s_X, s_F).restrict(t);
-
                 ts.add(AB.mk(FX, s_FX));
             }
         }
         return ts;
+    }*/
+
+    private static Function<Type,List<AB<String,Sub>>> ts_1(List<AB<String,Type>> gamma) {
+        return t -> ts_1(gamma, t);
     }
 
     private static List<AB<String,Sub>> ts_1(List<AB<String,Type>> gamma, Type t) {
@@ -397,7 +460,7 @@ public class LSolver {
         ch.it(t2nf.apply(t), t_nf.toString());
         Log.it();
 
-        List<AB<String, Sub>> ts = ts_k(gamma, k, t_nf);
+        List<AB<String, Sub>> ts = ts_k(gamma).apply(k, t_nf);
         Log.it("-- ts_"+k+"(gamma, t_nf) ------------");
         Log.listLn(ts);
 
