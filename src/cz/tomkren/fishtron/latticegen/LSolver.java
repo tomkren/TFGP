@@ -167,6 +167,7 @@ public class LSolver {
 
     private static List<AB<Sub,BigInteger>> subs_ij(int i, int j, Type t,
             BiFunction<Integer,Type,List<AB<Sub,BigInteger>>> subs_k_fun) {
+
         List<AB<Sub,BigInteger>> subs = new ArrayList<>();
 
         Type alpha = newVar(t);
