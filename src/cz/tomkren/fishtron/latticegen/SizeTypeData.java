@@ -9,7 +9,7 @@ import java.util.List;
 
 class SizeTypeData {
 
-    private List<AB<Integer,BigInteger>> subsData;
+    private List<AB<BigInteger,Integer>> subsData;
 
     SizeTypeData() {
         subsData = null;
@@ -19,11 +19,11 @@ class SizeTypeData {
         return subsData != null;
     }
 
-    void setSubsData(List<AB<Integer, BigInteger>> subsData) {
+    void setSubsData(List<AB<BigInteger,Integer>> subsData) {
         this.subsData = subsData;
     }
 
-    List<AB<Integer, BigInteger>> getSubsData() {
+    List<AB<BigInteger,Integer>> getSubsData() {
         return subsData;
     }
 }

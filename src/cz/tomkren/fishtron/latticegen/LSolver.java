@@ -49,23 +49,23 @@ public class LSolver {
 
     // -- CORE ---------------------------------------------
 
-    private List<AB<Sub,BigInteger>> subs_k(int k, Type t) {
+    private List<AB<BigInteger,Sub>> subs_k(int k, Type t) {
         AB<Type,Sub> nf = normalize(t);
         SizeTypeData sizeTypeData = getSizeTypeData(k, nf);
 
         if (!sizeTypeData.isComputed()) {
-            List<AB<Sub,BigInteger>> subs = subs_k(k, nf._1(), subs_1(gamma), this::subs_ij);
+            List<AB<BigInteger,Sub>> subs = core_k(k, nf._1(), subs_1(gamma), this::subs_ij, LSolver::packSubs);
             sizeTypeData.setSubsData(encodeSubs(subs));
         }
 
-        List<AB<Integer, BigInteger>> subsData = sizeTypeData.getSubsData();
-        List<AB<Sub, BigInteger>> decodedSubs  = decodeSubs(subsData);
+        List<AB<BigInteger,Integer>> subsData = sizeTypeData.getSubsData();
+        List<AB<BigInteger,Sub>> decodedSubs  = decodeSubs(subsData);
         return denormalizeSubs(decodedSubs, nf);
     }
 
-    private List<AB<Sub,BigInteger>> subs_ij(int i, int j, Type t) {
+    private List<AB<BigInteger,Sub>> subs_ij(int i, int j, Type t) {
         AB<Type,Sub> nfData = normalize(t);
-        List<AB<Sub,BigInteger>> subs = subs_ij(i, j, nfData._1(), this::subs_k);
+        List<AB<BigInteger,Sub>> subs = subs_ij(i, j, nfData._1(), this::subs_k);
         return denormalizeSubs(subs, nfData);
     }
 
@@ -78,8 +78,8 @@ public class LSolver {
         return typeData.getSizeTypeData(k);
     }
 
-    private AB<Integer,BigInteger> encodeSub(AB<Sub, BigInteger> subData) {
-        Sub sub = subData._1();
+    private AB<BigInteger,Integer> encodeSub(AB<BigInteger,Sub> subData) {
+        Sub sub = subData._2();
         String sub_str = sub.toString();
         Integer sub_id = sub2id.get(sub_str);
 
@@ -89,27 +89,27 @@ public class LSolver {
             sub2id.put(sub_str, sub_id);
         }
 
-        BigInteger num = subData._2();
-        return AB.mk(sub_id,num);
+        BigInteger num = subData._1();
+        return AB.mk(num,sub_id);
     }
 
-    private List<AB<Integer,BigInteger>> encodeSubs(List<AB<Sub, BigInteger>> subs) {
+    private List<AB<BigInteger,Integer>> encodeSubs(List<AB<BigInteger,Sub>> subs) {
         return F.map(subs, this::encodeSub);
     }
 
-    private List<AB<Sub,BigInteger>> decodeSubs(List<AB<Integer, BigInteger>> encodedSubs) {
-        return F.map(encodedSubs, p -> AB.mk(subsList.get(p._1()), p._2()));
+    private List<AB<BigInteger,Sub>> decodeSubs(List<AB<BigInteger,Integer>> encodedSubs) {
+        return F.map(encodedSubs, p -> AB.mk( p._1(), subsList.get(p._2()) ));
     }
 
-    private List<AB<Sub,BigInteger>> denormalizeSubs(List<AB<Sub, BigInteger>> subs, AB<Type,Sub> nfData) {
+    private List<AB<BigInteger,Sub>> denormalizeSubs(List<AB<BigInteger,Sub>> subs, AB<Type,Sub> nfData) {
         Sub  t2nf = nfData._2();
         Sub  nf2t = t2nf.inverse();
         return F.map(subs, p -> {
-            Sub sub_nf = p._1();
-            BigInteger num = p._2();
+            BigInteger num = p._1();
+            Sub sub_nf = p._2();
             Sub s1 = Sub.dot(sub_nf,t2nf);
             Sub sub = Sub.dot(nf2t, s1);
-            return AB.mk(sub,num);
+            return AB.mk(num,sub);
         });
     }
 
@@ -117,31 +117,33 @@ public class LSolver {
 
     // -- STATIC FUNS : core of the method -----------------------------------------------------
 
-    private static BiFunction<Integer,Type,List<AB<Sub,BigInteger>>> subs_k(List<AB<String,Type>> gamma) {
-        return (k,t) -> subs_k(k,t,subs_1(gamma), subs_ij(gamma));
-    }
-
-    private static TriFun<Integer,Integer,Type,List<AB<Sub,BigInteger>>> subs_ij(List<AB<String,Type>> gamma) {
-        return (i,j,t) -> subs_ij(i,j,t,subs_k(gamma));
+    private static BiFunction<Integer,Type,List<AB<BigInteger,Sub>>> subs_k(List<AB<String,Type>> gamma) {
+        //return (k,t) -> subs_k(k,t,subs_1(gamma), subs_ij(gamma));
+        return (k,t) -> core_k(k,t,subs_1(gamma), subs_ij(gamma), LSolver::packSubs);
     }
 
     private static BiFunction<Integer,Type,List<AB<String,Sub>>> ts_k(List<AB<String,Type>> gamma) {
-        return (k,t) -> ts_k(k,t,ts_1(gamma), ts_ij(gamma));
+        //return (k,t) -> ts_k(k,t,ts_1(gamma), ts_ij(gamma));
+        return (k,t) -> core_k(k,t,ts_1(gamma), ts_ij(gamma), xs->xs);
+    }
+
+    private static TriFun<Integer,Integer,Type,List<AB<BigInteger,Sub>>> subs_ij(List<AB<String,Type>> gamma) {
+        return (i,j,t) -> subs_ij(i,j,t,subs_k(gamma));
     }
 
     private static TriFun<Integer,Integer,Type,List<AB<String,Sub>>> ts_ij(List<AB<String,Type>> gamma) {
         return (i,j,t) -> ts_ij(i, j, t, ts_k(gamma));
     }
 
-    private static List<AB<Sub,BigInteger>> subs_k(int k, Type t,
-            Function<Type,List<AB<Sub,BigInteger>>> subs_1_fun,
-            TriFun<Integer, Integer, Type, List<AB<Sub,BigInteger>>> subs_ij_fun) {
+    /*private static List<AB<BigInteger,Sub>> subs_k(int k, Type t,
+            Function<Type,List<AB<BigInteger,Sub>>> subs_1_fun,
+            TriFun<Integer, Integer, Type, List<AB<BigInteger,Sub>>> subs_ij_fun) {
         if (k < 1) {
             throw new Error("k must be > 0, it is "+k);
         } else if (k == 1) {
             return subs_1_fun.apply(t);
         } else {
-            List<AB<Sub,BigInteger>> subs = new ArrayList<>();
+            List<AB<BigInteger,Sub>> subs = new ArrayList<>();
             for (int i = 1; i < k; i++) {
                 subs.addAll(subs_ij_fun.apply(i, k - i, t));
             }
@@ -163,32 +165,49 @@ public class LSolver {
             }
             return ts;
         }
+    }*/
+
+    private static <A> List<AB<A,Sub>> core_k(int k, Type t,
+            Function<Type,List<AB<A,Sub>>> fun_1,
+            TriFun<Integer, Integer, Type, List<AB<A,Sub>>> fun_ij,
+            Function<List<AB<A,Sub>>,List<AB<A,Sub>>> pack_fun) {
+        if (k < 1) {
+            throw new Error("k must be > 0, it is "+k);
+        } else if (k == 1) {
+            return fun_1.apply(t);
+        } else {
+            List<AB<A,Sub>> ret = new ArrayList<>();
+            for (int i = 1; i < k; i++) {
+                ret.addAll(fun_ij.apply(i, k - i, t));
+            }
+            return pack_fun.apply(ret);
+        }
     }
 
-    private static List<AB<Sub,BigInteger>> subs_ij(int i, int j, Type t,
-            BiFunction<Integer,Type,List<AB<Sub,BigInteger>>> subs_k_fun) {
+    private static List<AB<BigInteger,Sub>> subs_ij(int i, int j, Type t,
+            BiFunction<Integer,Type,List<AB<BigInteger,Sub>>> subs_k_fun) {
 
-        List<AB<Sub,BigInteger>> subs = new ArrayList<>();
+        List<AB<BigInteger,Sub>> subs = new ArrayList<>();
 
         Type alpha = newVar(t);
         Type t_F = Types.mkFunType(alpha, t);
 
-        List<AB<Sub,BigInteger>> p_Fs = subs_k_fun.apply(i, t_F);
-        for (AB<Sub,BigInteger> p_F : p_Fs) {
-            Sub        s_F = p_F._1();
-            BigInteger n_F = p_F._2();
+        List<AB<BigInteger,Sub>> p_Fs = subs_k_fun.apply(i, t_F);
+        for (AB<BigInteger,Sub> p_F : p_Fs) {
+            BigInteger n_F = p_F._1();
+            Sub        s_F = p_F._2();
 
             Type t_X = s_F.apply(alpha);
 
-            List<AB<Sub,BigInteger>> p_Xs = subs_k_fun.apply(j, t_X);
-            for (AB<Sub,BigInteger> p_X : p_Xs) {
-                Sub        s_X = p_X._1();
-                BigInteger n_X = p_X._2();
+            List<AB<BigInteger,Sub>> p_Xs = subs_k_fun.apply(j, t_X);
+            for (AB<BigInteger,Sub> p_X : p_Xs) {
+                BigInteger n_X = p_X._1();
+                Sub        s_X = p_X._2();
 
-                Sub        s_FX = Sub.dot(s_X, s_F).restrict(t);
                 BigInteger n_FX = n_X.multiply(n_F);
+                Sub        s_FX = Sub.dot(s_X, s_F).restrict(t);
 
-                subs.add(AB.mk(s_FX, n_FX));
+                subs.add(AB.mk(n_FX, s_FX));
             }
         }
         return packSubs(subs);
@@ -222,25 +241,25 @@ public class LSolver {
     }
 
 
-    private static Function<Type,List<AB<Sub,BigInteger>>> subs_1(List<AB<String,Type>> gamma) {
-        return t -> packSubs(F.map(ts_1(gamma, t), p -> AB.mk(p._2(), BigInteger.ONE)));
+    private static Function<Type,List<AB<BigInteger,Sub>>> subs_1(List<AB<String,Type>> gamma) {
+        return t -> packSubs(F.map(ts_1(gamma, t), p -> AB.mk(BigInteger.ONE,p._2()) ));
     }
 
-    private static List<AB<Sub,BigInteger>> packSubs(List<AB<Sub,BigInteger>> subs) {
-        Map<String,AB<Sub,BigInteger>> subsMap = new TreeMap<>();
+    private static List<AB<BigInteger,Sub>> packSubs(List<AB<BigInteger,Sub>> subs) {
+        Map<String,AB<BigInteger,Sub>> subsMap = new TreeMap<>();
 
-        for (AB<Sub, BigInteger> p : subs) {
-            Sub sub = p._1();
-            BigInteger num = p._2();
+        for (AB<BigInteger,Sub> p : subs) {
+            BigInteger num = p._1();
+            Sub sub = p._2();
 
             String key = sub.toString();
-            AB<Sub,BigInteger> val = subsMap.get(key);
+            AB<BigInteger,Sub> val = subsMap.get(key);
 
             if (val == null) {
                 subsMap.put(key, p);
             } else {
-                BigInteger oldNum = val._2();
-                val.set_2(oldNum.add(num));
+                BigInteger oldNum = val._1();
+                val.set_1(oldNum.add(num));
             }
         }
         return new ArrayList<>(subsMap.values());
@@ -354,8 +373,8 @@ public class LSolver {
         return F.jsonMap(td.getSizeDataMap(), x -> sizeTypeDataToJson(x.getSubsData()) );
     }
 
-    private static JSONArray sizeTypeDataToJson(List<AB<Integer, BigInteger>> subs) {
-        return F.jsonMap(subs, p -> F.arr(p._1(),p._2().toString()));
+    private static JSONArray sizeTypeDataToJson(List<AB<BigInteger,Integer>> subs) {
+        return F.jsonMap(subs, p -> F.arr(p._1().toString(),p._2()));
     }
 
 
@@ -465,7 +484,7 @@ public class LSolver {
         Log.it("-- ts_"+k+"(gamma, t_nf) ------------");
         Log.listLn(ts);
 
-        List<AB<Sub, BigInteger>> subs = subs_k(gamma).apply(k, t_nf);
+        List<AB<BigInteger,Sub>> subs = subs_k(gamma).apply(k, t_nf);
         Log.it("-- subs_"+k+"(gamma, t_nf) ----------");
         Log.listLn(subs);
 
@@ -473,7 +492,7 @@ public class LSolver {
         LSolver solver = new LSolver(gamma);
         Log.it(solver);
 
-        List<AB<Sub, BigInteger>> subs2 = solver.subs_k(k, t_nf);
+        List<AB<BigInteger,Sub>> subs2 = solver.subs_k(k, t_nf);
         Log.it("-- LSolver.subs_"+k+"(gamma, t_nf) ----------");
         Log.listLn(subs);
 
