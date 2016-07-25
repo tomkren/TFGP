@@ -26,4 +26,13 @@ class SizeTypeData {
     List<AB<BigInteger,Integer>> getSubsData() {
         return subsData;
     }
+
+    BigInteger computeNum() {
+        BigInteger sum = BigInteger.ZERO;
+        for (AB<BigInteger,Integer> sd : subsData) {
+            sum = sum.add(sd._1());
+        }
+        return sum;
+    }
+
 }

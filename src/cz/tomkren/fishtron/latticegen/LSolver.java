@@ -15,25 +15,28 @@ import java.util.function.*;
 public class LSolver {
 
     private List<AB<String,Type>> gamma;
-
+    private Random rand;
     private Map<String,TypeData> typeDataMap;
-
     private List<Sub> subsList;
     private Map<String,Integer> sub2id;
 
-
-    private LSolver(List<AB<String, Type>> gamma) {
+    private LSolver(List<AB<String, Type>> gamma, Random rand) {
         this.gamma = gamma;
+        this.rand = rand;
         typeDataMap = new HashMap<>();
-
         subsList = new ArrayList<>();
         sub2id = new HashMap<>();
     }
 
 
+
     // -- generate all -------------------------------------
 
-    // TODO dá se pří týhle operaci nějak využít že máme předpočítaný substituce?
+    // TODO | Tato metoda by mohla být statická, nijak nevyužívá předpočítanou strukturu.
+    // TODO | Q: Dá se pří téhle operaci nějak využít že máme předpočítaný substituce?
+    // TODO | A: Substituce můžem použít, abychom nezkoušeli zbytečný uličky;
+    // TODO |    a navíc si můžem v podobnym duchu předpočítat i termy.
+    // TODO |    Zatimbych to ale přeskočil a radši udělal generateOne.
     private List<AB<String,Sub>> ts_k(int k, Type t) {
         AB<Type,Sub> nf = normalize(t);
         List<AB<String,Sub>> ts = core_k(k,nf._1(), ts_1(gamma), this::ts_ij, xs->xs);
@@ -47,6 +50,56 @@ public class LSolver {
     }
 
 
+    // -- generate one -------------------------------------
+
+    private AB<String,Sub> gen_k(int k, Type type) {
+        AB<Type,Sub> nf = normalize(type);
+        Type t = nf._1();
+
+        SizeTypeData sizeTypeData = getSizeTypeData(k, nf);
+
+        BigInteger num  = sizeTypeData.computeNum();
+        BigInteger ball = F.nextBigInteger(num, rand);
+        if (ball == null) {throw new Error("Ball null check failed, should be unreachable.");}
+
+        for (int i = 1; i < k; i++) {
+            int j = k-i;
+
+            Type alpha = newVar(t);
+            Type t_F = Types.mkFunType(alpha, t);
+
+            for (AB<BigInteger,Sub> p_F : subs_k(i, t_F)) {
+                BigInteger n_F = p_F._1();
+                Sub        s_F = p_F._2();
+
+                Type t_X = s_F.apply(alpha);
+
+                for (AB<BigInteger,Sub> p_X : subs_k(j, t_X)) {
+                    BigInteger n_X = p_X._1();
+                    Sub        s_X = p_X._2();
+
+                    BigInteger n_FX = n_F.multiply(n_X);
+
+                    if (ball.compareTo(n_FX) < 0) {
+
+                        AB<String,Sub> F_res = gen_k(i, t_F);
+                        AB<String,Sub> X_res = gen_k(j, t_X);
+
+                        String FX = mkAppString(F_res._1(),X_res._1());
+                        Sub  s_FX = Sub.dot(s_X, s_F).restrict(t);
+
+                        AB<String,Sub> FX_res = AB.mk(FX, s_FX);
+                        return denormalize(FX_res, nf);
+                    }
+
+                    ball = ball.subtract(n_FX);
+                }
+            }
+        }
+
+        throw new Error("Ball not exhausted, should be unreachable.");
+    }
+
 
     // -- CORE ---------------------------------------------
 
@@ -54,14 +107,27 @@ public class LSolver {
         AB<Type,Sub> nf = normalize(t);
         SizeTypeData sizeTypeData = getSizeTypeData(k, nf);
 
-        if (!sizeTypeData.isComputed()) {
+        /*if (!sizeTypeData.isComputed()) {
             List<AB<BigInteger,Sub>> subs = core_k(k, nf._1(), subs_1(gamma), this::subs_ij, LSolver::packSubs);
             sizeTypeData.setSubsData(encodeSubs(subs));
-        }
+        }*/
 
         List<AB<BigInteger,Integer>> subsData = sizeTypeData.getSubsData();
         List<AB<BigInteger,Sub>> decodedSubs  = decodeSubs(subsData);
         return denormalize(decodedSubs, nf);
+    }
+
+    private SizeTypeData getSizeTypeData(int k, AB<Type,Sub> nfData) {
+        Type t = nfData._1();
+        TypeData typeData = typeDataMap.computeIfAbsent(t.toString(), key->new TypeData());
+        SizeTypeData sizeTypeData = typeData.getSizeTypeData(k);
+
+        if (!sizeTypeData.isComputed()) {
+            List<AB<BigInteger,Sub>> subs = core_k(k, t, subs_1(gamma), this::subs_ij, LSolver::packSubs);
+            sizeTypeData.setSubsData(encodeSubs(subs));
+        }
+
+        return sizeTypeData;
     }
 
     private List<AB<BigInteger,Sub>> subs_ij(int i, int j, Type t) {
@@ -72,12 +138,6 @@ public class LSolver {
 
 
     // -- Utils for CORE ---------------------------------------------
-
-    private SizeTypeData getSizeTypeData(int k, AB<Type,Sub> nfData) {
-        String nf_str = nfData._1().toString();
-        TypeData typeData = typeDataMap.computeIfAbsent(nf_str, key->new TypeData());
-        return typeData.getSizeTypeData(k);
-    }
 
     private AB<BigInteger,Integer> encodeSub(AB<BigInteger,Sub> subData) {
         Sub sub = subData._2();
@@ -102,21 +162,34 @@ public class LSolver {
         return F.map(encodedSubs, p -> AB.mk( p._1(), subsList.get(p._2()) ));
     }
 
+    private static <A> AB<A,Sub> denormalize(AB<A,Sub> x, AB<Type,Sub> nfData) {
+        Function<AB<A,Sub>,AB<A,Sub>> f = mkDenormalizator(nfData);
+        return f.apply(x);
+    }
+
     private static <A> List<AB<A,Sub>> denormalize(List<AB<A,Sub>> xs, AB<Type,Sub> nfData) {
+        Function<AB<A,Sub>,AB<A,Sub>> f = mkDenormalizator(nfData);
+        return F.map(xs, f);
+    }
+
+    private static <A> Function<AB<A,Sub>,AB<A,Sub>> mkDenormalizator(AB<Type,Sub> nfData) {
         Sub  t2nf = nfData._2();
         Sub  nf2t = t2nf.inverse();
-        return F.map(xs, p -> {
+        return p -> {
             A a = p._1();
             Sub sub_nf = p._2();
             Sub s1 = Sub.dot(sub_nf,t2nf);
             Sub sub = Sub.dot(nf2t, s1);
             return AB.mk(a,sub);
-        });
+        };
     }
 
 
 
-    // -- STATIC FUNS : core of the method -----------------------------------------------------
+
+
+
+        // -- STATIC FUNS : core of the method -----------------------------------------------------
 
     private static BiFunction<Integer,Type,List<AB<BigInteger,Sub>>> subs_k(List<AB<String,Type>> gamma) {
         return (k,t) -> core_k(k,t, subs_1(gamma), subs_ij(gamma), LSolver::packSubs);
@@ -404,7 +477,7 @@ public class LSolver {
         Log.listLn(subs);
 
         Log.it("Creating LSolver ... initial state:");
-        LSolver solver = new LSolver(gamma);
+        LSolver solver = new LSolver(gamma, ch.getRandom());
         Log.it(solver);
 
         List<AB<BigInteger,Sub>> subs2 = solver.subs_k(k, t_nf);
