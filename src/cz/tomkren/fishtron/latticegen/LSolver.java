@@ -33,18 +33,17 @@ public class LSolver {
 
     // -- generate all -------------------------------------
 
+    // TODO dá se pří týhle operaci nějak využít že máme předpočítaný substituce?
     private List<AB<String,Sub>> ts_k(int k, Type t) {
-
-
-        throw new TODO();
+        AB<Type,Sub> nf = normalize(t);
+        List<AB<String,Sub>> ts = core_k(k,nf._1(), ts_1(gamma), this::ts_ij, xs->xs);
+        return denormalize(ts, nf);
     }
 
-    private static List<AB<String,Sub>> ts_ij(int i, int j, Type t) {
-        AB<Type,Sub> nfData = normalize(t);
-
-
-
-        throw new TODO();
+    private List<AB<String,Sub>> ts_ij(int i, int j, Type t) {
+        AB<Type,Sub> nf = normalize(t);
+        List<AB<String,Sub>> ts = core_ij(i,j,nf._1(), this::ts_k, LSolver::mkAppString, xs->xs);
+        return denormalize(ts, nf);
     }
 
 
@@ -62,13 +61,13 @@ public class LSolver {
 
         List<AB<BigInteger,Integer>> subsData = sizeTypeData.getSubsData();
         List<AB<BigInteger,Sub>> decodedSubs  = decodeSubs(subsData);
-        return denormalizeSubs(decodedSubs, nf);
+        return denormalize(decodedSubs, nf);
     }
 
     private List<AB<BigInteger,Sub>> subs_ij(int i, int j, Type t) {
-        AB<Type,Sub> nfData = normalize(t);
-        List<AB<BigInteger,Sub>> subs = core_ij(i, j, nfData._1(), this::subs_k, BigInteger::multiply, LSolver::packSubs);
-        return denormalizeSubs(subs, nfData);
+        AB<Type,Sub> nf = normalize(t);
+        List<AB<BigInteger,Sub>> subs = core_ij(i, j, nf._1(), this::subs_k, BigInteger::multiply, LSolver::packSubs);
+        return denormalize(subs, nf);
     }
 
 
@@ -103,15 +102,15 @@ public class LSolver {
         return F.map(encodedSubs, p -> AB.mk( p._1(), subsList.get(p._2()) ));
     }
 
-    private List<AB<BigInteger,Sub>> denormalizeSubs(List<AB<BigInteger,Sub>> subs, AB<Type,Sub> nfData) {
+    private static <A> List<AB<A,Sub>> denormalize(List<AB<A,Sub>> xs, AB<Type,Sub> nfData) {
         Sub  t2nf = nfData._2();
         Sub  nf2t = t2nf.inverse();
-        return F.map(subs, p -> {
-            BigInteger num = p._1();
+        return F.map(xs, p -> {
+            A a = p._1();
             Sub sub_nf = p._2();
             Sub s1 = Sub.dot(sub_nf,t2nf);
             Sub sub = Sub.dot(nf2t, s1);
-            return AB.mk(num,sub);
+            return AB.mk(a,sub);
         });
     }
 
@@ -132,9 +131,8 @@ public class LSolver {
     }
 
     private static TriFun<Integer,Integer,Type,List<AB<String,Sub>>> ts_ij(List<AB<String,Type>> gamma) {
-        return (i,j,t) -> core_ij(i,j,t, ts_k(gamma), (F,X)->"("+F+" "+X+")", ts->ts);
+        return (i,j,t) -> core_ij(i,j,t, ts_k(gamma), LSolver::mkAppString, ts->ts);
     }
-
 
     private static <A> List<AB<A,Sub>> core_k(int k, Type t,
             Function<Type,List<AB<A,Sub>>> fun_1,
@@ -211,6 +209,10 @@ public class LSolver {
 
 
     // -- CORE utils ----------------------------------------------------------------
+
+    private static String mkAppString(String F, String X) {
+        return "("+F+" "+X+")";
+    }
 
     private static List<AB<BigInteger,Sub>> packSubs(List<AB<BigInteger,Sub>> subs) {
         Map<String,AB<BigInteger,Sub>> subsMap = new TreeMap<>();
