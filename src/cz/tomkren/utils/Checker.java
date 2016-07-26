@@ -149,6 +149,16 @@ public class Checker {
         return this;
     }
 
+    public Checker is(boolean shouldBeTrue, String comment) {
+        checkCore(shouldBeTrue, comment, comment);
+        return this;
+    }
+
+    public Checker fail(String comment) {
+        checkCore(false, null, comment);
+        return this;
+    }
+
     public Checker eq(Object x, Object y) {
         checkCore(x.equals(y), x+" =eqs= "+y , x+" SHOULD equals() "+y );
         return this;
@@ -169,21 +179,19 @@ public class Checker {
         return this;
     }
 
-    private boolean checkCore (boolean shouldBeTrue, String okMsg, String koMsg) {
+    private boolean checkCore(boolean shouldBeTrue, String okMsg, String koMsg) {
         sum++;
         if (shouldBeTrue) {
             Log.it("[OK "+sum+"] "+okMsg);
             ok++;
             return true;
         } else {
-            fail(koMsg);
+            String koStr = "!!! [KO "+sum+"] "+koMsg;
+            Log.it(koStr);
+            //System.err.println(koStr);
+            ko++;
             return false;
         }
-    }
-
-    private void fail(String koMsg) {
-        System.err.println("[KO "+sum+"] "+koMsg);
-        ko++;
     }
 
     public void check( String shouldBe, Object o ) {

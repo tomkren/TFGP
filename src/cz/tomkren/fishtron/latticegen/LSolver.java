@@ -14,6 +14,24 @@ import java.util.function.*;
 
 public class LSolver {
 
+    public static void main_(String[] args) {
+        separateError1();
+    }
+
+    public static void main(String[] args) {
+        Checker ch = new Checker(-2903305181020055939L);
+
+        testNormalizations(ch);
+        tests_subs_1(ch);
+        tests_subs_k(ch);
+
+        tests_lambdaDags(ch);
+
+        ch.results();
+    }
+
+
+
     private List<AB<String,Type>> gamma;
     private Random rand;
     private Map<String,TypeData> typeDataMap;
@@ -29,38 +47,53 @@ public class LSolver {
     }
 
 
+    // -- future public utils -----------------------------
 
-    // -- generate all -------------------------------------
-
-    // TODO | Tato metoda by mohla být statická, nijak nevyužívá předpočítanou strukturu.
-    // TODO | Q: Dá se pří téhle operaci nějak využít že máme předpočítaný substituce?
-    // TODO | A: Substituce můžem použít, abychom nezkoušeli zbytečný uličky;
-    // TODO |    a navíc si můžem v podobnym duchu předpočítat i termy.
-    // TODO |    Zatimbych to ale přeskočil a radši udělal generateOne.
-    private List<AB<String,Sub>> ts_k(int k, Type t) {
+    private BigInteger getNum(int k, Type t) {
         AB<Type,Sub> nf = normalize(t);
-        List<AB<String,Sub>> ts = core_k(k,nf._1(), ts_1(gamma), this::ts_ij, xs->xs);
-        return denormalize(ts, nf);
+        SizeTypeData sizeTypeData = getSizeTypeData(k, nf);
+        return sizeTypeData.computeNum();
     }
-
-    private List<AB<String,Sub>> ts_ij(int i, int j, Type t) {
-        AB<Type,Sub> nf = normalize(t);
-        List<AB<String,Sub>> ts = core_ij(i,j,nf._1(), this::ts_k, LSolver::mkAppString, xs->xs);
-        return denormalize(ts, nf);
-    }
-
 
     // -- generate one -------------------------------------
 
-    private AB<String,Sub> gen_k(int k, Type type) {
+    private AB<String,Sub> generateOne(int k, Type type) {
+        if (k < 1) {throw new Error("k must be > 0, it is "+k);}
+
         AB<Type,Sub> nf = normalize(type);
         Type t = nf._1();
 
         SizeTypeData sizeTypeData = getSizeTypeData(k, nf);
 
-        BigInteger num  = sizeTypeData.computeNum();
+        BigInteger num = sizeTypeData.computeNum();
+
+        if (F.isZero(num)) {return null;}
+
         BigInteger ball = F.nextBigInteger(num, rand);
         if (ball == null) {throw new Error("Ball null check failed, should be unreachable.");}
+
+        if (k == 1) {
+
+            for (AB<String,Type> p : gamma) {
+                String s = p._1();
+                Type t_s = p._2();
+
+                Type t_s_fresh = fresh(t_s, t);
+                Sub mu = Sub.mgu(t, t_s_fresh);
+
+                if (!mu.isFail()) {
+
+                    if (F.isZero(ball)) {
+                        AB<String,Sub> res = AB.mk(s, mu.restrict(t));
+                        return denormalize(res, nf);
+                    }
+
+                    ball = ball.subtract(BigInteger.ONE);
+                }
+            }
+
+            throw new Error("Ball not exhausted (k=1), should be unreachable.");
+        }
 
         for (int i = 1; i < k; i++) {
             int j = k-i;
@@ -82,8 +115,13 @@ public class LSolver {
 
                     if (ball.compareTo(n_FX) < 0) {
 
-                        AB<String,Sub> F_res = gen_k(i, t_F);
-                        AB<String,Sub> X_res = gen_k(j, t_X);
+                        Type t_F_selected = s_F.apply(t_F);
+                        Type t_X_selected = s_X.apply(t_X);
+
+                        AB<String,Sub> F_res = generateOne(i, t_F_selected);
+                        AB<String,Sub> X_res = generateOne(j, t_X_selected);
+
+                        if (F_res == null || X_res == null) {throw new Error("Null subtrees, should be unreachable.");}
 
                         String FX = mkAppString(F_res._1(),X_res._1());
                         Sub  s_FX = Sub.dot(s_X, s_F).restrict(t);
@@ -97,7 +135,7 @@ public class LSolver {
             }
         }
 
-        throw new Error("Ball not exhausted, should be unreachable.");
+        throw new Error("Ball not exhausted (k>1), should be unreachable.");
     }
 
 
@@ -106,12 +144,6 @@ public class LSolver {
     private List<AB<BigInteger,Sub>> subs_k(int k, Type t) {
         AB<Type,Sub> nf = normalize(t);
         SizeTypeData sizeTypeData = getSizeTypeData(k, nf);
-
-        /*if (!sizeTypeData.isComputed()) {
-            List<AB<BigInteger,Sub>> subs = core_k(k, nf._1(), subs_1(gamma), this::subs_ij, LSolver::packSubs);
-            sizeTypeData.setSubsData(encodeSubs(subs));
-        }*/
-
         List<AB<BigInteger,Integer>> subsData = sizeTypeData.getSubsData();
         List<AB<BigInteger,Sub>> decodedSubs  = decodeSubs(subsData);
         return denormalize(decodedSubs, nf);
@@ -136,6 +168,24 @@ public class LSolver {
         return denormalize(subs, nf);
     }
 
+    // -- generate all -------------------------------------
+
+    // TODO | Tato metoda by mohla být statická, nijak nevyužívá předpočítanou strukturu.
+    // TODO | Q: Dá se pří téhle operaci nějak využít že máme předpočítaný substituce?
+    // TODO | A: Substituce můžem použít, abychom nezkoušeli zbytečný uličky;
+    // TODO |    a navíc si můžem v podobnym duchu předpočítat i termy.
+    // TODO |    Zatimbych to ale přeskočil a radši udělal generateOne.
+    private List<AB<String,Sub>> ts_k(int k, Type t) {
+        AB<Type,Sub> nf = normalize(t);
+        List<AB<String,Sub>> ts = core_k(k,nf._1(), ts_1(gamma), this::ts_ij, xs->xs);
+        return denormalize(ts, nf);
+    }
+
+    private List<AB<String,Sub>> ts_ij(int i, int j, Type t) {
+        AB<Type,Sub> nf = normalize(t);
+        List<AB<String,Sub>> ts = core_ij(i,j,nf._1(), this::ts_k, LSolver::mkAppString, xs->xs);
+        return denormalize(ts, nf);
+    }
 
     // -- Utils for CORE ---------------------------------------------
 
@@ -274,7 +324,7 @@ public class LSolver {
             Sub mu = Sub.mgu(t, t_s_fresh);
 
             if (!mu.isFail()) {
-                ret.add(new AB<>(s, mu.restrict(t)));
+                ret.add(AB.mk(s, mu.restrict(t)));
             }
         }
         return ret;
@@ -380,21 +430,8 @@ public class LSolver {
 
     // -- TESTING -----------------------------------
 
-    public static void main(String[] args) {
-        Checker ch = new Checker();
-
-
-        testNormalizations(ch);
-        tests_subs_1(ch);
-        tests_subs_k(ch);
-
-        //tests_lambdaDags(ch); // TODO vyřešit otázky nastolené tímto testem !
-
-        ch.results();
-    }
-
     private static void tests_lambdaDags(Checker ch) {
-        Log.it("\n== LAMBDA DAGS ===========================================================\n");
+        Log.it("\n== LAMBDA DAGS TESTS =======================================================\n");
 
         List<AB<String,Type>> gamma = mkGamma(
             "s",     "(a -> (b -> c)) -> ((a -> b) -> (a -> c))",
@@ -408,11 +445,143 @@ public class LSolver {
             "snd",   "(P a b) -> b"
         );
 
-        Type t = Types.parse("(P a (P b c)) -> (P c (P b a))");
+        Type t_0 = Types.parse("(P a (P b c)) -> (P c (P b a))");
+        Type t_1 = Types.parse("(P A (P B C)) -> (P C (P B A))");
+        Type t_2 = Types.parse("(P A (P A A)) -> (P A (P A A))");
 
-        test_ts_k(ch, 7, t, gamma);
+        //test_ts_k(ch, 7, t_0, gamma); // TODO vyřešit otázky nastolené tímto testem !
 
 
+        int k_max = 5;
+        for (int k = 5; k <= k_max; k++) {
+            testGenerating(ch, k, t_2, gamma);
+        }
+
+    }
+
+    private static void separateError1() {
+
+        List<AB<String,Type>> gamma = mkGamma(
+                "s",     "(a -> (b -> c)) -> ((a -> b) -> (a -> c))",
+                "k",     "a -> (b -> a)",
+                "seri",  "(Dag a b) -> ((Dag b c) -> (Dag a c))",
+                "para",  "(Dag a b) -> ((Dag c d) -> (Dag (P a c) (P b d))",
+                "mkDag", "(a -> b) -> (Dag a b)",
+                "deDag", "(Dag a b) -> (a -> b)",
+                "mkP",   "a -> (b -> (P a b))",
+                "fst",   "(P a b) -> a",
+                "snd",   "(P a b) -> b"
+        );
+
+        Type t = Types.parse("(P A (P A A)) -> (P A (P A A))");
+        int k = 5;
+
+        long seed = 1;
+
+        LSolver s = new LSolver(gamma, new Random(seed));
+
+        AB<String,Sub> p_gen = s.generateOne(k,t);
+
+        List<AB<String,Sub>> allTrees = s.ts_k(k,t);
+
+        Set<String> testMap = new TreeSet<>();
+
+        for (AB<String,Sub> tree : allTrees) {
+            testMap.add(tree.toString());
+        }
+
+        if (testMap.contains(p_gen.toString())) {
+            Log.it("Mám ho!");
+            Log.it("seed: "+seed);
+            Log.it("tree: "+p_gen);
+        } else {
+            Log.it("Zkus to znova..");
+        }
+
+    }
+
+    private static void testGenerating(Checker ch, int k, Type t, List<AB<String,Type>> gamma) {
+        String argStr = "("+k+", "+t+")";
+
+        LSolver s = new LSolver(gamma, ch.getRandom());
+
+        Log.it_noln("s.num"+argStr+" = ");
+        BigInteger num = s.getNum(k,t);
+        Log.it(num);
+
+        Log.it_noln("s.generateOne"+argStr+" = ");
+        AB<String,Sub> p_gen = s.generateOne(k, t);
+        Log.it(p_gen);
+
+        if (F.isZero(num) || p_gen == null) {
+            ch.is(F.isZero(num) && p_gen == null, "num = 0 iff genOne = null");
+        }
+
+        if (!F.isZero(num) && num.compareTo(BigInteger.valueOf(10000)) < 0) {
+
+            int intNum = num.intValueExact();
+
+            Log.it_noln("|s.ts_k"+argStr+"| = ");
+            List<AB<String,Sub>> allTrees = s.ts_k(k,t);
+            Log.it(allTrees.size());
+
+            ch.is(p_gen != null, "genOne not null");
+            ch.is(intNum == allTrees.size(), "num = |genAll|");
+
+            if (intNum < 1000) {
+
+                Map<String,Integer> testMap = new TreeMap<>();
+
+                for (AB<String,Sub> tree : allTrees) {
+                    testMap.put(tree.toString(),0);
+                }
+
+                //Log.list(allTrees);
+
+                //int sampleRate = 100;
+                //int numSamples = sampleRate * intNum;
+
+                int numSamples = 100000;
+                double sampleRate = ((double)numSamples) / intNum;
+
+                boolean allGeneratedWereInGenAll = true;
+                for (int i = 0; i < numSamples; i++){
+                    AB<String,Sub> newTree = s.generateOne(k, t);
+
+                    if (newTree != null) {
+
+                        String key = newTree.toString();
+
+                        if (testMap.containsKey(key)) {
+                            testMap.compute(key, (_key,n) -> n+1);
+                        } else {
+                            allGeneratedWereInGenAll = false;
+                            ch.fail(key +" is not in genAll list.");
+                        }
+
+                    } else {
+                        ch.fail("generated tree is null");
+                    }
+                }
+                ch.is(allGeneratedWereInGenAll,"All generated trees were in GenAll list.");
+
+
+                Log.it("\nSample rate : "+ sampleRate);
+                for (Map.Entry<String,Integer> e : testMap.entrySet()) {
+
+                    String tree = e.getKey();
+                    int numGenerated = e.getValue();
+
+                    Log.it(tree +" "+ numGenerated);
+
+                }
+
+
+            }
+
+        }
+
+        Log.it();
     }
 
     private static void tests_subs_k(Checker ch) {
