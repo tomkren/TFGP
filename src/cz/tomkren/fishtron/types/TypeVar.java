@@ -36,6 +36,11 @@ public class TypeVar implements Type {
     }
 
     @Override
+    public Type skolemize() {
+        return new TypeSym("X"+id);
+    }
+
+    @Override
     public int getNextVarId(int acc) {
         return Math.max(acc,id+1);
     }

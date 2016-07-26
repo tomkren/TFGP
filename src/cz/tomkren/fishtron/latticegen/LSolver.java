@@ -14,18 +14,14 @@ import java.util.function.*;
 
 public class LSolver {
 
-    public static void main_(String[] args) {
-        separateError1();
-    }
-
     public static void main(String[] args) {
-        Checker ch = new Checker(-2903305181020055939L);
+        Checker ch = new Checker();
 
         testNormalizations(ch);
         tests_subs_1(ch);
         tests_subs_k(ch);
 
-        tests_lambdaDags(ch);
+        tests_lambdaDags(ch, 7, 10000);
 
         ch.results();
     }
@@ -115,8 +111,8 @@ public class LSolver {
 
                     if (ball.compareTo(n_FX) < 0) {
 
-                        Type t_F_selected = s_F.apply(t_F);
-                        Type t_X_selected = s_X.apply(t_X);
+                        Type t_F_selected = s_F.apply(t_F).skolemize();
+                        Type t_X_selected = s_X.apply(t_X).skolemize();
 
                         AB<String,Sub> F_res = generateOne(i, t_F_selected);
                         AB<String,Sub> X_res = generateOne(j, t_X_selected);
@@ -137,6 +133,7 @@ public class LSolver {
 
         throw new Error("Ball not exhausted (k>1), should be unreachable.");
     }
+
 
 
     // -- CORE ---------------------------------------------
@@ -430,7 +427,7 @@ public class LSolver {
 
     // -- TESTING -----------------------------------
 
-    private static void tests_lambdaDags(Checker ch) {
+    private static void tests_lambdaDags(Checker ch, int k_max, int numSamples) {
         Log.it("\n== LAMBDA DAGS TESTS =======================================================\n");
 
         List<AB<String,Type>> gamma = mkGamma(
@@ -445,17 +442,31 @@ public class LSolver {
             "snd",   "(P a b) -> b"
         );
 
-        Type t_0 = Types.parse("(P a (P b c)) -> (P c (P b a))");
-        Type t_1 = Types.parse("(P A (P B C)) -> (P C (P B A))");
-        Type t_2 = Types.parse("(P A (P A A)) -> (P A (P A A))");
 
+        //Type t_0 = Types.parse("(P a (P b c)) -> (P c (P b a))");
         //test_ts_k(ch, 7, t_0, gamma); // TODO vyřešit otázky nastolené tímto testem !
 
 
-        int k_max = 5;
-        for (int k = 5; k <= k_max; k++) {
-            testGenerating(ch, k, t_2, gamma);
+
+        Type t = Types.parse("(P A (P A A)) -> (P A (P A A))");
+        for (int k = 1; k <= k_max; k++) {
+            testGenerating(ch, k, t, gamma, numSamples);
         }
+
+        /* TODO pro k = 5 exituje anomální zóna
+        ...
+        <(((s s) (k fst)) k),{}> 1
+        <(((s s) (k k)) k),{}> 0
+        <(((s s) (k mkP)) k),{}> 1
+        <(((s s) (k snd)) k),{}> 0
+        <(((s s) (s k)) k),{}> 1
+        ...
+        */
+
+        // todo pro s.num(7, ((P A (P A A)) -> (P A (P A A)))) = 37596
+        // ...
+        // 700
+        // !!! [KO 46] <((((s deDag) (k k)) (mkDag s)) k),{}> is not in genAll list.
 
     }
 
@@ -500,7 +511,7 @@ public class LSolver {
 
     }
 
-    private static void testGenerating(Checker ch, int k, Type t, List<AB<String,Type>> gamma) {
+    private static void testGenerating(Checker ch, int k, Type t, List<AB<String,Type>> gamma, int numSamples) {
         String argStr = "("+k+", "+t+")";
 
         LSolver s = new LSolver(gamma, ch.getRandom());
@@ -517,7 +528,7 @@ public class LSolver {
             ch.is(F.isZero(num) && p_gen == null, "num = 0 iff genOne = null");
         }
 
-        if (!F.isZero(num) && num.compareTo(BigInteger.valueOf(10000)) < 0) {
+        if (!F.isZero(num) && num.compareTo(BigInteger.valueOf(100000)) < 0) {
 
             int intNum = num.intValueExact();
 
@@ -528,7 +539,7 @@ public class LSolver {
             ch.is(p_gen != null, "genOne not null");
             ch.is(intNum == allTrees.size(), "num = |genAll|");
 
-            if (intNum < 1000) {
+            if (intNum < 40000) {
 
                 Map<String,Integer> testMap = new TreeMap<>();
 
@@ -541,11 +552,15 @@ public class LSolver {
                 //int sampleRate = 100;
                 //int numSamples = sampleRate * intNum;
 
-                int numSamples = 100000;
                 double sampleRate = ((double)numSamples) / intNum;
 
                 boolean allGeneratedWereInGenAll = true;
                 for (int i = 0; i < numSamples; i++){
+
+                    if ((i+1)%100 == 0) {
+                        Log.it(i+1);
+                    }
+
                     AB<String,Sub> newTree = s.generateOne(k, t);
 
                     if (newTree != null) {

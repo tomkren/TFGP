@@ -24,6 +24,11 @@ public class TypeSym implements Type {
     }
 
     @Override
+    public Type skolemize() {
+        return this;
+    }
+
+    @Override
     public int getNextVarId(int acc) {
         return acc;
     }

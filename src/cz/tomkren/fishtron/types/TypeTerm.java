@@ -51,6 +51,11 @@ public class TypeTerm implements Type {
         return new AB<>(new TypeTerm(args2), nextId);
     }
 
+    @Override
+    public Type skolemize() {
+        return new TypeTerm(F.map(args, Type::skolemize));
+    }
+
     public <T> T fold(Function<List<T>, T> fNode, Function<Type,T> fLeaf) {
         return fNode.apply(F.map(t -> t instanceof TypeTerm ? ((TypeTerm)t).fold(fNode,fLeaf) : fLeaf.apply(t) , args));
     }
