@@ -20,8 +20,8 @@ interface SubTypeInfo {
     BigInteger getNum();
     void merge(SubTypeInfo info);
 
-    AppTree generateOne(QSolver qs);
-    List<AppTree> generateAll(QSolver qs);
+    ApplicationTree generateOne(QSolver qs);
+    List<ApplicationTree> generateAll(QSolver qs);
 
 
     class Leaf implements SubTypeInfo {
@@ -37,18 +37,18 @@ interface SubTypeInfo {
         }
 
         @Override
-        public AppTree generateOne(QSolver qs) {
+        public ApplicationTree generateOne(QSolver qs) {
             SmartSymbol sym = F.randomElement(symbols, qs.getRand());
             return mkTree(sym);
         }
 
         @Override
-        public List<AppTree> generateAll(QSolver qs) {
+        public List<ApplicationTree> generateAll(QSolver qs) {
             return F.map(symbols, this::mkTree);
         }
 
-        private AppTree mkTree(SmartSymbol sym) {
-            return AppTree.mk(sym, type);
+        private ApplicationTree mkTree(SmartSymbol sym) {
+            return ApplicationTree.mk(sym, type);
         }
 
         @Override public Type getReturnType() {return type;}
@@ -108,27 +108,27 @@ interface SubTypeInfo {
 
 
         @Override
-        public AppTree generateOne(QSolver qs) {
+        public ApplicationTree generateOne(QSolver qs) {
 
             Type funType = getWholeType();
-            AppTree funTree = qs.generateOne(funType, funTreeSize);
-            AppTree argTree = qs.generateOne(argType, argTreeSize);
+            ApplicationTree funTree = qs.generateOne(funType, funTreeSize);
+            ApplicationTree argTree = qs.generateOne(argType, argTreeSize);
 
-            return AppTree.mk(funTree, argTree, returnType);
+            return ApplicationTree.mk(funTree, argTree, returnType);
         }
 
         @Override
-        public List<AppTree> generateAll(QSolver qs) {
+        public List<ApplicationTree> generateAll(QSolver qs) {
 
             Type funType = getWholeType();
-            List<AppTree> funTrees = qs.generateAll(funType, funTreeSize);
-            List<AppTree> argTrees = qs.generateAll(argType, argTreeSize);
+            List<ApplicationTree> funTrees = qs.generateAll(funType, funTreeSize);
+            List<ApplicationTree> argTrees = qs.generateAll(argType, argTreeSize);
 
-            List<AppTree> ret = new ArrayList<>();
+            List<ApplicationTree> ret = new ArrayList<>();
 
-            for (AppTree funTree : funTrees) {
-                for (AppTree argTree : argTrees) {
-                    AppTree newTree = AppTree.mk(funTree, argTree, returnType);
+            for (ApplicationTree funTree : funTrees) {
+                for (ApplicationTree argTree : argTrees) {
+                    ApplicationTree newTree = ApplicationTree.mk(funTree, argTree, returnType);
                     ret.add(newTree);
                 }
             }

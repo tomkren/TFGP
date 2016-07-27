@@ -7,7 +7,6 @@ import cz.tomkren.fishtron.types.*;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.ABC;
 import cz.tomkren.utils.F;
-import cz.tomkren.utils.Log;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -31,9 +30,9 @@ class TypeGadget {
         return F.getOrMkAndPut(infos, treeSize, ()-> mkQueryInfosAndNum(treeSize,qs));
     }
 
-    List<AppTree> generateAll(int treeSize, QSolver qs) {
+    List<ApplicationTree> generateAll(int treeSize, QSolver qs) {
 
-        List<AppTree> ret = new ArrayList<>();
+        List<ApplicationTree> ret = new ArrayList<>();
 
         for (SubTypeInfo info : getInfos(treeSize, qs)) {
             ret.addAll(info.generateAll(qs));
@@ -43,7 +42,7 @@ class TypeGadget {
 
     }
 
-    AppTree generateOne(int treeSize, QSolver qs) {
+    ApplicationTree generateOne(int treeSize, QSolver qs) {
 
         AB<List<SubTypeInfo>,BigInteger> infoPair = query(treeSize, qs);
 

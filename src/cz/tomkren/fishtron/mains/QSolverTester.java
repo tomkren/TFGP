@@ -2,7 +2,6 @@ package cz.tomkren.fishtron.mains;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
-import cz.tomkren.fishtron.reusegen2.AppTree;
 import cz.tomkren.fishtron.reusegen2.QSolver;
 import cz.tomkren.fishtron.sandbox.*;
 import cz.tomkren.fishtron.terms.SmartLibrary;

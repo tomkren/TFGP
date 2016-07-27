@@ -11,9 +11,9 @@ import java.util.List;
 
 /** Created by tom on 21. 6. 2016.*/
 
-public interface AppTree {
+public interface ApplicationTree {
 
-    class Leaf implements AppTree {
+    class Leaf implements ApplicationTree {
         private SmartSymbol sym;
         private Type type;
 
@@ -28,13 +28,13 @@ public interface AppTree {
         }
     }
 
-    class App implements AppTree {
+    class App implements ApplicationTree {
 
-        private AppTree funTree;
-        private AppTree argTree;
+        private ApplicationTree funTree;
+        private ApplicationTree argTree;
         private Type type;
 
-        private App(AppTree funTree, AppTree argTree, Type type) {
+        private App(ApplicationTree funTree, ApplicationTree argTree, Type type) {
             this.funTree = funTree;
             this.argTree = argTree;
             this.type = type;
@@ -42,14 +42,14 @@ public interface AppTree {
 
         @Override
         public String toString() {
-            AB<Leaf,List<AppTree>> p = getFunLeafWithArgs();
+            AB<Leaf,List<ApplicationTree>> p = getFunLeafWithArgs();
             return "("+p._1()+" "+Joiner.on(' ').join(p._2())+")";
         }
 
 
-        private AB<Leaf,List<AppTree>> getFunLeafWithArgs() {
-            AppTree acc = this;
-            List<AppTree> argTrees = new ArrayList<>();
+        private AB<Leaf,List<ApplicationTree>> getFunLeafWithArgs() {
+            ApplicationTree acc = this;
+            List<ApplicationTree> argTrees = new ArrayList<>();
 
             while (acc instanceof App) {
                 App app = (App) acc;
@@ -62,11 +62,11 @@ public interface AppTree {
         }
     }
 
-    static AppTree mk(SmartSymbol sym, Type type) {
+    static ApplicationTree mk(SmartSymbol sym, Type type) {
         return new Leaf(sym, type);
     }
 
-    static AppTree mk(AppTree funTree, AppTree argTree, Type type) {
+    static ApplicationTree mk(ApplicationTree funTree, ApplicationTree argTree, Type type) {
         return new App(funTree, argTree, type);
     }
 

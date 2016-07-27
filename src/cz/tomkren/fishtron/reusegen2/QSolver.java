@@ -25,11 +25,11 @@ public class QSolver {
         gadgets = new HashMap<>();
     }
 
-    public AppTree generateOne(Type t, int treeSize) {
+    public ApplicationTree generateOne(Type t, int treeSize) {
         return getTypeGadget(t).generateOne(treeSize, this);
     }
 
-    public List<AppTree> generateAll(Type t, int treeSize) {
+    public List<ApplicationTree> generateAll(Type t, int treeSize) {
         return getTypeGadget(t).generateAll(treeSize, this);
     }
 
