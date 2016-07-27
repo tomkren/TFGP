@@ -53,6 +53,90 @@ public class LSolver {
 
     // -- generate one -------------------------------------
 
+    private AppTree genOne(int k, Type type) {
+        if (k < 1) {throw new Error("k must be > 0, it is "+k);}
+
+        AB<Type,Sub> nf = normalize(type);
+        Type t = nf._1();
+
+        SizeTypeData sizeTypeData = getSizeTypeData(k, nf);
+
+        BigInteger num = sizeTypeData.computeNum();
+
+        if (F.isZero(num)) {return null;}
+
+        BigInteger ball = F.nextBigInteger(num, rand);
+        if (ball == null) {throw new Error("Ball null check failed, should be unreachable.");}
+
+        if (k == 1) {
+
+            for (AB<String,Type> p : gamma) {
+                String s = p._1();
+                Type t_s = p._2();
+
+                Type t_s_fresh = fresh(t_s, t);
+                Sub mu = Sub.mgu(t, t_s_fresh);
+
+                if (!mu.isFail()) {
+
+                    if (F.isZero(ball)) {
+                        AppTree s_tree = AppTree.mk(s, mu.apply(t));
+                        s_tree.deskolemizeRootType();
+                        return s_tree;
+                    }
+
+                    ball = ball.subtract(BigInteger.ONE);
+                }
+            }
+
+            throw new Error("Ball not exhausted (k=1), should be unreachable.");
+        }
+
+        for (int i = 1; i < k; i++) {
+            int j = k-i;
+
+            Type alpha = newVar(t);
+            Type t_F = Types.mkFunType(alpha, t);
+
+            for (AB<BigInteger,Sub> p_F : subs_k(i, t_F)) {
+                BigInteger n_F = p_F._1();
+                Sub        s_F = p_F._2();
+
+                Type t_X = s_F.apply(alpha);
+
+                for (AB<BigInteger,Sub> p_X : subs_k(j, t_X)) {
+                    BigInteger n_X = p_X._1();
+                    Sub        s_X = p_X._2();
+
+                    BigInteger n_FX = n_F.multiply(n_X);
+
+                    if (ball.compareTo(n_FX) < 0) {
+
+                        Type t_F_selected = s_F.apply(t_F);
+                        Type t_X_selected = s_X.apply(t_X);
+
+                        AppTree F_tree = genOne(i, t_F_selected.skolemize());
+                        AppTree X_tree = genOne(j, t_X_selected.skolemize());
+
+                        if (F_tree == null || X_tree == null) {throw new Error("Null subtrees, should be unreachable.");}
+
+                        Sub  s_FX = Sub.dot(s_X, s_F).restrict(t);
+
+                        F_tree.specifyType(s_X);
+
+                        AppTree FX_tree = AppTree.mk(F_tree, X_tree, s_FX.apply(t));
+                        FX_tree.deskolemizeRootType();
+                        return FX_tree;
+                    }
+
+                    ball = ball.subtract(n_FX);
+                }
+            }
+        }
+
+        throw new Error("Ball not exhausted (k>1), should be unreachable.");
+    }
+
     private AB<String,Sub> generateOne(int k, Type type) {
         if (k < 1) {throw new Error("k must be > 0, it is "+k);}
 
@@ -111,11 +195,11 @@ public class LSolver {
 
                     if (ball.compareTo(n_FX) < 0) {
 
-                        Type t_F_selected = s_F.apply(t_F).skolemize();
-                        Type t_X_selected = s_X.apply(t_X).skolemize();
+                        Type t_F_selected = s_F.apply(t_F);
+                        Type t_X_selected = s_X.apply(t_X);
 
-                        AB<String,Sub> F_res = generateOne(i, t_F_selected);
-                        AB<String,Sub> X_res = generateOne(j, t_X_selected);
+                        AB<String,Sub> F_res = generateOne(i, t_F_selected.skolemize());
+                        AB<String,Sub> X_res = generateOne(j, t_X_selected.skolemize());
 
                         if (F_res == null || X_res == null) {throw new Error("Null subtrees, should be unreachable.");}
 

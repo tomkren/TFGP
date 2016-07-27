@@ -29,6 +29,19 @@ public class TypeSym implements Type {
     }
 
     @Override
+    public Type deskolemize() {
+        if (sym.charAt(0) == 'X') {
+            try {
+                int n = Integer.parseInt(sym.substring(1));
+                return new TypeVar(n);
+            } catch (NumberFormatException e) {
+                return this;
+            }
+        }
+        return this;
+    }
+
+    @Override
     public int getNextVarId(int acc) {
         return acc;
     }

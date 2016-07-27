@@ -15,6 +15,8 @@ public interface Type {
     AB<Type,Integer> freshenVars(int startVarId, Sub newVars);
 
     Type skolemize();
+    Type deskolemize();
+
 
     void getVarIds(Set<Integer> ret);
 

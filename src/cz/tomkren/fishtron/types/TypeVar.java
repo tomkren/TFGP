@@ -41,6 +41,11 @@ public class TypeVar implements Type {
     }
 
     @Override
+    public Type deskolemize() {
+        return this;
+    }
+
+    @Override
     public int getNextVarId(int acc) {
         return Math.max(acc,id+1);
     }
