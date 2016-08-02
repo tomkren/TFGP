@@ -21,7 +21,14 @@ public class LSolver {
         tests_subs_1(ch);
         tests_subs_k(ch);
 
-        tests_lambdaDags(ch, 7, 10000);
+        /* todo vyřešit: tests_lambdaDags(ch, 7, 10000);
+        zkončilo (ale bez chyby) u 1600 s Exception java.lang.OutOfMemoryError: GC overhead limit exceeded
+
+        */
+
+        //tests_lambdaDags(ch, 6, 10000);
+
+        tests_treeGenerating(ch,6, 100);
 
         ch.results();
     }
@@ -320,7 +327,7 @@ public class LSolver {
 
 
 
-        // -- STATIC FUNS : core of the method -----------------------------------------------------
+    // -- STATIC FUNS : core of the method -----------------------------------------------------
 
     private static BiFunction<Integer,Type,List<AB<BigInteger,Sub>>> subs_k(List<AB<String,Type>> gamma) {
         return (k,t) -> core_k(k,t, subs_1(gamma), subs_ij(gamma), LSolver::packSubs);
@@ -511,6 +518,27 @@ public class LSolver {
 
     // -- TESTING -----------------------------------
 
+    private static void tests_treeGenerating(Checker ch,int k_max, int numSamples){
+        Log.it("\n== TREE GENERATING TESTS =======================================================\n");
+
+        List<AB<String,Type>> gamma = mkGamma(
+                "s",     "(a -> (b -> c)) -> ((a -> b) -> (a -> c))",
+                "k",     "a -> (b -> a)",
+                "seri",  "(Dag a b) -> ((Dag b c) -> (Dag a c))",
+                "para",  "(Dag a b) -> ((Dag c d) -> (Dag (P a c) (P b d))",
+                "mkDag", "(a -> b) -> (Dag a b)",
+                "deDag", "(Dag a b) -> (a -> b)",
+                "mkP",   "a -> (b -> (P a b))",
+                "fst",   "(P a b) -> a",
+                "snd",   "(P a b) -> b"
+        );
+
+        Type t = Types.parse("(P A (P A A)) -> (P A (P A A))");
+        for (int k = 1; k <= k_max; k++) {
+            testTreeGenerating(ch, k, t, gamma, numSamples);
+        }
+    }
+
     private static void tests_lambdaDags(Checker ch, int k_max, int numSamples) {
         Log.it("\n== LAMBDA DAGS TESTS =======================================================\n");
 
@@ -593,6 +621,102 @@ public class LSolver {
             Log.it("Zkus to znova..");
         }
 
+    }
+
+    private static void testTreeGenerating(Checker ch, int k, Type t, List<AB<String,Type>> gamma, int numSamples) {
+        String argStr = "("+k+", "+t+")";
+
+        LSolver s = new LSolver(gamma, ch.getRandom());
+
+        Log.it_noln("s.num"+argStr+" = ");
+        BigInteger num = s.getNum(k,t);
+        Log.it(num);
+
+        Log.it_noln("s.generateOne"+argStr+" = ");
+        AppTree tree = s.genOne(k, t);
+        Log.it(tree);
+
+        if (F.isZero(num) || tree == null) {
+            ch.is(F.isZero(num) && tree == null, "num = 0 iff genOne = null");
+        }
+
+        if (!F.isZero(num) && num.compareTo(BigInteger.valueOf(100000)) < 0) {
+
+            int intNum = num.intValueExact();
+
+            Log.it_noln("|s.ts_k"+argStr+"| = ");
+            List<AB<String,Sub>> allTrees = s.ts_k(k,t);
+            Log.it(allTrees.size());
+
+            ch.is(tree != null, "genOne not null");
+            ch.is(intNum == allTrees.size(), "num = |genAll|");
+
+            if (intNum < 40000) {
+
+                Map<String,Integer> testMap = new TreeMap<>();
+
+                for (AB<String,Sub> tree_p : allTrees) {
+                    testMap.put(tree_p._1(),0);
+                }
+
+                //Log.list(allTrees);
+
+                double sampleRate = ((double)numSamples) / intNum;
+
+                boolean allGeneratedWereInGenAll = true;
+                boolean allTreesWereStrictlyWellTyped = true;
+                for (int i = 0; i < numSamples; i++){
+
+                    if ((i+1)%100 == 0) {
+                        Log.it(i+1);
+                    }
+
+                    AppTree newTree = s.genOne(k, t);
+
+                    if (newTree != null) {
+
+                        if (!newTree.isStrictlyWellTyped()) {
+                            ch.fail("tree is not strictly well-typed: "+newTree+"\n"+newTree.getTypeTrace().toString(2));
+                            allTreesWereStrictlyWellTyped = false;
+                        }
+
+                        String key = newTree.toRawString();
+
+                        if (testMap.containsKey(key)) {
+                            testMap.compute(key, (_key,n) -> n+1);
+                        } else {
+                            allGeneratedWereInGenAll = false;
+                            ch.fail(key +" is not in genAll list.");
+                        }
+
+                    } else {
+                        ch.fail("generated tree is null");
+                    }
+                }
+
+                ch.is(allGeneratedWereInGenAll,"All generated trees were in GenAll list.");
+                ch.is(allTreesWereStrictlyWellTyped,"All trees were strictly well typed.");
+
+
+                Log.it("\nSample rate : "+ sampleRate);
+                for (Map.Entry<String,Integer> e : testMap.entrySet()) {
+
+                    String tree_p = e.getKey();
+                    int numGenerated = e.getValue();
+
+                    Log.it(tree_p +" "+ numGenerated);
+
+                }
+
+
+            }
+
+        }
+
+        Log.it();
+
+
+        //throw new TODO();
     }
 
     private static void testGenerating(Checker ch, int k, Type t, List<AB<String,Type>> gamma, int numSamples) {

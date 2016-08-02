@@ -7,6 +7,8 @@ import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.utils.AA;
 import cz.tomkren.utils.AB;
+import cz.tomkren.utils.F;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,7 +30,9 @@ public interface AppTree {
     void deskolemizeRootType();
     void specifyType(Sub sub);
     String toRawString();
+
     boolean isStrictlyWellTyped();
+    JSONObject getTypeTrace();
 
     class Leaf implements AppTree {
         private String sym;
@@ -45,6 +49,7 @@ public interface AppTree {
         @Override public String toString() {return sym;}
         @Override public String toRawString() {return sym;}
         @Override public boolean isStrictlyWellTyped() {return true;}
+        @Override public JSONObject getTypeTrace() {return F.obj("node",sym, "type",type.toString());}
     }
 
     class App implements AppTree {
@@ -63,13 +68,30 @@ public interface AppTree {
 
         @Override
         public boolean isStrictlyWellTyped() {
+            return isRootStrictlyWellTyped() && funTree.isStrictlyWellTyped() && argTree.isStrictlyWellTyped();
+        }
 
+        private boolean isRootStrictlyWellTyped() {
             Type funType = funTree.getType();
             Type argType = argTree.getType();
-
             AA<Type> fun = Types.splitFunType(funType);
-
             return isSameType(fun._1(), argType) && isSameType(fun._2(), type);
+        }
+
+        @Override
+        public JSONObject getTypeTrace() {
+            JSONObject typeTrace = F.obj(
+                    "node","@",
+                    "type",type.toString(),
+                    "fun",funTree.getTypeTrace(),
+                    "arg",argTree.getTypeTrace()
+            );
+
+            if (!isRootStrictlyWellTyped()) {
+                typeTrace.put("error",true);
+            }
+
+            return typeTrace;
         }
 
         private boolean isSameType(Type t1, Type t2) {
@@ -78,7 +100,7 @@ public interface AppTree {
 
         @Override
         public String toRawString() {
-            return "("+funTree+" "+argTree+")";
+            return "("+funTree.toRawString()+" "+argTree.toRawString()+")";
         }
 
         @Override

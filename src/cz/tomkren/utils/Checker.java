@@ -17,6 +17,8 @@ public class Checker {
     private long seed;
     private Random rand;
 
+    private StringBuilder errors;
+
     public static Checker mk(JSONObject config) {
         return new Checker( config.has("seed") ? config.getLong("seed") : null, false);
     }
@@ -30,6 +32,8 @@ public class Checker {
         sum = 0;
         ok = 0;
         ko = 0;
+
+        errors = new StringBuilder();
 
         this.seed = seed == null ? (new Random().nextLong()) : seed;
 
@@ -53,6 +57,12 @@ public class Checker {
     public void results() {
         String hlaska = ko == 0 ? ":)" : ":( nééééé" ;
         Log.it("\n"+ok+" OK, "+ko+" KO.   "+hlaska);
+
+        if (ko > 0) {
+            Log.it("== ERRORS ================================================");
+            Log.it(errors.toString());
+        }
+
         Log.it("Seed was: "+seed+"L");
         showTime();
     }
@@ -188,6 +198,7 @@ public class Checker {
         } else {
             String koStr = "!!! [KO "+sum+"] "+koMsg;
             Log.it(koStr);
+            errors.append(koStr).append('\n');
             //System.err.println(koStr);
             ko++;
             return false;
