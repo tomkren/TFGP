@@ -14,7 +14,7 @@ import java.util.function.*;
 
 public class LSolver {
 
-    public static void main(String[] args) {
+    public static void main_main(String[] args) {
         Checker ch = new Checker();
 
         testNormalizations(ch);
@@ -33,6 +33,45 @@ public class LSolver {
         ch.results();
     }
 
+    public static void main(String[] args) {
+        separateError_strictlyWellTyped();
+    }
+
+    private static void separateError_strictlyWellTyped() {
+
+            Checker ch = new Checker(25L);
+
+            List<AB<String, Type>> gamma = mkGamma(
+                    "s", "(a -> (b -> c)) -> ((a -> b) -> (a -> c))",
+                    "k", "a -> (b -> a)",
+                    "seri", "(Dag a b) -> ((Dag b c) -> (Dag a c))",
+                    "para", "(Dag a b) -> ((Dag c d) -> (Dag (P a c) (P b d))",
+                    "mkDag", "(a -> b) -> (Dag a b)",
+                    "deDag", "(Dag a b) -> (a -> b)",
+                    "mkP", "a -> (b -> (P a b))",
+                    "fst", "(P a b) -> a",
+                    "snd", "(P a b) -> b"
+            );
+
+            Type t = Types.parse("(P A (P A A)) -> (P A (P A A))");
+
+            int k = 6;
+
+            LSolver s = new LSolver(gamma, ch.getRandom());
+
+            AppTree newTree = s.genOne(k, t);
+            if (newTree != null) {
+                boolean isStrictlyWellTyped = newTree.isStrictlyWellTyped();
+
+                ch.is(isStrictlyWellTyped, "Is tree strictly well typed?");
+
+                if (!isStrictlyWellTyped) {
+                    Log.it("tree is not strictly well-typed: " + newTree + "\n" + newTree.getTypeTrace().toString(2));
+                }
+            }
+
+            ch.results();
+    }
 
 
     private List<AB<String,Type>> gamma;

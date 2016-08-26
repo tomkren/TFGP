@@ -56,13 +56,13 @@ public class Checker {
 
     public void results() {
         String hlaska = ko == 0 ? ":)" : ":( nééééé" ;
-        Log.it("\n"+ok+" OK, "+ko+" KO.   "+hlaska);
 
         if (ko > 0) {
             Log.it("== ERRORS ================================================");
             Log.it(errors.toString());
         }
 
+        Log.it("\n"+ok+" OK, "+ko+" KO.   "+hlaska);
         Log.it("Seed was: "+seed+"L");
         showTime();
     }
