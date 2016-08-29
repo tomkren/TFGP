@@ -76,9 +76,7 @@ public class TypeVar implements Type {
 
         TypeVar typeVar = (TypeVar) o;
 
-        if (id != typeVar.id) return false;
-
-        return true;
+        return id == typeVar.id;
     }
 
     @Override

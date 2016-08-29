@@ -28,18 +28,18 @@ public class LSolver {
 
         //tests_lambdaDags(ch, 6, 10000);
 
-        tests_treeGenerating(ch,6, 100);
+        tests_treeGenerating(ch,6, 1000);
 
         ch.results();
     }
 
     public static void main(String[] args) {
-        separateError_strictlyWellTyped();
+        separateError_strictlyWellTyped(13);
     }
 
-    private static void separateError_strictlyWellTyped() {
+    private static void separateError_strictlyWellTyped(int seed) {
 
-            Checker ch = new Checker(25L);
+            Checker ch = new Checker((long)seed);
 
             List<AB<String, Type>> gamma = mkGamma(
                     "s", "(a -> (b -> c)) -> ((a -> b) -> (a -> c))",

@@ -30,6 +30,11 @@ public class TypeSym implements Type {
 
     @Override
     public Type deskolemize() {
+
+        Integer sid = getSkolemId();
+        return sid == null ? this : new TypeVar(sid);
+
+        /*
         if (sym.charAt(0) == 'X') {
             try {
                 int n = Integer.parseInt(sym.substring(1));
@@ -39,11 +44,27 @@ public class TypeSym implements Type {
             }
         }
         return this;
+        */
+    }
+
+    private Integer getSkolemId() {
+        if (sym.charAt(0) == 'X') {
+            try {
+                return Integer.parseInt(sym.substring(1));
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
     }
 
     @Override
     public int getNextVarId(int acc) {
-        return acc;
+
+        //return acc;
+
+        Integer sid = getSkolemId();
+        return sid == null ? acc : Math.max(acc,sid+1);
     }
 
     @Override
