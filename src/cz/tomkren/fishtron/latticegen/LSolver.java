@@ -127,7 +127,10 @@ public class LSolver {
 
                     if (F.isZero(ball)) {
                         AppTree s_tree = AppTree.mk(s, mu.apply(t));
+
                         s_tree.deskolemizeRootType();
+                        //denormalizeAppTree(s_tree, nf._2());
+
                         return s_tree;
                     }
 
@@ -170,8 +173,14 @@ public class LSolver {
 
                         F_tree.specifyType(s_X);
 
+                        //Sub fromNF = nf._2().inverse();
+                        //Type FX_type = fromNF.apply(s_FX.apply(t).deskolemize());
+
                         AppTree FX_tree = AppTree.mk(F_tree, X_tree, s_FX.apply(t));
+
                         FX_tree.deskolemizeRootType();
+                        //denormalizeAppTree(FX_tree, nf._2());
+
                         return FX_tree;
                     }
 
@@ -183,6 +192,8 @@ public class LSolver {
         throw new Error("Ball not exhausted (k>1), should be unreachable.");
     }
 
+
+    // todo asi smazat !
     private AB<String,Sub> generateOne(int k, Type type) {
         if (k < 1) {throw new Error("k must be > 0, it is "+k);}
 
@@ -338,6 +349,17 @@ public class LSolver {
     private List<AB<BigInteger,Sub>> decodeSubs(List<AB<BigInteger,Integer>> encodedSubs) {
         return F.map(encodedSubs, p -> AB.mk( p._1(), subsList.get(p._2()) ));
     }
+
+    /* asi 2 blobosti, radši přehodnotit interpretaci volaní skolemizovaneho getOne..
+    private static void denormalizeAppTree(AppTree appTree, Sub t2nf) {
+        Sub nf2t = t2nf.inverse();
+        appTree.specifyType(nf2t);
+    }
+    private static Type mkAppTreeType(Sub s_FX, AB<Type,Sub> nfData) {
+        Type goalNF = nfData._1();
+        Sub  fromNF = nfData._2().inverse();
+        return fromNF.apply(s_FX.apply(goalNF)).deskolemize();
+    }*/
 
     private static <A> AB<A,Sub> denormalize(AB<A,Sub> x, AB<Type,Sub> nfData) {
         Function<AB<A,Sub>,AB<A,Sub>> f = mkDenormalizator(nfData);
