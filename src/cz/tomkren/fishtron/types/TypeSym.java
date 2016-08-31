@@ -24,15 +24,20 @@ public class TypeSym implements Type {
     }
 
     @Override
-    public Type skolemize() {
+    public Type skolemize(Set<Integer> idsAcc) {
         return this;
     }
 
     @Override
-    public Type deskolemize() {
+    public Type deskolemize(Set<Integer> ids) {
 
         Integer sid = getSkolemId();
-        return sid == null ? this : new TypeVar(sid);
+
+        if (sid == null || !ids.contains(sid)) {
+            return this;
+        } else {
+            return new TypeVar(sid);
+        }
 
         /*
         if (sym.charAt(0) == 'X') {

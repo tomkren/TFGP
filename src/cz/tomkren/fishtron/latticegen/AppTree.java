@@ -13,10 +13,11 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /** Created by user on 27. 7. 2016.*/
 
-public interface AppTree {
+interface AppTree {
 
     static AppTree mk(String sym, Type type) {
         return new AppTree.Leaf(sym, type);
@@ -27,8 +28,8 @@ public interface AppTree {
     }
 
     Type getType();
-    void deskolemizeRootType();
-    void specifyType(Sub sub);
+    void deskolemize(Set<Integer> ids);
+    void applySub(Sub sub);
     String toRawString();
 
     boolean isStrictlyWellTyped();
@@ -44,8 +45,8 @@ public interface AppTree {
         }
 
         @Override public Type getType() {return type;}
-        @Override public void deskolemizeRootType() {type = type.deskolemize();}
-        @Override public void specifyType(Sub sub) {type = sub.apply(type);}
+        @Override public void deskolemize(Set<Integer> ids) {type = type.deskolemize(ids);}
+        @Override public void applySub(Sub sub) {type = sub.apply(type);}
         @Override public String toString() {return sym;}
         @Override public String toRawString() {return sym;}
         @Override public boolean isStrictlyWellTyped() {return true;}
@@ -124,15 +125,17 @@ public interface AppTree {
         }
 
         @Override
-        public void deskolemizeRootType() {
-            type = type.deskolemize();
+        public void deskolemize(Set<Integer> ids) {
+            type = type.deskolemize(ids);
+            funTree.deskolemize(ids);
+            argTree.deskolemize(ids);
         }
 
         @Override
-        public void specifyType(Sub sub) {
+        public void applySub(Sub sub) {
             type = sub.apply(type);
-            funTree.specifyType(sub);
-            argTree.specifyType(sub);
+            funTree.applySub(sub);
+            argTree.applySub(sub);
         }
 
     }

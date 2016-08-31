@@ -2,6 +2,7 @@ package cz.tomkren.fishtron.types;
 
 import cz.tomkren.utils.AB;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -14,11 +15,16 @@ public interface Type {
 
     AB<Type,Integer> freshenVars(int startVarId, Sub newVars);
 
-    Type skolemize();
-    Type deskolemize();
+    Type skolemize(Set<Integer> idsAcc);
+    Type deskolemize(Set<Integer> ids);
 
+    default AB<Type,Set<Integer>> skolemize() {
+        Set<Integer> acc = new HashSet<>();
+        Type skolemizedType = skolemize(acc);
+        return AB.mk(skolemizedType, acc);
+    }
 
-    void getVarIds(Set<Integer> ret);
+    void getVarIds(Set<Integer> acc);
 
     int getNextVarId(int acc);
 
@@ -27,9 +33,9 @@ public interface Type {
     }
 
     default Set<Integer> getVarIds() {
-        Set<Integer> ret = new TreeSet<>();
-        getVarIds(ret);
-        return ret;
+        Set<Integer> acc = new TreeSet<>();
+        getVarIds(acc);
+        return acc;
     }
 
     Object toJson();

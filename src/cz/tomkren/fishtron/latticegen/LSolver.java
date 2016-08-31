@@ -1,5 +1,6 @@
 package cz.tomkren.fishtron.latticegen;
 
+import com.google.common.collect.Sets;
 import cz.tomkren.fishtron.types.*;
 import cz.tomkren.utils.*;
 import org.json.JSONArray;
@@ -14,7 +15,7 @@ import java.util.function.*;
 
 public class LSolver {
 
-    public static void main_main(String[] args) {
+    public static void main(String[] args) {
         Checker ch = new Checker();
 
         testNormalizations(ch);
@@ -28,16 +29,16 @@ public class LSolver {
 
         //tests_lambdaDags(ch, 6, 10000);
 
-        tests_treeGenerating(ch,6, 1000);
+        tests_treeGenerating(ch,6, 100, true);
 
         ch.results();
     }
 
-    public static void main(String[] args) {
-        separateError_strictlyWellTyped(13);
+    public static void main_SWT(String[] args) {
+        separateError_strictlyWellTyped(13, true); // 13L: (snd (mkP snd (s k)) mkP)
     }
 
-    private static void separateError_strictlyWellTyped(int seed) {
+    private static void separateError_strictlyWellTyped(int seed, boolean isNormalizationPerformed) {
 
             Checker ch = new Checker((long)seed);
 
@@ -59,7 +60,7 @@ public class LSolver {
 
             LSolver s = new LSolver(gamma, ch.getRandom());
 
-            AppTree newTree = s.genOne(k, t);
+            AppTree newTree = s.genOne(k, t, isNormalizationPerformed);
             if (newTree != null) {
                 boolean isStrictlyWellTyped = newTree.isStrictlyWellTyped();
 
@@ -99,13 +100,24 @@ public class LSolver {
 
     // -- generate one -------------------------------------
 
-    private AppTree genOne(int k, Type type) {
+    private AppTree genOne(int k, Type type, boolean isNormalizationPerformed) {
         if (k < 1) {throw new Error("k must be > 0, it is "+k);}
 
-        AB<Type,Sub> nf = normalize(type);
-        Type t = nf._1();
+        Type t;
+        Sub fromNF;
+        SizeTypeData sizeTypeData;
 
-        SizeTypeData sizeTypeData = getSizeTypeData(k, nf);
+        if (isNormalizationPerformed) {
+            AB<Type,Sub> nf = normalize(type);
+            t = nf._1();
+            fromNF = nf._2().inverse();
+            sizeTypeData = getSizeTypeData(k, nf);
+        } else {
+            t = type;
+            fromNF = null;
+            sizeTypeData = getSizeTypeData(k, t);
+        }
+
 
         BigInteger num = sizeTypeData.computeNum();
 
@@ -128,8 +140,9 @@ public class LSolver {
                     if (F.isZero(ball)) {
                         AppTree s_tree = AppTree.mk(s, mu.apply(t));
 
-                        s_tree.deskolemizeRootType();
-                        //denormalizeAppTree(s_tree, nf._2());
+                        if (isNormalizationPerformed) {
+                            s_tree.applySub(fromNF);
+                        }
 
                         return s_tree;
                     }
@@ -164,22 +177,26 @@ public class LSolver {
                         Type t_F_selected = s_F.apply(t_F);
                         Type t_X_selected = s_X.apply(t_X);
 
-                        AppTree F_tree = genOne(i, t_F_selected.skolemize());
-                        AppTree X_tree = genOne(j, t_X_selected.skolemize());
+                        AB<Type,Set<Integer>> t_F_skolemized_p = t_F_selected.skolemize();
+                        AB<Type,Set<Integer>> t_X_skolemized_p = t_X_selected.skolemize();
+
+                        AppTree F_tree = genOne(i, t_F_skolemized_p._1(), isNormalizationPerformed);
+                        AppTree X_tree = genOne(j, t_X_skolemized_p._1(), isNormalizationPerformed);
 
                         if (F_tree == null || X_tree == null) {throw new Error("Null subtrees, should be unreachable.");}
 
-                        Sub  s_FX = Sub.dot(s_X, s_F).restrict(t);
+                        F_tree.deskolemize(t_F_skolemized_p._2());
+                        X_tree.deskolemize(t_X_skolemized_p._2());
 
-                        F_tree.specifyType(s_X);
+                        F_tree.applySub(s_X);
 
-                        //Sub fromNF = nf._2().inverse();
-                        //Type FX_type = fromNF.apply(s_FX.apply(t).deskolemize());
+                        Sub s_FX = Sub.dot(s_X, s_F); //TODO #bejval-restrikt-pokus .restrict(t); -- tady nemusim, jen se aplikuje na t a zahodí
 
                         AppTree FX_tree = AppTree.mk(F_tree, X_tree, s_FX.apply(t));
 
-                        FX_tree.deskolemizeRootType();
-                        //denormalizeAppTree(FX_tree, nf._2());
+                        if (isNormalizationPerformed) {
+                            FX_tree.applySub(fromNF);
+                        }
 
                         return FX_tree;
                     }
@@ -194,6 +211,7 @@ public class LSolver {
 
 
     // todo asi smazat !
+    /*
     private AB<String,Sub> generateOne(int k, Type type) {
         if (k < 1) {throw new Error("k must be > 0, it is "+k);}
 
@@ -273,7 +291,7 @@ public class LSolver {
         }
 
         throw new Error("Ball not exhausted (k>1), should be unreachable.");
-    }
+    }*/
 
 
 
@@ -288,7 +306,10 @@ public class LSolver {
     }
 
     private SizeTypeData getSizeTypeData(int k, AB<Type,Sub> nfData) {
-        Type t = nfData._1();
+        return getSizeTypeData(k, nfData._1());
+    }
+
+    private SizeTypeData getSizeTypeData(int k, Type t) {
         TypeData typeData = typeDataMap.computeIfAbsent(t.toString(), key->new TypeData());
         SizeTypeData sizeTypeData = typeData.getSizeTypeData(k);
 
@@ -353,7 +374,7 @@ public class LSolver {
     /* asi 2 blobosti, radši přehodnotit interpretaci volaní skolemizovaneho getOne..
     private static void denormalizeAppTree(AppTree appTree, Sub t2nf) {
         Sub nf2t = t2nf.inverse();
-        appTree.specifyType(nf2t);
+        appTree.applySub(nf2t);
     }
     private static Type mkAppTreeType(Sub s_FX, AB<Type,Sub> nfData) {
         Type goalNF = nfData._1();
@@ -444,7 +465,7 @@ public class LSolver {
                 Sub s_X = p_X._2();
 
                 A   a_FX = operation.apply(a_F,a_X);
-                Sub s_FX = Sub.dot(s_X, s_F).restrict(t);
+                Sub s_FX = Sub.dot(s_X, s_F);//TODO #restrikt-pokus .restrict(t);
 
                 ret.add(AB.mk(a_FX, s_FX));
             }
@@ -473,7 +494,7 @@ public class LSolver {
             Sub mu = Sub.mgu(t, t_s_fresh);
 
             if (!mu.isFail()) {
-                ret.add(AB.mk(s, mu.restrict(t)));
+                ret.add(AB.mk(s, mu/*TODO #restrikt-pokus .restrict(t)*/ ));
             }
         }
         return ret;
@@ -579,7 +600,7 @@ public class LSolver {
 
     // -- TESTING -----------------------------------
 
-    private static void tests_treeGenerating(Checker ch,int k_max, int numSamples){
+    private static void tests_treeGenerating(Checker ch,int k_max, int numSamples, boolean isNormalizationPerformed){
         Log.it("\n== TREE GENERATING TESTS =======================================================\n");
 
         List<AB<String,Type>> gamma = mkGamma(
@@ -596,10 +617,11 @@ public class LSolver {
 
         Type t = Types.parse("(P A (P A A)) -> (P A (P A A))");
         for (int k = 1; k <= k_max; k++) {
-            testTreeGenerating(ch, k, t, gamma, numSamples);
+            testTreeGenerating(ch, k, t, gamma, numSamples, isNormalizationPerformed);
         }
     }
 
+    /*
     private static void tests_lambdaDags(Checker ch, int k_max, int numSamples) {
         Log.it("\n== LAMBDA DAGS TESTS =======================================================\n");
 
@@ -626,24 +648,24 @@ public class LSolver {
             testGenerating(ch, k, t, gamma, numSamples);
         }
 
-        /* TODO pro k = 5 exituje anomální zóna
-        ...
-        <(((s s) (k fst)) k),{}> 1
-        <(((s s) (k k)) k),{}> 0
-        <(((s s) (k mkP)) k),{}> 1
-        <(((s s) (k snd)) k),{}> 0
-        <(((s s) (s k)) k),{}> 1
-        ...
-        */
+        //TODO pro k = 5 exituje anomální zóna
+        //...
+        //<(((s s) (k fst)) k),{}> 1
+        //<(((s s) (k k)) k),{}> 0
+        //<(((s s) (k mkP)) k),{}> 1
+        //<(((s s) (k snd)) k),{}> 0
+        //<(((s s) (s k)) k),{}> 1
+        //...
+
 
         // todo pro s.num(7, ((P A (P A A)) -> (P A (P A A)))) = 37596
         // ...
         // 700
         // !!! [KO 46] <((((s deDag) (k k)) (mkDag s)) k),{}> is not in genAll list.
 
-    }
+    }*/
 
-    private static void separateError1() {
+    /*private static void separateError1() {
 
         List<AB<String,Type>> gamma = mkGamma(
                 "s",     "(a -> (b -> c)) -> ((a -> b) -> (a -> c))",
@@ -682,9 +704,10 @@ public class LSolver {
             Log.it("Zkus to znova..");
         }
 
-    }
+    }*/
 
-    private static void testTreeGenerating(Checker ch, int k, Type t, List<AB<String,Type>> gamma, int numSamples) {
+    private static void testTreeGenerating(Checker ch, int k, Type t, List<AB<String,Type>> gamma, int numSamples,
+                                           boolean isNormalizationPerformed) {
         String argStr = "("+k+", "+t+")";
 
         LSolver s = new LSolver(gamma, ch.getRandom());
@@ -694,7 +717,7 @@ public class LSolver {
         Log.it(num);
 
         Log.it_noln("s.generateOne"+argStr+" = ");
-        AppTree tree = s.genOne(k, t);
+        AppTree tree = s.genOne(k, t, isNormalizationPerformed);
         Log.it(tree);
 
         if (F.isZero(num) || tree == null) {
@@ -732,7 +755,7 @@ public class LSolver {
                         Log.it(i+1);
                     }
 
-                    AppTree newTree = s.genOne(k, t);
+                    AppTree newTree = s.genOne(k, t, isNormalizationPerformed);
 
                     if (newTree != null) {
 
@@ -780,6 +803,7 @@ public class LSolver {
         //throw new TODO();
     }
 
+    /*
     private static void testGenerating(Checker ch, int k, Type t, List<AB<String,Type>> gamma, int numSamples) {
         String argStr = "("+k+", "+t+")";
 
@@ -866,7 +890,7 @@ public class LSolver {
         }
 
         Log.it();
-    }
+    }*/
 
     private static void tests_subs_k(Checker ch) {
         Log.it("\n== ts_k & subs_k tests ===================================================\n");

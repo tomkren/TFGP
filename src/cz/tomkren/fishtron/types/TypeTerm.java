@@ -52,13 +52,13 @@ public class TypeTerm implements Type {
     }
 
     @Override
-    public Type skolemize() {
-        return new TypeTerm(F.map(args, Type::skolemize));
+    public Type skolemize(Set<Integer> idsAcc) {
+        return new TypeTerm(F.map(args, arg -> arg.skolemize(idsAcc)));
     }
 
     @Override
-    public Type deskolemize() {
-        return new TypeTerm(F.map(args, Type::deskolemize));
+    public Type deskolemize(Set<Integer> ids) {
+        return new TypeTerm(F.map(args, arg -> arg.deskolemize(ids)));
     }
 
     public <T> T fold(Function<List<T>, T> fNode, Function<Type,T> fLeaf) {
