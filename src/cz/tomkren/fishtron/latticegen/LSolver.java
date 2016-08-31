@@ -494,7 +494,7 @@ public class LSolver {
             Sub mu = Sub.mgu(t, t_s_fresh);
 
             if (!mu.isFail()) {
-                ret.add(AB.mk(s, mu/*TODO #restrikt-pokus .restrict(t)*/ ));
+                ret.add(AB.mk(s, mu.restrict(t))); /*TODO #restrikt-pokus .restrict(t)*/
             }
         }
         return ret;
