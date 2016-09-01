@@ -1,3 +1,5 @@
+/*treeView*/
+
 .app {
     border-radius: 50%;
     background-color: #000;
@@ -21,9 +23,32 @@
     cursor: pointer;
 }
 
+.leaf .node-name {
+    cursor: pointer;
+}
+
 .node-title {
     color:red;
     font-size: xx-small;
     width: auto;
     white-space: nowrap;
+}
+
+/*popup*/
+
+#popup {
+    display:none;
+    position: absolute;
+    left: 10px;
+    top: 100px;
+    z-index: 1;
+    background-color: rgba(177, 177, 177, 0.75);
+    font-family: "Lucida Console", Monaco, monospace;
+    font-size: 8pt;
+    padding: 10px;
+}
+
+.popup-close {
+    float: right;
+    margin-top: 10px;
 }
