@@ -1,6 +1,6 @@
 function mkTreeView($el, config) {
 
-    var treeJson;
+    //var treeJson;
 
     config.treantContainerName = config.treantContainerName || 'treeView-treant';
 
@@ -23,11 +23,42 @@ function mkTreeView($el, config) {
     $el.append($textArea, $treantContainer);
 
     function loadTree() {
-        treeJson = $textArea.text();
+        var treeJson = JSON.parse($textArea.text());
         console.log(treeJson);
+        return treeJson;
     }
 
-    loadTree();
+    function processTree(tree) {
+
+        function mkChildren(tree) {
+            return [
+                processTree(tree.fun),
+                processTree(tree.arg)
+            ];
+        }
+
+        var nodeStructure;
+
+         if (tree.node === '@') {
+             nodeStructure = {
+                 text : {name : '+'},
+                 HTMLclass : 'app',
+                 children : mkChildren(tree)
+             };
+         } else {
+            nodeStructure = {
+                HTMLclass: 'leaf',
+                text :{
+                    name : tree.node
+                    /*title: tree.type*/
+                }
+            };
+         }
+
+        return nodeStructure;
+    }
+
+
 
 
     var chart;
@@ -37,17 +68,7 @@ function mkTreeView($el, config) {
             container: "#"+config.treantContainerName
         },
 
-        nodeStructure: {
-            text: { name: "Parent node" },
-            children: [
-                {
-                    text: { name: "First child" }
-                },
-                {
-                    text: { name: "Second child" }
-                }
-            ]
-        }
+        nodeStructure: processTree(loadTree())
     };
 
     chart = new Treant(simple_chart_config);

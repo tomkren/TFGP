@@ -1,0 +1,29 @@
+.app {
+    border-radius: 50%;
+    background-color: #000;
+    width: 13px;
+    height: 13px;
+    font-family: "Lucida Console", Monaco, monospace;
+}
+
+.leaf {
+    font-family: "Lucida Console", Monaco, monospace;
+    font-weight: bold;
+    /*border: 1px solid lightgrey;*/
+}
+
+.app .node-name {
+    width: auto;
+    margin-top: -3px;
+    margin-left: 2px;
+    /*text-indent: 12px;*/
+    color: white;
+    cursor: pointer;
+}
+
+.node-title {
+    color:red;
+    font-size: xx-small;
+    width: auto;
+    white-space: nowrap;
+}

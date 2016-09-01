@@ -5,7 +5,7 @@ function mkApp($container) {
 
     var treeView = mkTreeView($treeView, {
         treantContainerName: 'treeView-treant',
-        height: 300
+        height: 550
     });
 
     return {
