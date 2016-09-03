@@ -1,17 +1,21 @@
-function mkApp($container) {
+function mkApp(config) {
 
     var $treeView = $('<div>');
-    $container.append($treeView);
+    config.$container.append($treeView);
 
     var treeView = mkTreeView($treeView);
-    var popup = mkPopup($('#popup'));
+    var popup = mkPopup(config.$popup);
 
+    /*
     treeView.addClickNodeListener(function (subtree, e) {
-        log(subtree.type);
-        popup.show(e, subtree.type);
+        var type = Types.show(subtree.type);
+        log(type);
+        popup.show(e, subtree.typeInfo.getShort());
     });
+    */
 
     return {
-        getChart : treeView.getChart
+        getTypeInfo: treeView.getTypeInfo,
+        treeView: treeView
     };
 }

@@ -1,5 +1,7 @@
 function mkPopup($el) {
 
+    $el.addClass('popup');
+
     var $msg = $('<div>');
     var $close = $('<button>')
         .text('X')

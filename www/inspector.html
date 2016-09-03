@@ -19,6 +19,8 @@
 
     <script src="js/app.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/types.js"></script>
+    <script src="js/typeInfo.js"></script>
     <script src="js/popup.js"></script>
     <script src="js/treeView.js"></script>
     <script src="js/appTree.js"></script>
@@ -26,7 +28,10 @@
     <script>
         var App;
         $(function () {
-            App = mkApp($('#container'));
+            App = mkApp({
+                $container: $('#container'),
+                $popup: $('#popup')
+            });
         });
     </script>
 

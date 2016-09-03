@@ -16,7 +16,7 @@ import java.util.function.*;
 public class LSolver {
 
     public static void main(String[] args) {
-        Checker ch = new Checker();
+        Checker ch = new Checker(7404398919224944163L);
 
         testNormalizations(ch);
         tests_subs_1(ch);
@@ -34,7 +34,7 @@ public class LSolver {
         ch.results();
     }
 
-    public static void main_SWT(String[] args) {
+    public static void main_(String[] args) {
         separateError_strictlyWellTyped(13, true); // 13L: (snd (mkP snd (s k)) mkP)
     }
 
@@ -65,6 +65,8 @@ public class LSolver {
                 boolean isStrictlyWellTyped = newTree.isStrictlyWellTyped();
 
                 ch.is(isStrictlyWellTyped, "Is tree strictly well typed?");
+
+                Log.it(newTree.getTypeTrace());
 
                 if (!isStrictlyWellTyped) {
                     Log.it("tree is not strictly well-typed: " + newTree + "\n" + newTree.getTypeTrace().toString(2));
@@ -760,7 +762,7 @@ public class LSolver {
                     if (newTree != null) {
 
                         if (!newTree.isStrictlyWellTyped()) {
-                            ch.fail("tree is not strictly well-typed: "+newTree+"\n"+newTree.getTypeTrace().toString(2));
+                            ch.fail("tree is not strictly well-typed: "+newTree+"\n"+newTree.getTypeTrace().toString());
                             allTreesWereStrictlyWellTyped = false;
                         }
 

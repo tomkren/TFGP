@@ -50,7 +50,7 @@ interface AppTree {
         @Override public String toString() {return sym;}
         @Override public String toRawString() {return sym;}
         @Override public boolean isStrictlyWellTyped() {return true;}
-        @Override public JSONObject getTypeTrace() {return F.obj("node",sym, "type",type.toString());}
+        @Override public JSONObject getTypeTrace() {return F.obj("node",sym, "type",type.toJson());}
     }
 
     class App implements AppTree {
@@ -83,7 +83,7 @@ interface AppTree {
         public JSONObject getTypeTrace() {
             JSONObject typeTrace = F.obj(
                     "node","@",
-                    "type",type.toString(),
+                    "type",type.toJson(),
                     "fun",funTree.getTypeTrace(),
                     "arg",argTree.getTypeTrace()
             );
