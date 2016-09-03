@@ -1,5 +1,61 @@
 function mkTypes () {
 
+    function diff (t1,t2) {
+
+        var diffTab = diffTable(t1,t2);
+
+        function mkPair(txt1,txt2) {
+            return $('<div>').append([
+                $('<p>').text(txt1),
+                $('<p>').text(txt2)
+            ]);
+        }
+
+        function showTab (tab) {
+            if (_.isArray(tab)) {
+
+                var body = _.map(tab, function (x) {
+                    return $('<td>').html(showTab(x));
+                });
+
+                var $tr = $('<tr>').append(
+                   _.concat(
+                       [$('<td>').html(mkPair('(','('))],
+                       body,
+                       [$('<td>').html(mkPair(')',')'))]
+                   )
+                );
+
+                return $('<table>').append($tr);
+
+            } else {
+
+                var $div = mkPair(tab.col[0],tab.col[1]);
+
+                if (!tab.ok) {
+                    $div.addClass('error');
+                }
+
+                return $div;
+            }
+        }
+
+        return showTab(diffTab);
+    }
+
+    function diffTable (t1,t2) {
+        if (show(t1) === show(t2)) {
+            return [{col:[show(t1),show(t2)],ok:true}];
+        } else if (_.isArray(t1) && _.isArray(t2) && t1.length === t2.length) {
+
+            return [_.flatten(_.map(_.zip(t1,t2), function (p) {
+                return diffTable(p[0],p[1]);
+            }))];
+
+        } else {
+            return [{col:[show(t1),show(t2)],ok:false}];
+        }
+    }
 
 
     function show_internal (typeJson,hideFirstParens) {
@@ -61,7 +117,9 @@ function mkTypes () {
     }
 
     return {
-      show:show
+        show:show,
+        diffTable:diffTable,
+        diff:diff
     };
 }
 

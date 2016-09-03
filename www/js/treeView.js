@@ -4,6 +4,8 @@ function mkTreeView($el, config) {
 
     var clickNodeListeners = [];
     var nodeIdPrefix = 'node-';
+    var nodeLabelPrefix = 'node-L-';
+
 
     function addClickNodeListener (callback) {
         clickNodeListeners.push(callback);
@@ -73,6 +75,7 @@ function mkTreeView($el, config) {
 
         var nodeId = idPrefix+nextNodeId;
         id2subtree[nextNodeId] = tree;
+        tree.id = nextNodeId;
         nextNodeId++;
 
         function mkChildren(tree) {
@@ -93,7 +96,7 @@ function mkTreeView($el, config) {
         } else {
             nodeStructure = {
                 HTMLclass: 'leaf',
-                text :{name : tree.node, /*title: ':Tx'*/}
+                text :{name : tree.node /*,title: ':Tx'*/}
             };
         }
 
@@ -106,10 +109,10 @@ function mkTreeView($el, config) {
 
     function selectNode(id) {
         var $selected = $('#'+nodeIdPrefix+id);
-        $selected.addClass('selectedNode');
         if ($previousSelectedNode !== undefined) {
             $previousSelectedNode.removeClass('selectedNode');
         }
+        $selected.addClass('selectedNode');
         $previousSelectedNode = $selected;
 
         showNodeInfo(id2subtree[id]);
@@ -119,17 +122,25 @@ function mkTreeView($el, config) {
 
         var typeInfo = subtree.typeInfo;
 
-        var shortType = typeInfo.getShort();
+        var shortStr = typeInfo.getShort();
         var expandedType = typeInfo.getExpanded();
-        var origoType = Types.show(subtree.type);
+        var originalType = subtree.type;
+
+        var expandedStr = Types.show(expandedType);
+        var originalStr = Types.show(originalType);
+
 
         var $status = $('<span>').text('OK');
 
-        if (expandedType !== origoType) {
+        if (expandedStr !== originalStr) {
+
+            var $diff = Types.diff(expandedType, originalType);
+
             $status = $('<div>').append([
                 $('<p>').addClass('error').text('ERROR: expandedType !== origoType'),
-                $('<p>').text('expanded: '+expandedType),
-                $('<p>').text('original: '+origoType)
+                $('<p>').text('expanded: '+expandedStr),
+                $('<p>').text('original: '+originalStr),
+                $diff
             ]);
         }
 
@@ -149,8 +160,8 @@ function mkTreeView($el, config) {
         }
 
         var $box = $('<table>').addClass('nodeInfo').append([
-            mkRow('original',origoType),
-            mkRow('shortType',shortType),
+            mkRow('original',originalStr),
+            mkRow('shortType',shortStr),
             mkRow('node',subtree.node),
             mkRow('status',$status,true)
         ]);
@@ -164,7 +175,7 @@ function mkTreeView($el, config) {
         var pos = $node.position();
         var width = $node.width();
 
-        var $box = $('<div>').css({
+        var $box = $('<div>').attr({id:nodeLabelPrefix+id}).css({
             position:'absolute',
             left: (pos.left + width+3)+'px',
             top:  (pos.top + 5) + 'px',
@@ -175,11 +186,17 @@ function mkTreeView($el, config) {
         $node.parent().append($box);
     }
 
+    var errorNode = undefined;
+
     function addClicks() {
 
         _.forIn(id2subtree, function (subtree, id) {
 
             addUltraShortType(subtree, id);
+
+            if (subtree.error === true) {
+                errorNode = subtree.fun.id;
+            }
 
             $('#'+nodeIdPrefix+id).click(function (e) {
                 selectNode(id);
@@ -212,7 +229,8 @@ function mkTreeView($el, config) {
             nodeStructure: processTree(tree, nodeIdPrefix)
         }, function () {
             addClicks();
-            selectNode(0);
+            selectNode(errorNode === undefined ? 0 : errorNode);
+            $('#'+nodeLabelPrefix+errorNode).css({color:'red'});
         });
     }
 

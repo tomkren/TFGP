@@ -49,7 +49,7 @@ function mkTypeInfo(tree) {
 
     function mkGetExpanded(i) {
         return function () {
-            return Types.show(expand(i));
+            return expand(i);
         };
     }
 
