@@ -6,13 +6,12 @@ function mkNodeInfo ($nodeInfo) {
 
     function render(subtree) {
 
-
         var $box = $('<table>').addClass('nodeInfo').append([
             mkRow('shortType',subtree.typeInfo.getShort()),
             mkRow('original',Types.show(subtree.type)),
             mkRow('node',subtree.node),
             mkRow('status',mkStatus(subtree),true),
-            mkRow('debug log', subtree.debugInfo.log)
+            mkRow('debug log', mkDebugLog(subtree),true)
         ]);
 
         $nodeInfo.html($box);
@@ -42,6 +41,39 @@ function mkNodeInfo ($nodeInfo) {
 
 
         return $('<tr>').append($th, $td);
+    }
+
+    function mkDebugLog (subtree) {
+        var $table = $('<table>').addClass('nodeInfo');
+        var log = subtree.debugInfo.log;
+        var k = log.k;
+
+        function addRow (key,val) {
+            if (_.isFunction(val)) {val = val(log[key]);}
+            val = val || log[key];
+            $table.append($('<tr>').append($('<th>').text(key), $('<td>').text(val)));
+        }
+
+
+        addRow('k');
+        addRow('input type',Types.show);
+        addRow('normalized type',Types.show);
+        addRow('ball','1+'+log.ball);
+
+        if (k === 1) {
+            addRow("s");
+            addRow("t_s", Types.show);
+            addRow("t_s_fresh", Types.show);
+            addRow('mu', JSON.stringify);
+        }
+
+        addRow('fromNF',JSON.stringify);
+
+        addRow('','...');
+        addRow('(all-keys)', _.keys(log).toString());
+
+
+        return $table;
     }
 
     function mkStatus(subtree) {

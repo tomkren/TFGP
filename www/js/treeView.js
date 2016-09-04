@@ -66,7 +66,7 @@ function mkTreeView($el, config) {
     function mkInputSection () {
         $textArea = $('<textarea>')
             .css({width: '80%'})
-            .text(JSON.stringify(mkBadTreeExample()));
+            .text(JSON.stringify(mkLastErrTree()));
 
         var $updateButt = $('<button>')
             .text('update')

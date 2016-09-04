@@ -433,6 +433,13 @@ public class F {
         }
     }
 
+    public static void writeJsonAsJsFile(String filename, String mkFunName, JSONObject json) {
+        writeFile(filename,
+                "function "+mkFunName+" () {\n"+
+                "   return "+json.toString()+";\n"+
+                "}\n");
+    }
+
     public static List<String> stringsFromJsonArray(JSONArray jsonArr) {
         int n = jsonArr.length();
         List<String> ret = new ArrayList<>(n);

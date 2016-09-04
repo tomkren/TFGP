@@ -1,6 +1,5 @@
 package cz.tomkren.fishtron.latticegen;
 
-import com.google.common.collect.Sets;
 import cz.tomkren.fishtron.types.*;
 import cz.tomkren.utils.*;
 import org.json.JSONArray;
@@ -77,7 +76,9 @@ public class LSolver {
                 Log.it(newTree.getTypeTrace());
 
                 if (!isStrictlyWellTyped) {
-                    Log.it("tree is not strictly well-typed: " + newTree + "\n" + newTree.getTypeTrace().toString());
+                    JSONObject typeTrace = newTree.getTypeTrace();
+                    Log.it("tree is not strictly well-typed: " + newTree + "\n" + typeTrace.toString());
+                    F.writeJsonAsJsFile("www/data/lastErrTree.js", "mkLastErrTree", typeTrace);
                     wasOk = false;
                 }
             }
@@ -113,20 +114,30 @@ public class LSolver {
         return sizeTypeData.computeNum();
     }
 
+
     // -- generate one -------------------------------------
 
     private AppTree genOne(int k, Type type, boolean isNormalizationPerformed) {
         if (k < 1) {throw new Error("k must be > 0, it is "+k);}
 
+        JSONObject log = new JSONObject();
+
+        log.put("k",k);
+        log.put("input type",type.toJson());
+
         Type t;
         Sub fromNF;
         SizeTypeData sizeTypeData;
+
 
         if (isNormalizationPerformed) {
             AB<Type,Sub> nf = normalize(type);
             t = nf._1();
             fromNF = nf._2().inverse();
             sizeTypeData = getSizeTypeData(k, nf);
+
+            log.put("normalized type",t.toJson());
+
         } else {
             t = type;
             fromNF = null;
@@ -141,6 +152,8 @@ public class LSolver {
         BigInteger ball = F.nextBigInteger(num, rand);
         if (ball == null) {throw new Error("Ball null check failed, should be unreachable.");}
 
+        log.put("ball",ball+"/"+num);
+
         if (k == 1) {
 
             for (AB<String,Type> p : gamma) {
@@ -153,13 +166,20 @@ public class LSolver {
                 if (!mu.isFail()) {
 
                     if (F.isZero(ball)) {
+
+                        log.put("s",s);
+                        log.put("t_s",t_s.toJson());
+                        log.put("t_s_fresh",t_s_fresh.toJson());
+                        log.put("mu",mu.toJson());
+
                         AppTree s_tree = AppTree.mk(s, mu.apply(t));
 
                         if (isNormalizationPerformed) {
                             s_tree.applySub(fromNF);
+                            log.put("fromNF",fromNF.toJson());
                         }
 
-                        s_tree.updateDebugInfo(info -> info.put("log","Hello my little pony bond!"));
+                        s_tree.updateDebugInfo(info -> info.put("log",log));
 
                         return s_tree;
                     }
@@ -221,7 +241,7 @@ public class LSolver {
                             //throw new Error("TREE IS NOT SWT!");
                         }
 
-                        FX_tree.updateDebugInfo(info -> info.put("log","Hello my big pony bond!"));
+                        FX_tree.updateDebugInfo(info -> info.put("log",log));
 
                         return FX_tree;
                     }
