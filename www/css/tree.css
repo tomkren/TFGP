@@ -56,6 +56,10 @@
     background-color: red;
 }
 
+.offRow {
+    text-decoration: line-through;
+}
+
 .nodeInfo {
     font-family: "Lucida Console", Monaco, monospace;
     font-size: x-small;

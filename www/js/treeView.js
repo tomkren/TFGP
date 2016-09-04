@@ -71,7 +71,7 @@ function mkTreeView($el, config) {
         var $updateButt = $('<button>')
             .text('update')
             .css({
-                width: '18%',
+                width: '16%',
                 height: '35px',
                 display: 'block',
                 float:'right'

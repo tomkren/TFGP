@@ -15,7 +15,7 @@ import java.util.function.*;
 
 public class LSolver {
 
-    public static void main(String[] args) {
+    public static void main_(String[] args) {
         Checker ch = new Checker(7404398919224944163L);
 
         testNormalizations(ch);
@@ -34,11 +34,17 @@ public class LSolver {
         ch.results();
     }
 
-    public static void main_(String[] args) {
-        separateError_strictlyWellTyped(13, true); // 13L: (snd (mkP snd (s k)) mkP)
+    public static void main(String[] args) {
+
+        boolean wasOk = true;
+        int seed = 117;
+        while (wasOk) {
+            wasOk = separateError_strictlyWellTyped(seed, true); // 13L: (snd (mkP snd (s k)) mkP)
+            seed ++;
+        }
     }
 
-    private static void separateError_strictlyWellTyped(int seed, boolean isNormalizationPerformed) {
+    private static boolean separateError_strictlyWellTyped(int seed, boolean isNormalizationPerformed) {
 
             Checker ch = new Checker((long)seed);
 
@@ -60,6 +66,8 @@ public class LSolver {
 
             LSolver s = new LSolver(gamma, ch.getRandom());
 
+            boolean wasOk = true;
+
             AppTree newTree = s.genOne(k, t, isNormalizationPerformed);
             if (newTree != null) {
                 boolean isStrictlyWellTyped = newTree.isStrictlyWellTyped();
@@ -69,11 +77,16 @@ public class LSolver {
                 Log.it(newTree.getTypeTrace());
 
                 if (!isStrictlyWellTyped) {
-                    Log.it("tree is not strictly well-typed: " + newTree + "\n" + newTree.getTypeTrace().toString(2));
+                    Log.it("tree is not strictly well-typed: " + newTree + "\n" + newTree.getTypeTrace().toString());
+                    wasOk = false;
                 }
             }
 
-            ch.results();
+            if (!wasOk) {
+                ch.results();
+            }
+
+            return wasOk;
     }
 
 
@@ -146,6 +159,8 @@ public class LSolver {
                             s_tree.applySub(fromNF);
                         }
 
+                        s_tree.updateDebugInfo(info -> info.put("log","Hello my little pony bond!"));
+
                         return s_tree;
                     }
 
@@ -199,6 +214,14 @@ public class LSolver {
                         if (isNormalizationPerformed) {
                             FX_tree.applySub(fromNF);
                         }
+
+                        if (!FX_tree.isStrictlyWellTyped()) {
+                            Log.it("TREE IS NOT SWT!");
+                            Log.it(FX_tree.getTypeTrace());
+                            //throw new Error("TREE IS NOT SWT!");
+                        }
+
+                        FX_tree.updateDebugInfo(info -> info.put("log","Hello my big pony bond!"));
 
                         return FX_tree;
                     }

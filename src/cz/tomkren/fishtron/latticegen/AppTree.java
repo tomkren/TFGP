@@ -1,21 +1,26 @@
 
 package cz.tomkren.fishtron.latticegen;
 
-import com.google.common.base.Joiner;
+
 import cz.tomkren.fishtron.types.Sub;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.utils.AA;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
+
+import com.google.common.base.Joiner;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 /** Created by user on 27. 7. 2016.*/
+
+// TODO opakujou se tu kody, předelat na abstract dědičnost asi...
 
 interface AppTree {
 
@@ -35,13 +40,17 @@ interface AppTree {
     boolean isStrictlyWellTyped();
     JSONObject getTypeTrace();
 
+    void updateDebugInfo(Function<JSONObject,JSONObject> updateFun);
+
     class Leaf implements AppTree {
         private String sym;
         private Type type;
+        private JSONObject debugInfo;
 
         private Leaf(String sym, Type type) {
             this.sym = sym;
             this.type = type;
+            this.debugInfo = null;
         }
 
         @Override public Type getType() {return type;}
@@ -50,7 +59,17 @@ interface AppTree {
         @Override public String toString() {return sym;}
         @Override public String toRawString() {return sym;}
         @Override public boolean isStrictlyWellTyped() {return true;}
-        @Override public JSONObject getTypeTrace() {return F.obj("node",sym, "type",type.toJson());}
+
+        @Override public JSONObject getTypeTrace() {
+            JSONObject typeTrace = F.obj("node",sym, "type",type.toJson());
+            if (debugInfo != null) {typeTrace.put("debugInfo", debugInfo);}
+            return typeTrace;
+        }
+
+        @Override
+        public void updateDebugInfo(Function<JSONObject, JSONObject> updateFun) {
+            debugInfo = updateFun.apply(debugInfo == null ? new JSONObject() : debugInfo);
+        }
     }
 
     class App implements AppTree {
@@ -58,11 +77,14 @@ interface AppTree {
         private AppTree funTree;
         private AppTree argTree;
         private Type type;
+        private JSONObject debugInfo;
+
 
         private App(AppTree funTree, AppTree argTree, Type type) {
             this.funTree = funTree;
             this.argTree = argTree;
             this.type = type;
+            this.debugInfo = null;
         }
 
         @Override public Type getType() {return type;}
@@ -90,6 +112,10 @@ interface AppTree {
 
             if (!isRootStrictlyWellTyped()) {
                 typeTrace.put("error",true);
+            }
+
+            if (debugInfo != null) {
+                typeTrace.put("debugInfo", debugInfo);
             }
 
             return typeTrace;
@@ -138,6 +164,10 @@ interface AppTree {
             argTree.applySub(sub);
         }
 
+        @Override
+        public void updateDebugInfo(Function<JSONObject, JSONObject> updateFun) {
+            debugInfo = updateFun.apply(debugInfo == null ? new JSONObject() : debugInfo);
+        }
     }
 
 }
