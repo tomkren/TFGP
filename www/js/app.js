@@ -4,9 +4,10 @@ function mkApp(config) {
     config.$container.append($treeView);
 
     var treeView = mkTreeView($treeView);
-    var popup = mkPopup(config.$popup);
 
     /*
+    var popup = mkPopup(config.$popup);
+
     treeView.addClickNodeListener(function (subtree, e) {
         var type = Types.show(subtree.type);
         log(type);

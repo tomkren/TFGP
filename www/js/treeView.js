@@ -1,75 +1,142 @@
+// == TREE VIEW component ========
 function mkTreeView($el, config) {
 
-
-
-    var clickNodeListeners = [];
-    var nodeIdPrefix = 'node-';
-    var nodeLabelPrefix = 'node-L-';
-
-
-    function addClickNodeListener (callback) {
-        clickNodeListeners.push(callback);
-    }
-
+    // -- default config --
     config = _.assign({
         treantContainerName: 'treeView-treant',
         height: 400
     }, config || {});
 
-    $el.html('');
+    // -- listeners -------
+    var clickNodeListeners = [];
 
-    var $textArea = $('<textarea>')
-        .css({width: '80%'})
-        .text(JSON.stringify(mkBadTreeExample()));
+    // -- components ------
+    var nodeInfo;
+    var typeInfo;
 
-    var $updateButt = $('<button>')
-        .text('update')
-        .css({
-            width: '18%',
-            height: '35px',
-            display: 'block',
-            float:'right'
-        }).click(load);
+    // -- useful elems ----
+    var $textArea;
+    var $typeInfo;
+    var $nodeInfo;
 
-    var $treantContainer = $('<div>')
-        .attr('id',config.treantContainerName)
-        .css({
-            flex: '0 0 50%',
-            height: config.height+'px',
-            'border-right': '1px solid black'
+    // -- constants -------
+    var nodeIdPrefix = 'node-';
+    var nodeLabelPrefix = 'node-L-';
+
+    // -- state vars ------
+    var id2subtree;
+    var nextNodeId;
+    var $previousSelectedNode;
+    var errorNodeIds;
+
+
+    // ==  High level functions  ===========================
+
+    // Main constructor.
+    function init () {
+        resetState();
+        renderHTML();
+        initComponents();
+        renderInputTree();
+    }
+
+    // Initializes auxiliary state variables for shown tree.
+    function resetState () {
+        id2subtree = {};
+        nextNodeId = 0;
+        $previousSelectedNode = undefined;
+        errorNodeIds = [];
+    }
+
+    // Constructs html elements using jquery.
+    function renderHTML () {
+        $el.html('');
+        $el.append(mkInputSection(), mkNodeSection(), mkTreeSection());
+    }
+
+    // Constructs sub-components of this component.
+    function initComponents () {
+        nodeInfo = mkNodeInfo($nodeInfo);
+        typeInfo = mkTypeInfo($typeInfo);
+    }
+
+
+    // == HTML =============================================
+
+    function mkInputSection () {
+        $textArea = $('<textarea>')
+            .css({width: '80%'})
+            .text(JSON.stringify(mkBadTreeExample()));
+
+        var $updateButt = $('<button>')
+            .text('update')
+            .css({
+                width: '18%',
+                height: '35px',
+                display: 'block',
+                float:'right'
+            }).click(renderInputTree);
+
+        return $('<div>').append($textArea, $updateButt);
+    }
+
+    function mkNodeSection () {
+        $nodeInfo = $('<div>').css({
+            border: '1px solid black'
         });
+        return $nodeInfo;
+    }
 
-    var $typeInfo = $('<div>').addClass('typeInfo');
+    function mkTreeSection () {
+        var $treantContainer = $('<div>')
+            .attr('id',config.treantContainerName)
+            .css({
+                flex: '0 0 50%',
+                height: config.height+'px',
+                'border-right': '1px solid black'
+            });
 
-    var $typeBox = $('<div>')
-        .css({
-            flex: '1',
-            'padding-left': '15px'
-        }).html($typeInfo);
+        $typeInfo = $('<div>').addClass('typeInfo');
 
-    var $wrapper = $('<div>')
-        .css({
-            display: 'flex',
-            border: '1px solid black',
-            'border-top': '0'
-        })
-        .append($treantContainer, $typeBox);
+        var $typeInfoWrapper = $('<div>')
+            .css({
+                flex: '1',
+                'padding-left': '15px'
+            }).html($typeInfo);
 
-    var $nodeInfo = $('<div>').css({
-        //width: '100%',
-        border: '1px solid black'
-    });
+        return $('<div>')
+            .css({
+                display: 'flex',
+                border: '1px solid black',
+                'border-top': '0'
+            })
+            .append($treantContainer, $typeInfoWrapper);
+    }
 
-    $el.append($textArea, $updateButt, $nodeInfo, $wrapper);
+
+    // == Core functions ======================================
+
+    function renderInputTree() {
+        resetState();
+
+        var tree = loadTree();
+
+        typeInfo.render(tree);
+
+        var treantConfig = {
+            chart: {container: "#"+config.treantContainerName},
+            nodeStructure: processTree(tree, nodeIdPrefix)
+        };
+
+        $('#'+config.treantContainerName).html('');
+        new Treant(treantConfig, doAfterTreeIsRendered);
+    }
 
     function loadTree() {
         var treeJson = JSON.parse($textArea.val());
         console.log(treeJson);
         return treeJson;
     }
-
-    var id2subtree = {};
-    var nextNodeId = 0;
 
     function processTree(tree, idPrefix) {
 
@@ -105,7 +172,57 @@ function mkTreeView($el, config) {
         return nodeStructure;
     }
 
-    var $previousSelectedNode = undefined;
+    function doAfterTreeIsRendered () {
+        addVeryShortTypeLabels();
+        findErrorNodes();
+        markErrorNodes();
+        addNodeClicks();
+        selectNode(getDefaultSelectedNode());
+    }
+
+    function addVeryShortTypeLabels() {
+        _.forIn(id2subtree, function (subtree, id) {
+
+            var $node = $('#' + nodeIdPrefix + id);
+            var pos = $node.position();
+            var width = $node.width();
+
+            var $box = $('<div>').attr({id: nodeLabelPrefix + id}).css({
+                position: 'absolute',
+                left: (pos.left + width + 3) + 'px',
+                top: (pos.top + 5) + 'px',
+                color: 'gray',
+                'font-size': 'xx-small'
+            }).text(' : T' + subtree.typeInfo.i);
+
+            $node.parent().append($box);
+        });
+    }
+
+    function findErrorNodes () {
+        _.forIn(id2subtree, function (subtree) {
+            if (subtree.error === true) {
+                errorNodeIds.push(subtree.fun.id);
+            }
+        });
+    }
+
+    function markErrorNodes () {
+        _.each(errorNodeIds, function (errorNodeId) {
+            $('#'+nodeLabelPrefix+errorNodeId).css({color:'red'});
+        });
+    }
+
+    function addNodeClicks () {
+        _.forIn(id2subtree, function (subtree, id) {
+            $('#'+nodeIdPrefix+id).click(function (e) {
+                selectNode(id);
+                _.each(clickNodeListeners, function (callback) {
+                    callback(subtree, e);
+                });
+            });
+        });
+    }
 
     function selectNode(id) {
         var $selected = $('#'+nodeIdPrefix+id);
@@ -115,126 +232,25 @@ function mkTreeView($el, config) {
         $selected.addClass('selectedNode');
         $previousSelectedNode = $selected;
 
-        showNodeInfo(id2subtree[id]);
+        nodeInfo.render(id2subtree[id]);
     }
 
-    function showNodeInfo(subtree) {
-
-        var typeInfo = subtree.typeInfo;
-
-        var shortStr = typeInfo.getShort();
-        var expandedType = typeInfo.getExpanded();
-        var originalType = subtree.type;
-
-        var expandedStr = Types.show(expandedType);
-        var originalStr = Types.show(originalType);
-
-
-        var $status = $('<span>').text('OK');
-
-        if (expandedStr !== originalStr) {
-
-            var $diff = Types.diff(expandedType, originalType);
-
-            $status = $('<div>').append([
-                $('<p>').addClass('error').text('ERROR: expandedType !== origoType'),
-                $('<p>').text('expanded: '+expandedStr),
-                $('<p>').text('original: '+originalStr),
-                $diff
-            ]);
-        }
-
-        function mkRow(title, text, isHtml) {
-
-            var $td = $('<td>');
-            if (isHtml) {
-                $td.html(text);
-            } else {
-                $td.text(text);
-            }
-
-            return $('<tr>').append([
-                $('<th>').text(title),
-                $td
-            ]);
-        }
-
-        var $box = $('<table>').addClass('nodeInfo').append([
-            mkRow('original',originalStr),
-            mkRow('shortType',shortStr),
-            mkRow('node',subtree.node),
-            mkRow('status',$status,true)
-        ]);
-
-        $nodeInfo.html($box);
-    }
-
-    function addUltraShortType(subtree, id) {
-
-        var $node = $('#'+nodeIdPrefix+id);
-        var pos = $node.position();
-        var width = $node.width();
-
-        var $box = $('<div>').attr({id:nodeLabelPrefix+id}).css({
-            position:'absolute',
-            left: (pos.left + width+3)+'px',
-            top:  (pos.top + 5) + 'px',
-            color: 'gray',
-            'font-size':'xx-small'
-        }).text(' : T'+subtree.typeInfo.i);
-
-        $node.parent().append($box);
-    }
-
-    var errorNode = undefined;
-
-    function addClicks() {
-
-        _.forIn(id2subtree, function (subtree, id) {
-
-            addUltraShortType(subtree, id);
-
-            if (subtree.error === true) {
-                errorNode = subtree.fun.id;
-            }
-
-            $('#'+nodeIdPrefix+id).click(function (e) {
-                selectNode(id);
-                _.each(clickNodeListeners, function (callback) {
-                    callback(subtree, e);
-                });
-            });
-        });
-
+    function getDefaultSelectedNode() {
+        return _.isEmpty(errorNodeIds) ? 0 : errorNodeIds[0];
     }
 
 
-    var typeInfo;
+    // ==  Listener adding  =================================
 
-    function load() {
-
-        id2subtree = {};
-        nextNodeId = 0;
-        $previousSelectedNode = undefined;
-
-        $('#'+config.treantContainerName).html('');
-
-        var tree = loadTree();
-
-        typeInfo = mkTypeInfo(tree);
-        $typeInfo.html(typeInfo.getSummary());
-
-        new Treant({
-            chart: {container: "#"+config.treantContainerName},
-            nodeStructure: processTree(tree, nodeIdPrefix)
-        }, function () {
-            addClicks();
-            selectNode(errorNode === undefined ? 0 : errorNode);
-            $('#'+nodeLabelPrefix+errorNode).css({color:'red'});
-        });
+    function addClickNodeListener (callback) {
+        clickNodeListeners.push(callback);
     }
 
-    load();
+    // == Constructor execution =============================
+
+    init();
+
+    // == Public interface ==================================
 
     return {
         getTypeInfo : function () {return typeInfo;},

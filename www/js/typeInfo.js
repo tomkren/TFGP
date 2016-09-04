@@ -1,6 +1,12 @@
-function mkTypeInfo(tree) {
+function mkTypeInfo($typeInfo) {
 
-    var subtypes = processTree(tree);
+    var subtypes;
+
+    function render(tree) {
+        subtypes = processTree(tree);
+        $typeInfo.html(getSummary());
+    }
+
 
     function processTree(tree) {
 
@@ -101,6 +107,6 @@ function mkTypeInfo(tree) {
 
 
     return {
-        getSummary: getSummary
+        render:render
     };
 }
