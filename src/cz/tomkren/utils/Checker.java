@@ -40,7 +40,7 @@ public class Checker {
         rand = new Random(this.seed);
 
         if (!silent) {
-            Log.it("seed : "+this.seed+"L\n");
+            Log.it("seed : "+this.seed+"L");
         }
 
         startTime();

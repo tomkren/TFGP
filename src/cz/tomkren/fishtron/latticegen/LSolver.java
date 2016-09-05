@@ -14,7 +14,7 @@ import java.util.function.*;
 
 public class LSolver {
 
-    public static void main_(String[] args) {
+    public static void main(String[] args) {
         Checker ch = new Checker(7404398919224944163L);
 
         testNormalizations(ch);
@@ -28,74 +28,79 @@ public class LSolver {
 
         //tests_lambdaDags(ch, 6, 10000);
 
-        tests_treeGenerating(ch,6, 100, true);
+        tests_treeGenerating(ch, 6, 100);
 
         ch.results();
     }
 
-    public static void main(String[] args) {
+    public static void main_(String[] args) {
 
         boolean wasOk = true;
-        int seed = 117;
+        int seed = 210;
         while (wasOk) {
-            wasOk = separateError_strictlyWellTyped(seed, true); // 13L: (snd (mkP snd (s k)) mkP)
-            seed ++;
+            wasOk = separateError_strictlyWellTyped(seed); // 13L: (snd (mkP snd (s k)) mkP)
+            seed++;
+            Log.it("----------------------------------");
         }
     }
 
-    private static boolean separateError_strictlyWellTyped(int seed, boolean isNormalizationPerformed) {
+    private static boolean separateError_strictlyWellTyped(int seed) {
 
-            Checker ch = new Checker((long)seed);
+        Checker ch = new Checker((long) seed);
 
-            List<AB<String, Type>> gamma = mkGamma(
-                    "s", "(a -> (b -> c)) -> ((a -> b) -> (a -> c))",
-                    "k", "a -> (b -> a)",
-                    "seri", "(Dag a b) -> ((Dag b c) -> (Dag a c))",
-                    "para", "(Dag a b) -> ((Dag c d) -> (Dag (P a c) (P b d))",
-                    "mkDag", "(a -> b) -> (Dag a b)",
-                    "deDag", "(Dag a b) -> (a -> b)",
-                    "mkP", "a -> (b -> (P a b))",
-                    "fst", "(P a b) -> a",
-                    "snd", "(P a b) -> b"
-            );
+        List<AB<String, Type>> gamma = mkGamma(
+                "s", "(a -> (b -> c)) -> ((a -> b) -> (a -> c))",
+                "k", "a -> (b -> a)",
+                "seri", "(Dag a b) -> ((Dag b c) -> (Dag a c))",
+                "para", "(Dag a b) -> ((Dag c d) -> (Dag (P a c) (P b d))",
+                "mkDag", "(a -> b) -> (Dag a b)",
+                "deDag", "(Dag a b) -> (a -> b)",
+                "mkP", "a -> (b -> (P a b))",
+                "fst", "(P a b) -> a",
+                "snd", "(P a b) -> b"
+        );
 
-            Type t = Types.parse("(P A (P A A)) -> (P A (P A A))");
+        Type t = Types.parse("(P A (P A A)) -> (P A (P A A))");
 
-            int k = 6;
+        int k = 6;
 
-            LSolver s = new LSolver(gamma, ch.getRandom());
+        LSolver s = new LSolver(gamma, ch.getRandom());
 
-            boolean wasOk = true;
+        boolean wasOk = true;
 
-            AppTree newTree = s.genOne(k, t, isNormalizationPerformed);
-            if (newTree != null) {
-                boolean isStrictlyWellTyped = newTree.isStrictlyWellTyped();
+        AppTree newTree = s.genOne(k, t);
+        if (newTree != null) {
+            boolean isStrictlyWellTyped = newTree.isStrictlyWellTyped();
 
-                ch.is(isStrictlyWellTyped, "Is tree strictly well typed?");
+            ch.is(isStrictlyWellTyped, "Is tree strictly well typed?");
 
-                Log.it(newTree.getTypeTrace());
+            Log.it(newTree.getTypeTrace());
 
-                if (!isStrictlyWellTyped) {
-                    JSONObject typeTrace = newTree.getTypeTrace();
-                    Log.it("tree is not strictly well-typed: " + newTree + "\n" + typeTrace.toString());
-                    F.writeJsonAsJsFile("www/data/lastErrTree.js", "mkLastErrTree", typeTrace);
-                    wasOk = false;
-                }
+            if (!isStrictlyWellTyped) {
+                JSONObject typeTrace = newTree.getTypeTrace();
+                Log.it("tree is not strictly well-typed: " + newTree + "\n" + typeTrace.toString());
+                writeErrorTreeToFile(typeTrace);
+                wasOk = false;
             }
+        }
 
-            if (!wasOk) {
-                ch.results();
-            }
+        if (!wasOk) {
+            ch.results();
+        }
 
-            return wasOk;
+        return wasOk;
+    }
+
+    private static void writeErrorTreeToFile(JSONObject typeTrace) {
+        F.writeJsonAsJsFile("www/data/lastErrTree.js", "mkLastErrTree", typeTrace);
     }
 
 
-    private List<AB<String,Type>> gamma;
+    private List<AB<String, Type>> gamma;
     private Random rand;
-    private Map<String,TypeData> typeDataMap;
+    private Map<String, TypeData> typeDataMap;
     private List<Sub> subsList;
-    private Map<String,Integer> sub2id;
+    private Map<String, Integer> sub2id;
 
     private LSolver(List<AB<String, Type>> gamma, Random rand) {
         this.gamma = gamma;
@@ -109,7 +114,7 @@ public class LSolver {
     // -- future public utils -----------------------------
 
     private BigInteger getNum(int k, Type t) {
-        AB<Type,Sub> nf = normalize(t);
+        AB<Type, Sub> nf = normalize(t);
         SizeTypeData sizeTypeData = getSizeTypeData(k, nf);
         return sizeTypeData.computeNum();
     }
@@ -117,7 +122,11 @@ public class LSolver {
 
     // -- generate one -------------------------------------
 
-    private AppTree genOne(int k, Type type, boolean isNormalizationPerformed) {
+    private AppTree genOne(int k, Type type) {
+        return genOne(k,type, true , true);
+    }
+
+    private AppTree genOne(int k, Type type, boolean isNormalizationPerformed, boolean isTopLevel) {
         if (k < 1) {throw new Error("k must be > 0, it is "+k);}
 
         JSONObject log = new JSONObject();
@@ -217,8 +226,22 @@ public class LSolver {
                         AB<Type,Set<Integer>> t_F_skolemized_p = t_F_selected.skolemize();
                         AB<Type,Set<Integer>> t_X_skolemized_p = t_X_selected.skolemize();
 
-                        AppTree F_tree = genOne(i, t_F_skolemized_p._1(), isNormalizationPerformed);
-                        AppTree X_tree = genOne(j, t_X_skolemized_p._1(), isNormalizationPerformed);
+                        Type t_F_skolemized = t_F_skolemized_p._1();
+                        Type t_X_skolemized = t_X_skolemized_p._1();
+
+                        log.put("i,j",           i+","+j);
+                        log.put("alpha",         alpha.toJson());
+                        log.put("t_F",           t_F.toJson());
+                        log.put("s_F",           s_F.toJson());
+                        log.put("t_F_selected",  t_F_selected.toJson());
+                        log.put("t_F_skolemized",t_F_skolemized.toJson());
+                        log.put("t_X",           t_X.toJson());
+                        log.put("s_X",           s_X.toJson());
+                        log.put("t_X_selected",  t_X_selected.toJson());
+                        log.put("t_X_skolemized",t_X_skolemized.toJson());
+
+                        AppTree F_tree = genOne(i, t_F_skolemized, isNormalizationPerformed, false);
+                        AppTree X_tree = genOne(j, t_X_skolemized, isNormalizationPerformed, false);
 
                         if (F_tree == null || X_tree == null) {throw new Error("Null subtrees, should be unreachable.");}
 
@@ -233,15 +256,17 @@ public class LSolver {
 
                         if (isNormalizationPerformed) {
                             FX_tree.applySub(fromNF);
-                        }
-
-                        if (!FX_tree.isStrictlyWellTyped()) {
-                            Log.it("TREE IS NOT SWT!");
-                            Log.it(FX_tree.getTypeTrace());
-                            //throw new Error("TREE IS NOT SWT!");
+                            log.put("fromNF",fromNF.toJson());
                         }
 
                         FX_tree.updateDebugInfo(info -> info.put("log",log));
+
+                        if (isTopLevel && !FX_tree.isStrictlyWellTyped()) {
+                            JSONObject trace = FX_tree.getTypeTrace();
+                            Log.it("!!! TREE IS NOT SWT: "+trace);
+                            writeErrorTreeToFile(trace);
+                            throw new Error("TREE IS NOT SWT!");
+                        }
 
                         return FX_tree;
                     }
@@ -586,7 +611,8 @@ public class LSolver {
     private static AB<Type,Sub> normalize(Type t) {
 
         Sub t2nf = new Sub();
-        Type nf = t.freshenVars(0, t2nf)._1();
+        int startVarId = t.getNextVarId_onlySkolemVars(); //0;
+        Type nf = t.freshenVars(startVarId, t2nf)._1();
 
         Sub rho = t2nf.toRenaming(t);
         if (rho.isFail()) {throw new Error("Unable to construct renaming: "+rho.getFailMsg());}
@@ -645,7 +671,7 @@ public class LSolver {
 
     // -- TESTING -----------------------------------
 
-    private static void tests_treeGenerating(Checker ch,int k_max, int numSamples, boolean isNormalizationPerformed){
+    private static void tests_treeGenerating(Checker ch,int k_max, int numSamples){
         Log.it("\n== TREE GENERATING TESTS =======================================================\n");
 
         List<AB<String,Type>> gamma = mkGamma(
@@ -662,7 +688,7 @@ public class LSolver {
 
         Type t = Types.parse("(P A (P A A)) -> (P A (P A A))");
         for (int k = 1; k <= k_max; k++) {
-            testTreeGenerating(ch, k, t, gamma, numSamples, isNormalizationPerformed);
+            testTreeGenerating(ch, k, t, gamma, numSamples);
         }
     }
 
@@ -751,8 +777,7 @@ public class LSolver {
 
     }*/
 
-    private static void testTreeGenerating(Checker ch, int k, Type t, List<AB<String,Type>> gamma, int numSamples,
-                                           boolean isNormalizationPerformed) {
+    private static void testTreeGenerating(Checker ch, int k, Type t, List<AB<String,Type>> gamma, int numSamples) {
         String argStr = "("+k+", "+t+")";
 
         LSolver s = new LSolver(gamma, ch.getRandom());
@@ -762,7 +787,7 @@ public class LSolver {
         Log.it(num);
 
         Log.it_noln("s.generateOne"+argStr+" = ");
-        AppTree tree = s.genOne(k, t, isNormalizationPerformed);
+        AppTree tree = s.genOne(k, t);
         Log.it(tree);
 
         if (F.isZero(num) || tree == null) {
@@ -800,7 +825,7 @@ public class LSolver {
                         Log.it(i+1);
                     }
 
-                    AppTree newTree = s.genOne(k, t, isNormalizationPerformed);
+                    AppTree newTree = s.genOne(k, t);
 
                     if (newTree != null) {
 

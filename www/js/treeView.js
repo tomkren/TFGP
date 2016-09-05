@@ -202,7 +202,7 @@ function mkTreeView($el, config) {
     function findErrorNodes () {
         _.forIn(id2subtree, function (subtree) {
             if (subtree.error === true) {
-                errorNodeIds.push(subtree.fun.id);
+                errorNodeIds.push(subtree.id);
             }
         });
     }

@@ -74,6 +74,14 @@ public class TypeTerm implements Type {
     }
 
     @Override
+    public int getNextVarId_onlySkolemVars(int acc) {
+        for (Type arg : args) {
+            acc = arg.getNextVarId_onlySkolemVars(acc);
+        }
+        return acc;
+    }
+
+    @Override
     public void getVarIds(Set<Integer> ret) {
         args.forEach(t->t.getVarIds(ret));
     }

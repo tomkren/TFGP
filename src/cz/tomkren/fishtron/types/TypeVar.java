@@ -52,6 +52,11 @@ public class TypeVar implements Type {
     }
 
     @Override
+    public int getNextVarId_onlySkolemVars(int acc) {
+        return acc;
+    }
+
+    @Override
     public void getVarIds(Set<Integer> ret) {
         ret.add(id);
     }

@@ -27,9 +27,14 @@ public interface Type {
     void getVarIds(Set<Integer> acc);
 
     int getNextVarId(int acc);
+    int getNextVarId_onlySkolemVars(int acc);
 
     default int getNextVarId() {
         return getNextVarId(0);
+    }
+
+    default int getNextVarId_onlySkolemVars() {
+        return getNextVarId_onlySkolemVars(0);
     }
 
     default Set<Integer> getVarIds() {

@@ -65,11 +65,13 @@ public class TypeSym implements Type {
 
     @Override
     public int getNextVarId(int acc) {
-
-        //return acc;
-
         Integer sid = getSkolemId();
         return sid == null ? acc : Math.max(acc,sid+1);
+    }
+
+    @Override
+    public int getNextVarId_onlySkolemVars(int acc) {
+        return getNextVarId(acc);
     }
 
     @Override
