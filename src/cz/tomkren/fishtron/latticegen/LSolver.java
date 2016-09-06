@@ -115,7 +115,7 @@ public class LSolver {
 
     private BigInteger getNum(int k, Type t) {
         AB<Type, Sub> nf = normalize(t);
-        SizeTypeData sizeTypeData = getSizeTypeData(k, nf);
+        SizeTypeData sizeTypeData = getSizeTypeData(k, nf, t.getNextVarId());  // TODO opravdu 0 ??????? ?????? ????? ???? ??? ?? ?
         return sizeTypeData.computeNum();
     }
 
@@ -123,10 +123,10 @@ public class LSolver {
     // -- generate one -------------------------------------
 
     private AppTree genOne(int k, Type type) {
-        return genOne(k,type, true , true);
+        return genOne(k,type, true , true, type.getNextVarId())._1();
     }
 
-    private AppTree genOne(int k, Type type, boolean isNormalizationPerformed, boolean isTopLevel) {
+    private AB<AppTree,Integer> genOne(int k, Type type, boolean isNormalizationPerformed, boolean isTopLevel, int nextVarId) {
         if (k < 1) {throw new Error("k must be > 0, it is "+k);}
 
         JSONObject log = new JSONObject();
@@ -136,27 +136,27 @@ public class LSolver {
 
         Type t;
         Sub fromNF;
-        SizeTypeData sizeTypeData;
+        SizeTypeData sizeTypeData_forNum;
 
 
         if (isNormalizationPerformed) {
             AB<Type,Sub> nf = normalize(type);
             t = nf._1();
             fromNF = nf._2().inverse();
-            sizeTypeData = getSizeTypeData(k, nf);
+            sizeTypeData_forNum = getSizeTypeData(k, nf, nextVarId); // todo ??? nextVarId ????
 
             log.put("normalized type",t.toJson());
 
         } else {
             t = type;
             fromNF = null;
-            sizeTypeData = getSizeTypeData(k, t);
+            sizeTypeData_forNum = getSizeTypeData(k, t, nextVarId); // todo ??? nextVarId ????
         }
 
 
-        BigInteger num = sizeTypeData.computeNum();
+        BigInteger num = sizeTypeData_forNum.computeNum();
 
-        if (F.isZero(num)) {return null;}
+        if (F.isZero(num)) {return AB.mk(null,nextVarId);}
 
         BigInteger ball = F.nextBigInteger(num, rand);
         if (ball == null) {throw new Error("Ball null check failed, should be unreachable.");}
@@ -169,7 +169,11 @@ public class LSolver {
                 String s = p._1();
                 Type t_s = p._2();
 
-                Type t_s_fresh = fresh(t_s, t);
+                //Type t_s_fresh = fresh(t_s, t);
+                AB<Type,Integer> t_s_p =  fresh(t_s,t,nextVarId); // todo ještě promyslet kterou přesně variantu //t_s.freshenVars(nextVarId); //fresh(t_s, t);
+                Type t_s_fresh     = t_s_p._1();
+                int  t_s_nextVarId = t_s_p._2();
+
                 Sub mu = Sub.mgu(t, t_s_fresh);
 
                 if (!mu.isFail()) {
@@ -180,6 +184,7 @@ public class LSolver {
                         log.put("t_s",t_s.toJson());
                         log.put("t_s_fresh",t_s_fresh.toJson());
                         log.put("mu",mu.toJson());
+                        log.put("t_s_nextVarId",t_s_nextVarId);
 
                         AppTree s_tree = AppTree.mk(s, mu.apply(t));
 
@@ -190,7 +195,7 @@ public class LSolver {
 
                         s_tree.updateDebugInfo(info -> info.put("log",log));
 
-                        return s_tree;
+                        return AB.mk(s_tree,t_s_nextVarId);
                     }
 
                     ball = ball.subtract(BigInteger.ONE);
@@ -206,15 +211,17 @@ public class LSolver {
             Type alpha = newVar(t);
             Type t_F = Types.mkFunType(alpha, t);
 
-            for (AB<BigInteger,Sub> p_F : subs_k(i, t_F)) {
-                BigInteger n_F = p_F._1();
-                Sub        s_F = p_F._2();
+            for (ABC<BigInteger,Sub,Integer> p_F : subs_k(i, t_F,nextVarId)) {
+                BigInteger  n_F = p_F._1();
+                Sub         s_F = p_F._2();
+                int nextVarId_F = p_F._3();
 
                 Type t_X = s_F.apply(alpha);
 
-                for (AB<BigInteger,Sub> p_X : subs_k(j, t_X)) {
-                    BigInteger n_X = p_X._1();
-                    Sub        s_X = p_X._2();
+                for (ABC<BigInteger,Sub,Integer> p_X : subs_k(j, t_X, nextVarId_F)) {
+                    BigInteger  n_X = p_X._1();
+                    Sub         s_X = p_X._2();
+                    int nextVarId_X = p_X._3();
 
                     BigInteger n_FX = n_F.multiply(n_X);
 
@@ -240,8 +247,11 @@ public class LSolver {
                         log.put("t_X_selected",  t_X_selected.toJson());
                         log.put("t_X_skolemized",t_X_skolemized.toJson());
 
-                        AppTree F_tree = genOne(i, t_F_skolemized, isNormalizationPerformed, false);
-                        AppTree X_tree = genOne(j, t_X_skolemized, isNormalizationPerformed, false);
+                        AB<AppTree,Integer> F_tree_p = genOne(i, t_F_skolemized, isNormalizationPerformed, false, nextVarId_X);
+                        AB<AppTree,Integer> X_tree_p = genOne(j, t_X_skolemized, isNormalizationPerformed, false, F_tree_p._2());
+
+                        AppTree F_tree = F_tree_p._1();
+                        AppTree X_tree = X_tree_p._1();
 
                         if (F_tree == null || X_tree == null) {throw new Error("Null subtrees, should be unreachable.");}
 
@@ -268,7 +278,7 @@ public class LSolver {
                             throw new Error("TREE IS NOT SWT!");
                         }
 
-                        return FX_tree;
+                        return AB.mk(FX_tree,X_tree_p._2());
                     }
 
                     ball = ball.subtract(n_FX);
@@ -367,33 +377,32 @@ public class LSolver {
 
     // -- CORE ---------------------------------------------
 
-    private List<AB<BigInteger,Sub>> subs_k(int k, Type t) {
+    private List<ABC<BigInteger,Sub,Integer>> subs_k(int k, Type t, int nextVarId) {
         AB<Type,Sub> nf = normalize(t);
-        SizeTypeData sizeTypeData = getSizeTypeData(k, nf);
-        List<AB<BigInteger,Integer>> subsData = sizeTypeData.getSubsData();
-        List<AB<BigInteger,Sub>> decodedSubs  = decodeSubs(subsData);
+        SizeTypeData sizeTypeData = getSizeTypeData(k, nf, nextVarId);
+        List<ABC<BigInteger,Sub,Integer>> decodedSubs = decodeSubs(sizeTypeData,nextVarId);
         return denormalize(decodedSubs, nf);
     }
 
-    private SizeTypeData getSizeTypeData(int k, AB<Type,Sub> nfData) {
-        return getSizeTypeData(k, nfData._1());
+    private SizeTypeData getSizeTypeData(int k, AB<Type,Sub> nfData, int nextVarId) {
+        return getSizeTypeData(k, nfData._1(), nextVarId);
     }
 
-    private SizeTypeData getSizeTypeData(int k, Type t) {
+    private SizeTypeData getSizeTypeData(int k, Type t, int nextVarId) {
         TypeData typeData = typeDataMap.computeIfAbsent(t.toString(), key->new TypeData());
         SizeTypeData sizeTypeData = typeData.getSizeTypeData(k);
 
         if (!sizeTypeData.isComputed()) {
-            List<AB<BigInteger,Sub>> subs = core_k(k, t, subs_1(gamma), this::subs_ij, LSolver::packSubs);
-            sizeTypeData.setSubsData(encodeSubs(subs));
+            List<ABC<BigInteger,Sub,Integer>> subs = core_k(k, t, subs_1(gamma), this::subs_ij, LSolver::packSubs, nextVarId);
+            sizeTypeData.set(encodeSubs(subs),nextVarId);
         }
 
         return sizeTypeData;
     }
 
-    private List<AB<BigInteger,Sub>> subs_ij(int i, int j, Type t) {
+    private List<ABC<BigInteger,Sub,Integer>> subs_ij(int i, int j, Type t, int nextVarId) {
         AB<Type,Sub> nf = normalize(t);
-        List<AB<BigInteger,Sub>> subs = core_ij(i, j, nf._1(), this::subs_k, BigInteger::multiply, LSolver::packSubs);
+        List<ABC<BigInteger,Sub,Integer>> subs = core_ij(i, j, nf._1(), this::subs_k, BigInteger::multiply, LSolver::packSubs, nextVarId);
         return denormalize(subs, nf);
     }
 
@@ -404,21 +413,21 @@ public class LSolver {
     // TODO | A: Substituce můžem použít, abychom nezkoušeli zbytečný uličky;
     // TODO |    a navíc si můžem v podobnym duchu předpočítat i termy.
     // TODO |    Zatimbych to ale přeskočil a radši udělal generateOne.
-    private List<AB<String,Sub>> ts_k(int k, Type t) {
+    private List<ABC<String,Sub,Integer>> ts_k(int k, Type t, int nextVarId) {
         AB<Type,Sub> nf = normalize(t);
-        List<AB<String,Sub>> ts = core_k(k,nf._1(), ts_1(gamma), this::ts_ij, xs->xs);
+        List<ABC<String,Sub,Integer>> ts = core_k(k,nf._1(), ts_1(gamma), this::ts_ij, xs->xs,nextVarId);
         return denormalize(ts, nf);
     }
 
-    private List<AB<String,Sub>> ts_ij(int i, int j, Type t) {
+    private List<ABC<String,Sub,Integer>> ts_ij(int i, int j, Type t, int nextVarId) {
         AB<Type,Sub> nf = normalize(t);
-        List<AB<String,Sub>> ts = core_ij(i,j,nf._1(), this::ts_k, LSolver::mkAppString, xs->xs);
+        List<ABC<String,Sub,Integer>> ts = core_ij(i,j,nf._1(), this::ts_k, LSolver::mkAppString, xs->xs, nextVarId);
         return denormalize(ts, nf);
     }
 
     // -- Utils for CORE ---------------------------------------------
 
-    private AB<BigInteger,Integer> encodeSub(AB<BigInteger,Sub> subData) {
+    private ABC<BigInteger,Integer,Integer> encodeSub(ABC<BigInteger,Sub,Integer> subData) {
         Sub sub = subData._2();
         String sub_str = sub.toString();
         Integer sub_id = sub2id.get(sub_str);
@@ -430,15 +439,50 @@ public class LSolver {
         }
 
         BigInteger num = subData._1();
-        return AB.mk(num,sub_id);
+        int nextVarId  = subData._3();
+        return ABC.mk(num,sub_id,nextVarId);
     }
 
-    private List<AB<BigInteger,Integer>> encodeSubs(List<AB<BigInteger,Sub>> subs) {
+    private List<ABC<BigInteger,Integer,Integer>> encodeSubs(List<ABC<BigInteger,Sub,Integer>> subs) {
         return F.map(subs, this::encodeSub);
     }
 
-    private List<AB<BigInteger,Sub>> decodeSubs(List<AB<BigInteger,Integer>> encodedSubs) {
-        return F.map(encodedSubs, p -> AB.mk( p._1(), subsList.get(p._2()) ));
+    private List<ABC<BigInteger,Sub,Integer>> decodeSubs(SizeTypeData sizeTypeData, int nextVarId) {
+
+        List<ABC<BigInteger,Integer,Integer>> encodedSubs = sizeTypeData.getSubsData();
+        int nextVarId_input = sizeTypeData.getNextVarId_input();
+
+        List<ABC<BigInteger,Sub,Integer>> unIncremented = F.map(encodedSubs, p -> ABC.mk( p._1(), subsList.get(p._2()), p._3()));
+
+        if (nextVarId <= nextVarId_input) {
+            return unIncremented;
+        }
+
+        return F.map(unIncremented, subData -> incrementDecodedSub(subData, nextVarId_input, nextVarId));
+
+    }
+
+    private static ABC<BigInteger,Sub,Integer> incrementDecodedSub(ABC<BigInteger,Sub,Integer> subData, int nextVarId_input, int nextVarId) {
+
+        int delta = nextVarId - nextVarId_input;
+        Sub sub = subData._2();
+
+        Set<Integer> codomainVarIds = sub.getCodomainVarIds();
+
+        Sub incrementSub = new Sub();
+
+        // todo | neni to nejaky celý blbě? rozmyslet co když to je poprvý volany že nextVarId_input = 0, že to je naky chlupatý
+        // todo | ...
+
+        for (Integer codomVarId : codomainVarIds) {
+            if (codomVarId >= nextVarId_input) {
+                incrementSub.add(codomVarId, new TypeVar(codomVarId + delta)); // TODO nekurvěj to nějak skolemizovaný ?
+            }
+        }
+
+        Sub newSub = Sub.dot(incrementSub,sub);
+
+        return ABC.mk(subData._1(), newSub, subData._3() + delta);
     }
 
     /* asi 2 blobosti, radši přehodnotit interpretaci volaní skolemizovaneho getOne..
@@ -452,25 +496,28 @@ public class LSolver {
         return fromNF.apply(s_FX.apply(goalNF)).deskolemize();
     }*/
 
-    private static <A> AB<A,Sub> denormalize(AB<A,Sub> x, AB<Type,Sub> nfData) {
-        Function<AB<A,Sub>,AB<A,Sub>> f = mkDenormalizator(nfData);
+    private static <A> ABC<A,Sub,Integer> denormalize(ABC<A,Sub,Integer> x, AB<Type,Sub> nfData) {
+        Function<ABC<A,Sub,Integer>,ABC<A,Sub,Integer>> f = mkDenormalizator(nfData);
         return f.apply(x);
     }
 
-    private static <A> List<AB<A,Sub>> denormalize(List<AB<A,Sub>> xs, AB<Type,Sub> nfData) {
-        Function<AB<A,Sub>,AB<A,Sub>> f = mkDenormalizator(nfData);
+    private static <A> List<ABC<A,Sub,Integer>> denormalize(List<ABC<A,Sub,Integer>> xs, AB<Type,Sub> nfData) {
+        Function<ABC<A,Sub,Integer>,ABC<A,Sub,Integer>> f = mkDenormalizator(nfData);
         return F.map(xs, f);
     }
 
-    private static <A> Function<AB<A,Sub>,AB<A,Sub>> mkDenormalizator(AB<Type,Sub> nfData) {
+    private static <A> Function<ABC<A,Sub,Integer>,ABC<A,Sub,Integer>> mkDenormalizator(AB<Type,Sub> nfData) {
         Sub  t2nf = nfData._2();
         Sub  nf2t = t2nf.inverse();
         return p -> {
             A a = p._1();
+            int nextVarId = p._3();
+
             Sub sub_nf = p._2();
             Sub s1 = Sub.dot(sub_nf,t2nf);
             Sub sub = Sub.dot(nf2t, s1);
-            return AB.mk(a,sub);
+
+            return ABC.mk(a,sub,nextVarId); // TODO opravdu stačí jen zkopírovat nextVarId, určitě promyslet do hloubky !!!
         };
     }
 
@@ -481,63 +528,72 @@ public class LSolver {
 
     // -- STATIC FUNS : core of the method -----------------------------------------------------
 
-    private static BiFunction<Integer,Type,List<AB<BigInteger,Sub>>> subs_k(List<AB<String,Type>> gamma) {
-        return (k,t) -> core_k(k,t, subs_1(gamma), subs_ij(gamma), LSolver::packSubs);
+    private static TriFun<Integer,Type,Integer,List<ABC<BigInteger,Sub,Integer>>> subs_k(List<AB<String,Type>> gamma) {
+        return (k,t,nextVarId) -> core_k(k, t, subs_1(gamma), subs_ij(gamma), LSolver::packSubs, nextVarId);
     }
 
-    private static BiFunction<Integer,Type,List<AB<String,Sub>>> ts_k(List<AB<String,Type>> gamma) {
-        return (k,t) -> core_k(k,t, ts_1(gamma), ts_ij(gamma), ts->ts);
+
+    private static TetraFun<Integer,Integer,Type,Integer,List<ABC<BigInteger,Sub,Integer>>> subs_ij(List<AB<String,Type>> gamma) {
+        return (i,j,t,nextVarId) -> core_ij(i, j, t, subs_k(gamma), BigInteger::multiply, LSolver::packSubs, nextVarId);
     }
 
-    private static TriFun<Integer,Integer,Type,List<AB<BigInteger,Sub>>> subs_ij(List<AB<String,Type>> gamma) {
-        return (i,j,t) -> core_ij(i,j,t, subs_k(gamma), BigInteger::multiply, LSolver::packSubs);
+    private static TriFun<Integer,Type,Integer,List<ABC<String,Sub,Integer>>> ts_k(List<AB<String,Type>> gamma) {
+        return (k,t,nextVarId) -> core_k(k, t, ts_1(gamma), ts_ij(gamma), ts->ts, nextVarId);
     }
 
-    private static TriFun<Integer,Integer,Type,List<AB<String,Sub>>> ts_ij(List<AB<String,Type>> gamma) {
-        return (i,j,t) -> core_ij(i,j,t, ts_k(gamma), LSolver::mkAppString, ts->ts);
+    private static TetraFun<Integer,Integer,Type,Integer,List<ABC<String,Sub,Integer>>> ts_ij(List<AB<String,Type>> gamma) {
+        return (i,j,t,nextVarId) -> core_ij(i, j, t, ts_k(gamma), LSolver::mkAppString, ts->ts, nextVarId);
     }
 
-    private static <A> List<AB<A,Sub>> core_k(int k, Type t,
-            Function<Type,List<AB<A,Sub>>> fun_1,
-            TriFun<Integer, Integer, Type, List<AB<A,Sub>>> fun_ij,
-            Function<List<AB<A,Sub>>,List<AB<A,Sub>>> pack_fun) {
+    private static <A> List<ABC<A,Sub,Integer>> core_k(
+            int k, Type t,
+            BiFunction<Type,Integer,List<ABC<A,Sub,Integer>>> fun_1,
+            TetraFun<Integer, Integer, Type, Integer, List<ABC<A,Sub,Integer>>> fun_ij,
+            Function<List<ABC<A,Sub,Integer>>,List<ABC<A,Sub,Integer>>> pack_fun,
+            int nextVarId
+    ) {
         if (k < 1) {
             throw new Error("k must be > 0, it is "+k);
         } else if (k == 1) {
-            return fun_1.apply(t);
+            return fun_1.apply(t,nextVarId);
         } else {
-            List<AB<A,Sub>> ret = new ArrayList<>();
+            List<ABC<A,Sub,Integer>> ret = new ArrayList<>();
             for (int i = 1; i < k; i++) {
-                ret.addAll(fun_ij.apply(i, k - i, t));
+                ret.addAll(fun_ij.apply(i, k - i, t, nextVarId));
             }
             return pack_fun.apply(ret);
         }
     }
 
-    private static <A> List<AB<A,Sub>> core_ij(int i, int j, Type t,
-               BiFunction<Integer,Type,List<AB<A,Sub>>> fun_k,
-               BiFunction<A,A,A> operation,
-               Function<List<AB<A,Sub>>,List<AB<A,Sub>>> pack_fun) {
+    private static <A> List<ABC<A,Sub,Integer>> core_ij(
+            int i, int j, Type t,
+            TriFun<Integer,Type,Integer,List<ABC<A,Sub,Integer>>> fun_k,
+            BiFunction<A,A,A> operation,
+            Function<List<ABC<A,Sub,Integer>>,List<ABC<A,Sub,Integer>>> pack_fun,
+            int nextVarId
+    ) {
 
-        List<AB<A,Sub>> ret = new ArrayList<>();
+        List<ABC<A,Sub,Integer>> ret = new ArrayList<>();
 
         Type alpha = newVar(t);
         Type t_F = Types.mkFunType(alpha, t);
 
-        for (AB<A,Sub> p_F : fun_k.apply(i, t_F)) {
-            A   a_F = p_F._1();
-            Sub s_F = p_F._2();
+        for (ABC<A,Sub,Integer> p_F : fun_k.apply(i, t_F, nextVarId)) {
+            A   a_F         = p_F._1();
+            Sub s_F         = p_F._2();
+            int nextVarId_F = p_F._3();
 
             Type t_X = s_F.apply(alpha);
 
-            for (AB<A,Sub> p_X : fun_k.apply(j, t_X)) {
-                A   a_X = p_X._1();
-                Sub s_X = p_X._2();
+            for (ABC<A,Sub,Integer> p_X : fun_k.apply(j, t_X, nextVarId_F)) {
+                A   a_X         = p_X._1();
+                Sub s_X         = p_X._2();
+                int nextVarId_X = p_X._3();
 
                 A   a_FX = operation.apply(a_F,a_X);
                 Sub s_FX = Sub.dot(s_X, s_F);//TODO #restrikt-pokus .restrict(t);
 
-                ret.add(AB.mk(a_FX, s_FX));
+                ret.add(ABC.mk(a_FX, s_FX, nextVarId_X));
             }
         }
         return pack_fun.apply(ret);
@@ -545,26 +601,29 @@ public class LSolver {
 
 
 
-    private static Function<Type,List<AB<BigInteger,Sub>>> subs_1(List<AB<String,Type>> gamma) {
-        return t -> packSubs(F.map(ts_1(gamma, t), p -> AB.mk(BigInteger.ONE,p._2()) ));
+    private static BiFunction<Type,Integer,List<ABC<BigInteger,Sub,Integer>>> subs_1(List<AB<String,Type>> gamma) {
+        return (t,nextVarId) -> packSubs(F.map(ts_1(gamma,t,nextVarId), p -> ABC.mk(BigInteger.ONE,p._2(),p._3()) ));
     }
 
-    private static Function<Type,List<AB<String,Sub>>> ts_1(List<AB<String,Type>> gamma) {
-        return t -> ts_1(gamma, t);
+    private static BiFunction<Type,Integer,List<ABC<String,Sub,Integer>>> ts_1(List<AB<String,Type>> gamma) {
+        return (t,nextVarId) -> ts_1(gamma,t,nextVarId);
     }
 
-    private static List<AB<String,Sub>> ts_1(List<AB<String,Type>> gamma, Type t) {
-        List<AB<String,Sub>> ret = new ArrayList<>();
+    private static List<ABC<String,Sub,Integer>> ts_1(List<AB<String,Type>> gamma, Type t, int nextVarId) {
+        List<ABC<String,Sub,Integer>> ret = new ArrayList<>();
 
         for (AB<String,Type> p : gamma) {
             String s = p._1();
             Type t_s = p._2();
 
-            Type t_s_fresh = fresh(t_s, t);
+            AB<Type,Integer> t_s_p =  fresh(t_s,t,nextVarId); // todo ještě promyslet kterou přesně variantu //t_s.freshenVars(nextVarId); //fresh(t_s, t);
+            Type t_s_fresh     = t_s_p._1();
+            int  t_s_nextVarId = t_s_p._2();
+
             Sub mu = Sub.mgu(t, t_s_fresh);
 
             if (!mu.isFail()) {
-                ret.add(AB.mk(s, mu.restrict(t))); /*TODO #restrikt-pokus .restrict(t)*/
+                ret.add(ABC.mk(s, mu.restrict(t), t_s_nextVarId)); /*TODO #restrikt-pokus .restrict(t)*/
             }
         }
         return ret;
@@ -577,21 +636,25 @@ public class LSolver {
         return "("+F+" "+X+")";
     }
 
-    private static List<AB<BigInteger,Sub>> packSubs(List<AB<BigInteger,Sub>> subs) {
-        Map<String,AB<BigInteger,Sub>> subsMap = new TreeMap<>();
+    private static List<ABC<BigInteger,Sub,Integer>> packSubs(List<ABC<BigInteger,Sub,Integer>> subs) {
+        Map<String,ABC<BigInteger,Sub,Integer>> subsMap = new TreeMap<>();
 
-        for (AB<BigInteger,Sub> p : subs) {
+        for (ABC<BigInteger,Sub,Integer> p : subs) {
             BigInteger num = p._1();
             Sub sub = p._2();
+            int nextVarId = p._3();
 
             String key = sub.toString();
-            AB<BigInteger,Sub> val = subsMap.get(key);
+            ABC<BigInteger,Sub,Integer> val = subsMap.get(key);
 
             if (val == null) {
                 subsMap.put(key, p);
             } else {
                 BigInteger oldNum = val._1();
                 val.set_1(oldNum.add(num));
+
+                int oldNextVarId = val._3();
+                val.set_3( Math.max(oldNextVarId,nextVarId) ); // better safe than sorry, TODO promyslet, zda může někdy nastat nerovnost
             }
         }
         return new ArrayList<>(subsMap.values());
@@ -599,6 +662,12 @@ public class LSolver {
 
     private static TypeVar newVar(Type t) {
         return new TypeVar(t.getNextVarId());
+    }
+
+
+    private static AB<Type,Integer> fresh(Type typeToFresh, Type typeToAvoid, int nextVarId) {
+        int startVarId = Math.max(typeToAvoid.getNextVarId(),nextVarId);
+        return typeToFresh.freshenVars(startVarId);
     }
 
     private static Type fresh(Type typeToFresh, Type typeToAvoid) {
@@ -652,7 +721,7 @@ public class LSolver {
         return F.jsonMap(td.getSizeDataMap(), x -> sizeTypeDataToJson(x.getSubsData()) );
     }
 
-    private static JSONArray sizeTypeDataToJson(List<AB<BigInteger,Integer>> subs) {
+    private static JSONArray sizeTypeDataToJson(List<ABC<BigInteger,Integer,Integer>> subs) {
         return F.jsonMap(subs, p -> F.arr(p._1().toString(),p._2()));
     }
 
@@ -799,7 +868,7 @@ public class LSolver {
             int intNum = num.intValueExact();
 
             Log.it_noln("|s.ts_k"+argStr+"| = ");
-            List<AB<String,Sub>> allTrees = s.ts_k(k,t);
+            List<ABC<String,Sub,Integer>> allTrees = s.ts_k(k,t,0); // TODO ??????????????????????????????????????????? 0 je ok?
             Log.it(allTrees.size());
 
             ch.is(tree != null, "genOne not null");
@@ -809,7 +878,7 @@ public class LSolver {
 
                 Map<String,Integer> testMap = new TreeMap<>();
 
-                for (AB<String,Sub> tree_p : allTrees) {
+                for (ABC<String,Sub,Integer> tree_p : allTrees) {
                     testMap.put(tree_p._1(),0);
                 }
 
@@ -1015,11 +1084,11 @@ public class LSolver {
         ch.it(t2nf.apply(t), t_nf.toString());
         Log.it();
 
-        List<AB<String, Sub>> ts = ts_k(gamma).apply(k, t_nf);
+        List<ABC<String, Sub,Integer>> ts = ts_k(gamma).apply(k, t_nf, 0); // todo 0 ?
         Log.it("-- ts_"+k+"(gamma, t_nf) ------------");
         Log.listLn(ts);
 
-        List<AB<BigInteger,Sub>> subs = subs_k(gamma).apply(k, t_nf);
+        List<ABC<BigInteger,Sub,Integer>> subs = subs_k(gamma).apply(k, t_nf, 0); // todo 0 ?
         Log.it("-- subs_"+k+"(gamma, t_nf) ----------");
         Log.listLn(subs);
 
@@ -1027,7 +1096,7 @@ public class LSolver {
         LSolver solver = new LSolver(gamma, ch.getRandom());
         Log.it(solver);
 
-        List<AB<BigInteger,Sub>> subs2 = solver.subs_k(k, t_nf);
+        List<ABC<BigInteger,Sub,Integer>> subs2 = solver.subs_k(k, t_nf, 0); // todo 0 ?
         Log.it("-- LSolver.subs_"+k+"(gamma, t_nf) ----------");
         Log.listLn(subs);
 

@@ -15,6 +15,10 @@ public interface Type {
 
     AB<Type,Integer> freshenVars(int startVarId, Sub newVars);
 
+    default AB<Type,Integer> freshenVars(int nextVarId) {
+        return freshenVars(nextVarId, new Sub());
+    }
+
     Type skolemize(Set<Integer> idsAcc);
     Type deskolemize(Set<Integer> ids);
 

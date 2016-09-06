@@ -3,6 +3,10 @@ package cz.tomkren.utils;
 // modifikovatelná trojice
 public class ABC<A,B,C> {
 
+    public static <A,B,C> ABC<A,B,C> mk(A a, B b, C c) {
+        return new ABC<>(a,b,c);
+    }
+
     private A a;
     private B b;
     private C c;
