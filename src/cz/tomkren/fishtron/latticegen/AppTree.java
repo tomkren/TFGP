@@ -10,12 +10,10 @@ import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
 
 import com.google.common.base.Joiner;
+import cz.tomkren.utils.TODO;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 /** Created by user on 27. 7. 2016.*/
@@ -37,8 +35,16 @@ interface AppTree {
     void applySub(Sub sub);
     String toRawString();
 
-    boolean isStrictlyWellTyped();
+    AB<Boolean,Integer> isStrictlyWellTyped(Map<String, Type> gammaMap, int nextVarId);
     JSONObject getTypeTrace();
+
+    default boolean isStrictlyWellTyped(List<AB<String,Type>> gamma) {
+        Map<String,Type> gammaMap = new HashMap<>();
+        for(AB<String,Type> p : gamma) {
+            gammaMap.put(p._1(),p._2());
+        }
+        return isStrictlyWellTyped(gammaMap, 0)._1();
+    }
 
     void updateDebugInfo(Function<JSONObject,JSONObject> updateFun);
 
@@ -58,7 +64,22 @@ interface AppTree {
         @Override public void applySub(Sub sub) {type = sub.apply(type);}
         @Override public String toString() {return sym;}
         @Override public String toRawString() {return sym;}
-        @Override public boolean isStrictlyWellTyped() {return true;}
+
+        @Override public AB<Boolean,Integer> isStrictlyWellTyped(Map<String, Type> gammaMap, int nextVarId) {
+            Type t_s = gammaMap.get(sym);
+
+            if (t_s == null) {
+                return AB.mk(false, type.getNextVarId(nextVarId));
+            }
+
+            AB<Type,Integer> t_s_p = LSolver.fresh(t_s,type,nextVarId);
+            Type t_s_fresh     = t_s_p._1();
+            int  t_s_nextVarId = t_s_p._2();
+
+            Sub mgu = Sub.mgu(type, t_s_fresh); // todo: Není úplně podle definice, ale pokud ex mgu, tak určitě i substituce ex (tzn silnější). Do-potvrdit si, že je to ok.
+
+            return AB.mk(!mgu.isFail(), t_s_nextVarId);
+        }
 
         @Override public JSONObject getTypeTrace() {
             JSONObject typeTrace = F.obj("node",sym, "type",type.toJson());
@@ -90,8 +111,14 @@ interface AppTree {
         @Override public Type getType() {return type;}
 
         @Override
-        public boolean isStrictlyWellTyped() {
-            return isRootStrictlyWellTyped() && funTree.isStrictlyWellTyped() && argTree.isStrictlyWellTyped();
+        public AB<Boolean,Integer> isStrictlyWellTyped(Map<String, Type> gammaMap, int nextVarId) {
+
+            boolean isRootSWT = isRootStrictlyWellTyped();
+            AB<Boolean,Integer> funTreeRes = funTree.isStrictlyWellTyped(gammaMap, nextVarId);
+            AB<Boolean,Integer> argTreeRes = argTree.isStrictlyWellTyped(gammaMap, funTreeRes._2());
+
+            boolean isSWT = isRootSWT && funTreeRes._1() && argTreeRes._1();
+            return AB.mk(isSWT, argTreeRes._2());
         }
 
         private boolean isRootStrictlyWellTyped() {
