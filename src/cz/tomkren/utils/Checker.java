@@ -16,6 +16,7 @@ public class Checker {
     private long startTime;
     private long seed;
     private Random rand;
+    private boolean isSeedRandom;
 
     private StringBuilder errors;
 
@@ -35,12 +36,13 @@ public class Checker {
 
         errors = new StringBuilder();
 
-        this.seed = seed == null ? (new Random().nextLong()) : seed;
+        isSeedRandom = (seed == null);
+        this.seed = isSeedRandom ? (new Random().nextLong()) : seed;
 
         rand = new Random(this.seed);
 
         if (!silent) {
-            Log.it("seed : "+this.seed+"L");
+            Log.it("seed : "+this.seed+"L ("+getSeedOrigin()+")");
         }
 
         startTime();
@@ -63,8 +65,12 @@ public class Checker {
         }
 
         Log.it("\n"+ok+" OK, "+ko+" KO.   "+hlaska);
-        Log.it("Seed was: "+seed+"L");
+        Log.it("Seed was: "+seed+"L ("+getSeedOrigin()+")");
         showTime();
+    }
+
+    private String getSeedOrigin() {
+        return isSeedRandom ? "random" : "fixed";
     }
 
     private void startTime() {
