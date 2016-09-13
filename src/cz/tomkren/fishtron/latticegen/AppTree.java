@@ -30,6 +30,10 @@ interface AppTree {
         return new AppTree.App(funTree, argTree, type);
     }
 
+    static void writeErrorTreeToFile(JSONObject typeTrace) {
+        F.writeJsonAsJsFile("www/data/lastErrTree.js", "mkLastErrTree", typeTrace);
+    }
+
     Type getType();
     void deskolemize(Set<Integer> ids);
     void applySub(Sub sub);
