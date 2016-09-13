@@ -47,7 +47,7 @@ public class LSolver {
     public static void main(String[] args) {
         boolean wasOk = true;
         int k = 6;
-        int seed = 452;
+        int seed = 0;//452;
         while (wasOk) {
             wasOk = separateError_strictlyWellTyped(seed, g_testGamma, k, g_testGoal, Opts.mkDefault());
             Log.it("----------------------------------");
@@ -159,16 +159,6 @@ public class LSolver {
         NF nf      = normalizeIf(type);
         Type t     = nf.getTypeInNF();
         Sub fromNF = nf.getFromNF();
-
-        // todo #smazat
-        /*if (isNormalizationPerformed) {
-            AB<Type,Sub> nf = normalize_with_toNF(type);
-            t = nf._1();
-            fromNF = nf._2().inverse();
-        } else {
-            t = type;
-            fromNF = null;
-        }*/
 
         // debug log
         JSONObject log = log_prelude(k, type, t, ball, num);
@@ -405,18 +395,6 @@ public class LSolver {
         return sizeTypeData;
     }
 
-    // todo #smazat
-    /*private List<ABC<BigInteger,Sub,Integer>> subs_ij_caching(int i, int j, Type t, int nextVarId) {
-        AB<Type,Sub> nf = normalize_with_toNF(t);
-        List<ABC<BigInteger,Sub,Integer>> subs = core_ij(i, j, nf._1(), this::subs_k_caching, BigInteger::multiply, LSolver::packSubs, nextVarId);
-        return denormalize(subs, nf);
-    }
-    private List<ABC<BigInteger,Sub,Integer>> subs_ij_noCaching(int i, int j, Type t, int nextVarId) {
-        AB<Type,Sub> nf = normalize_with_toNF(t);
-        List<ABC<BigInteger,Sub,Integer>> subs = core_ij(i, j, nf._1(), this::subs_k_noCaching, BigInteger::multiply, LSolver::packSubs, nextVarId);
-        return denormalize(subs, nf);
-    }*/
-
     // -- generate all -------------------------------------
 
     private List<ABC<String,Sub,Integer>> ts_k(int k, Type type, int nextVarId) {
@@ -490,36 +468,6 @@ public class LSolver {
 
         return ABC.mk(subData._1(), newSub, subData._3() + delta);
     }
-
-    // todo #smazat
-    /*
-    private <A> List<ABC<A,Sub,Integer>> denormalizeIf(List<ABC<A,Sub,Integer>> xs, Sub t2nf) {
-        if (opts.isNormalizationPerformed()) {
-            return denormalize(xs,t2nf);
-        } else {
-            return xs;
-        }
-    }
-    private static <A> List<ABC<A,Sub,Integer>> denormalize(List<ABC<A,Sub,Integer>> xs, Sub t2nf) {
-        Function<ABC<A,Sub,Integer>,ABC<A,Sub,Integer>> f = mkDenormalizator(t2nf);
-        return F.map(xs, f);
-    }
-    private static <A> Function<ABC<A,Sub,Integer>,ABC<A,Sub,Integer>> mkDenormalizator(Sub t2nf) {
-        Sub nf2t = t2nf.inverse();
-        return p -> {
-            A a = p._1();
-            int nextVarId = p._3();
-
-            Sub sub_nf = p._2();
-            Sub s1 = Sub.dot(sub_nf,t2nf);
-            Sub sub = Sub.dot(nf2t, s1);
-
-            return ABC.mk(a,sub,nextVarId); // TODO opravdu stačí jen zkopírovat nextVarId, určitě promyslet do hloubky !!!
-        };
-    }
-    */
-
-
 
 
     // -- STATIC FUNS : core of the method -----------------------------------------------------
@@ -657,40 +605,15 @@ public class LSolver {
         return new TypeVar(t.getNextVarId());
     }
 
-
     static AB<Type,Integer> fresh(Type typeToFresh, Type typeToAvoid, int nextVarId) {
         int startVarId = Math.max(typeToAvoid.getNextVarId(),nextVarId);
         return typeToFresh.freshenVars(startVarId);
     }
 
-    // todo #smazat
-    /*
-    private static Type fresh(Type typeToFresh, Type typeToAvoid) {
-        int startVarId = typeToAvoid.getNextVarId();
-        Sub old2fresh = new Sub();
-        AB<Type,Integer> p = typeToFresh.freshenVars(startVarId, old2fresh);
-        return p._1();
-    }
-    */
-
     private NF normalizeIf(Type t) {
         return new NF(opts.isNormalizationPerformed(), t);
     }
 
-    // todo #smazat
-
-    /* nahrazeno by class NF
-    private static AB<Type,Sub> normalize_with_toNF(Type t) {
-
-        Sub t2nf = new Sub();
-        int startVarId = t.getNextVarId_onlySkolemVars(); //0;
-        Type nf = t.freshenVars(startVarId, t2nf)._1();
-
-        Sub rho = t2nf.toRenaming(t);
-        if (rho.isFail()) {throw new Error("Unable to construct renaming: "+rho.getFailMsg());}
-
-        return new AB<>(nf,rho);
-    }*/
 
 
     // -- toString and Serialization to json ----------------------------------------------------------------
