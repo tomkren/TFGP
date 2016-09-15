@@ -43,6 +43,14 @@ class Cache {
         return F.jsonMap(subsList, Sub::toJson);
     }
 
+    private static JSONObject subsToJson_debugVersion(List<Sub> subsList) {
+        JSONObject ret = new JSONObject();
+        for (int i = 0; i < subsList.size(); i++) {
+            ret.put(Integer.toString(i), subsList.get(i).toJson());
+        }
+        return ret;
+    }
+
     private static JSONObject typeDataToJson(TypeData td) {
         return F.jsonMap(td.getSizeDataMap(), x -> sizeTypeDataToJson(x.getSubsData()) );
     }

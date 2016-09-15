@@ -10,7 +10,6 @@ import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
 
 import com.google.common.base.Joiner;
-import cz.tomkren.utils.TODO;
 import org.json.JSONObject;
 
 import java.util.*;
@@ -42,9 +41,9 @@ interface AppTree {
     AB<Boolean,Integer> isStrictlyWellTyped(Map<String, Type> gammaMap, int nextVarId);
     JSONObject getTypeTrace();
 
-    default boolean isStrictlyWellTyped(List<AB<String,Type>> gamma) {
+    default boolean isStrictlyWellTyped(Gamma gamma) {
         Map<String,Type> gammaMap = new HashMap<>();
-        for(AB<String,Type> p : gamma) {
+        for(AB<String,Type> p : gamma.getSymbols()) {
             gammaMap.put(p._1(),p._2());
         }
         return isStrictlyWellTyped(gammaMap, 0)._1();

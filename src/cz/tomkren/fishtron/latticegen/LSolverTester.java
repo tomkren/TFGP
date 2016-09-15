@@ -21,7 +21,7 @@ public class LSolverTester {
         return t.getNextVarId(); // vs. return 0;
     }
 
-    private static final List<AB<String, Type>> g_testGamma = LSolver.mkGamma(
+    private static final Gamma g_testGamma = Gamma.mk(
             "s", "(a -> (b -> c)) -> ((a -> b) -> (a -> c))",
             "k", "a -> (b -> a)",
             "seri", "(Dag a b) -> ((Dag b c) -> (Dag a c))",
@@ -61,9 +61,7 @@ public class LSolverTester {
         ch.results();
     }
 
-    private static boolean separateError_strictlyWellTyped(
-            int seed, List<AB<String, Type>> gamma, int k, Type t, LSolver.Opts opts
-    ) {
+    private static boolean separateError_strictlyWellTyped(int seed, Gamma gamma, int k, Type t, LSolver.Opts opts) {
 
         Checker ch = new Checker((long) seed);
 
@@ -108,7 +106,7 @@ public class LSolverTester {
     }
 
 
-    private static void testTreeGenerating(Checker ch, int k, Type t, List<AB<String,Type>> gamma, int numSamples, LSolver.Opts opts) {
+    private static void testTreeGenerating(Checker ch, int k, Type t, Gamma gamma, int numSamples, LSolver.Opts opts) {
         String argStr = "("+k+", "+t+")";
 
         LSolver s = new LSolver(opts, gamma, ch.getRandom());
@@ -204,7 +202,7 @@ public class LSolverTester {
     private static void tests_subs_k(Checker ch, LSolver.Opts opts) {
         Log.it("\n== ts_k & subs_k tests ===================================================\n");
 
-        List<AB<String,Type>> gamma1 = LSolver.mkGamma(
+        Gamma gamma1 = Gamma.mk(
                 "f", "X -> X",
                 "seri", "(a -> b) -> ((b -> c) -> (a -> c))"
         );
@@ -217,7 +215,7 @@ public class LSolverTester {
     private static void tests_subs_1(Checker ch, LSolver.Opts opts) {
         Log.it("\n== ts_1 & subs_1 tests ===================================================\n");
 
-        List<AB<String,Type>> gamma1 = LSolver.mkGamma(
+        Gamma gamma1 = Gamma.mk(
                 "s", "(a -> (b -> c)) -> ((a -> b) -> (a -> c))",
                 "s2","(x5 -> (x0 -> x1)) -> ((x5 -> x0) -> (x5 -> x1))",
                 "s3","(y5 -> (x0 -> x1)) -> ((y5 -> x0) -> (y5 -> x1))",
@@ -232,11 +230,11 @@ public class LSolverTester {
         test_ts_k(ch, 1, "x1 -> x0",   gamma1, opts);
     }
 
-    private static void test_ts_k(Checker ch, int k, String tStr, List<AB<String,Type>> gamma, LSolver.Opts opts) {
+    private static void test_ts_k(Checker ch, int k, String tStr, Gamma gamma, LSolver.Opts opts) {
         test_ts_k(ch, k, Types.parse(tStr), gamma, opts);
     }
 
-    private static void test_ts_k(Checker ch, int k, Type t, List<AB<String,Type>> gamma, LSolver.Opts opts) {
+    private static void test_ts_k(Checker ch, int k, Type t, Gamma gamma, LSolver.Opts opts) {
 
         NF p_nf = new NF(opts.isNormalizationPerformed(), t);
         Type t_nf = p_nf.getTypeInNF();
@@ -244,7 +242,7 @@ public class LSolverTester {
 
         Log.it();
         Log.it("-- LIB gamma -------------");
-        Log.listLn(gamma);
+        Log.listLn(gamma.getSymbols());
 
         Log.it("-- GOAL TYPE t -----");
         Log.it("t: "+t);

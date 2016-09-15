@@ -2,7 +2,6 @@ package cz.tomkren.fishtron.latticegen;
 
 import cz.tomkren.fishtron.types.*;
 import cz.tomkren.utils.*;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.math.*;
@@ -14,27 +13,17 @@ import java.util.function.*;
 
 class LSolver {
 
-    private List<AB<String, Type>> gamma;
-    private Random rand;
     private Opts opts;
-
+    private Gamma gamma;
+    private Random rand;
     private Cache cache;
 
-    /*private Map<String, TypeData> typeDataMap;
-    private List<Sub> subsList;
-    private Map<String, Integer> sub2id;*/
-
-    LSolver(Opts opts, List<AB<String, Type>> gamma, Random rand) {
+    LSolver(Opts opts, Gamma gamma, Random rand) {
         this.opts = opts;
         this.gamma = gamma;
         this.rand = rand;
         this.cache = new Cache(this);
-
-        /*typeDataMap = new HashMap<>();
-        subsList = new ArrayList<>();
-        sub2id = new HashMap<>();*/
     }
-
 
     // -- "open problem" methods ----------------
 
@@ -42,8 +31,6 @@ class LSolver {
     private static int initNextVarDecision(Type t) {
         return t.getNextVarId(); // vs. return 0;
     }
-
-
 
     // -- generate one -------------------------------------
 
@@ -75,7 +62,7 @@ class LSolver {
         // --- CASE-A (treeSize = 1) ---------------------------------
         if (k == 1) {
 
-            for (AB<String,Type> p : gamma) {
+            for (AB<String,Type> p : gamma.getSymbols()) {
                 String s = p._1();
                 Type t_s = p._2();
 
@@ -305,19 +292,19 @@ class LSolver {
 
     // -- STATIC FUNS : core of the method -----------------------------------------------------
 
-    static TriFun<Integer,Type,Integer,List<ABC<BigInteger,Sub,Integer>>> subs_k(List<AB<String,Type>> gamma) {
+    static TriFun<Integer,Type,Integer,List<ABC<BigInteger,Sub,Integer>>> subs_k(Gamma gamma) {
         return (k,t,nextVarId) -> core_k(k, t, subs_1(gamma), subs_ij(gamma), LSolver::packSubs, nextVarId);
     }
 
-    private static TetraFun<Integer,Integer,Type,Integer,List<ABC<BigInteger,Sub,Integer>>> subs_ij(List<AB<String,Type>> gamma) {
+    private static TetraFun<Integer,Integer,Type,Integer,List<ABC<BigInteger,Sub,Integer>>> subs_ij(Gamma gamma) {
         return (i,j,t,nextVarId) -> core_ij(i, j, t, subs_k(gamma), BigInteger::multiply, LSolver::packSubs, nextVarId);
     }
 
-    static TriFun<Integer,Type,Integer,List<ABC<String,Sub,Integer>>> ts_k(List<AB<String,Type>> gamma) {
+    static TriFun<Integer,Type,Integer,List<ABC<String,Sub,Integer>>> ts_k(Gamma gamma) {
         return (k,t,nextVarId) -> core_k(k, t, ts_1(gamma), ts_ij(gamma), ts->ts, nextVarId);
     }
 
-    private static TetraFun<Integer,Integer,Type,Integer,List<ABC<String,Sub,Integer>>> ts_ij(List<AB<String,Type>> gamma) {
+    private static TetraFun<Integer,Integer,Type,Integer,List<ABC<String,Sub,Integer>>> ts_ij(Gamma gamma) {
         return (i,j,t,nextVarId) -> core_ij(i, j, t, ts_k(gamma), LSolver::mkAppString, ts->ts, nextVarId);
     }
 
@@ -375,18 +362,18 @@ class LSolver {
         return pack_fun.apply(ret);
     }
 
-    private static BiFunction<Type,Integer,List<ABC<BigInteger,Sub,Integer>>> subs_1(List<AB<String,Type>> gamma) {
+    private static BiFunction<Type,Integer,List<ABC<BigInteger,Sub,Integer>>> subs_1(Gamma gamma) {
         return (t,nextVarId) -> packSubs(F.map(ts_1(gamma,t,nextVarId), p -> ABC.mk(BigInteger.ONE,p._2(),p._3()) ));
     }
 
-    private static BiFunction<Type,Integer,List<ABC<String,Sub,Integer>>> ts_1(List<AB<String,Type>> gamma) {
+    private static BiFunction<Type,Integer,List<ABC<String,Sub,Integer>>> ts_1(Gamma gamma) {
         return (t,nextVarId) -> ts_1(gamma,t,nextVarId);
     }
 
-    private static List<ABC<String,Sub,Integer>> ts_1(List<AB<String,Type>> gamma, Type t, int nextVarId) {
+    private static List<ABC<String,Sub,Integer>> ts_1(Gamma gamma, Type t, int nextVarId) {
         List<ABC<String,Sub,Integer>> ret = new ArrayList<>();
 
-        for (AB<String,Type> p : gamma) {
+        for (AB<String,Type> p : gamma.getSymbols()) {
             String s = p._1();
             Type t_s = p._2();
 
@@ -405,10 +392,6 @@ class LSolver {
 
 
     // -- CORE utils ----------------------------------------------------------------
-
-    private static String mkAppString(String F, String X) {
-        return "("+F+" "+X+")";
-    }
 
     private static List<ABC<BigInteger,Sub,Integer>> packSubs(List<ABC<BigInteger,Sub,Integer>> subs) {
         Map<String,ABC<BigInteger,Sub,Integer>> subsMap = new TreeMap<>();
@@ -447,15 +430,16 @@ class LSolver {
         return new NF(opts.isNormalizationPerformed(), t);
     }
 
+    private static String mkAppString(String F, String X) {
+        return "("+F+" "+X+")";
+    }
 
     // -- toString and Serialization to json ----------------------------------------------------------------
 
     private JSONObject toJson() {
         return F.obj(
-                "gamma", gammaToJson(gamma),
+                "gamma", gamma.toJson(),
                 "cache", cache.toJson()
-                //"types", typesToJson(cache.getTypeDataMap()),
-                //"subs",  subsToJson(cache.getSubsList())
         );
     }
 
@@ -466,29 +450,6 @@ class LSolver {
                 "gamma", 1,
                 "subs",  1
         ));
-    }
-
-    private static JSONArray gammaToJson(List<AB<String,Type>> gamma) {
-        return F.jsonMap(gamma, p -> F.arr(p._1(),p._2().toString()));
-    }
-
-    private static JSONObject subsToJson_debugVersion(List<Sub> subsList) {
-        JSONObject ret = new JSONObject();
-        for (int i = 0; i < subsList.size(); i++) {
-            ret.put(Integer.toString(i), subsList.get(i).toJson());
-        }
-        return ret;
-    }
-
-    // -- general utils, move out asi -----------------------------------
-
-    static List<AB<String,Type>> mkGamma(String... strs) {
-        if (strs.length % 2 != 0) {throw new Error("There must be an even number of gamma strings.");}
-        List<AB<String,Type>> ret = new ArrayList<>(strs.length/2);
-        for (int i = 0; i < strs.length; i+=2) {
-            ret.add(new AB<>(strs[i],Types.parse(strs[i+1])));
-        }
-        return ret;
     }
 
     // -- OPTS -----------------------------------
