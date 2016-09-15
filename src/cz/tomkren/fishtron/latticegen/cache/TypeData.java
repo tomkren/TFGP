@@ -1,4 +1,6 @@
-package cz.tomkren.fishtron.latticegen;
+package cz.tomkren.fishtron.latticegen.cache;
+
+import cz.tomkren.fishtron.latticegen.cache.SizeTypeData;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +19,7 @@ class TypeData {
         return sizeDataMap.computeIfAbsent(k,_k -> new SizeTypeData());
     }
 
-    public Map<Integer, SizeTypeData> getSizeDataMap() {
+    Map<Integer, SizeTypeData> getSizeDataMap() {
         return sizeDataMap;
     }
 }

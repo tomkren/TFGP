@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.latticegen;
+package cz.tomkren.fishtron.latticegen.cache;
 
 import cz.tomkren.utils.ABC;
 
@@ -10,28 +10,28 @@ import java.util.List;
 class SizeTypeData {
 
     private List<ABC<BigInteger,Integer,Integer>> subsData;
-    private Integer nextVarId_input;
+    private Integer t_nvi;
 
     SizeTypeData() {
         subsData = null;
-        nextVarId_input = null;
+        t_nvi = null;
     }
 
     boolean isComputed() {
         return subsData != null;
     }
 
-    void set(List<ABC<BigInteger,Integer,Integer>> subsData, int nextVarId_input) {
+    void set(List<ABC<BigInteger,Integer,Integer>> subsData, int t_nvi) {
         this.subsData = subsData;
-        this.nextVarId_input = nextVarId_input;
+        this.t_nvi = t_nvi;
     }
 
     List<ABC<BigInteger,Integer,Integer>> getSubsData() {
         return subsData;
     }
 
-    Integer getNextVarId_input() {
-        return nextVarId_input;
+    Integer t_nvi() {
+        return t_nvi;
     }
 
     BigInteger computeNum() {

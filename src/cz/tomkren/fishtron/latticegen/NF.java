@@ -24,7 +24,8 @@ class NF {
         if (isNormalizationPerformed) {
             Sub t2nf = new Sub();
 
-            int startVarId = t.getNextVarId_onlySkolemVars(); // was wrongly 0 ...
+            // Skolemovský symboly zatim nenormalizujem, ale musíme zajistit aby se normalizací neklešly..
+            int startVarId = t.getNextVarId_onlySkolemVars(); //TODO časem by chtělo efektivnějc, tzn normalizovat i skolemčata..
             typeInNF = t.freshenVars(startVarId, t2nf)._1();
 
             toNF = t2nf.toRenaming(t);
