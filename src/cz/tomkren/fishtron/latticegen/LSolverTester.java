@@ -35,8 +35,25 @@ public class LSolverTester {
 
     private static final Type g_testGoal = Types.parse("(P A (P A A)) -> (P A (P A A))");
 
-
     public static void main(String[] args) {
+        main_2();
+    }
+
+    private static void main_sep_290_256() {
+        //todo - ale už vim že je to vázaný na caching....
+
+        Checker ch = new Checker();
+
+        boolean isCachingUsed = true;
+        LSolver.Opts opts = new LSolver.Opts(isCachingUsed, true);
+
+
+        LSolver s = new LSolver(opts, g_testGamma, ch.getRandom());
+
+    }
+
+
+    private static void main_1() {
         boolean wasOk = true;
         int k = 6;
         int seed = 0;//452;
@@ -47,7 +64,7 @@ public class LSolverTester {
         }
     }
 
-    public static void main_(String[] args) {
+    private static void main_2() {
         Checker ch = new Checker(7404398919224944163L);
 
         LSolver.Opts opts = LSolver.Opts.mkDefault();

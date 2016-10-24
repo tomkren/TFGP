@@ -467,7 +467,7 @@ public class LSolver {
         boolean isNormalizationPerformed() {return isNormalizationPerformed;}
 
         static Opts mkDefault() {
-            return new Opts(false,true);
+            return new Opts(true,true);
         }
     }
 
