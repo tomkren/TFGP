@@ -22,6 +22,8 @@
     urlcolor=black
 }
 
+%\usepackage{enumitem}
+
 \title{TFGP readme}
 
 \author{Tomáš Křen}
@@ -74,6 +76,10 @@ A \textit{context} is set of declarations with distinct term symbols.\footnote{I
 \newcommand{\sigmaPr}{\sigma^\prime}
 \newcommand{\tauPr}{\tau^\prime}
 \newcommand{\xPr}{x^\prime}
+\newcommand{\nPr}{n^\prime}
+\newcommand{\nPrr}{n^{\prime\prime}}
+\newcommand{\nPrrr}{n^{\prime\prime\prime}}
+\newcommand{\tausPr}{\tau_s^\prime}
 \newcommand{\s}{\sigma}
 \newcommand{\Th}{\theta}
 \newcommand{\sPr}{\sigmaPr}
@@ -98,7 +104,9 @@ A \textit{context} is set of declarations with distinct term symbols.\footnote{I
 \newcommand{\triRule}[4]{\dfrac{#1\ ,\ #2\ , \ #3}{#4}}
 \newcommand{\isSub}[1]{#1\ \mathit{substitution}}
 \newcommand{\MGU}[2]{\op{MGU}(#1,#2)}
+\newcommand{\mgu}[1]{\op{MGU}(#1)}
 
+\newcommand{\AX}{\textit{AX}\xspace}
 \newcommand{\subAx}{\textit{SUB-AX}\xspace}
 \newcommand{\mguMp}{\textit{MGU-MP}\xspace}
 \newcommand{\abs}[1]{\lvert #1 \rvert}
@@ -127,7 +135,6 @@ Let $M$ be a term. Term size $\abs{M}$ is the number of symbols in $M$; e.g. $\a
 \newcommand{\nekt}{\ntek_\tau}
 \newcommand{\nsucct}{\nsucc_\tau}
 
-
 \newcommand{\MGI}[1]{\op{MGI}(#1)}
 \newcommand{\MGIt}{\MGI{\tau}}
 \newcommand{\It}{\op{I}(\tau)}
@@ -138,24 +145,121 @@ Let $M$ be a term. Term size $\abs{M}$ is the number of symbols in $M$; e.g. $\a
 \newcommand{\Utt}{\U{\tau}{\tauPr}}
 \newcommand{\MGUtt}{\MGU{\tau}{\tauPr}}
 
-
-
-\section{Reusable generating}
-
 \newcommand{\e}[2]{\op{E}_{#1}(#2)}
 \newcommand{\restrict}[2]{{#1}_{\mid #2}}
 \newcommand{\fresh}[2]{\op{fresh}_{#1}(#2)}
 \newcommand{\newVar}[1]{\op{newVar}(#1)}
 \newcommand{\Ss}[1]{\op{ss}(#1)}
 \newcommand{\TS}[2]{\op{ts}_{#1}(#2)}
+\newcommand{\ts}[2]{\op{ts}_{#1}(#2)}
 \newcommand{\TSij}[3]{\op{ts}_{#1,#2}(#3)}
 \newcommand{\trees}[2]{\op{trees}_{#1}(#2)}
 \newcommand{\FX}{\ap{F}{X}}
 \newcommand{\sF}{\s_{F}}
 \newcommand{\sX}{\s_{X}}
 \newcommand{\vars}[1]{\op{vars}(#1)}
+\newcommand{\dom}[1]{\op{dom}(#1)}
 \newcommand{\IH}{induction hypothesis\xspace}
 \newcommand{\discup}{~\mathbin{\dot{\cup}}~}
+
+
+
+\section{Reusable generating}
+
+\begin{definition}
+\begin{align*}
+\e{k}{\tau} \defi& \{ M \mid \abs{M} = k, \E{\s}{ M : \s(\tau) } \} \\
+\ts{1}{\tau,n} \defi&  \{ (s,\restrict{\mu}{\tau}, \nPr) \mid \\
+ & ~~ (s,\tau_s) \in \Gamma, \\
+ & ~~ (\tausPr,\nPr) = \fresh{\tau}{\tau_s, n}, \\
+ & ~~ \mu = \mgu{\tau,\tausPr}
+\} \\
+\ts{i,j}{\tau,n} \defi& \{ (\FX, \restrict{(\sX \circ \sF)}{\tau}, \nPrrr) \mid \\ 
+  & ~~ (\alpha, \nPr) = \newVar{\tau,n}, \\
+  & ~~ (F,\sF,\nPrr) = \ts{i}{\alpha \ar \tau,\nPr}, \\
+  & ~~ (X,\sX,\nPrrr) = \ts{j}{\sF(\alpha), \nPrr} 
+\} \\
+\ts{k > 1}{\tau,n} \defi& \bigcup\limits_{i=1}^{k-1}  \TSij{i}{k-i}{\tau, n}
+\end{align*}
+\end{definition}
+
+\begin{lemma}[Core lemma about $\op{ts}_k$]
+Let $(M, \s, \nPr) \in \ts{k}{\tau,n}$, then: 
+\begin{align}
+& \abs{M} = k,  
+&\textit{(size)} \label{tsSize} \\
+& M : \s(\tau), 
+&\textit{(correctness)} \label{tsCorrectness} \\
+& \A{\sPr}{M : \sPr(\tau) \then  \E{\theta}{\sPr(\tau) = \theta\circ\s(\tau)}},
+& \textit{(generality)} \label{tsGenerality} \\
+& \dom{\s} \subseteq \vars{\tau},\op{OK}(\tau,\nPr,\s), \nPr \geq n.
+& \textit{(technical)} \label{tsTechnical}
+\end{align}
+\end{lemma}
+\begin{proof}
+
+By induction on $k$. 
+
+Let $k = 1$. 
+Let $(M, \s, \nPr) \in \ts{1}{\tau,n}$, 
+then $M = s, \s = \restrict{\mu}{\tau}$,
+
+where 
+$(s,\tau_s) \in \Gamma,
+(\tausPr,\nPr) = \fresh{\tau}{\tau_s, n},
+\mu = \mgu{\tau,\tausPr}$.
+ 
+(\ref{tsSize}) $\abs{M} = \abs{s} = 1$, since $s$ is a symbol of $\Gamma$.
+
+(\ref{tsCorrectness}) From \textit{lemma about fresh$_\tau$} we have that 
+$\E{\rho}{\rho(\tau_s) = \tausPr}$. 
+
+Let us use (\AX) rule:
+$\binRule{(s,\tau_s) \in \Gamma}{\isSub{\mu \circ \rho}}
+{s : \mu(\rho(\tau_s))}$
+\red{todo střízlivost}
+
+Since $\mu = \mgu{\tau,\tausPr}$, we have $\mu(\tausPr) = \mu(\tau)$, 
+
+therefore $\mu(\rho(\tau_s)) = \mu(\tausPr) = \mu(\tau) = \restrict{\mu}{\tau}(\tau)$, 
+
+thus $s : \restrict{\mu}{\tau}(\tau)$.
+
+(\ref{tsGenerality}) Let $\sPr$ be a substitution such that $s : \sPr(\tau)$.
+
+From \textit{factoring lemma} we have that
+$\E{\nu}{\nu(\tau) = \nu(\tausPr) = \sPr(\tau)}$. 
+
+But $\mu = \mgu{\tau,\tausPr}$, thus 
+$\mu$ is more general unification of $\tau$ and $\tausPr$ than $\nu$.
+
+Therefore $\E{\theta}{\nu = \theta \circ \mu}$.
+
+Finally $\sPr(\tau) = \nu(\tau) = \theta \circ \mu(\tau) = \theta \circ \restrict{\mu}{\tau} (\tau)$.
+
+(\ref{tsTechnical}) Trivially $\dom{\restrict{\mu}{\tau}} \subseteq \vars{\tau}$.
+
+\red{ todo zbytek technikálií (na papíře \#freshSummary)}.
+
+Let $k > 1$. 
+
+(\ref{tsSize})
+
+(\ref{tsCorrectness})
+
+(\ref{tsGenerality})
+
+(\ref{tsTechnical})
+
+
+\end{proof}
+
+
+~\\
+
+~\\
+
+\section{Reusable generating - older approach}
 
 
 \begin{definition}
