@@ -423,6 +423,7 @@ public class LSolver {
 
     static AB<Type,Integer> fresh(Type typeToFresh, Type typeToAvoid, int nextVarId) {
         int startVarId = typeToAvoid.getNextVarId(nextVarId);
+        startVarId = typeToFresh.getNextVarId(startVarId); // přidáno po oběvení chyby 24.1.17, todo předělat aby bylo přehledný jak na papíře
         return typeToFresh.freshenVars(startVarId);
     }
 
