@@ -37,6 +37,8 @@ public class LSolver {
 
         // ball selection
         BigInteger num = getNum(k, type, nextVarId);
+        /* (31.1.17) beru zpět že by se mělo počítat z normalizovaného typu, protože getNum si to normalizuje
+           tzn neplatí že: getNum by se mělo počítat z normalizovaného typu, jinak normalizujeme zbytečně*/
         if (F.isZero(num)) {return AB.mk(null,nextVarId);}
         BigInteger ball = F.nextBigInteger(num, rand);
         if (ball == null) {throw new Error("Ball null check failed, should be unreachable.");}
@@ -423,7 +425,7 @@ public class LSolver {
 
     static AB<Type,Integer> fresh(Type typeToFresh, Type typeToAvoid, int nextVarId) {
         int startVarId = typeToAvoid.getNextVarId(nextVarId);
-        startVarId = typeToFresh.getNextVarId(startVarId); // přidáno po oběvení chyby 24.1.17, todo předělat aby bylo přehledný jak na papíře
+        startVarId = typeToFresh.getNextVarId(startVarId); // přidáno po objevení chyby 24.1.17, todo předělat aby bylo přehledný jak na papíře
         return typeToFresh.freshenVars(startVarId);
     }
 
