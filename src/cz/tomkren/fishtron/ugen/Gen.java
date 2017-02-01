@@ -4,6 +4,7 @@ import cz.tomkren.fishtron.types.Sub;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.TypeVar;
 import cz.tomkren.fishtron.types.Types;
+import cz.tomkren.fishtron.ugen.cache.Cache;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.TODO;
@@ -18,11 +19,13 @@ public class Gen {
     private Opts opts;
     private Gamma gamma;
     private Random rand;
+    private Cache cache;
 
     Gen(Opts opts, Gamma gamma, Random rand) {
         this.opts = opts;
         this.gamma = gamma;
         this.rand = rand;
+        this.cache = new Cache(this);
     }
 
     AppTree genOne(int k, Type type) {
@@ -135,16 +138,28 @@ public class Gen {
         NF nf = normalizeIf(rawType);
         Type t_NF = nf.getTypeInNF();
 
-        throw new TODO();
+        List<SubsRes> subs = isCachingUsed() ?
+                cache.subs_k_caching(k, t_NF, n) :
+                      subs_k_compute(k,t_NF,n) ;
+
+        return nf.denormalize(subs);
     }
 
-    private List<Ts1Res> ts_1(Type t, int n) {
-        throw new TODO();
+    public List<SubsRes> subs_k_compute(int k, Type t, int n) {
+        if (k < 1) {
+            throw new Error("k must be > 0, it is " + k);
+        } else if (k == 1) {
+            return subs_1(t, n);
+        } else {
+            List<SubsRes> ret = new ArrayList<>();
+            for (int i = 1; i < k; i++) {
+                ret.addAll(subs_ij(i, k - i, t, n));
+            }
+            return pack(ret);
+        }
     }
 
-
-
-    private static List<Ts1Res> ts_1(Gamma gamma, Type t, int nextVarId) {
+    private List<Ts1Res> ts_1(Type t, int nextVarId) {
         List<Ts1Res> ret = new ArrayList<>();
 
         for (AB<String,Type> p : gamma.getSymbols()) {
@@ -162,13 +177,13 @@ public class Gen {
         return ret;
     }
 
-    private static List<SubsRes> subs_1(Gamma gamma, Type t, int nextVarId) {
-        List<Ts1Res> ts1_results = ts_1(gamma, t, nextVarId); // todo asi lepší předávat ts1_result pač ho chcem počítat jen jednou
+    private List<SubsRes> subs_1(Type t, int nextVarId) {
+        List<Ts1Res> ts1_results = ts_1(t, nextVarId); // todo asi lepší předávat ts1_results pač ho chcem počítat jen jednou
         List<SubsRes> unpackedResults = F.map(ts1_results, Ts1Res::toSubsRes);
         return pack(unpackedResults);
     }
 
-    private static List<SubsRes> subs_ij(Gamma gamma, int i, int j, Type t, int n) {
+    private List<SubsRes> subs_ij(int i, int j, Type t, int n) {
         List<SubsRes> ret = new ArrayList<>();
 
         AB<TypeVar,Integer> res_alpha = newVar(t, n);
@@ -177,10 +192,10 @@ public class Gen {
 
         Type t_F = Types.mkFunType(alpha, t);
 
-        for (SubsRes res_F : subs_k(gamma, i, t_F, n1)) {
+        for (SubsRes res_F : subs_k(i, t_F, n1)) {
             Type t_X = res_F.getSigma().apply(alpha);
 
-            for (SubsRes res_X : subs_k(gamma, j, t_X, res_F.getNextVarId())) {
+            for (SubsRes res_X : subs_k(j, t_X, res_F.getNextVarId())) {
                 BigInteger num_FX = res_F.getNum().multiply(res_X.getNum());
                 Sub      sigma_FX = Sub.dot(res_X.getSigma(), res_F.getSigma()).restrict(t);
                 ret.add(new SubsRes(num_FX, sigma_FX, res_X.getNextVarId()));
@@ -191,22 +206,8 @@ public class Gen {
         return ret; //pack(ret);
     }
 
-    private static List<SubsRes> subs_k(Gamma gamma, int k, Type t, int nextVarId) {
-        if (k < 1) {
-            throw new Error("k must be > 0, it is "+k);
-        } else if (k == 1) {
-            return subs_1(gamma, t, nextVarId);
-        } else {
-            List<SubsRes> ret = new ArrayList<>();
-            for (int i = 1; i < k; i++) {
-                ret.addAll(subs_ij(gamma, i, k - i, t, nextVarId));
-            }
-            return pack(ret);
-        }
-    }
 
-
-    private static List<SubsRes> pack(List<SubsRes> subs) {
+    static List<SubsRes> pack(List<SubsRes> subs) {
         Map<String,SubsRes> resultMap = new TreeMap<>();
 
         for (SubsRes res : subs) {
@@ -234,7 +235,7 @@ public class Gen {
     }
 
 
-    private static AB<TypeVar,Integer> newVar(Type t, int n) {
+    static AB<TypeVar,Integer> newVar(Type t, int n) {
         int n1 = t.getNextVarId(n);
         return AB.mk(new TypeVar(n1), n1+1);
     }
@@ -256,6 +257,11 @@ public class Gen {
             Sub fromNF = nf.getFromNF();
             tree.applySub(fromNF);
         }
+    }
+
+
+    private boolean isCachingUsed() {
+        return opts.isCachingUsed();
     }
 
 
@@ -292,12 +298,12 @@ public class Gen {
         }
     }
 
-    static class SubsRes {
+    public static class SubsRes {
         private BigInteger num;
         private final Sub sigma;
         private final int nextVarId;
 
-        SubsRes(BigInteger num, Sub sigma, int nextVarId) {
+        public SubsRes(BigInteger num, Sub sigma, int nextVarId) {
             this.num = num;
             this.sigma = sigma;
             this.nextVarId = nextVarId;
@@ -305,9 +311,9 @@ public class Gen {
 
         public void setNum(BigInteger num) {this.num = num;}
 
-        BigInteger getNum() {return num;}
-        Sub getSigma() {return sigma;}
-        int getNextVarId() {return nextVarId;}
+        public BigInteger getNum() {return num;}
+        public Sub getSigma() {return sigma;}
+        public int getNextVarId() {return nextVarId;}
     }
 
     static class Opts {

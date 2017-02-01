@@ -5,6 +5,7 @@ import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.utils.ABC;
 import cz.tomkren.utils.F;
 
+import java.math.BigInteger;
 import java.util.List;
 
 /** Created by tom on 13. 9. 2016. */
@@ -56,7 +57,7 @@ class NF {
     Type getTypeInNF() {return typeInNF;}
     Sub getToNF() {return toNF;}
 
-    <A> List<ABC<A,Sub,Integer>> denormalize(List<ABC<A,Sub,Integer>> xs) {
+    List<Gen.SubsRes> denormalize(List<Gen.SubsRes> xs) {
         if (isNormalizationPerformed()) {
             getFromNF(); // ensures existence of fromNF
             return F.map(xs, this::denormalize_internal);
@@ -65,15 +66,15 @@ class NF {
         }
     }
 
-    private <A> ABC<A,Sub,Integer> denormalize_internal(ABC<A,Sub,Integer> p) {
+    private Gen.SubsRes denormalize_internal(Gen.SubsRes p) {
 
-        Sub sub_nf = p._2();
+        Sub sub_nf = p.getSigma();
         Sub s1 = Sub.dot(sub_nf,toNF);
         Sub sub = Sub.dot(fromNF, s1);
 
-        A a = p._1();
-        int nextVarId = p._3();
-        return ABC.mk(a,sub,nextVarId); // TODO opravdu stačí jen zkopírovat nextVarId, určitě promyslet do hloubky !!!
+        BigInteger a = p.getNum();
+        int nextVarId = p.getNextVarId();
+        return new Gen.SubsRes(a,sub,nextVarId); // TODO opravdu stačí jen zkopírovat nextVarId, určitě promyslet do hloubky !!!
     }
 
 }
