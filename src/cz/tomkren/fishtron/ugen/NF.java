@@ -2,7 +2,7 @@ package cz.tomkren.fishtron.ugen;
 
 import cz.tomkren.fishtron.types.Sub;
 import cz.tomkren.fishtron.types.Type;
-import cz.tomkren.utils.ABC;
+import cz.tomkren.fishtron.ugen.data.SubsRes;
 import cz.tomkren.utils.F;
 
 import java.math.BigInteger;
@@ -57,7 +57,7 @@ class NF {
     Type getTypeInNF() {return typeInNF;}
     Sub getToNF() {return toNF;}
 
-    List<Gen.SubsRes> denormalize(List<Gen.SubsRes> xs) {
+    List<SubsRes> denormalize(List<SubsRes> xs) {
         if (isNormalizationPerformed()) {
             getFromNF(); // ensures existence of fromNF
             return F.map(xs, this::denormalize_internal);
@@ -66,7 +66,7 @@ class NF {
         }
     }
 
-    private Gen.SubsRes denormalize_internal(Gen.SubsRes p) {
+    private SubsRes denormalize_internal(SubsRes p) {
 
         Sub sub_nf = p.getSigma();
         Sub s1 = Sub.dot(sub_nf,toNF);
@@ -74,7 +74,7 @@ class NF {
 
         BigInteger a = p.getNum();
         int nextVarId = p.getNextVarId();
-        return new Gen.SubsRes(a,sub,nextVarId); // TODO opravdu stačí jen zkopírovat nextVarId, určitě promyslet do hloubky !!!
+        return new SubsRes(a,sub,nextVarId); // TODO opravdu stačí jen zkopírovat nextVarId, určitě promyslet do hloubky !!!
     }
 
 }

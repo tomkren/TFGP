@@ -5,9 +5,10 @@ import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.TypeVar;
 import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.cache.Cache;
+import cz.tomkren.fishtron.ugen.data.SubsRes;
+import cz.tomkren.fishtron.ugen.data.Ts1Res;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
-import cz.tomkren.utils.TODO;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -40,21 +41,20 @@ public class Gen {
         Type t_NF = nf.getTypeInNF();
 
         // ball selection
-        BigInteger num = getNum_noNF(k, t_NF); // TODO je v tom trochu zmatek, v LSOlveru getNum delal normalizaci, tady zatim předpokladame že ji nedělá
+        BigInteger num = getNum(k, t_NF);
         if (F.isZero(num)) {return AB.mk(null,n);}
         BigInteger ball = F.nextBigInteger(num, rand);
         if (ball == null) {throw new Error("Ball null check failed, should be unreachable.");}
 
-
         // Compute normalized result
-        AB<AppTree,Integer> res = (k == 1) ? genOne_1(t_NF, n, ball) : genOne_k(k, t_NF, n, ball);
+        AB<AppTree,Integer> res = (k == 1) ? genOne_sym(t_NF, n, ball) : genOne_app(k, t_NF, n, ball);
 
         //denormalize
         denormalizeIf(res, nf);
         return res;
     }
 
-    private AB<AppTree,Integer> genOne_1(Type t, int n, BigInteger ball) {
+    private AB<AppTree,Integer> genOne_sym(Type t, int n, BigInteger ball) {
         for (Ts1Res res : ts_1(t,n)) {
             if (F.isZero(ball)) {
                 // todo logy
@@ -66,7 +66,7 @@ public class Gen {
         throw new Error("Ball not exhausted (k=1), should be unreachable.");
     }
 
-    private AB<AppTree,Integer> genOne_k(int k, Type t, int n, BigInteger ball) {
+    private AB<AppTree,Integer> genOne_app(int k, Type t, int n, BigInteger ball) {
         AB<TypeVar,Integer> res_alpha = newVar(t, n);
         TypeVar alpha = res_alpha._1();
         int     n1    = res_alpha._2();
@@ -76,14 +76,14 @@ public class Gen {
         for (int i = 1; i < k; i++) {
             int j = k-i;
 
-            for (SubsRes res_F : subs_k(i, t_F, n1)) {
+            for (SubsRes res_F : subs(i, t_F, n1)) {
                 Type t_X = res_F.getSigma().apply(alpha);
 
-                for (SubsRes res_X : subs_k(j, t_X, res_F.getNextVarId())) {
+                for (SubsRes res_X : subs(j, t_X, res_F.getNextVarId())) {
                     BigInteger num_FX  = res_F.getNum().multiply(res_X.getNum());
 
                     if (ball.compareTo(num_FX) < 0) {
-                        return genOne_k_core(i, j, t, t_F, res_F.getSigma(), t_X, res_X.getSigma(), res_X.getNextVarId());
+                        return genOne_app_core(i, j, t, t_F, res_F.getSigma(), t_X, res_X.getSigma(), res_X.getNextVarId());
                     }
 
                     ball = ball.subtract(num_FX);
@@ -93,7 +93,7 @@ public class Gen {
         throw new Error("Ball not exhausted (k>1), should be unreachable.");
     }
 
-    private AB<AppTree,Integer> genOne_k_core(int i, int j, Type t, Type t_F, Sub sigma_F, Type t_X, Sub sigma_X, int n3) {
+    private AB<AppTree,Integer> genOne_app_core(int i, int j, Type t, Type t_F, Sub sigma_F, Type t_X, Sub sigma_X, int n3) {
         Type t_selected_F = sigma_F.apply(t_F);
         Type t_selected_X = sigma_X.apply(t_X);
 
@@ -130,22 +130,31 @@ public class Gen {
         return AB.mk(tree_FX,n5);
     }
 
-    private BigInteger getNum_noNF(int k, Type type) {
-        throw new TODO();
+    // je v tom trochu zmatek, v LSolver getNum dělal normalizaci, tady jí ale nedělá
+    private BigInteger getNum(int k, Type t) {
+        if (opts.isCachingUsed()) {
+            return cache.computeNum(k, t);
+        } else {
+            BigInteger sum = BigInteger.ZERO;
+            for (SubsRes subsRes : subs_compute(k, t, 0)) {
+                sum = sum.add(subsRes.getNum());
+            }
+            return sum;
+        }
     }
 
-    private List<SubsRes> subs_k(int k, Type rawType, int n) {
+    private List<SubsRes> subs(int k, Type rawType, int n) {
         NF nf = normalizeIf(rawType);
         Type t_NF = nf.getTypeInNF();
 
-        List<SubsRes> subs = isCachingUsed() ?
-                cache.subs_k_caching(k, t_NF, n) :
-                      subs_k_compute(k,t_NF,n) ;
+        List<SubsRes> subs = opts.isCachingUsed() ?
+                cache.subs_caching(k, t_NF, n) :
+                      subs_compute(k, t_NF, n) ;
 
         return nf.denormalize(subs);
     }
 
-    public List<SubsRes> subs_k_compute(int k, Type t, int n) {
+    public List<SubsRes> subs_compute(int k, Type t, int n) {
         if (k < 1) {
             throw new Error("k must be > 0, it is " + k);
         } else if (k == 1) {
@@ -153,20 +162,31 @@ public class Gen {
         } else {
             List<SubsRes> ret = new ArrayList<>();
             for (int i = 1; i < k; i++) {
-                ret.addAll(subs_ij(i, k - i, t, n));
+                List<SubsRes> res_ij = subs_ij(i, k - i, t, n);
+                ret.addAll(res_ij);
             }
             return pack(ret);
         }
     }
 
-    private List<Ts1Res> ts_1(Type t, int nextVarId) {
+    private List<SubsRes> subs_1(Type t, int nextVarId) {
+        List<Ts1Res> ts1_results = ts_1(t, nextVarId); // todo asi lepší předávat ts1_results pač ho chcem počítat jen jednou
+        List<SubsRes> unpackedResults = F.map(ts1_results, Ts1Res::toSubsRes);
+        return pack(unpackedResults);
+    }
+
+    private List<Ts1Res> ts_1(Type t, int n) {
+        return ts_1(gamma, t, n);
+    }
+
+    static List<Ts1Res> ts_1(Gamma gamma, Type t, int nextVarId) {
         List<Ts1Res> ret = new ArrayList<>();
 
         for (AB<String,Type> p : gamma.getSymbols()) {
             String s = p._1();
             Type t_s = p._2();
 
-            FreshRes freshRes = fresh(t_s, t, nextVarId);
+            Fresh freshRes = new Fresh(t_s, t, nextVarId);
             Sub mu = Sub.mgu(t, freshRes.getFreshType());
 
             if (!mu.isFail()) {
@@ -175,12 +195,6 @@ public class Gen {
             }
         }
         return ret;
-    }
-
-    private List<SubsRes> subs_1(Type t, int nextVarId) {
-        List<Ts1Res> ts1_results = ts_1(t, nextVarId); // todo asi lepší předávat ts1_results pač ho chcem počítat jen jednou
-        List<SubsRes> unpackedResults = F.map(ts1_results, Ts1Res::toSubsRes);
-        return pack(unpackedResults);
     }
 
     private List<SubsRes> subs_ij(int i, int j, Type t, int n) {
@@ -192,17 +206,17 @@ public class Gen {
 
         Type t_F = Types.mkFunType(alpha, t);
 
-        for (SubsRes res_F : subs_k(i, t_F, n1)) {
+        for (SubsRes res_F : subs(i, t_F, n1)) {
             Type t_X = res_F.getSigma().apply(alpha);
 
-            for (SubsRes res_X : subs_k(j, t_X, res_F.getNextVarId())) {
+            for (SubsRes res_X : subs(j, t_X, res_F.getNextVarId())) {
                 BigInteger num_FX = res_F.getNum().multiply(res_X.getNum());
                 Sub      sigma_FX = Sub.dot(res_X.getSigma(), res_F.getSigma()).restrict(t);
                 ret.add(new SubsRes(num_FX, sigma_FX, res_X.getNextVarId()));
             }
         }
 
-        //todo zde neni potřeba packovat, packovat stačí subs_k, rozmyslet co je efektivnější
+        //todo zde neni potřeba packovat, packovat stačí subs_compute, rozmyslet co je efektivnější
         return ret; //pack(ret);
     }
 
@@ -240,12 +254,12 @@ public class Gen {
         return AB.mk(new TypeVar(n1), n1+1);
     }
 
-    static FreshRes fresh(Type typeToFresh, Type typeToAvoid, int n) {
+    /*static Fresh fresh(Type typeToFresh, Type typeToAvoid, int n) {
         int n1 = typeToAvoid.getNextVarId(n);
         int n2 = typeToFresh.getNextVarId(n1);
         AB<Type,Integer> res = typeToFresh.freshenVars(n2);
-        return new FreshRes(res._1(), res._2());
-    }
+        return new Fresh(res._1(), res._2());
+    }*/
 
     private NF normalizeIf(Type t) {
         return new NF(opts.isNormalizationPerformed(), t);
@@ -259,62 +273,6 @@ public class Gen {
         }
     }
 
-
-    private boolean isCachingUsed() {
-        return opts.isCachingUsed();
-    }
-
-
-    static class FreshRes {
-        private final Type freshType;
-        private final int nextVarId;
-
-        FreshRes(Type freshType, int nextVarId) {
-            this.freshType = freshType;
-            this.nextVarId = nextVarId;
-        }
-
-        Type getFreshType() {return freshType;}
-        int getNextVarId() {return nextVarId;}
-    }
-
-    static class Ts1Res {
-        private final String s;
-        private final Sub sigma;
-        private final int nextVarId;
-
-        Ts1Res(String s, Sub sigma, int nextVarId) {
-            this.s = s;
-            this.sigma = sigma;
-            this.nextVarId = nextVarId;
-        }
-
-        String getSym() {return s;}
-        Sub getSigma() {return sigma;}
-        int getNextVarId() {return nextVarId;}
-
-        SubsRes toSubsRes() {
-            return new SubsRes(BigInteger.ONE, sigma, nextVarId);
-        }
-    }
-
-    public static class SubsRes {
-        private BigInteger num;
-        private final Sub sigma;
-        private final int nextVarId;
-
-        public SubsRes(BigInteger num, Sub sigma, int nextVarId) {
-            this.num = num;
-            this.sigma = sigma;
-            this.nextVarId = nextVarId;
-        }
-
-        public void setNum(BigInteger num) {this.num = num;}
-
-        public BigInteger getNum() {return num;}
-        public Sub getSigma() {return sigma;}
-        public int getNextVarId() {return nextVarId;}
-    }
 
     static class Opts {
         private final boolean isCachingUsed;

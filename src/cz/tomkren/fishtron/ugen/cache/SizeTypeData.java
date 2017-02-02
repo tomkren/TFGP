@@ -9,7 +9,7 @@ import java.util.List;
 
 class SizeTypeData {
 
-    private List<ABC<BigInteger,Integer,Integer>> subsData;
+    private List<EncodedSubsRes> subsData;
     private Integer t_nvi;
 
     SizeTypeData() {
@@ -21,12 +21,12 @@ class SizeTypeData {
         return subsData != null;
     }
 
-    void set(List<ABC<BigInteger,Integer,Integer>> subsData, int t_nvi) {
+    void set(List<EncodedSubsRes> subsData, int t_nvi) {
         this.subsData = subsData;
         this.t_nvi = t_nvi;
     }
 
-    List<ABC<BigInteger,Integer,Integer>> getSubsData() {
+    List<EncodedSubsRes> getSubsData() {
         return subsData;
     }
 
@@ -36,8 +36,8 @@ class SizeTypeData {
 
     BigInteger computeNum() {
         BigInteger sum = BigInteger.ZERO;
-        for (ABC<BigInteger,Integer,Integer> sd : subsData) {
-            sum = sum.add(sd._1());
+        for (EncodedSubsRes sd : subsData) {
+            sum = sum.add(sd.getNum());
         }
         return sum;
     }

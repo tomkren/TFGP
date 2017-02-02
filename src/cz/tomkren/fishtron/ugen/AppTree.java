@@ -73,7 +73,7 @@ interface AppTree {
                 return AB.mk(false, type.getNextVarId(nextVarId));
             }
 
-            Gen.FreshRes freshRes = Gen.fresh(t_s,type,nextVarId);
+            Fresh freshRes = new Fresh(t_s,type,nextVarId);
             Type t_s_fresh     = freshRes.getFreshType();
             int  t_s_nextVarId = freshRes.getNextVarId();
 
