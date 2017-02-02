@@ -11,6 +11,7 @@ public class TypeSym implements Type {
     private final String sym;
 
     public TypeSym(String sym) {this.sym = sym;}
+    public TypeSym(int sid) {this("X"+sid);}
 
     @Override
     public Type applyMiniSub(int varId, Type type) {return this;}
@@ -52,7 +53,7 @@ public class TypeSym implements Type {
         */
     }
 
-    private Integer getSkolemId() {
+    public Integer getSkolemId() {
         if (sym.charAt(0) == 'X') {
             try {
                 return Integer.parseInt(sym.substring(1));

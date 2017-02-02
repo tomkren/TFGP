@@ -28,7 +28,7 @@ class NF {
             int startVarId = t.getNextVarId_onlySkolemVars(); //TODO časem by chtělo efektivnějc, tzn normalizovat i skolemčata..
             typeInNF = t.freshenVars(startVarId, t2nf)._1();
 
-            toNF = t2nf.toRenaming(t);
+            toNF = t2nf.toRenaming();
             fromNF = null;
 
             if (toNF.isFail()) {

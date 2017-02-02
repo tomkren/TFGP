@@ -38,7 +38,7 @@ public class TypeVar implements Type {
     @Override
     public Type skolemize(Set<Integer> idsAcc) {
         idsAcc.add(id);
-        return new TypeSym("X"+id);
+        return new TypeSym(id);
     }
 
     @Override

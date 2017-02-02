@@ -21,6 +21,10 @@ public class Sub implements Function<Type,Type> {
         failMsg = null;
     }
 
+    public TreeMap<Integer, Type> getTable() {
+        return table;
+    }
+
     @Override
     public boolean equals(Object o) {
         return o instanceof Sub && toString().equals(o.toString());
@@ -118,11 +122,14 @@ public class Sub implements Function<Type,Type> {
         return ret;
     }
 
-    public Sub toRenaming(Type domain) {
+    public Sub toRenaming() {
 
         Sub ret = new Sub();
 
-        //Set<Integer> domainVars = domain.getVarIds();
+        if (isFail()) {
+            ret.setFail("source fail: "+getFailMsg());
+            return ret;
+        }
 
         List<AA<Integer>> inverse = new ArrayList<>();
 
@@ -132,10 +139,6 @@ public class Sub implements Function<Type,Type> {
         List<Integer> domTodo = new ArrayList<>();
         List<Integer> codomTodo = new ArrayList<>();
 
-        if (isFail()) {
-            ret.setFail("source fail: "+getFailMsg());
-            return ret;
-        }
 
         for(Map.Entry<Integer,Type> e : table.entrySet()) {
 

@@ -26,10 +26,10 @@ class NF {
             Sub t2nf = new Sub();
 
             // Skolemovský symboly zatim nenormalizujem, ale musíme zajistit aby se normalizací neklešly..
-            int startVarId = t.getNextVarId_onlySkolemVars(); //TODO časem by chtělo efektivnějc, tzn normalizovat i skolemčata..
-            typeInNF = t.freshenVars(startVarId, t2nf)._1();
+            int nextSkolemId = t.getNextVarId_onlySkolemVars(); //TODO časem by chtělo efektivnějc, tzn normalizovat i skolemčata..
+            typeInNF = t.freshenVars(nextSkolemId, t2nf)._1();
 
-            toNF = t2nf.toRenaming(t);
+            toNF = t2nf.toRenaming();
             fromNF = null;
 
             if (toNF.isFail()) {

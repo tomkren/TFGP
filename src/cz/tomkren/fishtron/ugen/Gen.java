@@ -254,12 +254,6 @@ public class Gen {
         return AB.mk(new TypeVar(n1), n1+1);
     }
 
-    /*static Fresh fresh(Type typeToFresh, Type typeToAvoid, int n) {
-        int n1 = typeToAvoid.getNextVarId(n);
-        int n2 = typeToFresh.getNextVarId(n1);
-        AB<Type,Integer> res = typeToFresh.freshenVars(n2);
-        return new Fresh(res._1(), res._2());
-    }*/
 
     private NF normalizeIf(Type t) {
         return new NF(opts.isNormalizationPerformed(), t);
