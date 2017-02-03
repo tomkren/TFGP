@@ -7,6 +7,7 @@ import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.cache.Cache;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
 import cz.tomkren.fishtron.ugen.data.Ts1Res;
+import cz.tomkren.fishtron.ugen.nf.NF;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
 

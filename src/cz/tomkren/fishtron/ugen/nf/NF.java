@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen;
+package cz.tomkren.fishtron.ugen.nf;
 
 import cz.tomkren.fishtron.types.Sub;
 import cz.tomkren.fishtron.types.Type;
@@ -10,7 +10,7 @@ import java.util.List;
 
 /** Created by tom on 13. 9. 2016. */
 
-class NF {
+public class NF {
 
     private final Type typeInNF;
     private final Sub toNF;
@@ -20,7 +20,7 @@ class NF {
         this(true, t);
     }
 
-    NF(boolean isNormalizationPerformed, Type t) {
+    public NF(boolean isNormalizationPerformed, Type t) {
 
         if (isNormalizationPerformed) {
             Sub t2nf = new Sub();
@@ -47,17 +47,17 @@ class NF {
     }
 
 
-    Sub getFromNF() {
+    public Sub getFromNF() {
         if (isNormalizationPerformed() && fromNF == null) {
             fromNF = toNF.inverse();
         }
         return fromNF;
     }
 
-    Type getTypeInNF() {return typeInNF;}
+    public Type getTypeInNF() {return typeInNF;}
     Sub getToNF() {return toNF;}
 
-    List<SubsRes> denormalize(List<SubsRes> xs) {
+    public List<SubsRes> denormalize(List<SubsRes> xs) {
         if (isNormalizationPerformed()) {
             getFromNF(); // ensures existence of fromNF
             return F.map(xs, this::denormalize_internal);
