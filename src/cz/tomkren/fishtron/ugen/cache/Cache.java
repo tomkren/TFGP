@@ -32,32 +32,29 @@ public class Cache {
     // -- main public interface ----------------------------------------------------------------------
 
     public List<SubsRes> subs_caching(int k, Type t, int nextVarId) {
-        SizeTypeData sizeTypeData = getSizeTypeData(k, t, nextVarId);
-        return decodeSubs(sizeTypeData,nextVarId,t);
+        SizeTypeData sizeTypeData = getSizeTypeData(k, t);
+        return decodeSubs(sizeTypeData, t, nextVarId);
     }
 
     public BigInteger computeNum(int k, Type t) {
-        SizeTypeData sizeTypeData = getSizeTypeData(k, t, 0); // TODO 2.1.17 - dodělat pořádně odstranění explicitního nvi, ted sem akorat tady narval 0
+        SizeTypeData sizeTypeData = getSizeTypeData(k, t);
         return sizeTypeData.computeNum();
     }
 
     // -- private methods ---------------------------------------------------------------------------
 
-    private SizeTypeData getSizeTypeData(int k, Type t, int nextVarId) {
+    private SizeTypeData getSizeTypeData(int k, Type t) {
         TypeData typeData = typeDataMap.computeIfAbsent(t.toString(), key->new TypeData());
         SizeTypeData sizeTypeData = typeData.getSizeTypeData(k);
 
         if (!sizeTypeData.isComputed()) {
-            List<SubsRes> subs = gen.subs_compute(k, t, nextVarId);
-            int t_nvi = t.getNextVarId(nextVarId);
-            sizeTypeData.set(encodeSubs(subs),t_nvi);
+            List<SubsRes> subs = gen.subs_compute(k, t,/*bylo nvi*/ 0);
+            //int t_nvi = t.getNextVarId(nextVarId);
+            List<EncodedSubsRes> encodedSubs = F.map(subs, this::encodeSub);
+            sizeTypeData.set(encodedSubs/*,t_nvi*/);
         }
 
         return sizeTypeData;
-    }
-
-    private List<EncodedSubsRes> encodeSubs(List<SubsRes> subs) {
-        return F.map(subs, this::encodeSub);
     }
 
     private EncodedSubsRes encodeSub(SubsRes subData) {
@@ -76,30 +73,34 @@ public class Cache {
         return new EncodedSubsRes(num,sub_id,nextVarId);
     }
 
-    private List<SubsRes> decodeSubs(SizeTypeData sizeTypeData, int nextVarId, Type t) {
+    private List<SubsRes> decodeSubs(SizeTypeData sizeTypeData, Type t, int nextVarId) {
 
         List<EncodedSubsRes> encodedSubs = sizeTypeData.getSubsData();
-        int t_nvi = sizeTypeData.t_nvi();
 
         List<SubsRes> decoded_unIncremented = F.map(encodedSubs,
                 p -> new SubsRes(p.getNum(), subsList.get(p.getEncodedSub()), p.getNextVarId()));
 
-        int new_t_nvi = t.getNextVarId(nextVarId);
+        int t_nvi = t.getNextVarId(0); //sizeTypeData.t_nvi();
+        int new_t_nvi =  Math.max(t_nvi, nextVarId);// což se == t.getNextVarId(nextVarId);
 
-        if (new_t_nvi <= t_nvi) {
-            return decoded_unIncremented; // todo opravdu ???
+        if (new_t_nvi != t.getNextVarId(nextVarId)) {
+            throw new Error("Cache.decodeSubs assert fail: new_t_nvi != t.getNextVarId(nextVarId)");
         }
 
-        return F.map(decoded_unIncremented, subData -> incrementDecodedSub(subData, t_nvi, new_t_nvi));
+        if (new_t_nvi < t_nvi) {
+            throw new Error("Cache.decodeSubs error: new_t_nvi < t_nvi, should never be true.");
+        } else if (new_t_nvi == t_nvi) {
+            return decoded_unIncremented;
+        } else {
+            return F.map(decoded_unIncremented, subsRes -> incrementDecodedSub(subsRes, t_nvi, new_t_nvi));
+        }
+
     }
 
-    // todo | neni to nejaky celý blbě? rozmyslet co když to je poprvý volany že nextVarId_input = 0, že to je naky chlupatý
-    // todo | ...
-
-    private static SubsRes incrementDecodedSub(SubsRes subData, int t_nvi, int new_t_nvi) {
+    private static SubsRes incrementDecodedSub(SubsRes subsRes, int t_nvi, int new_t_nvi) {
 
         int delta = new_t_nvi - t_nvi;
-        Sub sub = subData.getSigma();
+        Sub sub = subsRes.getSigma();
 
         Set<Integer> codomainVarIds = sub.getCodomainVarIds();
 
@@ -107,13 +108,13 @@ public class Cache {
 
         for (Integer codomVarId : codomainVarIds) {
             if (codomVarId >= t_nvi) {
-                incrementSub.add(codomVarId, new TypeVar(codomVarId + delta)); // TODO nekurvěj to nějak skolemizovaný ?
+                incrementSub.add(codomVarId, new TypeVar(codomVarId + delta));
             }
         }
 
         Sub newSub = Sub.dot(incrementSub,sub);
 
-        return new SubsRes(subData.getNum(), newSub, subData.getNextVarId() + delta);
+        return new SubsRes(subsRes.getNum(), newSub, subsRes.getNextVarId() + delta);
     }
 
 

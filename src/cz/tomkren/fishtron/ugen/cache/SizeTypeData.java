@@ -10,29 +10,27 @@ import java.util.List;
 class SizeTypeData {
 
     private List<EncodedSubsRes> subsData;
-    private Integer t_nvi;
+    //private Integer t_nvi;
 
     SizeTypeData() {
         subsData = null;
-        t_nvi = null;
+        //t_nvi = null;
     }
 
     boolean isComputed() {
         return subsData != null;
     }
 
-    void set(List<EncodedSubsRes> subsData, int t_nvi) {
+    void set(List<EncodedSubsRes> subsData/*, int t_nvi*/) {
         this.subsData = subsData;
-        this.t_nvi = t_nvi;
+        /*this.t_nvi = t_nvi;*/
     }
 
     List<EncodedSubsRes> getSubsData() {
         return subsData;
     }
 
-    Integer t_nvi() {
-        return t_nvi;
-    }
+    //Integer t_nvi() {return t_nvi;}
 
     BigInteger computeNum() {
         BigInteger sum = BigInteger.ZERO;

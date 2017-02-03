@@ -15,19 +15,6 @@ class Renaming {
     private TreeMap<Integer,Integer> table;
     private TreeMap<Integer,Integer> reverseTable;
 
-    private void putBothWays(int var1, int var2) {
-        safePut(table, var1, var2);
-        safePut(reverseTable, var2, var1);
-    }
-
-    private void safePut(TreeMap<Integer,Integer> t, int key, int val) {
-        if (t.get(key) == null) {
-            t.put(key, val);
-        } else {
-            throw new Error("safePut fail: x"+val+" is more times in dom or codom!");
-        }
-    }
-
     Renaming(TreeMap<Integer,Integer> tab) {
 
         table        = new TreeMap<>();
@@ -39,7 +26,7 @@ class Renaming {
         List<Integer> domTodo = new ArrayList<>();
         List<Integer> codomTodo = new ArrayList<>();
 
-        for(Map.Entry<Integer,Integer> e : tab.entrySet()) {
+        for (Map.Entry<Integer,Integer> e : tab.entrySet()) {
             int var1 = e.getKey();
             int var2 = e.getValue();
             if (var1 != var2) {
@@ -49,7 +36,7 @@ class Renaming {
             }
         }
 
-        for(Map.Entry<Integer,Integer> e : table.entrySet()) {
+        for (Map.Entry<Integer,Integer> e : table.entrySet()) {
             int var1 = e.getKey();
             int var2 = e.getValue();
             if (table.containsKey(var2) /*domTabu.contains(var2)*/) {
@@ -75,6 +62,20 @@ class Renaming {
             putBothWays(fromId, toId);
         }
     }
+
+    private void putBothWays(int var1, int var2) {
+        safePut(table, var1, var2);
+        safePut(reverseTable, var2, var1);
+    }
+
+    private void safePut(TreeMap<Integer,Integer> t, int key, int val) {
+        if (t.get(key) == null) {
+            t.put(key, val);
+        } else {
+            throw new Error("safePut fail: x"+val+" is more times in dom or codom!");
+        }
+    }
+
 
     Type applyAsVars(Type t) {
         return applyAsVars(table, t);
