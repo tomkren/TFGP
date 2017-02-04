@@ -3,6 +3,8 @@ package cz.tomkren.fishtron.ugen.cache;
 import cz.tomkren.fishtron.types.Sub;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.Gen;
+import cz.tomkren.fishtron.ugen.cache.data.EncodedSubsRes;
+import cz.tomkren.fishtron.ugen.cache.data.PreSubsRes;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
 import cz.tomkren.utils.F;
 import org.json.JSONObject;
@@ -12,18 +14,18 @@ import java.util.List;
 
 /** Created by user on 18. 7. 2016. */
 
-class SizeTypeData {
+class SizeData {
 
     private List<EncodedSubsRes> subsData;
 
-    SizeTypeData() {
+    SizeData() {
         subsData = null;
     }
 
     private void ensureSubsDataIsComputed(Gen gen, Cache cache, int k, Type t) {
         if (subsData == null) {
             List<SubsRes> subs = gen.subs_compute(k, t, 0);
-            subsData = F.map(subs, subsRes -> encodeSub(cache, subsRes));
+            subsData = F.map(subs, subsRes -> encode(cache, subsRes));
         }
     }
 
@@ -34,19 +36,19 @@ class SizeTypeData {
         return sum;
     }
 
-    List<SubsRes> getSubsData(Gen gen, Cache cache, int k, Type t) {
+    List<PreSubsRes> getSubsData(Gen gen, Cache cache, int k, Type t) {
         ensureSubsDataIsComputed(gen, cache, k ,t);
-        return F.map(subsData, p -> decodeSub(cache, p));
+        return F.map(subsData, p -> decode(cache, p));
     }
 
-    private static EncodedSubsRes encodeSub(Cache cache, SubsRes subsRes) {
-        int sub_id = cache.addSub(subsRes.getSigma());
-        return new EncodedSubsRes(subsRes.getNum(), sub_id, subsRes.getNextVarId());
+    private static EncodedSubsRes encode(Cache cache, SubsRes r) {
+        int sub_id = cache.addSub(r.getSigma());
+        return new EncodedSubsRes(r.getNum(), sub_id/*, subsRes.getNextVarId()*/);
     }
 
-    private static SubsRes decodeSub(Cache cache, EncodedSubsRes subsRes) {
-        Sub sub = cache.getSub(subsRes.getSub_id());
-        return new SubsRes(subsRes.getNum(), sub, subsRes.getNextVarId());
+    private static PreSubsRes decode(Cache cache, EncodedSubsRes r) {
+        Sub sub = cache.getSub(r.getSub_id());
+        return new PreSubsRes(r.getNum(), sub /*, subsRes.getNextVarId()*/);
     }
 
 
