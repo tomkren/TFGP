@@ -55,11 +55,11 @@ public class Gen {
         return res;
     }
 
-    private AB<AppTree,Integer> genOne_sym(Type t, int n, BigInteger ball) {
-        for (Ts1Res res : ts_1(t,n)) {
+    private AB<AppTree,Integer> genOne_sym(Type t_NF, int n, BigInteger ball) {
+        for (Ts1Res res : ts_1(t_NF,n)) {
             if (F.isZero(ball)) {
                 // todo logy
-                AppTree symLeaf = AppTree.mk(res.getSym(), res.getSigma().apply(t));
+                AppTree symLeaf = AppTree.mk(res.getSym(), res.getSigma().apply(t_NF));
                 return AB.mk(symLeaf, res.getNextVarId());
             }
             ball = ball.subtract(BigInteger.ONE);
@@ -132,12 +132,12 @@ public class Gen {
     }
 
     // je v tom trochu zmatek, v LSolver getNum dělal normalizaci, tady jí ale nedělá
-    private BigInteger getNum(int k, Type t) {
+    private BigInteger getNum(int k, Type t_NF) {
         if (opts.isCachingUsed()) {
-            return cache.computeNum(k, t);
+            return cache.computeNum_caching(k, t_NF);
         } else {
             BigInteger sum = BigInteger.ZERO;
-            for (SubsRes subsRes : subs_compute(k, t, 0)) {
+            for (SubsRes subsRes : subs_compute(k, t_NF, 0)) {
                 sum = sum.add(subsRes.getNum());
             }
             return sum;
@@ -155,32 +155,40 @@ public class Gen {
         return nf.denormalize(subs);
     }
 
-    public List<SubsRes> subs_compute(int k, Type t, int n) {
+    private List<Ts1Res> ts_1(Type t_NF, int n) {
+        return opts.isCachingUsed() ?
+                cache.ts_1_caching(t_NF, n) :
+                ts_1_compute(t_NF, n);
+    }
+
+    public List<Ts1Res> ts_1_compute(Type t, int n) {
+        return ts_1_static(gamma, t, n);
+    }
+
+    public List<SubsRes> subs_compute(int k, Type t_NF, int n) {
         if (k < 1) {
             throw new Error("k must be > 0, it is " + k);
         } else if (k == 1) {
-            return subs_1(t, n);
+            return subs_1(t_NF, n);
         } else {
             List<SubsRes> ret = new ArrayList<>();
             for (int i = 1; i < k; i++) {
-                List<SubsRes> res_ij = subs_ij(i, k - i, t, n);
+                List<SubsRes> res_ij = subs_ij(i, k - i, t_NF, n);
                 ret.addAll(res_ij);
             }
             return pack(ret);
         }
     }
 
-    private List<SubsRes> subs_1(Type t, int nextVarId) {
-        List<Ts1Res> ts1_results = ts_1(t, nextVarId); // todo asi lepší předávat ts1_results pač ho chcem počítat jen jednou
+    private List<SubsRes> subs_1(Type t_NF, int nextVarId) {
+        List<Ts1Res> ts1_results = ts_1(t_NF, nextVarId);
         List<SubsRes> unpackedResults = F.map(ts1_results, Ts1Res::toSubsRes);
         return pack(unpackedResults);
     }
 
-    private List<Ts1Res> ts_1(Type t, int n) {
-        return ts_1(gamma, t, n);
-    }
 
-    static List<Ts1Res> ts_1(Gamma gamma, Type t, int nextVarId) {
+
+    static List<Ts1Res> ts_1_static(Gamma gamma, Type t, int nextVarId) {
         List<Ts1Res> ret = new ArrayList<>();
 
         for (AB<String,Type> p : gamma.getSymbols()) {

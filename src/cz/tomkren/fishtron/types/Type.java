@@ -28,7 +28,7 @@ public interface Type {
         return AB.mk(skolemizedType, acc);
     }
 
-    void getVarIds(Set<Integer> acc);
+    void getVarIds(TreeSet<Integer> acc);
 
     int getNextVarId(int acc);
     int getNextVarId_onlySkolemVars(int acc);
@@ -41,8 +41,8 @@ public interface Type {
         return getNextVarId_onlySkolemVars(0);
     }
 
-    default Set<Integer> getVarIds() {
-        Set<Integer> acc = new TreeSet<>();
+    default TreeSet<Integer> getVarIds() {
+        TreeSet<Integer> acc = new TreeSet<>();
         getVarIds(acc);
         return acc;
     }

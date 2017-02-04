@@ -3,6 +3,7 @@ package cz.tomkren.fishtron.ugen.nf;
 import cz.tomkren.fishtron.types.Sub;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
+import cz.tomkren.fishtron.ugen.data.Ts1Res;
 import cz.tomkren.utils.F;
 
 import java.math.BigInteger;
@@ -66,15 +67,35 @@ public class NF {
         }
     }
 
+    public List<Ts1Res> denormalize_ts1(List<Ts1Res> xs) {
+        if (isNormalizationPerformed()) {
+            getFromNF(); // ensures existence of fromNF
+            return F.map(xs, this::denormalize_internal_ts1);
+        } else {
+            return xs;
+        }
+    }
+
     private SubsRes denormalize_internal(SubsRes p) {
 
         Sub sub_nf = p.getSigma();
         Sub s1 = Sub.dot(sub_nf,toNF);
         Sub sub = Sub.dot(fromNF, s1);
 
-        BigInteger a = p.getNum();
-        int nextVarId = p.getNextVarId();
-        return new SubsRes(a,sub,nextVarId); // TODO opravdu stačí jen zkopírovat nextVarId, určitě promyslet do hloubky !!!
+        BigInteger num = p.getNum();
+        int nextVarId = p.getNextVarId(); // TODO opravdu stačí jen zkopírovat nextVarId, určitě promyslet do hloubky !!! 4.2.17: imho se musí taky prohnat fromNF
+        return new SubsRes(num,sub,nextVarId);
+    }
+
+    private Ts1Res denormalize_internal_ts1(Ts1Res p) {
+
+        Sub sub_nf = p.getSigma();
+        Sub s1 = Sub.dot(sub_nf,toNF);
+        Sub sub = Sub.dot(fromNF, s1);
+
+        String sym = p.getSym();
+        int nextVarId = p.getNextVarId(); // TODO opravdu stačí jen zkopírovat nextVarId, určitě promyslet do hloubky !!! 4.2.17: imho se musí taky prohnat fromNF
+        return new Ts1Res(sym,sub,nextVarId);
     }
 
 }

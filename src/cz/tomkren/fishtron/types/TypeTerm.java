@@ -4,10 +4,7 @@ import com.google.common.base.Joiner;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 /** Created by tom on 7.11.2015.*/
@@ -82,7 +79,7 @@ public class TypeTerm implements Type {
     }
 
     @Override
-    public void getVarIds(Set<Integer> ret) {
+    public void getVarIds(TreeSet<Integer> ret) {
         args.forEach(t->t.getVarIds(ret));
     }
 

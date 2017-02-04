@@ -6,16 +6,16 @@ import java.math.BigInteger;
 class EncodedSubsRes {
 
     private final BigInteger num;
-    private final int encodedSub;
-    private final int nextVarId;
+    private final int sub_id;
+    private final int nextVarId; // todo krásné by bylo kdyby to tu nebylo
 
-    EncodedSubsRes(BigInteger num, int encodedSub, int nextVarId) {
+    EncodedSubsRes(BigInteger num, int sub_id, int nextVarId) {
         this.num = num;
-        this.encodedSub = encodedSub;
+        this.sub_id = sub_id;
         this.nextVarId = nextVarId;
     }
 
     BigInteger getNum() {return num;}
-    int getEncodedSub() {return encodedSub;}
+    int getSub_id() {return sub_id;}
     int getNextVarId() {return nextVarId;}
 }

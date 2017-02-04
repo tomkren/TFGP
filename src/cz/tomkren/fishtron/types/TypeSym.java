@@ -3,6 +3,7 @@ package cz.tomkren.fishtron.types;
 import cz.tomkren.utils.AB;
 
 import java.util.Set;
+import java.util.TreeSet;
 
 /** Created by tom on 7.11.2015.*/
 
@@ -76,7 +77,7 @@ public class TypeSym implements Type {
     }
 
     @Override
-    public void getVarIds(Set<Integer> ret) {}
+    public void getVarIds(TreeSet<Integer> ret) {}
 
     @Override public String toString() {return sym;}
     @Override public Object toJson()   {return sym;}

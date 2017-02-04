@@ -30,8 +30,8 @@ public class Sub implements Function<Type,Type> {
         return o instanceof Sub && toString().equals(o.toString());
     }
 
-    public Set<Integer> getCodomainVarIds() {
-        Set<Integer> ret = new TreeSet<>();
+    public TreeSet<Integer> getCodomainVarIds() {
+        TreeSet<Integer> ret = new TreeSet<>();
         for (Type type : table.values()) {
             ret.addAll(type.getVarIds());
         }
@@ -48,7 +48,7 @@ public class Sub implements Function<Type,Type> {
 
     public boolean isFail() {return failMsg != null;}
     public String getFailMsg() {return failMsg;}
-    public void setFail(String error) {failMsg = error;}
+    private void setFail(String error) {failMsg = error;}
 
     @Override
     public Type apply(Type input) {

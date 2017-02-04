@@ -5,7 +5,10 @@ import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.TypeVar;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
+import cz.tomkren.fishtron.ugen.data.Ts1Res;
+import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
+import cz.tomkren.utils.TODO;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -31,94 +34,119 @@ public class Cache {
 
     // -- main public interface ----------------------------------------------------------------------
 
-    public List<SubsRes> subs_caching(int k, Type t, int nextVarId) {
-        SizeTypeData sizeTypeData = getSizeTypeData(k, t);
-        return decodeSubs(sizeTypeData, t, nextVarId);
+    public List<Ts1Res> ts_1_caching(Type t, int nextVarId) {
+        TypeData typeData = getTypeData(t);
+        List<Ts1Res> ts1results_unmoved = typeData.getTs1(t, gen);
+        return moveTs1Results(ts1results_unmoved, t, nextVarId);
     }
 
-    public BigInteger computeNum(int k, Type t) {
+    public List<SubsRes> subs_caching(int k, Type t, int nextVarId) {
         SizeTypeData sizeTypeData = getSizeTypeData(k, t);
-        return sizeTypeData.computeNum();
+        List<SubsRes> decoded_unIncremented = sizeTypeData.getSubsData(gen, this, k, t);
+        return moveSubsResults(decoded_unIncremented, t, nextVarId);
+    }
+
+
+    public BigInteger computeNum_caching(int k, Type t) {
+        SizeTypeData sizeTypeData = getSizeTypeData(k, t);
+        return sizeTypeData.computeNum(gen, this, k, t);
     }
 
     // -- private methods ---------------------------------------------------------------------------
 
-    private SizeTypeData getSizeTypeData(int k, Type t) {
-        TypeData typeData = typeDataMap.computeIfAbsent(t.toString(), key->new TypeData());
-        SizeTypeData sizeTypeData = typeData.getSizeTypeData(k);
-
-        if (!sizeTypeData.isComputed()) {
-            List<SubsRes> subs = gen.subs_compute(k, t,/*bylo nvi*/ 0);
-            //int t_nvi = t.getNextVarId(nextVarId);
-            List<EncodedSubsRes> encodedSubs = F.map(subs, this::encodeSub);
-            sizeTypeData.set(encodedSubs/*,t_nvi*/);
-        }
-
-        return sizeTypeData;
+    private TypeData getTypeData(Type t) {
+        return typeDataMap.computeIfAbsent(t.toString(), key->new TypeData());
     }
 
-    private EncodedSubsRes encodeSub(SubsRes subData) {
-        Sub sub = subData.getSigma();
+    private SizeTypeData getSizeTypeData(int k, Type t) {
+        return getTypeData(t).getSizeTypeData(k);
+    }
+
+    int addSub(Sub sub) {
         String sub_str = sub.toString();
         Integer sub_id = sub2id.get(sub_str);
-
         if (sub_id == null) {
             sub_id = subsList.size();
             subsList.add(sub);
             sub2id.put(sub_str, sub_id);
         }
-
-        BigInteger num = subData.getNum();
-        int nextVarId  = subData.getNextVarId();
-        return new EncodedSubsRes(num,sub_id,nextVarId);
+        return sub_id;
     }
 
-    private List<SubsRes> decodeSubs(SizeTypeData sizeTypeData, Type t, int nextVarId) {
+    Sub getSub(int sub_id) {
+        return subsList.get(sub_id);
+    }
 
-        List<EncodedSubsRes> encodedSubs = sizeTypeData.getSubsData();
 
-        List<SubsRes> decoded_unIncremented = F.map(encodedSubs,
-                p -> new SubsRes(p.getNum(), subsList.get(p.getEncodedSub()), p.getNextVarId()));
+    private static List<Ts1Res> moveTs1Results(List<Ts1Res> ts1results_unmoved, Type t, int nextVarId) {
 
-        int t_nvi = t.getNextVarId(0); //sizeTypeData.t_nvi();
-        int new_t_nvi =  Math.max(t_nvi, nextVarId);// což se == t.getNextVarId(nextVarId);
+        int tnvi_0 = t.getNextVarId(0);
+        int tnvi_n = Math.max(tnvi_0, nextVarId);
+        int delta  = tnvi_n - tnvi_0;
 
-        if (new_t_nvi != t.getNextVarId(nextVarId)) {
-            throw new Error("Cache.decodeSubs assert fail: new_t_nvi != t.getNextVarId(nextVarId)");
+        if (delta == 0) {
+            return ts1results_unmoved;
+        } else {
+            return F.map(ts1results_unmoved, ts1Res -> moveTs1Res(ts1Res, tnvi_0, delta));
+        }
+    }
+
+    private static List<SubsRes> moveSubsResults(List<SubsRes> decoded_unIncremented, Type t, int nextVarId) {
+
+        int tnvi_0 = t.getNextVarId(0); //sizeTypeData.t_nvi();
+        int tnvi_n = Math.max(tnvi_0, nextVarId);// což se == t.getNextVarId(nextVarId);
+
+        if (tnvi_n != t.getNextVarId(nextVarId)) {
+            throw new Error("Cache.moveSubsResults assert fail: tnvi_n != t.getNextVarId(nextVarId)");
         }
 
-        if (new_t_nvi < t_nvi) {
-            throw new Error("Cache.decodeSubs error: new_t_nvi < t_nvi, should never be true.");
-        } else if (new_t_nvi == t_nvi) {
+        if (tnvi_n < tnvi_0) {
+            throw new Error("Cache.moveSubsResults error: tnvi_n < tnvi_0, should never be true.");
+        } else if (tnvi_n == tnvi_0) {
             return decoded_unIncremented;
         } else {
-            return F.map(decoded_unIncremented, subsRes -> incrementDecodedSub(subsRes, t_nvi, new_t_nvi));
+            return F.map(decoded_unIncremented, subsRes -> moveSubsRes(subsRes, tnvi_0, tnvi_n));
         }
-
     }
 
-    private static SubsRes incrementDecodedSub(SubsRes subsRes, int t_nvi, int new_t_nvi) {
+    private static Ts1Res moveTs1Res(Ts1Res ts1Res, int tnvi_0, int tnvi_n) {
+        Sub sub = ts1Res.getSigma();
+        AB<Sub,Integer> moveSubRes = moveSub(sub, tnvi_0, tnvi_n);
+        return new Ts1Res(ts1Res.getSym(), moveSubRes._1(), moveSubRes._2() /*ts1Res.getNextVarId() + delta*/);
+    }
 
-        int delta = new_t_nvi - t_nvi;
+    private static SubsRes moveSubsRes(SubsRes subsRes, int tnvi_0, int tnvi_n) {
         Sub sub = subsRes.getSigma();
+        AB<Sub,Integer> moveSubRes = moveSub(sub, tnvi_0, tnvi_n);
+        return new SubsRes(subsRes.getNum(), moveSubRes._1(), moveSubRes._2() /*subsRes.getNextVarId() + delta*/);
+    }
 
-        Set<Integer> codomainVarIds = sub.getCodomainVarIds();
+    private static AB<Sub,Integer> moveSub(Sub sub, int tnvi_0, int tnvi_n) {
+        TreeSet<Integer> codomainVarIds = sub.getCodomainVarIds();
 
-        Sub incrementSub = new Sub();
+        Sub incSub = new Sub();
+        int delta  = tnvi_n - tnvi_0;
 
-        for (Integer codomVarId : codomainVarIds) {
-            if (codomVarId >= t_nvi) {
-                incrementSub.add(codomVarId, new TypeVar(codomVarId + delta));
+        for (Integer varId : codomainVarIds) {
+            if (varId >= tnvi_0) {
+                int newVarId = varId + delta;
+                incSub.add(varId, new TypeVar(newVarId));
             }
         }
 
-        Sub newSub = Sub.dot(incrementSub,sub);
+        Sub movedSub = Sub.dot(incSub,sub);
 
-        return new SubsRes(subsRes.getNum(), newSub, subsRes.getNextVarId() + delta);
+        int nextVarId = tnvi_n;
+        if (!codomainVarIds.isEmpty()) {
+            nextVarId = codomainVarIds.last() + delta + 1;
+        }
+
+        return AB.mk(movedSub, nextVarId);
     }
 
 
-    // -- toJson method and utils ---------------------------------------------------------------
+
+    // -- toJson method and its utils ---------------------------------------------------------------
 
     public JSONObject toJson() {
         return F.obj(
@@ -128,7 +156,7 @@ public class Cache {
     }
 
     private static JSONObject typesToJson(Map<String,TypeData> typeDataMap) {
-        return F.jsonMap(typeDataMap, Cache::typeDataToJson);
+        return F.jsonMap(typeDataMap, TypeData::toJson);
     }
 
     private static JSONArray subsToJson(List<Sub> subsList) {
@@ -143,13 +171,9 @@ public class Cache {
         return ret;
     }
 
-    private static JSONObject typeDataToJson(TypeData td) {
-        return F.jsonMap(td.getSizeDataMap(), x -> sizeTypeDataToJson(x.getSubsData()) );
-    }
 
-    private static JSONArray sizeTypeDataToJson(List<EncodedSubsRes> subs) {
-        return F.jsonMap(subs, p -> F.arr(p.getNum().toString(),p.getEncodedSub()));
-    }
+
+
 
 
 }
