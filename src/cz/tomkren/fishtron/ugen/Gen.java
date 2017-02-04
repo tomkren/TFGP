@@ -23,6 +23,10 @@ public class Gen {
     private Random rand;
     private Cache cache;
 
+    Gen(Gamma gamma, Random rand) {
+        this(Opts.mkDefault(), gamma, rand);
+    }
+
     Gen(Opts opts, Gamma gamma, Random rand) {
         this.opts = opts;
         this.gamma = gamma;
