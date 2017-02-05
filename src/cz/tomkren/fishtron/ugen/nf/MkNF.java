@@ -10,7 +10,7 @@ import java.util.TreeMap;
 
 /** Created by tom on 2. 2. 2017.*/
 
-public class MkNF {
+class MkNF {
 
     private Renaming renaming_skol;
     private Renaming renaming_vars;
@@ -20,7 +20,7 @@ public class MkNF {
     private int n_skol;
     private int n_vars;
 
-    public MkNF(Type t) {
+    MkNF(Type t) {
 
         tab_skol = new TreeMap<>();
         tab_vars = new TreeMap<>();
@@ -34,8 +34,8 @@ public class MkNF {
         renaming_vars = new Renaming(tab_vars);
     }
 
-    public Renaming getRenaming_skol() {return renaming_skol;}
-    public Renaming getRenaming_vars() {return renaming_vars;}
+    Renaming getRenaming_skol() {return renaming_skol;}
+    Renaming getRenaming_vars() {return renaming_vars;}
 
     private void nf(Type t) {
         if (t instanceof TypeSym) {
