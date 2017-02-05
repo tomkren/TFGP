@@ -7,7 +7,7 @@ import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.cache.Cache;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
 import cz.tomkren.fishtron.ugen.data.Ts1Res;
-import cz.tomkren.fishtron.ugen.nf.NF;
+import cz.tomkren.fishtron.ugen.nf.NF_old;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
 
@@ -42,7 +42,7 @@ public class Gen {
         if (k < 1) {throw new Error("k must be > 0, it is "+k);}
 
         // normalization
-        NF nf = normalizeIf(rawType);
+        NF_old nf = normalizeIf(rawType);
         Type t_NF = nf.getTypeInNF();
 
         // ball selection
@@ -149,7 +149,7 @@ public class Gen {
     }
 
     private List<SubsRes> subs(int k, Type rawType, int n) {
-        NF nf = normalizeIf(rawType);
+        NF_old nf = normalizeIf(rawType);
         Type t_NF = nf.getTypeInNF();
 
         List<SubsRes> subs = opts.isCachingUsed() ?
@@ -229,7 +229,7 @@ public class Gen {
             }
         }
 
-        //todo zde neni potřeba packovat, packovat stačí subs_compute, rozmyslet co je efektivnější
+        //zde neni potřeba packovat, packovat stačí subs_compute
         return ret; //pack(ret);
     }
 
@@ -268,11 +268,11 @@ public class Gen {
     }
 
 
-    private NF normalizeIf(Type t) {
-        return new NF(opts.isNormalizationPerformed(), t);
+    private NF_old normalizeIf(Type t) {
+        return new NF_old(opts.isNormalizationPerformed(), t);
     }
 
-    private void denormalizeIf(AB<AppTree,Integer> tree_res, NF nf) {
+    private void denormalizeIf(AB<AppTree,Integer> tree_res, NF_old nf) {
         if (opts.isNormalizationPerformed()) {
             AppTree tree = tree_res._1();
             Sub fromNF = nf.getFromNF();
