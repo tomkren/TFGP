@@ -11,7 +11,7 @@ import java.util.List;
 
 /**  Created by user on 31. 1. 2017. */
 
-class Gamma {
+public class Gamma {
 
     private final List<AB<String, Type>> gamma;
 

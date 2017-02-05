@@ -2,9 +2,11 @@ package cz.tomkren.fishtron.ugen.nf;
 
 import cz.tomkren.fishtron.types.Sub;
 import cz.tomkren.fishtron.types.Type;
+import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.AppTree;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
 import cz.tomkren.utils.F;
+import cz.tomkren.utils.Log;
 
 import java.util.List;
 import java.util.Map;
@@ -18,6 +20,9 @@ public class NF {
     private Type typeInNF;
     private int t_nvi;
 
+    private NF(Type t) {
+        this(true, t);
+    }
 
     public NF(boolean isNormalizationPerformed, Type t) {
         if (isNormalizationPerformed) {
@@ -90,6 +95,29 @@ public class NF {
         }
 
         return new SubsRes(subsRes_NF.getNum() ,sigma, nextVarId);
+    }
+
+
+
+    // -- TESTING ------------------------------------------------
+
+    public static void main(String[] args) {
+        test_1();
+    }
+
+    private static void test_1() {
+        Type rawType = Types.parse("(P x5 x4) -> ((Q x2 x5) -> ((x0 -> x2) -> ((P x5 x4) -> x6)))");
+
+        NF nf = new NF(rawType);
+        Type t_NF = nf.getTypeInNF();
+
+        Log.it(rawType);
+        Log.it(nf.fromNF(t_NF));
+
+        Log.it(t_NF);
+        Log.it(nf.toNF(rawType));
+
+
     }
 
 }

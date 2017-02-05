@@ -5,6 +5,7 @@ import cz.tomkren.fishtron.types.TypeSym;
 import cz.tomkren.fishtron.types.TypeTerm;
 import cz.tomkren.fishtron.types.TypeVar;
 import cz.tomkren.utils.F;
+import cz.tomkren.utils.Log;
 
 import java.util.*;
 
@@ -20,9 +21,6 @@ class Renaming {
         table        = new TreeMap<>();
         reverseTable = new TreeMap<>();
 
-        //Set<Integer> domTabu = new HashSet<>();
-        //Set<Integer> codomTabu = new HashSet<>();
-
         List<Integer> domTodo = new ArrayList<>();
         List<Integer> codomTodo = new ArrayList<>();
 
@@ -30,25 +28,25 @@ class Renaming {
             int var1 = e.getKey();
             int var2 = e.getValue();
             if (var1 != var2) {
-                //domTabu.add(var1);
-                //codomTabu.add(var2);
                 putBothWays(var1, var2);
             }
         }
 
-        for (Map.Entry<Integer,Integer> e : table.entrySet()) {
+        for (Map.Entry<Integer,Integer> e : tab.entrySet()) {
             int var1 = e.getKey();
             int var2 = e.getValue();
-            if (table.containsKey(var2) /*domTabu.contains(var2)*/) {
-                if (!reverseTable.containsKey(var1) /*reverseTable.get(var1) == null*/) {
-                    codomTodo.add(var1);
+            if (var1 != var2) {
+                if (table.containsKey(var2)) {
+                    if (!reverseTable.containsKey(var1)) {
+                        codomTodo.add(var1);
+                    }
+                } else if (reverseTable.containsKey(var1)) {
+                    if (!table.containsKey(var2)) {
+                        domTodo.add(var2);
+                    }
+                } else {
+                    putBothWays(var2, var1);
                 }
-            } else if (reverseTable.containsKey(var1) /*codomTabu.contains(var1)*/) {
-                if (!table.containsKey(var2)/*table.get(var2) == null*/) {
-                    domTodo.add(var2);
-                }
-            } else {
-                putBothWays(var2, var1);
             }
         }
 
@@ -150,6 +148,64 @@ class Renaming {
         } else {
             throw new Error("Unsupported type construct.");
         }
+    }
+
+
+
+
+    // -- TESTING -----------------------------------------------
+
+    private static String showTab(TreeMap<Integer,Integer> tab) {
+        String line1 = "";
+        String line2 = "";
+
+        for (Map.Entry<Integer,Integer> e : tab.entrySet()) {
+            line1 += e.getKey() +" ";
+            line2 += e.getValue() +" ";
+        }
+
+        return line1 +"\n"+ line2;
+    }
+
+    private static void logTab(TreeMap<Integer,Integer> tab) {
+        Log.it(showTab(tab));
+        //Log.it();
+    }
+
+
+    public static void main(String[] args) {
+        test_1();
+    }
+
+
+    private static void testTab(int... xs) {
+
+        TreeMap<Integer,Integer> tab = new TreeMap<>();
+
+        for (int i = 0; i < xs.length; i+=2) {
+            int k = xs[i];
+            int v = xs[i+1];
+            tab.put(k,v);
+        }
+
+        Log.it("input tab:");
+        logTab(tab);
+
+        Renaming r = new Renaming(tab);
+
+        Log.it("table:");
+        logTab(r.table);
+
+        Log.it("reverseTable:");
+        logTab(r.reverseTable);
+        Log.it();
+    }
+
+    private static void test_1() {
+
+        testTab(0,0,  4,1,  2,2,  0,3,  6,4);
+        testTab(0,0,  5,1,  4,2,  1,3,  3,4);
+
     }
 
 

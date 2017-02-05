@@ -188,7 +188,7 @@ public class Gen {
 
 
 
-    static List<Ts1Res> ts1_static(Gamma gamma, Type t, int nextVarId) {
+    public static List<Ts1Res> ts1_static(Gamma gamma, Type t, int nextVarId) {
         List<Ts1Res> ret = new ArrayList<>();
 
         for (AB<String,Type> p : gamma.getSymbols()) {
@@ -230,7 +230,7 @@ public class Gen {
     }
 
 
-    static List<SubsRes> pack(List<SubsRes> subs) {
+    public static List<SubsRes> pack(List<SubsRes> subs) {
         Map<String,SubsRes> resultMap = new TreeMap<>();
 
         for (SubsRes res : subs) {
@@ -258,7 +258,7 @@ public class Gen {
     }
 
 
-    static AB<TypeVar,Integer> newVar(Type t, int n) {
+    public static AB<TypeVar,Integer> newVar(Type t, int n) {
         int n1 = t.getNextVarId(n);
         return AB.mk(new TypeVar(n1), n1+1);
     }
