@@ -102,11 +102,13 @@ public class NF {
     // -- TESTING ------------------------------------------------
 
     public static void main(String[] args) {
-        test_1();
+        test_1("(P x5 x4) -> ((Q x2 x5) -> ((x0 -> x2) -> ((P x5 x4) -> x6)))");
+        test_1("((P X15 X14) -> ((Q X12 X15) -> ((X10 -> X12) -> ((P X15 X14) -> X16)))) -> ((P x5 x4) -> ((Q x2 x5) -> ((x0 -> x2) -> ((P x5 x4) -> x6))))");
+
     }
 
-    private static void test_1() {
-        Type rawType = Types.parse("(P x5 x4) -> ((Q x2 x5) -> ((x0 -> x2) -> ((P x5 x4) -> x6)))");
+    private static void test_1(String typeStr) {
+        Type rawType = Types.parse(typeStr);
 
         NF nf = new NF(rawType);
         Type t_NF = nf.getTypeInNF();
@@ -116,7 +118,7 @@ public class NF {
 
         Log.it(t_NF);
         Log.it(nf.toNF(rawType));
-
+        Log.it();
 
     }
 

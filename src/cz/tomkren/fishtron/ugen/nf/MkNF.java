@@ -26,7 +26,7 @@ public class MkNF {
         tab_vars = new TreeMap<>();
 
         n_skol = 0;
-        n_vars = t.getNextVarId_onlySkolemVars();
+        n_vars = t.getSkolemIds().size();
 
         nf(t);
 

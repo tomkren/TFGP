@@ -79,6 +79,14 @@ public class TypeSym implements Type {
     @Override
     public void getVarIds(TreeSet<Integer> ret) {}
 
+    @Override
+    public void getSkolemIds(TreeSet<Integer> acc) {
+        Integer sid = getSkolemId();
+        if (sid != null) {
+            acc.add(sid);
+        }
+    }
+
     @Override public String toString() {return sym;}
     @Override public Object toJson()   {return sym;}
 

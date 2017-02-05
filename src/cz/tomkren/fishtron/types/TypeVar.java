@@ -62,6 +62,8 @@ public class TypeVar implements Type {
         ret.add(id);
     }
 
+    @Override public void getSkolemIds(TreeSet<Integer> acc) {}
+
     @Override
     public String toString() {
         return "x"+id;

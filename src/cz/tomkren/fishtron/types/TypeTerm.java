@@ -80,7 +80,12 @@ public class TypeTerm implements Type {
 
     @Override
     public void getVarIds(TreeSet<Integer> ret) {
-        args.forEach(t->t.getVarIds(ret));
+        args.forEach(t -> t.getVarIds(ret));
+    }
+
+    @Override
+    public void getSkolemIds(TreeSet<Integer> acc) {
+        args.forEach(t -> t.getSkolemIds(acc));
     }
 
     @Override

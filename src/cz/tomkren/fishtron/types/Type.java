@@ -29,6 +29,19 @@ public interface Type {
     }
 
     void getVarIds(TreeSet<Integer> acc);
+    void getSkolemIds(TreeSet<Integer> acc);
+
+    default TreeSet<Integer> getVarIds() {
+        TreeSet<Integer> acc = new TreeSet<>();
+        getVarIds(acc);
+        return acc;
+    }
+
+    default TreeSet<Integer> getSkolemIds() {
+        TreeSet<Integer> acc = new TreeSet<>();
+        getSkolemIds(acc);
+        return acc;
+    }
 
     int getNextVarId(int acc);
     int getNextVarId_onlySkolemVars(int acc);
@@ -41,11 +54,7 @@ public interface Type {
         return getNextVarId_onlySkolemVars(0);
     }
 
-    default TreeSet<Integer> getVarIds() {
-        TreeSet<Integer> acc = new TreeSet<>();
-        getVarIds(acc);
-        return acc;
-    }
+
 
     Object toJson();
 
