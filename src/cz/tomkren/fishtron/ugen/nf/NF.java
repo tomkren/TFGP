@@ -4,14 +4,14 @@ import cz.tomkren.fishtron.types.Type;
 
 /** Created by user on 3. 2. 2017. */
 
-public class NF2 {
+public class NF {
 
     private Renaming renaming_skol;
     private Renaming renaming_vars;
 
 
 
-    public NF2(boolean isNormalizationPerformed, Type t) {
+    public NF(boolean isNormalizationPerformed, Type t) {
         if (isNormalizationPerformed) {
 
             MkNF renamings = new MkNF(t);
