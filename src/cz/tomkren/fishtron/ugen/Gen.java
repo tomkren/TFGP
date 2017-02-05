@@ -7,7 +7,7 @@ import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.cache.Cache;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
 import cz.tomkren.fishtron.ugen.data.Ts1Res;
-import cz.tomkren.fishtron.ugen.nf.NF_old;
+import cz.tomkren.fishtron.ugen.nf.NF;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
 
@@ -42,7 +42,7 @@ public class Gen {
         if (k < 1) {throw new Error("k must be > 0, it is "+k);}
 
         // normalization
-        NF_old nf = normalizeIf(rawType);
+        NF nf = normalizeIf(rawType);
         Type t_NF = nf.getTypeInNF();
 
         // ball selection
@@ -55,12 +55,12 @@ public class Gen {
         AB<AppTree,Integer> res = (k == 1) ? genOne_sym(t_NF, n, ball) : genOne_app(k, t_NF, n, ball);
 
         //denormalize
-        denormalizeIf(res, nf);
+        nf.denormalizeIf(res._1());
         return res;
     }
 
     private AB<AppTree,Integer> genOne_sym(Type t_NF, int n, BigInteger ball) {
-        for (Ts1Res res : ts_1(t_NF,n)) {
+        for (Ts1Res res : ts1(t_NF,n)) {
             if (F.isZero(ball)) {
                 // todo logy
                 AppTree symLeaf = AppTree.mk(res.getSym(), res.getSigma().apply(t_NF));
@@ -138,7 +138,7 @@ public class Gen {
     // je v tom trochu zmatek, v LSolver getNum dělal normalizaci, tady jí ale nedělá
     private BigInteger getNum(int k, Type t_NF) {
         if (opts.isCachingUsed()) {
-            return cache.computeNum_caching(k, t_NF);
+            return cache.getNum(k, t_NF);
         } else {
             BigInteger sum = BigInteger.ZERO;
             for (SubsRes subsRes : subs_compute(k, t_NF, 0)) {
@@ -149,24 +149,20 @@ public class Gen {
     }
 
     private List<SubsRes> subs(int k, Type rawType, int n) {
-        NF_old nf = normalizeIf(rawType);
+        NF nf = normalizeIf(rawType);
         Type t_NF = nf.getTypeInNF();
 
-        List<SubsRes> subs = opts.isCachingUsed() ?
-                cache.subs_caching(k, t_NF, n) :
-                      subs_compute(k, t_NF, n) ;
+        List<SubsRes> subs = opts.isCachingUsed() ? cache.subs(k, t_NF, n) : subs_compute(k, t_NF, n) ;
 
-        return nf.denormalize(subs);
+        return nf.denormalizeIf(subs);
     }
 
-    private List<Ts1Res> ts_1(Type t_NF, int n) {
-        return opts.isCachingUsed() ?
-                cache.ts_1_caching(t_NF, n) :
-                ts_1_compute(t_NF, n);
+    private List<Ts1Res> ts1(Type t_NF, int n) {
+        return opts.isCachingUsed() ? cache.ts1(t_NF, n) : ts1_compute(t_NF, n);
     }
 
-    public List<Ts1Res> ts_1_compute(Type t, int n) {
-        return ts_1_static(gamma, t, n);
+    public List<Ts1Res> ts1_compute(Type t, int n) {
+        return ts1_static(gamma, t, n);
     }
 
     public List<SubsRes> subs_compute(int k, Type t_NF, int n) {
@@ -185,14 +181,14 @@ public class Gen {
     }
 
     private List<SubsRes> subs_1(Type t_NF, int nextVarId) {
-        List<Ts1Res> ts1_results = ts_1(t_NF, nextVarId);
+        List<Ts1Res> ts1_results = ts1(t_NF, nextVarId);
         List<SubsRes> unpackedResults = F.map(ts1_results, Ts1Res::toSubsRes);
         return pack(unpackedResults);
     }
 
 
 
-    static List<Ts1Res> ts_1_static(Gamma gamma, Type t, int nextVarId) {
+    static List<Ts1Res> ts1_static(Gamma gamma, Type t, int nextVarId) {
         List<Ts1Res> ret = new ArrayList<>();
 
         for (AB<String,Type> p : gamma.getSymbols()) {
@@ -268,17 +264,10 @@ public class Gen {
     }
 
 
-    private NF_old normalizeIf(Type t) {
-        return new NF_old(opts.isNormalizationPerformed(), t);
+    private NF normalizeIf(Type t) {
+        return new NF(opts.isNormalizationPerformed(), t);
     }
 
-    private void denormalizeIf(AB<AppTree,Integer> tree_res, NF_old nf) {
-        if (opts.isNormalizationPerformed()) {
-            AppTree tree = tree_res._1();
-            Sub fromNF = nf.getFromNF();
-            tree.applySub(fromNF);
-        }
-    }
 
 
     static class Opts {

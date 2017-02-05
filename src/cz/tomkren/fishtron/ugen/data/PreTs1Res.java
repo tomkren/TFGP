@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen.cache.data;
+package cz.tomkren.fishtron.ugen.data;
 
 import cz.tomkren.fishtron.types.Sub;
 

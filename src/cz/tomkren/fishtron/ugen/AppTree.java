@@ -17,7 +17,7 @@ import java.util.function.Function;
 
 // TODO opakujou se tu kody, předelat na abstract dědičnost asi...
 
-interface AppTree {
+public interface AppTree {
 
     static AppTree mk(String sym, Type type) {
         return new AppTree.Leaf(sym, type);
@@ -34,6 +34,7 @@ interface AppTree {
     Type getType();
     void deskolemize(Set<Integer> ids);
     void applySub(Sub sub);
+    void applyTypeTransform(Function<Type,Type> tt);
     String toRawString();
 
     AB<Boolean,Integer> isStrictlyWellTyped(Map<String, Type> gammaMap, int nextVarId);
@@ -63,6 +64,7 @@ interface AppTree {
         @Override public Type getType() {return type;}
         @Override public void deskolemize(Set<Integer> ids) {type = type.deskolemize(ids);}
         @Override public void applySub(Sub sub) {type = sub.apply(type);}
+        @Override public void applyTypeTransform(Function<Type, Type> tt) {type = tt.apply(type);}
         @Override public String toString() {return sym;}
         @Override public String toRawString() {return sym;}
 
@@ -190,6 +192,13 @@ interface AppTree {
             type = sub.apply(type);
             funTree.applySub(sub);
             argTree.applySub(sub);
+        }
+
+        @Override
+        public void applyTypeTransform(Function<Type,Type> tt) {
+            type = tt.apply(type);
+            funTree.applyTypeTransform(tt);
+            argTree.applyTypeTransform(tt);
         }
 
         @Override

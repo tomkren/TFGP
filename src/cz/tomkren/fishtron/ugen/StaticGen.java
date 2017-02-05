@@ -18,7 +18,7 @@ import java.util.List;
 public class StaticGen {
 
     private static List<SubsRes> subs_1(Gamma gamma, Type t, int nextVarId) {
-        List<Ts1Res> ts1_results = Gen.ts_1_static(gamma, t, nextVarId);
+        List<Ts1Res> ts1_results = Gen.ts1_static(gamma, t, nextVarId);
         List<SubsRes> unpackedResults = F.map(ts1_results, Ts1Res::toSubsRes);
         return Gen.pack(unpackedResults);
     }

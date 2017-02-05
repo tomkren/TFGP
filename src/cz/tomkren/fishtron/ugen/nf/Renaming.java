@@ -77,6 +77,11 @@ class Renaming {
     }
 
 
+    int applyReverse(int varId) {
+        Integer ret = reverseTable.get(varId);
+        return (ret == null) ? varId : ret;
+    }
+
     Type applyAsVars(Type t) {
         return applyAsVars(table, t);
     }

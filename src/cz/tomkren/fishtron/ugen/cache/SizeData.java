@@ -4,7 +4,7 @@ import cz.tomkren.fishtron.types.Sub;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.cache.data.EncodedSubsRes;
-import cz.tomkren.fishtron.ugen.cache.data.PreSubsRes;
+import cz.tomkren.fishtron.ugen.data.PreSubsRes;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
 import cz.tomkren.utils.F;
 import org.json.JSONObject;

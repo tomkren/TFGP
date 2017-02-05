@@ -5,7 +5,7 @@ import cz.tomkren.fishtron.types.Sub;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.cache.data.EncodedTs1Res;
-import cz.tomkren.fishtron.ugen.cache.data.PreTs1Res;
+import cz.tomkren.fishtron.ugen.data.PreTs1Res;
 import cz.tomkren.fishtron.ugen.data.Ts1Res;
 import cz.tomkren.utils.F;
 import org.json.JSONObject;
@@ -26,9 +26,9 @@ class TypeData {
         ts1Data = null;
     }
 
-    List<PreTs1Res> getTs1(Type t, Gen gen, Cache cache) {
+    List<PreTs1Res> ts1(Type t, Gen gen, Cache cache) {
         if (ts1Data == null) {
-            List<Ts1Res> ts1results = gen.ts_1_compute(t, 0);
+            List<Ts1Res> ts1results = gen.ts1_compute(t, 0);
             ts1Data = F.map(ts1results, r -> encode(cache, r));
         }
         return F.map(ts1Data, r -> decode(cache, r));
@@ -45,7 +45,7 @@ class TypeData {
     }
 
 
-    SizeData getSizeTypeData(int k) {
+    SizeData getSizeData(int k) {
         return sizeDataMap.computeIfAbsent(k,_k -> new SizeData());
     }
 
