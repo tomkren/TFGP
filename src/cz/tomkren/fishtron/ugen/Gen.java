@@ -154,7 +154,7 @@ public class Gen {
 
         List<SubsRes> subs = opts.isCachingUsed() ? cache.subs(k, t_NF, n) : subs_compute(k, t_NF, n) ;
 
-        return nf.denormalizeIf(subs);
+        return nf.denormalizeIf(subs, n);
     }
 
     private List<Ts1Res> ts1(Type t_NF, int n) {
