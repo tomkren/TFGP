@@ -20,7 +20,7 @@ public class NF {
     private Type typeInNF;
     private int t_nvi;
 
-    private NF(Type t) {
+    public NF(Type t) {
         this(true, t);
     }
 
@@ -41,14 +41,14 @@ public class NF {
         }
     }
 
-    private Type toNF(Type t) {
+    public Type toNF(Type t) {
         if (renaming_vars == null) {return t;}
 
         Type t1 = renaming_skol.applyAsSkolems(t);
         return renaming_vars.applyAsVars(t1);
     }
 
-    private Type fromNF(Type t) {
+    public Type fromNF(Type t) {
         if (renaming_vars == null) {return t;}
 
         Type t1 = renaming_skol.applyReverseAsSkolems(t);

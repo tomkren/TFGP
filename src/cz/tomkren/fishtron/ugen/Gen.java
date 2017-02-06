@@ -270,7 +270,7 @@ public class Gen {
 
 
 
-    static class Opts {
+    public static class Opts {
         private final boolean isCachingUsed;
         private final boolean isNormalizationPerformed;
 
@@ -282,7 +282,7 @@ public class Gen {
         boolean isCachingUsed() {return isCachingUsed;}
         boolean isNormalizationPerformed() {return isNormalizationPerformed;}
 
-        static Opts mkDefault() {
+        public static Opts mkDefault() {
             return new Opts(true,true);
         }
     }

@@ -27,7 +27,7 @@ public class Gamma {
         return F.jsonMap(gamma, p -> F.arr(p._1(),p._2().toString()));
     }
 
-    static Gamma mk(String... strs) {
+    public static Gamma mk(String... strs) {
         if (strs.length % 2 != 0) {throw new Error("There must be an even number of gamma strings.");}
         List<AB<String,Type>> ret = new ArrayList<>(strs.length/2);
         for (int i = 0; i < strs.length; i+=2) {
