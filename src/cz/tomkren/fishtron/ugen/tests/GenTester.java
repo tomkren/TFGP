@@ -1,7 +1,5 @@
 package cz.tomkren.fishtron.ugen.tests;
 
-
-import cz.tomkren.fishtron.latticegen.LSolver;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.TypeTerm;
 import cz.tomkren.fishtron.types.Types;
@@ -91,6 +89,10 @@ public class GenTester {
         ch.it(nf.toNF(t), t_nf.toString());
         Log.it();
 
+        Log.it("Creating Gen ... initial state:");
+        Gen gen = new Gen(opts, gamma, ch.getRandom());
+        Log.it(gen);
+
         List<TsRes> ts = StaticGen.ts_k(gamma, k, t_nf, 0);
         Log.it("-- ts_"+k+"(gamma, t_nf) ------------");
         Log.listLn(ts);
@@ -99,9 +101,9 @@ public class GenTester {
         Log.it("-- subs_"+k+"(gamma, t_nf) ----------");
         Log.listLn(subs);
 
-        Log.it("Creating Gen ... initial state:");
-        Gen gen = new Gen(opts, gamma, ch.getRandom());
-        Log.it(gen);
+        List<SubsRes> subs2 = gen.subs(k, t_nf, 0);
+        Log.it("-- LSolver.subs_"+k+"(gamma, t_nf) ----------");
+        Log.listLn(subs2);
 
 
     }

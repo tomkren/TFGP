@@ -19,8 +19,10 @@ public class Mover {
 
     private final int tnvi_0;
     private final int tnvi_n;
+    private final Type t;
 
     private Mover(Type t, int n) {
+        this.t = t;
         tnvi_0 = t.getNextVarId(0);
         tnvi_n = Math.max(tnvi_0, n);
     }
@@ -38,7 +40,7 @@ public class Mover {
             }
         }
 
-        Sub movedSub = Sub.dot(deltaSub, sub);
+        Sub movedSub = Sub.dot(deltaSub, sub).restrict(t);
         return AB.mk(movedSub, nextVarId);
     }
 

@@ -15,4 +15,12 @@ public class PreTs1Res {
 
     public String getSym() {return s;}
     public Sub getSigma() {return sigma;}
+
+    @Override
+    public String toString() {
+        return "PreTs1Res{" +
+                "s='" + s + '\'' +
+                ", sigma=" + sigma +
+                '}';
+    }
 }

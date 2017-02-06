@@ -10,6 +10,7 @@ import cz.tomkren.fishtron.ugen.data.Ts1Res;
 import cz.tomkren.fishtron.ugen.nf.NF;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
+import cz.tomkren.utils.Log;
 import org.json.JSONObject;
 
 import java.math.BigInteger;
@@ -149,7 +150,7 @@ public class Gen {
         }
     }
 
-    private List<SubsRes> subs(int k, Type rawType, int n) {
+    public List<SubsRes> subs(int k, Type rawType, int n) {
         NF nf = normalizeIf(rawType);
         Type t_NF = nf.getTypeInNF();
 

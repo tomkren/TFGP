@@ -33,4 +33,13 @@ public class Ts1Res {
         return new TsRes(symLeaf, sigma, nextVarId);
     }
 
+
+    @Override
+    public String toString() {
+        return "Ts1Res{" +
+                "s='" + s + '\'' +
+                ", sigma=" + sigma +
+                ", nextVarId=" + nextVarId +
+                '}';
+    }
 }

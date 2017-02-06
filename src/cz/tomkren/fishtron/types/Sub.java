@@ -55,8 +55,17 @@ public class Sub implements Function<Type,Type> {
         return input.applySub(this);
     }
 
-    public Type get(int varId) {return table.get(varId);}
-    public void add(int varId, Type t) {table.put(varId, t);}
+    public Type get(int varId) {
+        return table.get(varId);
+    }
+
+    public void add(int varId, Type t) {
+        if (t instanceof TypeVar) {
+            int t_id = ((TypeVar) t).getId();
+            if (t_id == varId) {return;}
+        }
+        table.put(varId, t);
+    }
 
     public void removeAllBut(Set<Integer> varsSet) {
 
