@@ -36,12 +36,12 @@ public class Cache {
 
     public List<Ts1Res> ts1(Type t, int n) {
         List<PreTs1Res> ts1results_unmoved = getTypeData(t).ts1(t, gen, this);
-        return Mover.moveTs1Results(t, n, ts1results_unmoved);
+        return Mover.movePreTs1Results(t, n, ts1results_unmoved);
      }
 
     public List<SubsRes> subs(int k, Type t, int n) {
         List<PreSubsRes> results_unmoved = getSizeTypeData(k, t).getSubsData(gen, this, k, t);
-        return Mover.moveSubsResults(t, n, results_unmoved);
+        return Mover.movePreSubsResults(t, n, results_unmoved);
     }
 
     public BigInteger getNum(int k, Type t) {

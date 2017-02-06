@@ -5,6 +5,7 @@ import cz.tomkren.fishtron.types.TypeTerm;
 import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
+import cz.tomkren.fishtron.ugen.Mover;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
 import cz.tomkren.fishtron.ugen.data.TsRes;
 import cz.tomkren.fishtron.ugen.nf.NF;
@@ -42,12 +43,25 @@ public class GenTester {
 
         Gen.Opts opts = Gen.Opts.mkDefault();
         tests_subs_1(ch, opts);
+        tests_subs_k(ch, opts);
 
         // todo
-        //tests_subs_k(ch, opts);
         //tests_treeGenerating(ch, 6, 100, opts);
 
         ch.results();
+    }
+
+    private static void tests_subs_k(Checker ch, Gen.Opts opts) {
+        Log.it("\n== ts_k & subs_k tests ==================================================\n");
+
+        Gamma gamma1 = Gamma.mk(
+                "f", "X -> X",
+                "seri", "(a -> b) -> ((b -> c) -> (a -> c))"
+        );
+
+        test_ts_k(ch, 1, "X -> X", gamma1, opts);
+        test_ts_k(ch, 2, "X -> X", gamma1, opts);
+        test_ts_k(ch, 3, "X -> X", gamma1, opts);
     }
 
     private static void tests_subs_1(Checker ch, Gen.Opts opts) {
@@ -97,14 +111,27 @@ public class GenTester {
         Log.it("-- ts_"+k+"(gamma, t_nf) ------------");
         Log.listLn(ts);
 
-        List<SubsRes> subs = StaticGen.subs_k(gamma, k, t_nf, 0);
-        Log.it("-- subs_"+k+"(gamma, t_nf) ----------");
-        Log.listLn(subs);
+        List<SubsRes> subs_unmoved = StaticGen.subs_k(gamma, k, t_nf, 0);
+        Log.it("-- subs_"+k+"(gamma, t_nf) : UNMOVED ----------");
+        Log.listLn(subs_unmoved);
+
+        List<SubsRes> subs_moved = Mover.moveSubsResults(t_nf, 0, subs_unmoved);
+
+        Log.it("-- ... and MOVED, but unpacked ----------");
+        Log.listLn(subs_moved);
+
+        List<SubsRes> subs_moved_packed = Gen.pack(subs_moved);
+
+        Log.it("-- ... and MOVED and PACKED ----------");
+        Log.listLn(subs_moved_packed);
 
         List<SubsRes> subs2 = gen.subs(k, t_nf, 0);
-        Log.it("-- LSolver.subs_"+k+"(gamma, t_nf) ----------");
+        Log.it("-- LSolver.subs("+k+", t_nf, 0) ----------");
         Log.listLn(subs2);
 
+        ch.list(subs2,subs_moved_packed);
+
+        Log.it("-------------------------------------------------------");
 
     }
 
