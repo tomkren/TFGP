@@ -1,13 +1,19 @@
 package cz.tomkren.fishtron.ugen.tests;
 
 
+import cz.tomkren.fishtron.latticegen.LSolver;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.TypeTerm;
 import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.Gamma;
+import cz.tomkren.fishtron.ugen.Gen;
+import cz.tomkren.fishtron.ugen.data.SubsRes;
+import cz.tomkren.fishtron.ugen.data.TsRes;
 import cz.tomkren.fishtron.ugen.nf.NF;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.Log;
+
+import java.util.List;
 
 /** Created by Tomáš Křen on 5.2.2017. */
 
@@ -36,13 +42,68 @@ public class GenTester {
 
         testNormalizations(ch);
 
+        Gen.Opts opts = Gen.Opts.mkDefault();
+        tests_subs_1(ch, opts);
+
         // todo
-        //Gen.Opts opts = Gen.Opts.mkDefault();
-        //tests_subs_1(ch, opts);
         //tests_subs_k(ch, opts);
         //tests_treeGenerating(ch, 6, 100, opts);
 
         ch.results();
+    }
+
+    private static void tests_subs_1(Checker ch, Gen.Opts opts) {
+        Log.it("\n== ts_1 & subs_1 tests ===================================================\n");
+
+        Gamma gamma1 = Gamma.mk(
+                "s", "(a -> (b -> c)) -> ((a -> b) -> (a -> c))",
+                "s2","(x5 -> (x0 -> x1)) -> ((x5 -> x0) -> (x5 -> x1))",
+                "s3","(y5 -> (x0 -> x1)) -> ((y5 -> x0) -> (y5 -> x1))",
+                "k", "a -> (b -> a)",
+                "k2","x1 -> (x0 -> x1)",
+                "+", "Int -> (Int -> Int)",
+                "42", "Int",
+                "magicVal", "alpha"
+        );
+
+        test_ts_k(ch, 1, "Int -> Int", gamma1, opts);
+        test_ts_k(ch, 1, "x1 -> x0",   gamma1, opts);
+    }
+
+    private static void test_ts_k(Checker ch, int k, String tStr, Gamma gamma, Gen.Opts opts) {
+        test_ts_k(ch, k, Types.parse(tStr), gamma, opts);
+    }
+
+    private static void test_ts_k(Checker ch, int k, Type t, Gamma gamma, Gen.Opts opts) {
+
+        NF nf = new NF(opts.isNormalizationPerformed(), t);
+        Type t_nf = nf.getTypeInNF();
+
+        Log.it();
+        Log.it("-- LIB gamma -------------");
+        Log.listLn(gamma.getSymbols());
+
+        Log.it("-- GOAL TYPE t -----");
+        Log.it("t: "+t);
+        Log.it("t_nf: "+t_nf);
+        //Log.it("t2nf: "+t2nf); TODO udělat vypisování toNF type transformace
+
+        ch.it(nf.toNF(t), t_nf.toString());
+        Log.it();
+
+        List<TsRes> ts = StaticGen.ts_k(gamma, k, t_nf, 0);
+        Log.it("-- ts_"+k+"(gamma, t_nf) ------------");
+        Log.listLn(ts);
+
+        List<SubsRes> subs = StaticGen.subs_k(gamma, k, t_nf, 0);
+        Log.it("-- subs_"+k+"(gamma, t_nf) ----------");
+        Log.listLn(subs);
+
+        Log.it("Creating Gen ... initial state:");
+        Gen gen = new Gen(opts, gamma, ch.getRandom());
+        Log.it(gen);
+
+
     }
 
     private static void testNormalizations(Checker ch) {
@@ -75,6 +136,7 @@ public class GenTester {
 
         ch.it(t);
         ch.it(typeInNF);
+        // ch.it(toNF); TODO udělat vypisování toNF TypeTransformace
         Log.it("----------------------------------");
         ch.it(nf.toNF(t),typeInNF.toString());
         ch.it(nf.fromNF(nf.toNF(t)),t.toString());

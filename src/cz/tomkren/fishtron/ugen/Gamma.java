@@ -19,7 +19,7 @@ public class Gamma {
         this.gamma = gamma;
     }
 
-    List<AB<String, Type>> getSymbols() {
+    public List<AB<String, Type>> getSymbols() {
         return gamma;
     }
 

@@ -10,6 +10,7 @@ import cz.tomkren.fishtron.ugen.data.Ts1Res;
 import cz.tomkren.fishtron.ugen.nf.NF;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
+import org.json.JSONObject;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -27,7 +28,7 @@ public class Gen {
         this(Opts.mkDefault(), gamma, rand);
     }
 
-    Gen(Opts opts, Gamma gamma, Random rand) {
+    public Gen(Opts opts, Gamma gamma, Random rand) {
         this.opts = opts;
         this.gamma = gamma;
         this.rand = rand;
@@ -263,12 +264,31 @@ public class Gen {
         return AB.mk(new TypeVar(n1), n1+1);
     }
 
-
     private NF normalizeIf(Type t) {
         return new NF(opts.isNormalizationPerformed(), t);
     }
 
 
+    // -- toString and Serialization to json ----------------------------------------------------------------
+
+    private JSONObject toJson() {
+        return F.obj(
+                "gamma", gamma.toJson(),
+                "cache", cache.toJson()
+        );
+    }
+
+    @Override
+    public String toString() {
+        return F.prettyJson(toJson(),F.obj(
+                "types", 2,
+                "gamma", 1,
+                "subs",  1
+        ));
+    }
+
+
+    // -- OPTIONS -----------------------------------
 
     public static class Opts {
         private final boolean isCachingUsed;
@@ -280,7 +300,7 @@ public class Gen {
         }
 
         boolean isCachingUsed() {return isCachingUsed;}
-        boolean isNormalizationPerformed() {return isNormalizationPerformed;}
+        public boolean isNormalizationPerformed() {return isNormalizationPerformed;}
 
         public static Opts mkDefault() {
             return new Opts(true,true);

@@ -1,32 +1,30 @@
 package cz.tomkren.fishtron.ugen.data;
 
 import cz.tomkren.fishtron.types.Sub;
+import cz.tomkren.fishtron.ugen.AppTree;
 
-import java.math.BigInteger;
+/** Created by Tomáš Křen on 6.2.2017. */
 
-/** Created by tom on 2. 2. 2017. */
+public class TsRes {
 
-public class SubsRes {
-    private BigInteger num;
+    private final AppTree tree;
     private final Sub sigma;
     private final int nextVarId;
 
-    public SubsRes(BigInteger num, Sub sigma, int nextVarId) {
-        this.num = num;
+    public TsRes(AppTree tree, Sub sigma, int nextVarId) {
+        this.tree = tree;
         this.sigma = sigma;
         this.nextVarId = nextVarId;
     }
 
-    public void setNum(BigInteger num) {this.num = num;}
-
-    public BigInteger getNum() {return num;}
+    public AppTree getTree() {return tree;}
     public Sub getSigma() {return sigma;}
     public int getNextVarId() {return nextVarId;}
 
     @Override
     public String toString() {
-        return "SubsRes{" +
-                "num=" + num +
+        return "TsRes{" +
+                "tree=" + tree +
                 ", sigma=" + sigma +
                 ", nextVarId=" + nextVarId +
                 '}';
