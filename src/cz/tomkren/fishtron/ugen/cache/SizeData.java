@@ -36,19 +36,19 @@ class SizeData {
         return sum;
     }
 
-    List<PreSubsRes> getSubsData(Gen gen, Cache cache, int k, Type t) {
+    List<SubsRes> getSubsData(Gen gen, Cache cache, int k, Type t) {
         ensureSubsDataIsComputed(gen, cache, k ,t);
         return F.map(subsData, p -> decode(cache, p));
     }
 
     private static EncodedSubsRes encode(Cache cache, SubsRes r) {
         int sub_id = cache.addSub(r.getSigma());
-        return new EncodedSubsRes(r.getNum(), sub_id/*, subsRes.getNextVarId()*/);
+        return new EncodedSubsRes(r.getNum(), sub_id, r.getNextVarId());
     }
 
-    private static PreSubsRes decode(Cache cache, EncodedSubsRes r) {
+    private static SubsRes decode(Cache cache, EncodedSubsRes r) {
         Sub sub = cache.getSub(r.getSub_id());
-        return new PreSubsRes(r.getNum(), sub /*, subsRes.getNextVarId()*/);
+        return new SubsRes(r.getNum(), sub, r.getNextVarId());
     }
 
 

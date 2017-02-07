@@ -4,7 +4,6 @@ import cz.tomkren.fishtron.types.Sub;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.data.PreSubsRes;
-import cz.tomkren.fishtron.ugen.data.PreTs1Res;
 import cz.tomkren.fishtron.ugen.Mover;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
 import cz.tomkren.fishtron.ugen.data.Ts1Res;
@@ -35,13 +34,13 @@ public class Cache {
     // -- main public interface ----------------------------------------------------------------------
 
     public List<Ts1Res> ts1(Type t, int n) {
-        List<PreTs1Res> ts1results_unmoved = getTypeData(t).ts1(t, gen, this);
-        return Mover.movePreTs1Results(t, n, ts1results_unmoved);
+        List<Ts1Res> ts1results_0 = getTypeData(t).ts1(t, gen, this);
+        return Mover.moveTs1Results_0(t, n, ts1results_0);
      }
 
     public List<SubsRes> subs(int k, Type t, int n) {
-        List<PreSubsRes> results_unmoved = getSizeTypeData(k, t).getSubsData(gen, this, k, t);
-        return Mover.movePreSubsResults(t, n, results_unmoved);
+        List<SubsRes> results_0 = getSizeTypeData(k, t).getSubsData(gen, this, k, t);
+        return Mover.moveSubsResults_0(t, n, results_0);
     }
 
     public BigInteger getNum(int k, Type t) {

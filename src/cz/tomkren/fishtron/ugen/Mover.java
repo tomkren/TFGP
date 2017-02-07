@@ -44,37 +44,37 @@ public class Mover {
         return AB.mk(movedSub, nextVarId);
     }
 
-    private Ts1Res moveTs1Res(PreTs1Res preRes) {
-        Sub sub = preRes.getSigma();
-        AB<Sub,Integer> moveSubRes = moveSub(sub);
-        return new Ts1Res(preRes.getSym(), moveSubRes._1(), moveSubRes._2());
+    private boolean isMoveNeeded() {
+        if (tnvi_n < tnvi_0) {throw new Error("Assert failed: tnvi_n < tnvi_0.");}
+        return tnvi_n > tnvi_0;
     }
 
-    private SubsRes movePreSubsRes(PreSubsRes preRes) {
-        Sub sub = preRes.getSigma();
-        AB<Sub, Integer> moveSubRes = moveSub(sub);
-        return new SubsRes(preRes.getNum(), moveSubRes._1(), moveSubRes._2());
-    }
+    private Ts1Res movePreTs1Res(PreTs1Res preRes)    {return new Ts1Res(preRes.getSym(), moveSub(preRes.getSigma()));}
+    private Ts1Res moveTs1Res(Ts1Res res)             {return new Ts1Res(res.getSym(), moveSub(res.getSigma()));}
+    private SubsRes movePreSubsRes(PreSubsRes preRes) {return new SubsRes(preRes.getNum(), moveSub(preRes.getSigma()));}
+    private SubsRes moveSubsRes(SubsRes res)          {return new SubsRes(res.getNum(), moveSub(res.getSigma()));}
 
-    private SubsRes moveSubsRes(SubsRes res) {
-        Sub sub = res.getSigma();
-        AB<Sub, Integer> moveSubRes = moveSub(sub);
-        return new SubsRes(res.getNum(), moveSubRes._1(), moveSubRes._2());
-    }
 
     public static List<Ts1Res> movePreTs1Results(Type t, int n, List<PreTs1Res> ts1results_unmoved) {
         Mover mover = new Mover(t, n);
-        return F.map(ts1results_unmoved, mover::moveTs1Res);
+        return F.map(ts1results_unmoved, mover::movePreTs1Res);
     }
 
-    public static List<SubsRes> movePreSubsResults(Type t, int n, List<PreSubsRes> results_unmoved) {
+    static List<SubsRes> movePreSubsResults(Type t, int n, List<PreSubsRes> results_unmoved) {
         Mover mover = new Mover(t, n);
         return F.map(results_unmoved, mover::movePreSubsRes);
     }
 
-    public static List<SubsRes> moveSubsResults(Type t, int n, List<SubsRes> results_unmoved) {
+    // Intended for moving results generated for old_n = 0, now needed for n.
+    public static List<Ts1Res> moveTs1Results_0(Type t, int n, List<Ts1Res> ts1results_0) {
         Mover mover = new Mover(t, n);
-        return F.map(results_unmoved, mover::moveSubsRes);
+        return mover.isMoveNeeded() ? F.map(ts1results_0, mover::moveTs1Res) : ts1results_0;
+    }
+
+    // Intended for moving results generated for old_n = 0, now needed for n.
+    public static List<SubsRes> moveSubsResults_0(Type t, int n, List<SubsRes> results_0) {
+        Mover mover = new Mover(t, n);
+        return mover.isMoveNeeded() ? F.map(results_0, mover::moveSubsRes) : results_0;
     }
 
 }

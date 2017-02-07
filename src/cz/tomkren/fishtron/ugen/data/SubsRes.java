@@ -1,6 +1,7 @@
 package cz.tomkren.fishtron.ugen.data;
 
 import cz.tomkren.fishtron.types.Sub;
+import cz.tomkren.utils.AB;
 
 import java.math.BigInteger;
 
@@ -15,6 +16,10 @@ public class SubsRes {
         this.num = num;
         this.sigma = sigma;
         this.nextVarId = nextVarId;
+    }
+
+    public SubsRes(BigInteger num, AB<Sub,Integer> moveRes) {
+        this(num, moveRes._1(), moveRes._2());
     }
 
     public void setNum(BigInteger num) {this.num = num;}

@@ -15,7 +15,6 @@ public class PreSubsRes {
         this.sigma = sigma;
     }
 
-
     public BigInteger getNum() {return num;}
     public Sub getSigma() {return sigma;}
 }

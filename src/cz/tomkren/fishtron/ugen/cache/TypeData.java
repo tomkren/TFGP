@@ -26,7 +26,7 @@ class TypeData {
         ts1Data = null;
     }
 
-    List<PreTs1Res> ts1(Type t, Gen gen, Cache cache) {
+    List<Ts1Res> ts1(Type t, Gen gen, Cache cache) {
         if (ts1Data == null) {
             List<Ts1Res> ts1results = gen.ts1_compute(t, 0);
             ts1Data = F.map(ts1results, r -> encode(cache, r));
@@ -36,12 +36,12 @@ class TypeData {
 
     private static EncodedTs1Res encode(Cache cache, Ts1Res ts1Res) {
         int sub_id = cache.addSub(ts1Res.getSigma());
-        return new EncodedTs1Res(ts1Res.getSym(), sub_id);
+        return new EncodedTs1Res(ts1Res.getSym(), sub_id, ts1Res.getNextVarId());
     }
 
-    private static PreTs1Res decode(Cache cache, EncodedTs1Res r) {
+    private static Ts1Res decode(Cache cache, EncodedTs1Res r) {
         Sub sub = cache.getSub(r.getSub_id());
-        return new PreTs1Res(r.getSym(), sub);
+        return new Ts1Res(r.getSym(), sub, r.getNextVarId());
     }
 
 

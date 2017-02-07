@@ -7,6 +7,7 @@ import java.math.BigInteger;
 /** Created by tom on 5. 2. 2017. */
 
 public class PreTs1Res {
+
     private final String s;
     private final Sub sigma;
 

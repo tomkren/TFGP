@@ -3,6 +3,7 @@ package cz.tomkren.fishtron.ugen.data;
 import cz.tomkren.fishtron.types.Sub;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.AppTree;
+import cz.tomkren.utils.AB;
 
 import java.math.BigInteger;
 
@@ -18,6 +19,10 @@ public class Ts1Res {
         this.s = s;
         this.sigma = sigma;
         this.nextVarId = nextVarId;
+    }
+
+    public Ts1Res(String s, AB<Sub,Integer> moveRes) {
+        this(s, moveRes._1(), moveRes._2());
     }
 
     public String getSym() {return s;}
