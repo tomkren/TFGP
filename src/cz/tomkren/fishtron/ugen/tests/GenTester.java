@@ -12,6 +12,7 @@ import cz.tomkren.fishtron.ugen.nf.NF;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.Log;
 
+import java.math.BigInteger;
 import java.util.List;
 
 /** Created by Tomáš Křen on 5.2.2017. */
@@ -44,12 +45,40 @@ public class GenTester {
         Gen.Opts opts = Gen.Opts.mkDefault();
         tests_subs_1(ch, opts);
         tests_subs_k(ch, opts);
-
-        // todo
-        //tests_treeGenerating(ch, 6, 100, opts);
+        tests_treeGenerating(ch, 3/*6*/, 100, opts);
 
         ch.results();
     }
+
+    private static void tests_treeGenerating(Checker ch,int k_max, int numSamples, Gen.Opts opts) {
+        Log.it("\n== TREE GENERATING TESTS =======================================================\n");
+        Type t = Types.parse("(P A (P A A)) -> (P A (P A A))");
+        for (int k = 1; k <= k_max; k++) {
+            testTreeGenerating(ch, k, t, g_testGamma, numSamples,opts);
+        }
+    }
+
+    private static void testTreeGenerating(Checker ch, int k, Type t, Gamma gamma, int numSamples, Gen.Opts opts) {
+        String argStr = "("+k+", "+t+")";
+
+        Gen gen = new Gen(opts, gamma, ch.getRandom());
+
+        Log.it("-----------");
+        Log.list(StaticGen.ts_k(gamma, k, t, 0));
+        Log.it("-----------");
+
+        Log.it_noln("s.num"+argStr+" = ");
+        BigInteger num = gen.getNum(k, t);
+        Log.it(num);
+
+        Log.it("-----------");
+        Log.list(gen.subs(k,t,0));
+        Log.it("-----------");
+
+
+
+    }
+
 
     private static void tests_subs_k(Checker ch, Gen.Opts opts) {
         Log.it("\n== ts_k & subs_k tests ==================================================\n");

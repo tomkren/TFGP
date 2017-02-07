@@ -9,7 +9,7 @@ import java.math.BigInteger;
 public class SubsRes {
     private BigInteger num;
     private final Sub sigma;
-    private final int nextVarId;
+    private int nextVarId;
 
     public SubsRes(BigInteger num, Sub sigma, int nextVarId) {
         this.num = num;
@@ -18,6 +18,8 @@ public class SubsRes {
     }
 
     public void setNum(BigInteger num) {this.num = num;}
+    public void setNextVarId(int nextVarId) {this.nextVarId = nextVarId;}
+
 
     public BigInteger getNum() {return num;}
     public Sub getSigma() {return sigma;}

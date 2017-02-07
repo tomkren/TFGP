@@ -138,7 +138,7 @@ public class Gen {
     }
 
     // je v tom trochu zmatek, v LSolver getNum dělal normalizaci, tady jí ale nedělá
-    private BigInteger getNum(int k, Type t_NF) {
+    public BigInteger getNum(int k, Type t_NF) {
         if (opts.isCachingUsed()) {
             return cache.getNum(k, t_NF);
         } else {
@@ -159,7 +159,7 @@ public class Gen {
         return nf.denormalizeIf(subs, n);
     }
 
-    private List<Ts1Res> ts1(Type t_NF, int n) {
+    public List<Ts1Res> ts1(Type t_NF, int n) {
         return opts.isCachingUsed() ? cache.ts1(t_NF, n) : ts1_compute(t_NF, n);
     }
 
@@ -249,10 +249,16 @@ public class Gen {
                 int oldNextVarId = val.getNextVarId();
 
                 // TODO dřív tu bylo todle, to sem ale zmenil na assert co to zabije když fejlne, ALE FAKT RADši PROMYSLET !!!
-                // val.set_3( Math.max(oldNextVarId,nextVarId) ); // better safe than sorry, TODO promyslet, zda může někdy nastat nerovnost
-                if (oldNextVarId != res.getNextVarId()) {
+
+                val.setNextVarId( Math.max(oldNextVarId,val.getNextVarId()) ); // better safe than sorry, TODO už vim že nastává
+
+                /*if (oldNextVarId != res.getNextVarId()) {
+
+                    Log.it(sigmaFingerprint);
+                    Log.it(oldNextVarId +" != "+ res.getNextVarId());
+
                     throw new Error("Assert failed in pack(): oldNextVarId != res.getNextVarId()");
-                }
+                }*/
 
             }
         }
