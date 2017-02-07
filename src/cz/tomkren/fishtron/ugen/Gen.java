@@ -138,7 +138,7 @@ public class Gen {
         return AB.mk(tree_FX,n5);
     }
 
-    // je v tom trochu zmatek, v LSolver getNum dělal normalizaci, tady jí ale nedělá
+
     public BigInteger getNum(int k, Type t_NF) {
         if (opts.isCachingUsed()) {
             return cache.getNum(k, t_NF);
@@ -164,19 +164,11 @@ public class Gen {
         return opts.isCachingUsed() ? cache.ts1(t_NF, n) : ts1_compute(t_NF, n);
     }
 
+
     public List<Ts1Res> ts1_compute(Type t, int n) {
         List<PreTs1Res> ts1results_unmoved = ts1_static(gamma, t, n);
         return Mover.movePreTs1Results(t, n, ts1results_unmoved);
     }
-
-    /*public List<PreTs1Res> ts1_compute(Type t, int n) {
-        return ts1_static(gamma, t, n);
-    }*/
-
-    /*private List<SubsRes> subs_compute_move(int k, Type t_NF, int n) {
-        List<PreSubsRes> results_unmoved = subs_compute(k, t_NF, n);
-        return Mover.movePreSubsResults(t_NF, n, results_unmoved);
-    }*/
 
     public List<SubsRes> subs_compute(int k, Type t_NF, int n) {
         List<PreSubsRes> ret = new ArrayList<>();
@@ -192,6 +184,7 @@ public class Gen {
         }
         return pack(t_NF, n, ret);
     }
+
 
     public static List<PreTs1Res> ts1_static(Gamma gamma, Type t, int nextVarId) {
         List<PreTs1Res> ret = new ArrayList<>();
@@ -225,13 +218,13 @@ public class Gen {
 
             for (SubsRes res_X : subs(j, t_X, res_F.getNextVarId())) {
                 BigInteger num_FX = res_F.getNum().multiply(res_X.getNum());
-                Sub      sigma_FX = Sub.dot(res_X.getSigma(), res_F.getSigma()).restrict(t);
-                ret.add(new PreSubsRes(num_FX, sigma_FX/*, res_X.getNextVarId()*/));
+                Sub sigma_FX = Sub.dot(res_X.getSigma(), res_F.getSigma()).restrict(t);
+                ret.add(new PreSubsRes(num_FX, sigma_FX));
             }
         }
 
         //zde neni potřeba packovat, packovat stačí subs_compute
-        return ret; //pack(ret);
+        return ret;
     }
 
 
