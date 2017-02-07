@@ -5,7 +5,6 @@ import cz.tomkren.fishtron.types.TypeTerm;
 import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
-import cz.tomkren.fishtron.ugen.Mover;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
 import cz.tomkren.fishtron.ugen.data.TsRes;
 import cz.tomkren.fishtron.ugen.nf.NF;
@@ -64,7 +63,7 @@ public class GenTester {
         Gen gen = new Gen(opts, gamma, ch.getRandom());
 
         Log.it("-----------");
-        Log.list(StaticGen.ts_k(gamma, k, t, 0));
+        Log.list(StaticGen.ts(gamma, k, t, 0));
         Log.it("-----------");
 
         Log.it_noln("s.num"+argStr+" = ");
@@ -136,29 +135,19 @@ public class GenTester {
         Gen gen = new Gen(opts, gamma, ch.getRandom());
         Log.it(gen);
 
-        List<TsRes> ts = StaticGen.ts_k(gamma, k, t_nf, 0);
+        List<TsRes> ts = StaticGen.ts(gamma, k, t_nf, 0);
         Log.it("-- ts_"+k+"(gamma, t_nf) ------------");
         Log.listLn(ts);
 
-        List<SubsRes> subs_unmoved = StaticGen.subs_k(gamma, k, t_nf, 0);
-        Log.it("-- subs_"+k+"(gamma, t_nf) : UNMOVED ----------");
-        Log.listLn(subs_unmoved);
-
-        List<SubsRes> subs_moved = Mover.moveSubsResults(t_nf, 0, subs_unmoved);
-
-        Log.it("-- ... and MOVED, but unpacked ----------");
-        Log.listLn(subs_moved);
-
-        List<SubsRes> subs_moved_packed = Gen.pack(subs_moved);
-
-        Log.it("-- ... and MOVED and PACKED ----------");
-        Log.listLn(subs_moved_packed);
+        List<SubsRes> subs = StaticGen.subs(gamma, k, t_nf, 0);
+        Log.it("-- StaticGen.subs("+k+", t_nf, 0) ----------");
+        Log.listLn(subs);
 
         List<SubsRes> subs2 = gen.subs(k, t_nf, 0);
-        Log.it("-- LSolver.subs("+k+", t_nf, 0) ----------");
+        Log.it("-- Gen.subs("+k+", t_nf, 0) ----------");
         Log.listLn(subs2);
 
-        ch.list(subs2,subs_moved_packed);
+        ch.list(subs2,subs);
 
         Log.it("-------------------------------------------------------");
 

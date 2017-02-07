@@ -2,6 +2,8 @@ package cz.tomkren.fishtron.ugen.data;
 
 import cz.tomkren.fishtron.types.Sub;
 
+import java.math.BigInteger;
+
 /** Created by tom on 5. 2. 2017. */
 
 public class PreTs1Res {
@@ -15,6 +17,10 @@ public class PreTs1Res {
 
     public String getSym() {return s;}
     public Sub getSigma() {return sigma;}
+
+    public PreSubsRes toPreSubsRes() {
+        return new PreSubsRes(BigInteger.ONE, sigma);
+    }
 
     @Override
     public String toString() {

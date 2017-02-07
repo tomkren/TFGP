@@ -7,7 +7,6 @@ import cz.tomkren.fishtron.ugen.cache.data.EncodedSubsRes;
 import cz.tomkren.fishtron.ugen.data.PreSubsRes;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
 import cz.tomkren.utils.F;
-import cz.tomkren.utils.Log;
 import org.json.JSONObject;
 
 import java.math.BigInteger;

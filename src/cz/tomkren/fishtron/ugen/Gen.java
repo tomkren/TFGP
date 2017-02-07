@@ -6,11 +6,12 @@ import cz.tomkren.fishtron.types.TypeVar;
 import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.cache.Cache;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
+import cz.tomkren.fishtron.ugen.data.PreSubsRes;
 import cz.tomkren.fishtron.ugen.data.Ts1Res;
+import cz.tomkren.fishtron.ugen.data.PreTs1Res;
 import cz.tomkren.fishtron.ugen.nf.NF;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
-import cz.tomkren.utils.Log;
 import org.json.JSONObject;
 
 import java.math.BigInteger;
@@ -159,39 +160,41 @@ public class Gen {
         return nf.denormalizeIf(subs, n);
     }
 
-    public List<Ts1Res> ts1(Type t_NF, int n) {
+    private List<Ts1Res> ts1(Type t_NF, int n) {
         return opts.isCachingUsed() ? cache.ts1(t_NF, n) : ts1_compute(t_NF, n);
     }
 
     public List<Ts1Res> ts1_compute(Type t, int n) {
-        return ts1_static(gamma, t, n);
+        List<PreTs1Res> ts1results_unmoved = ts1_static(gamma, t, n);
+        return Mover.movePreTs1Results(t, n, ts1results_unmoved);
     }
 
+    /*public List<PreTs1Res> ts1_compute(Type t, int n) {
+        return ts1_static(gamma, t, n);
+    }*/
+
+    /*private List<SubsRes> subs_compute_move(int k, Type t_NF, int n) {
+        List<PreSubsRes> results_unmoved = subs_compute(k, t_NF, n);
+        return Mover.movePreSubsResults(t_NF, n, results_unmoved);
+    }*/
+
     public List<SubsRes> subs_compute(int k, Type t_NF, int n) {
+        List<PreSubsRes> ret = new ArrayList<>();
         if (k < 1) {
             throw new Error("k must be > 0, it is " + k);
         } else if (k == 1) {
-            return subs_1(t_NF, n);
+            ret = F.map(ts1(t_NF, n), Ts1Res::toPreSubsRes);
         } else {
-            List<SubsRes> ret = new ArrayList<>();
             for (int i = 1; i < k; i++) {
-                List<SubsRes> res_ij = subs_ij(i, k - i, t_NF, n);
+                List<PreSubsRes> res_ij = subs_ij(i, k - i, t_NF, n);
                 ret.addAll(res_ij);
             }
-            return pack(ret);
         }
+        return pack(t_NF, n, ret);
     }
 
-    private List<SubsRes> subs_1(Type t_NF, int nextVarId) {
-        List<Ts1Res> ts1_results = ts1(t_NF, nextVarId);
-        List<SubsRes> unpackedResults = F.map(ts1_results, Ts1Res::toSubsRes);
-        return pack(unpackedResults);
-    }
-
-
-
-    public static List<Ts1Res> ts1_static(Gamma gamma, Type t, int nextVarId) {
-        List<Ts1Res> ret = new ArrayList<>();
+    public static List<PreTs1Res> ts1_static(Gamma gamma, Type t, int nextVarId) {
+        List<PreTs1Res> ret = new ArrayList<>();
 
         for (AB<String,Type> p : gamma.getSymbols()) {
             String s = p._1();
@@ -202,14 +205,14 @@ public class Gen {
 
             if (!mu.isFail()) {
                 Sub sigma = mu.restrict(t);
-                ret.add(new Ts1Res(s, sigma, freshRes.getNextVarId()));
+                ret.add(new PreTs1Res(s, sigma));
             }
         }
         return ret;
     }
 
-    private List<SubsRes> subs_ij(int i, int j, Type t, int n) {
-        List<SubsRes> ret = new ArrayList<>();
+    private List<PreSubsRes> subs_ij(int i, int j, Type t, int n) {
+        List<PreSubsRes> ret = new ArrayList<>();
 
         AB<TypeVar,Integer> res_alpha = newVar(t, n);
         TypeVar alpha = res_alpha._1();
@@ -223,7 +226,7 @@ public class Gen {
             for (SubsRes res_X : subs(j, t_X, res_F.getNextVarId())) {
                 BigInteger num_FX = res_F.getNum().multiply(res_X.getNum());
                 Sub      sigma_FX = Sub.dot(res_X.getSigma(), res_F.getSigma()).restrict(t);
-                ret.add(new SubsRes(num_FX, sigma_FX, res_X.getNextVarId()));
+                ret.add(new PreSubsRes(num_FX, sigma_FX/*, res_X.getNextVarId()*/));
             }
         }
 
@@ -232,10 +235,12 @@ public class Gen {
     }
 
 
-    public static List<SubsRes> pack(List<SubsRes> subs) {
+    public static List<SubsRes> pack(Type t, int n, List<PreSubsRes> preSubsResults) {
         Map<String,SubsRes> resultMap = new TreeMap<>();
 
-        for (SubsRes res : subs) {
+        List<SubsRes> subsResults = Mover.movePreSubsResults(t, n, preSubsResults);
+
+        for (SubsRes res : subsResults) {
 
             String sigmaFingerprint = res.getSigma().toString();
             SubsRes val = resultMap.get(sigmaFingerprint);
@@ -246,20 +251,13 @@ public class Gen {
                 BigInteger oldNum = val.getNum();
                 val.setNum(oldNum.add(res.getNum()));
 
+                // ASSERT o NVI:
                 int oldNextVarId = val.getNextVarId();
-
-                // TODO dřív tu bylo todle, to sem ale zmenil na assert co to zabije když fejlne, ALE FAKT RADši PROMYSLET !!!
-
-                val.setNextVarId( Math.max(oldNextVarId,val.getNextVarId()) ); // better safe than sorry, TODO už vim že nastává
-
-                /*if (oldNextVarId != res.getNextVarId()) {
-
-                    Log.it(sigmaFingerprint);
-                    Log.it(oldNextVarId +" != "+ res.getNextVarId());
-
+                if (oldNextVarId != res.getNextVarId()) {
+                    //Log.it(sigmaFingerprint);
+                    //Log.it(oldNextVarId +" != "+ res.getNextVarId());
                     throw new Error("Assert failed in pack(): oldNextVarId != res.getNextVarId()");
-                }*/
-
+                }
             }
         }
         return new ArrayList<>(resultMap.values());

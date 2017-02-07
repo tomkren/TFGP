@@ -28,6 +28,11 @@ public class Ts1Res {
         return new SubsRes(BigInteger.ONE, sigma, nextVarId);
     }
 
+    public PreSubsRes toPreSubsRes() {
+        return new PreSubsRes(BigInteger.ONE, sigma);
+    }
+
+
     public TsRes toTsRes(Type t) {
         AppTree symLeaf = AppTree.mk(s, sigma.apply(t));
         return new TsRes(symLeaf, sigma, nextVarId);
