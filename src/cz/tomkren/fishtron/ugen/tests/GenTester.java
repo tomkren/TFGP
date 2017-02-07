@@ -44,7 +44,7 @@ public class GenTester {
         Gen.Opts opts = Gen.Opts.mkDefault();
         tests_subs_1(ch, opts);
         tests_subs_k(ch, opts);
-        tests_treeGenerating(ch, 3/*6*/, 100, opts);
+        tests_treeGenerating(ch, 9/*6*/, 100, opts);
 
         ch.results();
     }
@@ -62,19 +62,11 @@ public class GenTester {
 
         Gen gen = new Gen(opts, gamma, ch.getRandom());
 
-        Log.it("-----------");
-        Log.list(StaticGen.ts(gamma, k, t, 0));
-        Log.it("-----------");
-
         Log.it_noln("s.num"+argStr+" = ");
         BigInteger num = gen.getNum(k, t);
         Log.it(num);
 
-        Log.it("-----------");
-        Log.list(gen.subs(k,t,0));
-        Log.it("-----------");
-
-
+        // TODO
 
     }
 
