@@ -267,6 +267,12 @@ public class Gen {
     }
 
 
+    // -- Stats -------------------------------------------------------
+
+    public Cache getCache() {
+        return cache;
+    }
+
     // -- toString and Serialization to json ----------------------------------------------------------------
 
     private JSONObject toJson() {

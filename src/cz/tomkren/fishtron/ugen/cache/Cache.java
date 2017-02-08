@@ -3,6 +3,7 @@ package cz.tomkren.fishtron.ugen.cache;
 import cz.tomkren.fishtron.types.Sub;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.Gen;
+import cz.tomkren.fishtron.ugen.cache.data.SubData;
 import cz.tomkren.fishtron.ugen.data.PreSubsRes;
 import cz.tomkren.fishtron.ugen.Mover;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
@@ -21,7 +22,7 @@ public class Cache {
     private Gen gen;
 
     private Map<String, TypeData> typeDataMap;
-    private List<Sub> subsList;
+    private List<SubData> subsList;
     private Map<String, Integer> sub2id;
 
     public Cache(Gen gen) {
@@ -62,16 +63,45 @@ public class Cache {
         Integer sub_id = sub2id.get(sub_str);
         if (sub_id == null) {
             sub_id = subsList.size();
-            subsList.add(sub);
+            subsList.add(new SubData(sub));
             sub2id.put(sub_str, sub_id);
+        } else {
+            subsList.get(sub_id).incrementNumUsed();
         }
         return sub_id;
     }
 
     Sub getSub(int sub_id) {
-        return subsList.get(sub_id);
+        return subsList.get(sub_id).getSub();
     }
 
+
+    // -- Stats ------------------------------------------------------
+
+    public int getNumCachedSubs() {
+        return subsList.size();
+    }
+
+    public String getCachedSubsStats() {
+
+        double sumNumUsed = 0.0;
+        int maxNumUsed = 0;
+
+        for (SubData subData : subsList) {
+            int numUsed = subData.getNumUsed();
+            sumNumUsed += numUsed;
+            if (numUsed > maxNumUsed) {
+                maxNumUsed = numUsed;
+            }
+        }
+        int numSubs = subsList.size();
+        double meanNumUsed = sumNumUsed / numSubs;
+
+        return "numCachedSubs : "+numSubs+"\n"+
+               "sumNumUsed    : "+sumNumUsed+"\n"+
+               "meanNumUsed   : "+meanNumUsed+"\n"+
+               "maxNumUsed    : "+maxNumUsed;
+    }
 
     // -- toJson method and its utils ---------------------------------------------------------------
 
@@ -86,8 +116,8 @@ public class Cache {
         return F.jsonMap(typeDataMap, TypeData::toJson);
     }
 
-    private static JSONArray subsToJson(List<Sub> subsList) {
-        return F.jsonMap(subsList, Sub::toJson);
+    private static JSONArray subsToJson(List<SubData> subsList) {
+        return F.jsonMap(subsList, SubData::toJson);
     }
 
     private static JSONObject subsToJson_debugVersion(List<Sub> subsList) {

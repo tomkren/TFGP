@@ -9,20 +9,19 @@ import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
 import cz.tomkren.fishtron.ugen.data.TsRes;
 import cz.tomkren.fishtron.ugen.nf.NF;
-import cz.tomkren.utils.Checker;
-import cz.tomkren.utils.F;
-import cz.tomkren.utils.Log;
-import cz.tomkren.utils.Stopwatch;
+import cz.tomkren.utils.*;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /** Created by Tomáš Křen on 5.2.2017. */
 
 public class GenTester {
 
     public static void main(String[] args) {
-        test_2();
+        test_1();
     }
 
     private static final Gamma g_testGamma = Gamma.mk(
@@ -39,7 +38,7 @@ public class GenTester {
 
     private static final Type g_testGoal = Types.parse("(P A (P A A)) -> (P A (P A A))");
 
-    private static void test_2() {
+    private static void test_1() {
         Checker ch = new Checker(7404398919224944163L);
 
         testNormalizations(ch);
@@ -47,20 +46,22 @@ public class GenTester {
         Gen.Opts opts = Gen.Opts.mkDefault();
         tests_subs_1(ch, opts);
         tests_subs_k(ch, opts);
-        tests_treeGenerating(ch, 8/*6*/, 100, opts);
+        tests_treeGenerating(ch, 8/*6*/, 100000, opts);
 
         ch.results();
     }
 
     private static void tests_treeGenerating(Checker ch,int k_max, int numSamples, Gen.Opts opts) {
         Log.it("\n== TREE GENERATING TESTS =======================================================\n");
-        Type t = Types.parse("(P A (P A A)) -> (P A (P A A))");
         for (int k = 1; k <= k_max; k++) {
-            testTreeGenerating(ch, k, t, g_testGamma, numSamples,opts);
+            testTreeGenerating(ch, k, g_testGoal, g_testGamma, numSamples,opts);
         }
     }
 
     private static void testTreeGenerating(Checker ch, int k, Type t, Gamma gamma, int numSamples, Gen.Opts opts) {
+
+        Log.it("--  k = "+k+"  ---------------------------------------------------------");
+
         String argStr = "("+k+", "+t+")";
 
         Gen gen = new Gen(opts, gamma, ch.getRandom());
@@ -71,6 +72,8 @@ public class GenTester {
         BigInteger num = gen.getNum(k, t);
         Log.it(num + stopwatch.restart());
 
+        Log.it(gen.getCache().getCachedSubsStats());
+
         Log.it_noln("StaticGen.getNum"+argStr+" = ");
         BigInteger num2 = StaticGen.getNum(gamma, k, t);
         Log.it(num2 + stopwatch.restart());
@@ -79,9 +82,17 @@ public class GenTester {
         BigInteger num3 = gen.getNum(k, t);
         Log.it(num3 + stopwatch.restart());
 
+        Log.it_noln("gen.subs"+argStr+".size() = ");
+        int numSubs = gen.subs(k, t, 0).size();
+        Log.it(numSubs + stopwatch.restart());
+
         Log.it_noln("s.genOne"+argStr+" = ");
         AppTree tree = gen.genOne(k, t);
         Log.it(tree + stopwatch.restart());
+
+        ch.is(num.equals(num2), "gen.getNum = StaticGen.getNum");
+        ch.is(num.equals(num3), "gen.getNum = gen.getNum(second time..)");
+
 
         if (F.isZero(num) || tree == null) {
             ch.is(F.isZero(num) && tree == null, "num = 0 iff genOne = null");
@@ -94,9 +105,80 @@ public class GenTester {
             List<TsRes> allTrees = StaticGen.ts(gamma, k, t, 0);
             Log.it(allTrees.size() + stopwatch.restart());
 
+            ch.is(tree != null, "genOne not null");
+            ch.is(intNum == allTrees.size(), "num = |genAll|");
 
+            if (intNum < 40000) {
 
-            // TODO ...
+                Map<String,Integer> testMap = new TreeMap<>();
+
+                for (TsRes tsRes : allTrees) {
+                    testMap.put(tsRes.getTree().toRawString(),0);
+                }
+
+                double sampleRate = ((double)numSamples) / intNum;
+                boolean allGeneratedWereInGenAll = true;
+                boolean allTreesWereStrictlyWellTyped = true;
+
+                double sumGenOneTime = 0.0;
+
+                for (int i = 0; i < numSamples; i++){
+                    if ((i+1)%(k<=6?1000:100) == 0) {
+                        Log.it(i+1+" trees generated (k="+k+") .. so far mean genOne time: "+ sumGenOneTime / i);
+                    }
+
+                    Stopwatch sw = new Stopwatch(5);
+                    AppTree newTree = gen.genOne(k, t);
+
+                    double genOneTime = sw.getTime();
+                    sumGenOneTime += genOneTime;
+
+                    if (newTree != null) {
+
+                        if (!newTree.isStrictlyWellTyped(gamma)) {
+                            ch.fail("tree is not strictly well-typed: "+newTree+"\n"+newTree.getTypeTrace().toString());
+                            allTreesWereStrictlyWellTyped = false;
+                        }
+
+                        String key = newTree.toRawString();
+
+                        if (testMap.containsKey(key)) {
+                            testMap.compute(key, (_key,n) -> n+1);
+                        } else {
+                            ch.fail(key +" is not in genAll list.");
+                            allGeneratedWereInGenAll = false;
+                        }
+
+                    } else {
+                        ch.fail("generated tree is null");
+                    }
+                }
+
+                ch.is(allGeneratedWereInGenAll,"All generated trees were in GenAll list.");
+                ch.is(allTreesWereStrictlyWellTyped,"All trees were strictly well typed.");
+
+                Log.it();
+
+                int minNumGenerated = Integer.MAX_VALUE;
+                int maxNumGenerated = -1;
+
+                for (Map.Entry<String, Integer> e : testMap.entrySet()) {
+                    String tree_p = e.getKey();
+                    int numGenerated = e.getValue();
+                    if (intNum < 100) {Log.it(tree_p + " " + numGenerated);}
+
+                    if (numGenerated > maxNumGenerated) {maxNumGenerated = numGenerated;}
+                    if (numGenerated < minNumGenerated) {minNumGenerated = numGenerated;}
+                }
+
+                Log.it();
+                Log.it("Sample rate: "+ sampleRate);
+                Log.it("Num samples: "+ numSamples);
+                Log.it("Sum genOne time: "+ sumGenOneTime);
+                Log.it("mean genOne time: "+ sumGenOneTime / numSamples);
+                Log.it("minNumGenerated: "+ minNumGenerated);
+                Log.it("maxNumGenerated: "+ maxNumGenerated);
+            }
         }
 
         Log.it();
