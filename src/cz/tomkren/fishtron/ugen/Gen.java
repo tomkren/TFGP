@@ -37,7 +37,7 @@ public class Gen {
         this.cache = new Cache(this);
     }
 
-    AppTree genOne(int k, Type type) {
+    public AppTree genOne(int k, Type type) {
         return genOne(k,type, 0, true)._1();
     }
 

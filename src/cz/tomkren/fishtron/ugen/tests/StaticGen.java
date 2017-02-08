@@ -24,6 +24,8 @@ import java.util.List;
 
 class StaticGen {
 
+
+
     private static List<TsRes> ts_1(Gamma gamma, Type t, int n) {
         List<PreTs1Res> ts1_results_unmoved = Gen.ts1_static(gamma, t, n);
         List<Ts1Res> ts1_results = Mover.movePreTs1Results(t,n,ts1_results_unmoved);
@@ -98,6 +100,14 @@ class StaticGen {
             }
             return Gen.pack(t, n, acc);
         }
+    }
+
+    static BigInteger getNum(Gamma gamma, int k, Type t) {
+        BigInteger sum = BigInteger.ZERO;
+        for (SubsRes subsRes : subs(gamma, k, t, 0)) {
+            sum = sum.add(subsRes.getNum());
+        }
+        return sum;
     }
 
 }

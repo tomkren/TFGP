@@ -3,13 +3,16 @@ package cz.tomkren.fishtron.ugen.tests;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.TypeTerm;
 import cz.tomkren.fishtron.types.Types;
+import cz.tomkren.fishtron.ugen.AppTree;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
 import cz.tomkren.fishtron.ugen.data.TsRes;
 import cz.tomkren.fishtron.ugen.nf.NF;
 import cz.tomkren.utils.Checker;
+import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
+import cz.tomkren.utils.Stopwatch;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -44,7 +47,7 @@ public class GenTester {
         Gen.Opts opts = Gen.Opts.mkDefault();
         tests_subs_1(ch, opts);
         tests_subs_k(ch, opts);
-        tests_treeGenerating(ch, 9/*6*/, 100, opts);
+        tests_treeGenerating(ch, 8/*6*/, 100, opts);
 
         ch.results();
     }
@@ -62,12 +65,41 @@ public class GenTester {
 
         Gen gen = new Gen(opts, gamma, ch.getRandom());
 
-        Log.it_noln("s.num"+argStr+" = ");
+        Stopwatch stopwatch = new Stopwatch(3);
+
+        Log.it_noln("gen.getNum"+argStr+" = ");
         BigInteger num = gen.getNum(k, t);
-        Log.it(num);
+        Log.it(num + stopwatch.restart());
 
-        // TODO
+        Log.it_noln("StaticGen.getNum"+argStr+" = ");
+        BigInteger num2 = StaticGen.getNum(gamma, k, t);
+        Log.it(num2 + stopwatch.restart());
 
+        Log.it_noln("(2) gen.getNum"+argStr+" = ");
+        BigInteger num3 = gen.getNum(k, t);
+        Log.it(num3 + stopwatch.restart());
+
+        Log.it_noln("s.genOne"+argStr+" = ");
+        AppTree tree = gen.genOne(k, t);
+        Log.it(tree + stopwatch.restart());
+
+        if (F.isZero(num) || tree == null) {
+            ch.is(F.isZero(num) && tree == null, "num = 0 iff genOne = null");
+        }
+
+        if (!F.isZero(num) && num.compareTo(BigInteger.valueOf(100000)) < 0) {
+            int intNum = num.intValueExact();
+
+            Log.it_noln("|s.ts_k"+argStr+"| = ");
+            List<TsRes> allTrees = StaticGen.ts(gamma, k, t, 0);
+            Log.it(allTrees.size() + stopwatch.restart());
+
+
+
+            // TODO ...
+        }
+
+        Log.it();
     }
 
 
