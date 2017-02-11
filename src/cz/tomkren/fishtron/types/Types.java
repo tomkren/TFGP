@@ -1,6 +1,7 @@
 package cz.tomkren.fishtron.types;
 
 import com.google.common.base.Joiner;
+import cz.tomkren.fishtron.ugen.nf.MkNF;
 import cz.tomkren.utils.AA;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Checker;
@@ -19,6 +20,19 @@ public class Types {
 
     public static final TypeSym FUN_ARROW = new TypeSym("->");
     public static final TypeSym BOX_ARROW = new TypeSym("=>");
+
+    public static boolean isSameType(Type t1, Type t2) {
+        return t1.toString().equals(t2.toString());
+    }
+
+    public static boolean isRenamedType(Type t1, Type t2) {
+
+        Type t1_var_NF = MkNF.onlyVarsNF(t1);
+        Type t2_var_NF = MkNF.onlyVarsNF(t2);
+
+        return isSameType(t1_var_NF, t2_var_NF);
+    }
+
 
     public static Type mkFunType(Type argType, Type returnType) {
         return new TypeTerm(Types.FUN_ARROW, argType, returnType);

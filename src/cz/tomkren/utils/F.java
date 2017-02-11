@@ -247,7 +247,7 @@ public class F {
     }
 
 
-    public static <T> List<T> filter(List<T> xs, Predicate<T> f) {
+    public static <T> List<T> filter(Collection<T> xs, Predicate<T> f) {
         return xs.stream().filter(f).collect(Collectors.toList());
     }
 

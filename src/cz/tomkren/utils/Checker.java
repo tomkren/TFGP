@@ -197,7 +197,7 @@ public class Checker {
 
     private boolean checkCore(boolean shouldBeTrue, String okMsg, String koMsg) {
         sum++;
-        String koInfo = ko == 0 ? "" : " <"+ko+"ERRORS occurred before>";
+        String koInfo = ko == 0 ? "" : " <"+ko+" ERRORS occurred before>";
         if (shouldBeTrue) {
             Log.it("[OK "+sum+koInfo+"] "+okMsg);
             ok++;

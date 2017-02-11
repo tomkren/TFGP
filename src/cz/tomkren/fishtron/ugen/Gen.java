@@ -12,6 +12,8 @@ import cz.tomkren.fishtron.ugen.data.PreTs1Res;
 import cz.tomkren.fishtron.ugen.nf.NF;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
+import cz.tomkren.utils.Log;
+import cz.tomkren.utils.TODO;
 import org.json.JSONObject;
 
 import java.math.BigInteger;
@@ -37,11 +39,35 @@ public class Gen {
         this.cache = new Cache(this);
     }
 
-    public AppTree genOne(int k, Type type) {
-        return genOne(k,type, 0, true)._1();
+    public AppTree genOne(int k, Type rawType) {
+        return genOne(k, rawType, randomBall(k, rawType));
     }
 
-    private AB<AppTree,Integer> genOne(int k, Type rawType, int n, boolean isTopLevel) {
+
+
+    // --
+
+    public BigInteger getBall(AppTree tree) {
+        return getBall(tree, tree.getOriginalType(), 0)._1();
+    }
+
+    public AppTree genOne(int k, Type rawType, BigInteger ball) {
+        if (ball == null) {return null;}
+        return genOne(k, rawType, 0, ball)._1();
+    }
+
+    // --
+
+    private AB<BigInteger,Integer> getBall(AppTree tree, Type rawType, int n) {
+
+        NF nf = normalizeIf(rawType);
+        //Type t_NF = nf.getTypeInNF();
+
+        int k = tree.size();
+        return (k == 1) ? getBall_sym(tree, nf, n) : getBall_app(tree, nf, n);
+    }
+
+    private AB<AppTree,Integer> genOne(int k, Type rawType, int n, BigInteger ball /*,boolean isTopLevel*/) {
         if (k < 1) {throw new Error("k must be > 0, it is "+k);}
 
         // normalization
@@ -49,18 +75,25 @@ public class Gen {
         Type t_NF = nf.getTypeInNF();
 
         // ball selection
-        BigInteger num = getNum(k, t_NF);
+        /*BigInteger num = getNum(k, t_NF);
         if (F.isZero(num)) {return AB.mk(null,n);}
         BigInteger ball = F.nextBigInteger(num, rand);
-        if (ball == null) {throw new Error("Ball null check failed, should be unreachable.");}
+        if (ball == null) {throw new Error("Ball null check failed, should be unreachable.");}*/
 
         // Compute normalized result
         AB<AppTree,Integer> res = (k == 1) ? genOne_sym(t_NF, n, ball) : genOne_app(k, t_NF, n, ball);
 
         //denormalize
         nf.denormalizeIf(res._1());
+
+        if (!Types.isSameType(res._1().getType(), rawType)) {
+            throw new Error("Result tree hasn't the input rawType.");
+        }
+
         return res;
     }
+
+    // --
 
     private AB<AppTree,Integer> genOne_sym(Type t_NF, int n, BigInteger ball) {
         for (Ts1Res res : ts1(t_NF,n)) {
@@ -74,12 +107,140 @@ public class Gen {
         throw new Error("Ball not exhausted (k=1), should be unreachable.");
     }
 
-    private AB<AppTree,Integer> genOne_app(int k, Type t, int n, BigInteger ball) {
-        AB<TypeVar,Integer> res_alpha = newVar(t, n);
-        TypeVar alpha = res_alpha._1();
-        int     n1    = res_alpha._2();
+    private AB<BigInteger,Integer> getBall_sym(AppTree tree, NF nf, int n) {
+        if (!(tree instanceof AppTree.Leaf)) {throw new Error("Input tree must be a Leaf.");}
 
-        Type t_F = Types.mkFunType(alpha, t);
+        Type t_NF = nf.getTypeInNF();
+
+        AppTree.Leaf leaf = (AppTree.Leaf) tree;
+        String sym = leaf.getSym();
+        BigInteger ball = BigInteger.ZERO;
+
+        for (Ts1Res res : ts1(t_NF,n)) {
+            if (res.getSym().equals(sym)) {
+                return AB.mk(ball, res.getNextVarId());
+            } else {
+                ball = ball.add(BigInteger.ONE);
+            }
+        }
+        throw new Error("The leaf symbol "+sym+" is not in the Gamma with compatible type.");
+    }
+
+    // --
+
+
+    private  AB<BigInteger,Integer> getBall_app(AppTree tree, NF nf, int n) {
+        if (!(tree instanceof AppTree.App)) {throw new Error("Input tree must be an App.");}
+
+        Type t_NF = nf.getTypeInNF();
+
+        int k = tree.size();
+        AppTree.App FX = (AppTree.App) tree;
+        AppTree F = FX.getFunTree();
+        AppTree X = FX.getArgTree();
+
+        int i_goal = F.size();
+        int j_goal = X.size();
+
+        //Type t_F_goal = nf.toNF(F.getType());
+        //Type t_X_goal = nf.toNF(X.getType());
+
+        BigInteger base = BigInteger.ZERO;
+
+        // ---
+
+        AB<TypeVar,Integer> res_alpha = newVar(t_NF, n);
+        TypeVar alpha = res_alpha._1();
+        int n1 = res_alpha._2();
+
+        Type t_F = Types.mkFunType(alpha, t_NF);
+
+        for (int i = 1; i < k; i++) {
+            int j = k - i;
+
+            for (SubsRes res_F : subs(i, t_F, n1)) {
+
+                BigInteger num_F = res_F.getNum();
+                Sub sigma_F = res_F.getSigma();
+                int n2 = res_F.getNextVarId();
+
+                Type t_X = sigma_F.apply(alpha);
+
+                for (SubsRes res_X : subs(j, t_X, n2)) {
+
+                    BigInteger num_X = res_X.getNum();
+                    Sub sigma_X = res_X.getSigma();
+                    int n3 = res_X.getNextVarId();
+
+                    if (i == i_goal && j == j_goal) {
+
+                        //Type t_F_sel = sigma_X.apply(sigma_F.apply(t_F));
+                        //Type t_X_sel = sigma_X.apply(t_X);
+
+                        Sub sigma_FX = Sub.dot(sigma_X, sigma_F);
+
+                        Type XF_t_NF = sigma_FX.apply(t_NF);
+
+                        //Type t_magic = nf.fromNF(XF_t_NF);
+                        //Type t_roota = tree.getType();
+
+                        Log.it(tree);
+                        Log.it(" "+t_NF);
+                        Log.it(" "+sigma_FX.restrict(t_NF));
+                        Log.it(" "+tree.getOriginalType());
+                        Log.it(" "+XF_t_NF);
+
+                        if (Types.isSameType(XF_t_NF,tree.getOriginalType())) {
+
+                            Type t_selected_F = sigma_F.apply(t_F);
+                            AB<Type,Set<Integer>> skolemizeRes_F = t_selected_F.skolemize();
+                            Type t_skolemized_F = skolemizeRes_F._1();
+                            Set<Integer> skolemizedVars_F = skolemizeRes_F._2();
+                            AB<BigInteger,Integer> ball_F_res = getBall(F, t_skolemized_F , n3); // genOne(i, t_skolemized_F, n3, ball_F);
+                            BigInteger ball_F = ball_F_res._1();
+                            int n4 = ball_F_res._2();
+
+                            Type t_selected_X = sigma_X.apply(t_X);
+                            AB<Type,Set<Integer>> skolemizeRes_X = t_selected_X.skolemize();
+                            Type t_skolemized_X = skolemizeRes_X._1();
+                            Set<Integer> skolemizedVars_X = skolemizeRes_X._2();
+                            AB<BigInteger,Integer> ball_X_res = getBall(X, t_skolemized_X, n4); // genOne(j, t_skolemized_X, n4, ball_X);
+                            BigInteger ball_X = ball_X_res._1();
+                            int n5 = ball_X_res._2();
+
+                            BigInteger ball = base.add(num_X.multiply(ball_F).add(ball_X));
+                            return AB.mk(ball,n5);
+                        }
+
+                        /*if (Types.isRenamedType(t_F_sel,t_F_goal)) {
+                            if (Types.isRenamedType(t_X_sel,t_X_goal)) {
+                                AB<BigInteger,Integer> ball_F_res = getBall(F, n3);
+                                BigInteger ball_F = ball_F_res._1();
+                                int n4 = ball_F_res._2();
+                                AB<BigInteger,Integer> ball_X_res = getBall(X, n4);
+                                BigInteger ball_X = ball_X_res._1();
+                                int n5 = ball_X_res._2();
+                                BigInteger ball = base.add(num_X.multiply(ball_F).add(ball_X));
+                                return AB.mk(ball,n5);
+                            }
+                        }*/
+                    }
+
+                    BigInteger num_FX  = num_F.multiply(num_X);
+                    base = base.add(num_FX);
+                }
+            }
+        }
+
+        throw new Error("Tree not 'exhausted' (k>1), should be unreachable. Tree:"+tree);
+    }
+
+    private AB<AppTree,Integer> genOne_app(int k, Type t_NF, int n, BigInteger ball) {
+        AB<TypeVar,Integer> res_alpha = newVar(t_NF, n);
+        TypeVar alpha = res_alpha._1();
+        int n1 = res_alpha._2();
+
+        Type t_F = Types.mkFunType(alpha, t_NF);
 
         for (int i = 1; i < k; i++) {
             int j = k-i;
@@ -91,17 +252,18 @@ public class Gen {
                     BigInteger num_FX  = res_F.getNum().multiply(res_X.getNum());
 
                     if (ball.compareTo(num_FX) < 0) {
-                        return genOne_app_core(i, j, t, t_F, res_F.getSigma(), t_X, res_X.getSigma(), res_X.getNextVarId());
+                        return genOne_app_core(i, j, t_NF, t_F, res_F.getSigma(), t_X, res_X.getSigma(), res_X.getNextVarId(), ball, res_X.getNum());
+                    } else {
+                        ball = ball.subtract(num_FX);
                     }
 
-                    ball = ball.subtract(num_FX);
                 }
             }
         }
         throw new Error("Ball not exhausted (k>1), should be unreachable.");
     }
 
-    private AB<AppTree,Integer> genOne_app_core(int i, int j, Type t, Type t_F, Sub sigma_F, Type t_X, Sub sigma_X, int n3) {
+    private AB<AppTree,Integer> genOne_app_core(int i, int j, Type t_NF, Type t_F, Sub sigma_F, Type t_X, Sub sigma_X, int n3, BigInteger ball, BigInteger num_X) {
         Type t_selected_F = sigma_F.apply(t_F);
         Type t_selected_X = sigma_X.apply(t_X);
 
@@ -111,8 +273,12 @@ public class Gen {
         Type t_skolemized_F = skolemizeRes_F._1();
         Type t_skolemized_X = skolemizeRes_X._1();
 
-        AB<AppTree,Integer> treeRes_F = genOne(i, t_skolemized_F, n3, false);
-        AB<AppTree,Integer> treeRes_X = genOne(j, t_skolemized_X, /*n4*/ treeRes_F._2(), false);
+        BigInteger[] subBalls = ball.divideAndRemainder(num_X);
+        BigInteger ball_F = subBalls[0];
+        BigInteger ball_X = subBalls[1];
+
+        AB<AppTree,Integer> treeRes_F = genOne(i, t_skolemized_F, n3, ball_F/*, false*/);
+        AB<AppTree,Integer> treeRes_X = genOne(j, t_skolemized_X, /*n4*/ treeRes_F._2(), ball_X/*, false*/);
 
         AppTree tree_F = treeRes_F._1();
         AppTree tree_X = treeRes_X._1();
@@ -131,7 +297,7 @@ public class Gen {
         tree_F.applySub(sigma_X);
 
         Sub sigma_FX = Sub.dot(sigma_X, sigma_F); // #bejval-restrikt-pokus .restrict(t); -- tady nemusim, jen se aplikuje na t a zahodí
-        AppTree tree_FX = AppTree.mk(tree_F, tree_X, sigma_FX.apply(t));
+        AppTree tree_FX = AppTree.mk(tree_F, tree_X, sigma_FX.apply(t_NF));
 
         // todo logy a test strictní well typovanosti
 
@@ -139,6 +305,18 @@ public class Gen {
     }
 
 
+    private BigInteger randomBall(int k, Type rawType) {
+        NF nf = normalizeIf(rawType);
+        Type t_NF = nf.getTypeInNF();
+
+        BigInteger num = getNum(k, t_NF);
+        if (F.isZero(num)) {return null;}
+        BigInteger ball = F.nextBigInteger(num, rand);
+        if (ball == null) {throw new Error("Ball null check failed, should be unreachable.");}
+        return ball;
+    }
+
+    // TODO nebezpečný aby verce, co předpokládá typ v NF byla public
     public BigInteger getNum(int k, Type t_NF) {
         if (opts.isCachingUsed()) {
             return cache.getNum(k, t_NF);

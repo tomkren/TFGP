@@ -23,7 +23,8 @@ import org.apache.commons.math3.stat.inference.ChiSquareTest;
 public class GenTester {
 
     public static void main(String[] args) {
-        test_1();
+        //test_1();
+        bugIsolator_ProblemWithSystematicBalls();
     }
 
     private static final Gamma g_testGamma = Gamma.mk(
@@ -40,27 +41,40 @@ public class GenTester {
 
     private static final Type g_testGoal = Types.parse("(P A (P A A)) -> (P A (P A A))");
 
+    private static void bugIsolator_ProblemWithSystematicBalls() {
+        Checker ch = new Checker();
+        Gen.Opts opts = Gen.Opts.mkDefault();
+        //testTreeGenerating(ch, 4/*5*/, g_testGoal, g_testGamma, 100000, opts, false);
+        int k = 4;
+        Gamma gamma = g_testGamma;
+        Type t = g_testGoal;
+
+        testGenOne_systematicBalls(ch, new Gen(opts,gamma, ch.getRandom()), k, t, gamma, StaticGen.ts(gamma, k, t, 0));
+
+        ch.results();
+    }
+
     private static void test_1() {
-        Checker ch = new Checker(7404398919224944163L);
+        Checker ch = new Checker(/*7404398919224944163L*/);
 
         testNormalizations(ch);
 
         Gen.Opts opts = Gen.Opts.mkDefault();
         tests_subs_1(ch, opts);
         tests_subs_k(ch, opts);
-        tests_treeGenerating(ch, 6/*6*/, 10000, opts);
+        tests_treeGenerating(ch, 5/*6*/, 100000, opts, true);
 
         ch.results();
     }
 
-    private static void tests_treeGenerating(Checker ch,int k_max, int numSamples, Gen.Opts opts) {
+    private static void tests_treeGenerating(Checker ch,int k_max, int numSamples, Gen.Opts opts, boolean testSampling) {
         Log.it("\n== TREE GENERATING TESTS =======================================================\n");
         for (int k = 1; k <= k_max; k++) {
-            testTreeGenerating(ch, k, g_testGoal, g_testGamma, numSamples,opts);
+            testTreeGenerating(ch, k, g_testGoal, g_testGamma, numSamples,opts, testSampling);
         }
     }
 
-    private static void testTreeGenerating(Checker ch, int k, Type t, Gamma gamma, int numSamples, Gen.Opts opts) {
+    private static void testTreeGenerating(Checker ch, int k, Type t, Gamma gamma, int numSamples, Gen.Opts opts, boolean testSampling) {
 
         Log.it("--  k = "+k+"  ---------------------------------------------------------");
 
@@ -103,43 +117,134 @@ public class GenTester {
         if (!F.isZero(num) && num.compareTo(BigInteger.valueOf(100000)) < 0) {
             ch.is(tree != null, "genOne not null");
 
-            testGenOneSampling(ch, gen, k, t, gamma, numSamples);
+
+            stopwatch.restart();
+            Log.it_noln("|s.ts_k"+argStr+"| = ");
+            List<TsRes> allTrees = StaticGen.ts(gamma, k, t, 0);
+            Log.it(allTrees.size() + stopwatch.restart());
+
+            int intNum = num.intValueExact();
+            ch.is(intNum == allTrees.size(), "num = |genAll|");
+
+            if (intNum < 40000) {
+
+                testGenOne_systematicBalls(ch, gen, k, t, gamma, allTrees);
+
+                if (testSampling) {
+                    testGenOneSampling(ch, gen, k, t, gamma, numSamples, allTrees);
+                }
+            }
         }
 
         Log.it();
     }
 
-    private static void testGenOneSampling(Checker ch, Gen gen, int k, Type t, Gamma gamma, int numSamples) {
-
+    /*private static void testGenOneSampling(Checker ch, Gen gen, int k, Type t, Gamma gamma, int numSamples) {
         String argStr = "("+k+", "+t+")";
-
         Stopwatch stopwatch = new Stopwatch(3);
-
         Log.it_noln("gen.getNum"+argStr+" = ");
         BigInteger num = gen.getNum(k, t);
         Log.it(num + stopwatch.restart());
+    }*/
 
-        int intNum = num.intValueExact();
-
-        Log.it_noln("|s.ts_k"+argStr+"| = ");
-        List<TsRes> allTrees = StaticGen.ts(gamma, k, t, 0);
-        Log.it(allTrees.size() + stopwatch.restart());
-
-        ch.is(intNum == allTrees.size(), "num = |genAll|");
-
-        if (intNum < 40000) {
-            testGenOneSampling_core(ch, gen, k, t, gamma, numSamples, intNum, allTrees);
+    private static void testGenOne_systematicBalls(Checker ch, Gen gen, int k, Type t, Gamma gamma, List<TsRes> allTrees) {
+        Map<String, Integer> testMap = new TreeMap<>();
+        for (TsRes tsRes : allTrees) {
+            testMap.put(tsRes.getTree().toRawString(), 0);
         }
+
+        boolean allGeneratedWereInGenAll = true;
+        boolean allTreesWereStrictlyWellTyped = true;
+        double sumGenOneTime = 0.0;
+
+        int numBadBalls = 0;
+
+        for (long i_ball = 0; i_ball < allTrees.size(); i_ball++) {
+
+            //testMap.put();
+
+            BigInteger ball = BigInteger.valueOf(i_ball);
+
+            Stopwatch sw = new Stopwatch(5);
+            AppTree newTree = gen.genOne(k, t, ball);
+
+            double genOneTime = sw.getTime();
+            sumGenOneTime += genOneTime;
+
+
+            //Log.it("Testing "+newTree+" [SWT="+newTree.isStrictlyWellTyped(gamma)+"] ....");
+            BigInteger ball2 = gen.getBall(newTree);
+
+            //Log.it(ball +" --vs-- "+ ball2);
+
+
+            if (!ball.equals(ball2)) {
+                Log.it("!!! bad ball: "+ball +" --vs-- "+ ball2+ " \t ... tree: "+newTree);
+                numBadBalls ++;
+            }
+
+            if (newTree != null) {
+
+                String key = newTree.toRawString();
+
+                //Log.it(tsRes.getTree().toRawString() + " -vs- "+ key + " ... "+ (key.equals(tsRes.getTree().toRawString())));
+
+                if (testMap.containsKey(key)) {
+                    testMap.compute(key, (_key,n) -> n+1);
+                } else {
+                    ch.fail(key +" is not in genAll list.");
+                    allGeneratedWereInGenAll = false;
+                }
+
+                if (!newTree.isStrictlyWellTyped(gamma)) {
+                    ch.fail("tree is not strictly well-typed: "+newTree+"\n"+newTree.getTypeTrace().toString());
+                    allTreesWereStrictlyWellTyped = false;
+                }
+
+            } else {
+                ch.fail("generated tree is null");
+            }
+        }
+
+        if (numBadBalls > 0) {
+            Log.it("numBadBalls: "+numBadBalls);
+            ch.fail("There are some bad balls!");
+        }
+
+        ch.is(allGeneratedWereInGenAll,"All generated trees were in GenAll list.");
+        ch.is(allTreesWereStrictlyWellTyped,"All trees were strictly well typed.");
+
+
+        Log.it(testMap.values());
+        int numProblems = F.filter(testMap.values(), x->x!=1).size();
+        boolean everyTreeIsGeneratedPreciselyOnce = numProblems == 0;
+        ch.is( everyTreeIsGeneratedPreciselyOnce, "every tree is generated precisely once");
+
+        if (!everyTreeIsGeneratedPreciselyOnce) {
+            for (Map.Entry<String,Integer> e : testMap.entrySet()) {
+                String code = e.getKey();
+                int numGenerated = e.getValue();
+                if (numGenerated != 1) {
+                    Log.it(code +" ... "+numGenerated+"×");
+                }
+            }
+            Log.it("numProblems: "+numProblems);
+        }
+
+
+
+
+
     }
 
-    private static void testGenOneSampling_core(Checker ch, Gen gen, int k, Type t, Gamma gamma, int numSamples, int intNum, List<TsRes> allTrees) {
+    private static void testGenOneSampling(Checker ch, Gen gen, int k, Type t, Gamma gamma, int numSamples, List<TsRes> allTrees) {
         Map<String,Integer> testMap = new TreeMap<>();
 
         for (TsRes tsRes : allTrees) {
             testMap.put(tsRes.getTree().toRawString(),0);
         }
 
-        double sampleRate = ((double)numSamples) / intNum;
+        double sampleRate = ((double)numSamples) / allTrees.size();
         boolean allGeneratedWereInGenAll = true;
         boolean allTreesWereStrictlyWellTyped = true;
 
@@ -188,7 +293,7 @@ public class GenTester {
         for (Map.Entry<String, Integer> e : testMap.entrySet()) {
             String tree_p = e.getKey();
             int numGenerated = e.getValue();
-            if (intNum < 100) {Log.it(tree_p + " " + numGenerated);}
+            if (allTrees.size() < 100) {Log.it(tree_p + " " + numGenerated);}
 
             if (numGenerated > maxNumGenerated) {maxNumGenerated = numGenerated;}
             if (numGenerated < minNumGenerated) {minNumGenerated = numGenerated;}
@@ -214,20 +319,27 @@ public class GenTester {
         Log.it("expected value:  "+expectedValue);
         Log.it("observed values: "+Arrays.toString(observed));
 
+        double chiSquare_test_statistic = chiTest.chiSquare(expected, observed);
+        double p_value = chiTest.chiSquareTest(expected, observed);
+
+        boolean isProbablyUniform_999= ! chiTest.chiSquareTest(expected, observed, 0.001);
         boolean isProbablyUniform_99 = ! chiTest.chiSquareTest(expected, observed, 0.01);
         boolean isProbablyUniform_95 = ! chiTest.chiSquareTest(expected, observed, 0.05);
         boolean isProbablyUniform_90 = ! chiTest.chiSquareTest(expected, observed, 0.10);
-        boolean isProbablyUniform_80 = ! chiTest.chiSquareTest(expected, observed, 0.20);
-        boolean isProbablyUniform_70 = ! chiTest.chiSquareTest(expected, observed, 0.30);
-        boolean isProbablyUniform_60 = ! chiTest.chiSquareTest(expected, observed, 0.40);
+        //boolean isProbablyUniform_80 = ! chiTest.chiSquareTest(expected, observed, 0.20);
+        //boolean isProbablyUniform_70 = ! chiTest.chiSquareTest(expected, observed, 0.30);
+        //boolean isProbablyUniform_60 = ! chiTest.chiSquareTest(expected, observed, 0.40);
 
         Log.it("isProbablyUniform - Chi Squared Test:");
-        Log.it(" ... 99% confidence: "+isProbablyUniform_99);
-        Log.it(" ... 95% confidence: "+isProbablyUniform_95);
-        Log.it(" ... 90% confidence: "+isProbablyUniform_90);
-        Log.it(" ... 80% confidence: "+isProbablyUniform_80);
-        Log.it(" ... 70% confidence: "+isProbablyUniform_70);
-        Log.it(" ... 60% confidence: "+isProbablyUniform_60);
+        Log.it(" ... chiSquare test statistic: "+chiSquare_test_statistic);
+        Log.it(" ... p-value: "+p_value);
+        Log.it(" ... 99.9% confidence: "+isProbablyUniform_999);
+        Log.it(" ... 99% confidence:   "+isProbablyUniform_99);
+        Log.it(" ... 95% confidence:   "+isProbablyUniform_95);
+        Log.it(" ... 90% confidence:   "+isProbablyUniform_90);
+        //Log.it(" ... 80% confidence: "+isProbablyUniform_80);
+        //Log.it(" ... 70% confidence: "+isProbablyUniform_70);
+        //Log.it(" ... 60% confidence: "+isProbablyUniform_60);
     }
 
 

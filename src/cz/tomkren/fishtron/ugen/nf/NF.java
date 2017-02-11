@@ -55,9 +55,7 @@ public class NF {
         return renaming_vars.applyReverseAsVars(t1);
     }
 
-    public Type getTypeInNF() {
-        return typeInNF;
-    }
+    public Type getTypeInNF() {return typeInNF;}
 
     public void denormalizeIf(AppTree tree) {
         if (renaming_vars != null) {

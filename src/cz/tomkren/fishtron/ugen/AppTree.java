@@ -32,6 +32,8 @@ public interface AppTree {
     }
 
     Type getType();
+    Type getOriginalType();
+    int size();
     void deskolemize(Set<Integer> ids);
     void applySub(Sub sub);
     void applyTypeTransform(Function<Type,Type> tt);
@@ -53,26 +55,34 @@ public interface AppTree {
     class Leaf implements AppTree {
         private String sym;
         private Type type;
+        private Type originalType;
         private JSONObject debugInfo;
 
         private Leaf(String sym, Type type) {
             this.sym = sym;
             this.type = type;
+            this.originalType = type;
             this.debugInfo = null;
         }
 
+        @Override public Type getOriginalType() {return originalType;}
+
         @Override public Type getType() {return type;}
+        @Override public int size() {return 1;}
+
         @Override public void deskolemize(Set<Integer> ids) {type = type.deskolemize(ids);}
         @Override public void applySub(Sub sub) {type = sub.apply(type);}
         @Override public void applyTypeTransform(Function<Type, Type> tt) {type = tt.apply(type);}
+
         @Override public String toString() {return sym;}
         @Override public String toRawString() {return sym;}
+        public String getSym() {return sym;}
 
         @Override public AB<Boolean,Integer> isStrictlyWellTyped(Map<String, Type> gammaMap, int nextVarId) {
             Type t_s = gammaMap.get(sym);
 
             if (t_s == null) {
-                return AB.mk(false, type.getNextVarId(nextVarId));
+                return AB.mk(false, null);
             }
 
             Fresh freshRes = new Fresh(t_s,type,nextVarId);
@@ -101,6 +111,7 @@ public interface AppTree {
         private AppTree funTree;
         private AppTree argTree;
         private Type type;
+        private Type originalType;
         private JSONObject debugInfo;
 
 
@@ -108,27 +119,48 @@ public interface AppTree {
             this.funTree = funTree;
             this.argTree = argTree;
             this.type = type;
+            this.originalType = type;
             this.debugInfo = null;
         }
+
+        public AppTree getFunTree() {return funTree;}
+        public AppTree getArgTree() {return argTree;}
+
+        @Override public Type getOriginalType() {return originalType;}
+
 
         @Override public Type getType() {return type;}
 
         @Override
+        public int size() {
+            return funTree.size() + argTree.size();
+        }
+
+        @Override
         public AB<Boolean,Integer> isStrictlyWellTyped(Map<String, Type> gammaMap, int nextVarId) {
 
-            boolean isRootSWT = isRootStrictlyWellTyped();
+            if (isRootStrictlyWellTyped()) {
+                AB<Boolean,Integer> funTreeRes = funTree.isStrictlyWellTyped(gammaMap, nextVarId);
+                if (funTreeRes._1()) {
+                    return argTree.isStrictlyWellTyped(gammaMap, funTreeRes._2());
+                }
+            }
+
+            return AB.mk(false, null);
+
+            /*boolean isRootSWT = isRootStrictlyWellTyped();
             AB<Boolean,Integer> funTreeRes = funTree.isStrictlyWellTyped(gammaMap, nextVarId);
             AB<Boolean,Integer> argTreeRes = argTree.isStrictlyWellTyped(gammaMap, funTreeRes._2());
 
             boolean isSWT = isRootSWT && funTreeRes._1() && argTreeRes._1();
-            return AB.mk(isSWT, argTreeRes._2());
+            return AB.mk(isSWT, argTreeRes._2());*/
         }
 
         private boolean isRootStrictlyWellTyped() {
             Type funType = funTree.getType();
             Type argType = argTree.getType();
             AA<Type> fun = Types.splitFunType(funType);
-            return isSameType(fun._1(), argType) && isSameType(fun._2(), type);
+            return Types.isSameType(fun._1(), argType) && Types.isSameType(fun._2(), type);
         }
 
         @Override
@@ -151,9 +183,9 @@ public interface AppTree {
             return typeTrace;
         }
 
-        private boolean isSameType(Type t1, Type t2) {
+        /*private boolean isSameType(Type t1, Type t2) {
             return t1.toString().equals(t2.toString());
-        }
+        }*/
 
         @Override
         public String toRawString() {
@@ -167,9 +199,9 @@ public interface AppTree {
         }
 
         private AB<Leaf,List<AppTree>> getFunLeafWithArgs() {
-            AppTree acc = this;
             List<AppTree> argTrees = new ArrayList<>();
 
+            AppTree acc = this;
             while (acc instanceof App) {
                 App app = (App) acc;
                 argTrees.add(app.argTree);

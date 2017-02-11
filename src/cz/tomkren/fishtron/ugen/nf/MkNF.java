@@ -10,7 +10,7 @@ import java.util.TreeMap;
 
 /** Created by tom on 2. 2. 2017.*/
 
-class MkNF {
+public class MkNF {
 
     private Renaming renaming_skol;
     private Renaming renaming_vars;
@@ -20,8 +20,26 @@ class MkNF {
     private int n_skol;
     private int n_vars;
 
-    MkNF(Type t) {
+    private boolean normalizeBoth;
 
+    MkNF(Type t) {
+        this(t, true);
+    }
+
+    public static Type onlyVarsNF(Type t) {
+        return new MkNF(t,false).getRenaming_vars().applyAsVars(t);
+    }
+
+    private MkNF(Type t, boolean normalizeBoth) {
+        this.normalizeBoth = normalizeBoth;
+        if (normalizeBoth) {
+            init(t);
+        } else {
+            init_onlyVars(t);
+        }
+    }
+
+    private void init(Type t) {
         tab_skol = new TreeMap<>();
         tab_vars = new TreeMap<>();
 
@@ -34,12 +52,25 @@ class MkNF {
         renaming_vars = new Renaming(tab_vars);
     }
 
+    private void init_onlyVars(Type t) {
+        tab_vars = new TreeMap<>();
+        tab_skol = null;
+
+        n_skol = 0;
+        n_vars = t.getSkolemIds().size();
+
+        nf(t);
+
+        renaming_vars = new Renaming(tab_vars);
+        renaming_skol = null;
+    }
+
     Renaming getRenaming_skol() {return renaming_skol;}
     Renaming getRenaming_vars() {return renaming_vars;}
 
     private void nf(Type t) {
         if (t instanceof TypeSym) {
-            nf_sym((TypeSym) t);
+            if (normalizeBoth) {nf_sym((TypeSym) t);}
         } else if (t instanceof TypeVar) {
             nf_var((TypeVar) t);
         } else if (t instanceof TypeTerm) {
