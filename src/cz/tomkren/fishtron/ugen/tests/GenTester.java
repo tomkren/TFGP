@@ -1,5 +1,7 @@
 package cz.tomkren.fishtron.ugen.tests;
 
+import com.google.common.primitives.Doubles;
+import com.google.common.primitives.Longs;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.TypeTerm;
 import cz.tomkren.fishtron.types.Types;
@@ -12,9 +14,9 @@ import cz.tomkren.fishtron.ugen.nf.NF;
 import cz.tomkren.utils.*;
 
 import java.math.BigInteger;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
+
+import org.apache.commons.math3.stat.inference.ChiSquareTest;
 
 /** Created by Tomáš Křen on 5.2.2017. */
 
@@ -46,7 +48,7 @@ public class GenTester {
         Gen.Opts opts = Gen.Opts.mkDefault();
         tests_subs_1(ch, opts);
         tests_subs_k(ch, opts);
-        tests_treeGenerating(ch, 8/*6*/, 100000, opts);
+        tests_treeGenerating(ch, 6/*6*/, 10000, opts);
 
         ch.results();
     }
@@ -99,90 +101,135 @@ public class GenTester {
         }
 
         if (!F.isZero(num) && num.compareTo(BigInteger.valueOf(100000)) < 0) {
-            int intNum = num.intValueExact();
-
-            Log.it_noln("|s.ts_k"+argStr+"| = ");
-            List<TsRes> allTrees = StaticGen.ts(gamma, k, t, 0);
-            Log.it(allTrees.size() + stopwatch.restart());
-
             ch.is(tree != null, "genOne not null");
-            ch.is(intNum == allTrees.size(), "num = |genAll|");
 
-            if (intNum < 40000) {
-
-                Map<String,Integer> testMap = new TreeMap<>();
-
-                for (TsRes tsRes : allTrees) {
-                    testMap.put(tsRes.getTree().toRawString(),0);
-                }
-
-                double sampleRate = ((double)numSamples) / intNum;
-                boolean allGeneratedWereInGenAll = true;
-                boolean allTreesWereStrictlyWellTyped = true;
-
-                double sumGenOneTime = 0.0;
-
-                for (int i = 0; i < numSamples; i++){
-                    if ((i+1)%(k<=6?1000:100) == 0) {
-                        Log.it(i+1+" trees generated (k="+k+") .. so far mean genOne time: "+ sumGenOneTime / i);
-                    }
-
-                    Stopwatch sw = new Stopwatch(5);
-                    AppTree newTree = gen.genOne(k, t);
-
-                    double genOneTime = sw.getTime();
-                    sumGenOneTime += genOneTime;
-
-                    if (newTree != null) {
-
-                        if (!newTree.isStrictlyWellTyped(gamma)) {
-                            ch.fail("tree is not strictly well-typed: "+newTree+"\n"+newTree.getTypeTrace().toString());
-                            allTreesWereStrictlyWellTyped = false;
-                        }
-
-                        String key = newTree.toRawString();
-
-                        if (testMap.containsKey(key)) {
-                            testMap.compute(key, (_key,n) -> n+1);
-                        } else {
-                            ch.fail(key +" is not in genAll list.");
-                            allGeneratedWereInGenAll = false;
-                        }
-
-                    } else {
-                        ch.fail("generated tree is null");
-                    }
-                }
-
-                ch.is(allGeneratedWereInGenAll,"All generated trees were in GenAll list.");
-                ch.is(allTreesWereStrictlyWellTyped,"All trees were strictly well typed.");
-
-                Log.it();
-
-                int minNumGenerated = Integer.MAX_VALUE;
-                int maxNumGenerated = -1;
-
-                for (Map.Entry<String, Integer> e : testMap.entrySet()) {
-                    String tree_p = e.getKey();
-                    int numGenerated = e.getValue();
-                    if (intNum < 100) {Log.it(tree_p + " " + numGenerated);}
-
-                    if (numGenerated > maxNumGenerated) {maxNumGenerated = numGenerated;}
-                    if (numGenerated < minNumGenerated) {minNumGenerated = numGenerated;}
-                }
-
-                Log.it();
-                Log.it("Sample rate: "+ sampleRate);
-                Log.it("Num samples: "+ numSamples);
-                Log.it("Sum genOne time: "+ sumGenOneTime);
-                Log.it("mean genOne time: "+ sumGenOneTime / numSamples);
-                Log.it("minNumGenerated: "+ minNumGenerated);
-                Log.it("maxNumGenerated: "+ maxNumGenerated);
-            }
+            testGenOneSampling(ch, gen, k, t, gamma, numSamples);
         }
 
         Log.it();
     }
+
+    private static void testGenOneSampling(Checker ch, Gen gen, int k, Type t, Gamma gamma, int numSamples) {
+
+        String argStr = "("+k+", "+t+")";
+
+        Stopwatch stopwatch = new Stopwatch(3);
+
+        Log.it_noln("gen.getNum"+argStr+" = ");
+        BigInteger num = gen.getNum(k, t);
+        Log.it(num + stopwatch.restart());
+
+        int intNum = num.intValueExact();
+
+        Log.it_noln("|s.ts_k"+argStr+"| = ");
+        List<TsRes> allTrees = StaticGen.ts(gamma, k, t, 0);
+        Log.it(allTrees.size() + stopwatch.restart());
+
+        ch.is(intNum == allTrees.size(), "num = |genAll|");
+
+        if (intNum < 40000) {
+            testGenOneSampling_core(ch, gen, k, t, gamma, numSamples, intNum, allTrees);
+        }
+    }
+
+    private static void testGenOneSampling_core(Checker ch, Gen gen, int k, Type t, Gamma gamma, int numSamples, int intNum, List<TsRes> allTrees) {
+        Map<String,Integer> testMap = new TreeMap<>();
+
+        for (TsRes tsRes : allTrees) {
+            testMap.put(tsRes.getTree().toRawString(),0);
+        }
+
+        double sampleRate = ((double)numSamples) / intNum;
+        boolean allGeneratedWereInGenAll = true;
+        boolean allTreesWereStrictlyWellTyped = true;
+
+        double sumGenOneTime = 0.0;
+
+        for (int i = 0; i < numSamples; i++){
+            if ((i+1)%(k<=6?1000:100) == 0) {
+                Log.it(i+1+" trees generated (k="+k+") .. so far mean genOne time: "+ sumGenOneTime / i);
+            }
+
+            Stopwatch sw = new Stopwatch(5);
+            AppTree newTree = gen.genOne(k, t);
+
+            double genOneTime = sw.getTime();
+            sumGenOneTime += genOneTime;
+
+            if (newTree != null) {
+
+                if (!newTree.isStrictlyWellTyped(gamma)) {
+                    ch.fail("tree is not strictly well-typed: "+newTree+"\n"+newTree.getTypeTrace().toString());
+                    allTreesWereStrictlyWellTyped = false;
+                }
+
+                String key = newTree.toRawString();
+
+                if (testMap.containsKey(key)) {
+                    testMap.compute(key, (_key,n) -> n+1);
+                } else {
+                    ch.fail(key +" is not in genAll list.");
+                    allGeneratedWereInGenAll = false;
+                }
+
+            } else {
+                ch.fail("generated tree is null");
+            }
+        }
+
+        ch.is(allGeneratedWereInGenAll,"All generated trees were in GenAll list.");
+        ch.is(allTreesWereStrictlyWellTyped,"All trees were strictly well typed.");
+
+        Log.it();
+
+        int minNumGenerated = Integer.MAX_VALUE;
+        int maxNumGenerated = -1;
+
+        for (Map.Entry<String, Integer> e : testMap.entrySet()) {
+            String tree_p = e.getKey();
+            int numGenerated = e.getValue();
+            if (intNum < 100) {Log.it(tree_p + " " + numGenerated);}
+
+            if (numGenerated > maxNumGenerated) {maxNumGenerated = numGenerated;}
+            if (numGenerated < minNumGenerated) {minNumGenerated = numGenerated;}
+        }
+
+        Log.it();
+        Log.it("Sample rate (expected numGenerated): "+ sampleRate);
+        Log.it("Num samples: "+ numSamples);
+        Log.it("Sum genOne time: "+ sumGenOneTime);
+        Log.it("mean genOne time: "+ sumGenOneTime / numSamples);
+        Log.it("minNumGenerated: "+ minNumGenerated);
+        Log.it("maxNumGenerated: "+ maxNumGenerated);
+        Log.it();
+
+        chiTesting(testMap.values(), sampleRate);
+    }
+
+    private static void chiTesting(Collection<Integer> observedList, double expectedValue) {
+        ChiSquareTest chiTest = new ChiSquareTest();
+        double[] expected = Doubles.toArray(F.fill(observedList.size(), expectedValue));
+        long[] observed = Longs.toArray(observedList);
+
+        Log.it("expected value:  "+expectedValue);
+        Log.it("observed values: "+Arrays.toString(observed));
+
+        boolean isProbablyUniform_99 = ! chiTest.chiSquareTest(expected, observed, 0.01);
+        boolean isProbablyUniform_95 = ! chiTest.chiSquareTest(expected, observed, 0.05);
+        boolean isProbablyUniform_90 = ! chiTest.chiSquareTest(expected, observed, 0.10);
+        boolean isProbablyUniform_80 = ! chiTest.chiSquareTest(expected, observed, 0.20);
+        boolean isProbablyUniform_70 = ! chiTest.chiSquareTest(expected, observed, 0.30);
+        boolean isProbablyUniform_60 = ! chiTest.chiSquareTest(expected, observed, 0.40);
+
+        Log.it("isProbablyUniform - Chi Squared Test:");
+        Log.it(" ... 99% confidence: "+isProbablyUniform_99);
+        Log.it(" ... 95% confidence: "+isProbablyUniform_95);
+        Log.it(" ... 90% confidence: "+isProbablyUniform_90);
+        Log.it(" ... 80% confidence: "+isProbablyUniform_80);
+        Log.it(" ... 70% confidence: "+isProbablyUniform_70);
+        Log.it(" ... 60% confidence: "+isProbablyUniform_60);
+    }
+
 
 
     private static void tests_subs_k(Checker ch, Gen.Opts opts) {
