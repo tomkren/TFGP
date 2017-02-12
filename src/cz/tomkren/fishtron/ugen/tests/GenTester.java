@@ -171,11 +171,14 @@ public class GenTester {
             double genOneTime = sw.getTime();
             sumGenOneTime += genOneTime;
 
+            Log.it("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
 
             //Log.it("Testing "+newTree+" [SWT="+newTree.isStrictlyWellTyped(gamma)+"] ....");
             BigInteger ball2 = gen.getBall(newTree);
 
             //Log.it(ball +" --vs-- "+ ball2);
+
+            Log.it("==================================================================================================");
 
 
             if (!ball.equals(ball2)) {

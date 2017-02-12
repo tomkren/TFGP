@@ -60,6 +60,9 @@ public class Gen {
 
     private AB<BigInteger,Integer> getBall(AppTree tree, Type rawType, int n) {
 
+        Log.it("rawType:"+rawType+"\t"+tree);
+
+
         NF nf = normalizeIf(rawType);
         //Type t_NF = nf.getTypeInNF();
 
@@ -69,6 +72,8 @@ public class Gen {
 
     private AB<AppTree,Integer> genOne(int k, Type rawType, int n, BigInteger ball /*,boolean isTopLevel*/) {
         if (k < 1) {throw new Error("k must be > 0, it is "+k);}
+
+        Log.it("rawType:"+rawType+"\t"+ball);
 
         // normalization
         NF nf = normalizeIf(rawType);
@@ -181,21 +186,24 @@ public class Gen {
 
                         Type XF_t_NF = sigma_FX.apply(t_NF);
 
+                        Log.it("  XFtNF:"+ XF_t_NF+"\t"+tree);
+
                         //Type t_magic = nf.fromNF(XF_t_NF);
                         //Type t_roota = tree.getType();
 
-                        Log.it(tree);
-                        Log.it(" "+t_NF);
-                        Log.it(" "+sigma_FX.restrict(t_NF));
-                        Log.it(" "+tree.getOriginalType());
-                        Log.it(" "+XF_t_NF);
+                        //Log.it(tree);
+                        //Log.it(" "+t_NF);
+                        //Log.it(" "+sigma_FX.restrict(t_NF));
+                        //Log.it(" "+tree.getOriginalType());
+                        //Log.it(" "+XF_t_NF);
 
                         if (Types.isSameType(XF_t_NF,tree.getOriginalType())) {
 
                             Type t_selected_F = sigma_F.apply(t_F);
                             AB<Type,Set<Integer>> skolemizeRes_F = t_selected_F.skolemize();
                             Type t_skolemized_F = skolemizeRes_F._1();
-                            Set<Integer> skolemizedVars_F = skolemizeRes_F._2();
+                            //Set<Integer> skolemizedVars_F = skolemizeRes_F._2();
+
                             AB<BigInteger,Integer> ball_F_res = getBall(F, t_skolemized_F , n3); // genOne(i, t_skolemized_F, n3, ball_F);
                             BigInteger ball_F = ball_F_res._1();
                             int n4 = ball_F_res._2();
@@ -203,7 +211,8 @@ public class Gen {
                             Type t_selected_X = sigma_X.apply(t_X);
                             AB<Type,Set<Integer>> skolemizeRes_X = t_selected_X.skolemize();
                             Type t_skolemized_X = skolemizeRes_X._1();
-                            Set<Integer> skolemizedVars_X = skolemizeRes_X._2();
+                            //Set<Integer> skolemizedVars_X = skolemizeRes_X._2();
+
                             AB<BigInteger,Integer> ball_X_res = getBall(X, t_skolemized_X, n4); // genOne(j, t_skolemized_X, n4, ball_X);
                             BigInteger ball_X = ball_X_res._1();
                             int n5 = ball_X_res._2();
@@ -299,7 +308,11 @@ public class Gen {
         Sub sigma_FX = Sub.dot(sigma_X, sigma_F); // #bejval-restrikt-pokus .restrict(t); -- tady nemusim, jen se aplikuje na t a zahodí
         AppTree tree_FX = AppTree.mk(tree_F, tree_X, sigma_FX.apply(t_NF));
 
+        Log.it("  XFtNF:"+sigma_FX.apply(t_NF)+"\t"+ball);
+
         // todo logy a test strictní well typovanosti
+
+
 
         return AB.mk(tree_FX,n5);
     }
