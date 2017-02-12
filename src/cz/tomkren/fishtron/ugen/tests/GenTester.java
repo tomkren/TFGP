@@ -166,7 +166,7 @@ public class GenTester {
             BigInteger ball = BigInteger.valueOf(i_ball);
 
             Stopwatch sw = new Stopwatch(5);
-            AppTree newTree = gen.genOne(k, t, ball);
+            AppTree newTree = gen.genOne(ball, k, t);
 
             double genOneTime = sw.getTime();
             sumGenOneTime += genOneTime;
