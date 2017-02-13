@@ -8,12 +8,15 @@ import cz.tomkren.fishtron.ugen.cache.Cache;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
 import cz.tomkren.fishtron.ugen.data.PreSubsRes;
 import cz.tomkren.fishtron.ugen.data.Ts1Res;
+import cz.tomkren.fishtron.ugen.data.TsRes;
 import cz.tomkren.fishtron.ugen.data.PreTs1Res;
 import cz.tomkren.fishtron.ugen.nf.NF;
+import cz.tomkren.fishtron.ugen.tests.StaticGen;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
 import org.json.JSONObject;
+
 
 import java.math.BigInteger;
 import java.util.*;
@@ -59,7 +62,7 @@ public class Gen {
         NF nf = normalizeIf(rawType);
         Type t_NF = nf.getTypeInNF();
 
-        log_root(lvl, k, rawType, t_NF);
+        log_root(lvl, k, rawType, t_NF, ball);
 
         AB<AppTree,Integer> res = (k == 1) ? genOne_sym(ball, t_NF, n, lvl) : genOne_app(ball, k, t_NF, n, lvl);
 
@@ -124,16 +127,21 @@ public class Gen {
 
         AB<Type,Set<Integer>> skol_F = selectAndSkolemize(sigma_F, t_F);
         AB<Type,Set<Integer>> skol_X = selectAndSkolemize(sigma_X, t_X);
+        Type t_skol_F = skol_F._1();
+        Type t_skol_X = skol_X._1();
+
+        assert_skolemizationNumTest(i, t_skol_F, res_F, t_F, "F");
+        assert_skolemizationNumTest(j, t_skol_X, res_X, t_X, "X");
 
         BigInteger[] subBalls = ball.divideAndRemainder(num_X);
         BigInteger ball_F = subBalls[0];
         BigInteger ball_X = subBalls[1];
 
-        AB<AppTree,Integer> genRes_F = genOne(ball_F, i, skol_F._1(), n3, lvl+1);
+        AB<AppTree,Integer> genRes_F = genOne(ball_F, i, t_skol_F, n3, lvl+1);
         AppTree tree_F = genRes_F._1();
         int n4 = genRes_F._2();
 
-        AB<AppTree,Integer> genRes_X = genOne(ball_X, j, skol_X._1(), n4, lvl+1);
+        AB<AppTree,Integer> genRes_X = genOne(ball_X, j, t_skol_X, n4, lvl+1);
         AppTree tree_X = genRes_X._1();
         int n5 = genRes_X._2();
 
@@ -155,6 +163,75 @@ public class Gen {
         return t_selected_A.skolemize();
     }
 
+    private void assert_skolemizationNumTest(int i, Type t_skol_A, SubsRes res_A, Type t_A, String caseName) {
+        BigInteger num_A = res_A.getNum();
+        BigInteger num_test_A = getNum(i, t_skol_A);
+        if (!num_A.equals(num_test_A)) {
+            String errMsg = "Skolemization num assert failed ("+caseName+"): "+num_test_A+" != "+num_A;
+
+            Sub sigma_A = res_A.getSigma();
+            Type t_selected_A = sigma_A.apply(t_A);
+
+            Log.it("\n-- !!! ----------------------------------------");
+            Log.it(errMsg);
+            Log.it("t_"+caseName+" = "+ t_A);
+            Log.it("sigma_"+caseName+" = "+ sigma_A);
+            Log.it("t_selected_"+caseName+" = "+ t_selected_A +" = sigma_"+caseName+"(t_"+caseName+")");
+            Log.it("t_skol_"+caseName+"     = "+ t_skol_A);
+            Log.it();
+
+            Log.it("res_"+caseName+" = "+ res_A);
+            Log.it("res_"+caseName+".getNum() = "+ num_A);
+            Log.it("getNum("+i+", t_skol_"+caseName+") = "+num_test_A);
+            Log.it();
+
+            List<TsRes> all_t_A_trees = StaticGen.ts(gamma, i, t_A, 0);
+            Log.it("|all_t_"+caseName+"_trees| = "+ all_t_A_trees.size());
+            List<TsRes> filteredTrees = F.filter(all_t_A_trees, res -> res.getSigma().equals(sigma_A));
+            Log.it("|filtered_t_"+caseName+"_trees| = "+ filteredTrees.size());
+
+            List<AppTree> trees_skol = F.map(StaticGen.ts(gamma, i, t_skol_A, 0), TsRes::getTree);
+            Log.it("|trees_skol| = "+trees_skol.size());
+
+            Map<String,AppTree> filteredTreesMap = new TreeMap<>();
+            for (TsRes res : filteredTrees) {
+                filteredTreesMap.put(res.getTree().toRawString(), res.getTree());
+            }
+
+            List<AppTree> problemTrees = F.filter(trees_skol,
+                    t -> !filteredTreesMap.containsKey(t.toRawString()));
+
+            Log.it("|problem_trees| = "+problemTrees.size());
+
+            Map<String,TsRes> allTreesMap = new TreeMap<>();
+            for (TsRes res : all_t_A_trees) {
+                allTreesMap.put(res.getTree().toRawString(), res);
+            }
+
+            Log.it("Problem trees:");
+            for (AppTree problemTree : problemTrees) {
+                Log.it_noln("\t"+problemTree.toRawString());
+
+                TsRes problemRes = allTreesMap.get(problemTree.toRawString());
+
+                if (problemRes != null) {
+                    Log.it_noln("\t ... but it is in all_t_"+caseName+"_trees :)");
+                    Log.it(" ... with sigma = "+problemRes.getSigma());
+                } else {
+                    Log.it("\t ... and it is not even in all_t_"+caseName+"_trees :(");
+                }
+            }
+
+
+
+            Log.it();
+            try {Thread.sleep(500L);} catch (InterruptedException e) {e.printStackTrace();}
+
+            throw new Error(errMsg);
+        }
+    }
+
+
     // -- GET BALL -----------------------------------------
 
     // "public api"
@@ -169,7 +246,7 @@ public class Gen {
         NF nf = normalizeIf(rawType);
         Type t_NF = nf.getTypeInNF();
 
-        log_root(lvl, k, rawType, t_NF);
+        log_root(lvl, k, rawType, t_NF, null);
 
         return (k == 1) ? getBall_sym(tree, t_NF, n, lvl) : getBall_app(tree, t_NF, n, lvl);
     }
@@ -264,13 +341,16 @@ public class Gen {
 
     // -----------------------------------------------------
 
-    private static void log_root(int lvl, int k, Type rawType, Type t_NF) {
+    private void log_root(int lvl, int k, Type rawType, Type t_NF, BigInteger ball) {
+        if (!opts.isLogging()) {return;}
+        log(lvl, "ball", ball);
         log(lvl, "k", k);
         log(lvl, "rawType", rawType);
         log(lvl, "t_NF", t_NF);
     }
 
-    private static void log_leaf(int lvl, Ts1Res res, BigInteger ball) {
+    private void log_leaf(int lvl, Ts1Res res, BigInteger ball) {
+        if (!opts.isLogging()) {return;}
         log(lvl, "sym  ", res.getSym());
         log(lvl, "sigma", res.getSigma());
         log(lvl, "nvi  ", res.getNextVarId());
@@ -289,15 +369,19 @@ public class Gen {
         NF nf = normalizeIf(rawType);
         Type t_NF = nf.getTypeInNF();
 
-        BigInteger num = getNum(k, t_NF);
+        BigInteger num = getNum_NF(k, t_NF);
         if (F.isZero(num)) {return null;}
         BigInteger ball = F.nextBigInteger(num, rand);
         if (ball == null) {throw new Error("Ball null check failed, should be unreachable.");}
         return ball;
     }
 
-    // TODO nebezpečný aby verce, co předpokládá typ v NF byla public
-    public BigInteger getNum(int k, Type t_NF) {
+    public BigInteger getNum(int k, Type rawType) {
+        NF nf = normalizeIf(rawType);
+        return getNum_NF(k, nf.getTypeInNF());
+    }
+
+    private BigInteger getNum_NF(int k, Type t_NF) {
         if (opts.isCachingUsed()) {
             return cache.getNum(k, t_NF);
         } else {
@@ -455,17 +539,24 @@ public class Gen {
     public static class Opts {
         private final boolean isCachingUsed;
         private final boolean isNormalizationPerformed;
+        private final boolean isLogging;
 
-        Opts(boolean isCachingUsed, boolean isNormalizationPerformed) {
+        Opts(boolean isCachingUsed, boolean isNormalizationPerformed, boolean isLogging) {
             this.isCachingUsed = isCachingUsed;
             this.isNormalizationPerformed = isNormalizationPerformed;
+            this.isLogging = isLogging;
         }
 
         boolean isCachingUsed() {return isCachingUsed;}
         public boolean isNormalizationPerformed() {return isNormalizationPerformed;}
+        boolean isLogging() {return isLogging;}
+
+        public static Opts mkDefault(boolean isLogging) {
+            return new Opts(true,true,isLogging);
+        }
 
         public static Opts mkDefault() {
-            return new Opts(true,true);
+            return mkDefault(false);
         }
     }
 

@@ -7,6 +7,7 @@ import cz.tomkren.fishtron.ugen.data.PreSubsRes;
 import cz.tomkren.fishtron.ugen.data.PreTs1Res;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
 import cz.tomkren.fishtron.ugen.data.Ts1Res;
+import cz.tomkren.fishtron.ugen.data.TsRes;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
 
@@ -53,6 +54,7 @@ public class Mover {
     private Ts1Res moveTs1Res(Ts1Res res)             {return new Ts1Res(res.getSym(), moveSub(res.getSigma()));}
     private SubsRes movePreSubsRes(PreSubsRes preRes) {return new SubsRes(preRes.getNum(), moveSub(preRes.getSigma()));}
     private SubsRes moveSubsRes(SubsRes res)          {return new SubsRes(res.getNum(), moveSub(res.getSigma()));}
+    private TsRes moveTsRes(TsRes res)                {return new TsRes(res.getTree(), moveSub(res.getSigma()));}
 
 
     public static List<Ts1Res> movePreTs1Results(Type t, int n, List<PreTs1Res> ts1results_unmoved) {
@@ -63,6 +65,11 @@ public class Mover {
     static List<SubsRes> movePreSubsResults(Type t, int n, List<PreSubsRes> results_unmoved) {
         Mover mover = new Mover(t, n);
         return F.map(results_unmoved, mover::movePreSubsRes);
+    }
+
+    public static List<TsRes> moveTsResults(Type t, int n, List<TsRes> results_unmoved) {
+        Mover mover = new Mover(t, n);
+        return F.map(results_unmoved, mover::moveTsRes);
     }
 
     // Intended for moving results generated for old_n = 0, now needed for n.

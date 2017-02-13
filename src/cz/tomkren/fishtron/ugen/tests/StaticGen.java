@@ -22,7 +22,7 @@ import java.util.List;
 
 /** Created by user on 1. 2. 2017.*/
 
-class StaticGen {
+public class StaticGen {
 
 
 
@@ -78,20 +78,24 @@ class StaticGen {
     }
 
 
-    static List<TsRes> ts(Gamma gamma, int k, Type t, int n) {
+    public static List<TsRes> ts(Gamma gamma, int k, Type t, int n) {
         if (k < 1) {throw new Error("k must be > 0, it is "+k);}
-        else if (k == 1) {return ts_1(gamma, t, n);}
-        else {
-            List<TsRes> ret = new ArrayList<>();
-            for (int i = 1; i < k; i++) {ret.addAll(ts_ij(gamma, i, k-i, t, n));}
-            return ret;
+
+        if (k == 1) {
+            return ts_1(gamma, t, n);
+        } else {
+            List<TsRes> ret_unmoved = new ArrayList<>();
+            for (int i = 1; i < k; i++) {
+                ret_unmoved.addAll(ts_ij(gamma, i, k-i, t, n));
+            }
+            return Mover.moveTsResults(t,n,ret_unmoved);
         }
     }
 
     static List<SubsRes> subs(Gamma gamma, int k, Type t, int n) {
-        if (k < 1) {
-            throw new Error("k must be > 0, it is "+k);
-        } else if (k == 1) {
+        if (k < 1) {throw new Error("k must be > 0, it is "+k);}
+
+        if (k == 1) {
             return subs_1(gamma, t, n);
         } else {
             List<PreSubsRes> acc = new ArrayList<>();

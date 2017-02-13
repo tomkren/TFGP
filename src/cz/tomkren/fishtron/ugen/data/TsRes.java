@@ -2,6 +2,7 @@ package cz.tomkren.fishtron.ugen.data;
 
 import cz.tomkren.fishtron.types.Sub;
 import cz.tomkren.fishtron.ugen.AppTree;
+import cz.tomkren.utils.AB;
 
 /** Created by Tomáš Křen on 6.2.2017. */
 
@@ -16,6 +17,11 @@ public class TsRes {
         this.sigma = sigma;
         this.nextVarId = nextVarId;
     }
+
+    public TsRes(AppTree tree, AB<Sub,Integer> moveRes) {
+        this(tree, moveRes._1(), moveRes._2());
+    }
+
 
     public AppTree getTree() {return tree;}
     public Sub getSigma() {return sigma;}

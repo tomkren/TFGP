@@ -24,7 +24,8 @@ public class GenTester {
 
     public static void main(String[] args) {
         //test_1();
-        bugIsolator_ProblemWithSystematicBalls();
+        //bugIsolator_ProblemWithSystematicBalls();
+        bugIsolator_skolemizationNumTest();
     }
 
     private static final Gamma g_testGamma = Gamma.mk(
@@ -41,15 +42,33 @@ public class GenTester {
 
     private static final Type g_testGoal = Types.parse("(P A (P A A)) -> (P A (P A A))");
 
-    private static void bugIsolator_ProblemWithSystematicBalls() {
-        Checker ch = new Checker();
-        Gen.Opts opts = Gen.Opts.mkDefault();
-        //testTreeGenerating(ch, 4/*5*/, g_testGoal, g_testGamma, 100000, opts, false);
-        int k = 4;
+    private static void bugIsolator_skolemizationNumTest() {
+        int k = 5;
+        int numSamples = 10000;
+
+        Checker ch = new Checker(3031101149781176088L);
+        Gen.Opts opts = Gen.Opts.mkDefault(true);
         Gamma gamma = g_testGamma;
         Type t = g_testGoal;
+        Gen gen = new Gen(opts,gamma, ch.getRandom());
+        List<TsRes> allTrees =  StaticGen.ts(gamma, k, t, 0);
 
-        testGenOne_systematicBalls(ch, new Gen(opts,gamma, ch.getRandom()), k, t, gamma, StaticGen.ts(gamma, k, t, 0));
+        testGenOne_sampling(ch, gen, k, t, gamma, numSamples, allTrees);
+
+        ch.results();
+    }
+
+    private static void bugIsolator_ProblemWithSystematicBalls() {
+        int k = 4;
+
+        Checker ch = new Checker();
+        Gen.Opts opts = Gen.Opts.mkDefault();
+        Gamma gamma = g_testGamma;
+        Type t = g_testGoal;
+        Gen gen = new Gen(opts, gamma, ch.getRandom());
+        List<TsRes> allTrees =  StaticGen.ts(gamma, k, t, 0);
+
+        testGenOne_systematicBalls(ch, gen, k, t, gamma, allTrees);
 
         ch.results();
     }
@@ -60,21 +79,24 @@ public class GenTester {
         testNormalizations(ch);
 
         Gen.Opts opts = Gen.Opts.mkDefault();
+
         tests_subs_1(ch, opts);
         tests_subs_k(ch, opts);
-        tests_treeGenerating(ch, 5/*6*/, 100000, opts, true);
+        tests_treeGenerating(ch, 6/*6*/, 10000, opts, true, !true);
 
         ch.results();
     }
 
-    private static void tests_treeGenerating(Checker ch,int k_max, int numSamples, Gen.Opts opts, boolean testSampling) {
+    private static void tests_treeGenerating(Checker ch,int k_max, int numSamples, Gen.Opts opts,
+                                             boolean testSampling, boolean testSystematicBalls) {
         Log.it("\n== TREE GENERATING TESTS =======================================================\n");
         for (int k = 1; k <= k_max; k++) {
-            testTreeGenerating(ch, k, g_testGoal, g_testGamma, numSamples,opts, testSampling);
+            testTreeGenerating(ch, k, g_testGoal, g_testGamma, numSamples,opts, testSampling, testSystematicBalls);
         }
     }
 
-    private static void testTreeGenerating(Checker ch, int k, Type t, Gamma gamma, int numSamples, Gen.Opts opts, boolean testSampling) {
+    private static void testTreeGenerating(Checker ch, int k, Type t, Gamma gamma, int numSamples, Gen.Opts opts,
+                                           boolean testSampling, boolean testSystematicBalls) {
 
         Log.it("--  k = "+k+"  ---------------------------------------------------------");
 
@@ -128,24 +150,18 @@ public class GenTester {
 
             if (intNum < 40000) {
 
-                testGenOne_systematicBalls(ch, gen, k, t, gamma, allTrees);
+                if (testSystematicBalls) {
+                    testGenOne_systematicBalls(ch, gen, k, t, gamma, allTrees);
+                }
 
                 if (testSampling) {
-                    testGenOneSampling(ch, gen, k, t, gamma, numSamples, allTrees);
+                    testGenOne_sampling(ch, gen, k, t, gamma, numSamples, allTrees);
                 }
             }
         }
 
         Log.it();
     }
-
-    /*private static void testGenOneSampling(Checker ch, Gen gen, int k, Type t, Gamma gamma, int numSamples) {
-        String argStr = "("+k+", "+t+")";
-        Stopwatch stopwatch = new Stopwatch(3);
-        Log.it_noln("gen.getNum"+argStr+" = ");
-        BigInteger num = gen.getNum(k, t);
-        Log.it(num + stopwatch.restart());
-    }*/
 
     private static void testGenOne_systematicBalls(Checker ch, Gen gen, int k, Type t, Gamma gamma, List<TsRes> allTrees) {
         Map<String, Integer> testMap = new TreeMap<>();
@@ -240,7 +256,7 @@ public class GenTester {
 
     }
 
-    private static void testGenOneSampling(Checker ch, Gen gen, int k, Type t, Gamma gamma, int numSamples, List<TsRes> allTrees) {
+    private static void testGenOne_sampling(Checker ch, Gen gen, int k, Type t, Gamma gamma, int numSamples, List<TsRes> allTrees) {
         Map<String,Integer> testMap = new TreeMap<>();
 
         for (TsRes tsRes : allTrees) {
@@ -254,7 +270,7 @@ public class GenTester {
         double sumGenOneTime = 0.0;
 
         for (int i = 0; i < numSamples; i++){
-            if ((i+1)%(k<=6?1000:100) == 0) {
+            if ((i+1)%(k<=6?100:10) == 0) {
                 Log.it(i+1+" trees generated (k="+k+") .. so far mean genOne time: "+ sumGenOneTime / i);
             }
 
