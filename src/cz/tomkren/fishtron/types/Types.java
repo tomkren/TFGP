@@ -5,6 +5,7 @@ import cz.tomkren.fishtron.ugen.nf.MkNF;
 import cz.tomkren.utils.AA;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Checker;
+import cz.tomkren.utils.F;
 
 import java.util.Arrays;
 import java.util.List;
@@ -59,10 +60,49 @@ public class Types {
             if (args.size() == 3 && args.get(0).equals(FUN_ARROW)) {
                 return "("+ prettyPrint(args.get(1)) +" "+ FUN_ARROW +" "+ prettyPrint(args.get(2))+")";
             } else {
-                return "("+ Joiner.on(' ').join(args)+")";
+                List<String> strArgs = F.map(args, Types::prettyPrint);
+                return "("+ Joiner.on(' ').join(strArgs)+")";
             }
         } else {
             return t.toString();
+        }
+    }
+
+    public static String prettyPrint2(Type t) {
+        return prettyPrint2(t, true);
+    }
+
+    private static String prettyPrint2(Type t, boolean skipParens) {
+        if (t instanceof TypeTerm) {
+            TypeTerm tt = (TypeTerm) t;
+            List<Type> args = tt.getArgs();
+            String p1 = skipParens ? "" : "(";
+            String p2 = skipParens ? "" : ")";
+            if (isFunType(t)) {
+
+                Type arg1 = args.get(1);
+                Type arg2 = args.get(2);
+
+                boolean skip1 = !isFunType(arg1);
+
+                return p1+prettyPrint2(arg1,skip1)+" "+FUN_ARROW+" "+prettyPrint2(arg2,true)+p2;
+            } else {
+
+                List<String> strArgs = F.map(args, arg -> prettyPrint2(arg, false) );
+
+                return p1+ Joiner.on(' ').join(strArgs)+ p2;
+            }
+        } else {
+            return t.toString();
+        }
+    }
+
+    private static boolean isFunType(Type t) {
+        if (t instanceof TypeTerm) {
+            List<Type> args = ((TypeTerm) t).getArgs();
+            return args.size() == 3 && args.get(0).equals(FUN_ARROW);
+        } else {
+            return false;
         }
     }
 

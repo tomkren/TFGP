@@ -33,7 +33,7 @@ public class Stopwatch {
     }
 
     public double getTime(int precision) {
-        return BigDecimal.valueOf(getTime()).setScale(precision, RoundingMode.HALF_UP).doubleValue();
+        return F.prettyDouble(getTime(), precision);
     }
 
 }

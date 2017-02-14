@@ -23,9 +23,9 @@ import org.apache.commons.math3.stat.inference.ChiSquareTest;
 public class GenTester {
 
     public static void main(String[] args) {
-        //test_1();
+        test_1();
         //bugIsolator_ProblemWithSystematicBalls();
-        bugIsolator_skolemizationNumTest();
+        //bugIsolator_skolemizationNumTest();
     }
 
     private static final Gamma g_testGamma = Gamma.mk(

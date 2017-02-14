@@ -36,4 +36,18 @@ public class Gamma {
         return new Gamma(ret);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        for (AB<String,Type> p : gamma) {
+            String s = p._1();
+            Type t_s = p._2();
+
+            sb.append(s).append(" : ").append(Types.prettyPrint2(t_s)).append('\n');
+
+        }
+
+        return sb.toString();
+    }
 }

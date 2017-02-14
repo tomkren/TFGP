@@ -6,7 +6,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
@@ -19,6 +21,9 @@ public class F {
         return x -> g.apply(f.apply(x));
     }
 
+    public static double prettyDouble(double x, int precision) {
+        return BigDecimal.valueOf(x).setScale(precision, RoundingMode.HALF_UP).doubleValue();
+    }
 
     public static class ListResult <T> {
 

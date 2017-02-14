@@ -44,18 +44,27 @@ public class Gen {
 
     // -- GEN ONE -----------------------------------------------
 
+    // "public random api"
     public AppTree genOne(int k, Type rawType) {
         return genOne(randomBall(k, rawType), k, rawType);
     }
 
+    // "private random api"
+    private AB<AppTree,Integer> genOne(int k, Type rawType, int n, int lvl) {
+        BigInteger ball = randomBall(k, rawType);
+        if (ball == null) {return AB.mk(null,n);}
+        return genOne(ball, k, rawType, n, lvl);
+    }
 
-    // "public api"
+    // --
+
+    // "public deterministic api"
     public AppTree genOne(BigInteger ball, int k, Type rawType) {
         if (ball == null) {return null;}
         return genOne(ball, k, rawType, 0, 0)._1();
     }
 
-    // "private api"
+    // "private deterministic api"
     private AB<AppTree,Integer> genOne(BigInteger ball, int k, Type rawType, int n, int lvl) {
         if (k < 1) {throw new Error("k must be > 0, it is "+k);}
 
@@ -130,18 +139,25 @@ public class Gen {
         Type t_skol_F = skol_F._1();
         Type t_skol_X = skol_X._1();
 
-        assert_skolemizationNumTest(i, t_skol_F, res_F, t_F, "F");
-        assert_skolemizationNumTest(j, t_skol_X, res_X, t_X, "X");
+        //todo vyřešit
+        //assert_skolemizationNumTest(i, t_skol_F, res_F, t_F, "F");
+        //assert_skolemizationNumTest(j, t_skol_X, res_X, t_X, "X");
 
-        BigInteger[] subBalls = ball.divideAndRemainder(num_X);
-        BigInteger ball_F = subBalls[0];
-        BigInteger ball_X = subBalls[1];
+        AB<AppTree,Integer> genRes_F, genRes_X;
 
-        AB<AppTree,Integer> genRes_F = genOne(ball_F, i, t_skol_F, n3, lvl+1);
+        if (opts.computeSubBalls()) {
+            BigInteger[] subBalls = ball.divideAndRemainder(num_X);
+            BigInteger ball_F = subBalls[0];
+            BigInteger ball_X = subBalls[1];
+
+            genRes_F = genOne(ball_F, i, t_skol_F, n3, lvl+1);
+            genRes_X = genOne(ball_X, j, t_skol_X, genRes_F._2() /*n4*/, lvl+1);
+        } else {
+            genRes_F = genOne(i, t_skol_F, n3, lvl+1);
+            genRes_X = genOne(j, t_skol_X, genRes_F._2() /*n4*/, lvl+1);
+        }
+
         AppTree tree_F = genRes_F._1();
-        int n4 = genRes_F._2();
-
-        AB<AppTree,Integer> genRes_X = genOne(ball_X, j, t_skol_X, n4, lvl+1);
         AppTree tree_X = genRes_X._1();
         int n5 = genRes_X._2();
 
@@ -222,8 +238,6 @@ public class Gen {
                 }
             }
 
-
-
             Log.it();
             try {Thread.sleep(500L);} catch (InterruptedException e) {e.printStackTrace();}
 
@@ -231,115 +245,7 @@ public class Gen {
         }
     }
 
-
-    // -- GET BALL -----------------------------------------
-
-    // "public api"
-    public BigInteger getBall(AppTree tree) {
-        return getBall(tree, tree.getOriginalType(), 0, 0)._1();
-    }
-
-    // "private api"
-    private AB<BigInteger,Integer> getBall(AppTree tree, Type rawType, int n, int lvl) {
-        int k = tree.size();
-
-        NF nf = normalizeIf(rawType);
-        Type t_NF = nf.getTypeInNF();
-
-        log_root(lvl, k, rawType, t_NF, null);
-
-        return (k == 1) ? getBall_sym(tree, t_NF, n, lvl) : getBall_app(tree, t_NF, n, lvl);
-    }
-
-    // "sym case"
-    private AB<BigInteger,Integer> getBall_sym(AppTree tree, Type t_NF, int n, int lvl) {
-        if (!(tree instanceof AppTree.Leaf)) {throw new Error("Input tree must be a Leaf.");}
-
-        AppTree.Leaf leaf = (AppTree.Leaf) tree;
-        String sym = leaf.getSym();
-        BigInteger ball = BigInteger.ZERO;
-
-        for (Ts1Res res : ts1(t_NF,n)) {
-            if (res.getSym().equals(sym)) {
-                log_leaf(lvl, res, ball);
-                return AB.mk(ball, res.getNextVarId());
-            } else {
-                ball = ball.add(BigInteger.ONE);
-            }
-        }
-        throw new Error("The leaf symbol "+sym+" is not in the Gamma with compatible type.");
-    }
-
-    // "app case"
-    private  AB<BigInteger,Integer> getBall_app(AppTree tree, Type t_NF, int n, int lvl) {
-        if (!(tree instanceof AppTree.App)) {throw new Error("Input tree must be an App.");}
-        int k = tree.size();
-        AppTree.App FX = (AppTree.App) tree;
-        AppTree F = FX.getFunTree();
-        AppTree X = FX.getArgTree();
-        int i_goal = FX.getFunTree().size();
-        int j_goal = FX.getArgTree().size();
-
-        BigInteger base = BigInteger.ZERO;
-
-        // ---
-
-        AB<TypeVar,Integer> res_alpha = newVar(t_NF, n);
-        TypeVar alpha = res_alpha._1();
-        int n1 = res_alpha._2();
-
-        Type t_F = Types.mkFunType(alpha, t_NF);
-
-        for (int i = 1; i < k; i++) {
-            int j = k-i;
-
-            for (SubsRes res_F : subs(i, t_F, n1)) {
-                Type t_X = res_F.getSigma().apply(alpha);
-
-                for (SubsRes res_X : subs(j, t_X, res_F.getNextVarId())) {
-                    BigInteger num_FX  = res_F.getNum().multiply(res_X.getNum());
-
-                    if (i == i_goal && j == j_goal) {
-
-                        Sub sigma_FX = Sub.dot(res_X.getSigma(), res_F.getSigma());
-
-                        if (Types.isSameType( sigma_FX.apply(t_NF) , tree.getOriginalType()) ) {
-                            return getBall_app_core(base, F, X, t_NF, t_F, t_X, res_F, res_X, lvl);
-                        }
-                    }
-
-                    base = base.add(num_FX);
-                }
-            }
-        }
-
-        throw new Error("Tree not 'exhausted' (k>1), should be unreachable. Tree:"+tree);
-    }
-
-    // "core"
-    private AB<BigInteger,Integer> getBall_app_core(BigInteger base, AppTree F, AppTree X, Type t_NF, Type t_F, Type t_X, SubsRes res_F, SubsRes res_X, int lvl) {
-
-        BigInteger num_X = res_X.getNum();
-        int n3 = res_X.getNextVarId();
-        Sub sigma_F = res_F.getSigma();
-        Sub sigma_X = res_X.getSigma();
-
-        AB<Type,Set<Integer>> skol_F = selectAndSkolemize(sigma_F, t_F);
-        AB<Type,Set<Integer>> skol_X = selectAndSkolemize(sigma_X, t_X);
-
-        AB<BigInteger,Integer> ball_F_res = getBall(F, skol_F._1() , n3, lvl+1);
-        BigInteger ball_F = ball_F_res._1();
-        int n4 = ball_F_res._2();
-
-        AB<BigInteger,Integer> ball_X_res = getBall(X, skol_X._1(), n4, lvl+1);
-        BigInteger ball_X = ball_X_res._1();
-        int n5 = ball_X_res._2();
-
-        BigInteger ball = base.add(num_X.multiply(ball_F)).add(ball_X);
-        return AB.mk(ball,n5);
-    }
-
-    // -----------------------------------------------------
+    // -- LOGGING ----------------------------------------------------------------
 
     private void log_root(int lvl, int k, Type rawType, Type t_NF, BigInteger ball) {
         if (!opts.isLogging()) {return;}
@@ -363,7 +269,7 @@ public class Gen {
     }
 
 
-    // -----------------------------------------------------
+    // ------------------------------------------------------------------------------
 
     private BigInteger randomBall(int k, Type rawType) {
         NF nf = normalizeIf(rawType);
@@ -509,13 +415,122 @@ public class Gen {
     }
 
 
-    // -- Stats -------------------------------------------------------
+
+    // -- GET BALL -----------------------------------------------------------------------------------
+
+    // "public api"
+    public BigInteger getBall(AppTree tree) {
+        return getBall(tree, tree.getOriginalType(), 0, 0)._1();
+    }
+
+    // "private api"
+    private AB<BigInteger,Integer> getBall(AppTree tree, Type rawType, int n, int lvl) {
+        int k = tree.size();
+
+        NF nf = normalizeIf(rawType);
+        Type t_NF = nf.getTypeInNF();
+
+        log_root(lvl, k, rawType, t_NF, null);
+
+        return (k == 1) ? getBall_sym(tree, t_NF, n, lvl) : getBall_app(tree, t_NF, n, lvl);
+    }
+
+    // "sym case"
+    private AB<BigInteger,Integer> getBall_sym(AppTree tree, Type t_NF, int n, int lvl) {
+        if (!(tree instanceof AppTree.Leaf)) {throw new Error("Input tree must be a Leaf.");}
+
+        AppTree.Leaf leaf = (AppTree.Leaf) tree;
+        String sym = leaf.getSym();
+        BigInteger ball = BigInteger.ZERO;
+
+        for (Ts1Res res : ts1(t_NF,n)) {
+            if (res.getSym().equals(sym)) {
+                log_leaf(lvl, res, ball);
+                return AB.mk(ball, res.getNextVarId());
+            } else {
+                ball = ball.add(BigInteger.ONE);
+            }
+        }
+        throw new Error("The leaf symbol "+sym+" is not in the Gamma with compatible type.");
+    }
+
+    // "app case"
+    private  AB<BigInteger,Integer> getBall_app(AppTree tree, Type t_NF, int n, int lvl) {
+        if (!(tree instanceof AppTree.App)) {throw new Error("Input tree must be an App.");}
+        int k = tree.size();
+        AppTree.App FX = (AppTree.App) tree;
+        AppTree F = FX.getFunTree();
+        AppTree X = FX.getArgTree();
+        int i_goal = FX.getFunTree().size();
+        int j_goal = FX.getArgTree().size();
+
+        BigInteger base = BigInteger.ZERO;
+
+        // ---
+
+        AB<TypeVar,Integer> res_alpha = newVar(t_NF, n);
+        TypeVar alpha = res_alpha._1();
+        int n1 = res_alpha._2();
+
+        Type t_F = Types.mkFunType(alpha, t_NF);
+
+        for (int i = 1; i < k; i++) {
+            int j = k-i;
+
+            for (SubsRes res_F : subs(i, t_F, n1)) {
+                Type t_X = res_F.getSigma().apply(alpha);
+
+                for (SubsRes res_X : subs(j, t_X, res_F.getNextVarId())) {
+                    BigInteger num_FX  = res_F.getNum().multiply(res_X.getNum());
+
+                    if (i == i_goal && j == j_goal) {
+
+                        Sub sigma_FX = Sub.dot(res_X.getSigma(), res_F.getSigma());
+
+                        if (Types.isSameType( sigma_FX.apply(t_NF) , tree.getOriginalType()) ) {
+                            return getBall_app_core(base, F, X, t_NF, t_F, t_X, res_F, res_X, lvl);
+                        }
+                    }
+
+                    base = base.add(num_FX);
+                }
+            }
+        }
+
+        throw new Error("Tree not 'exhausted' (k>1), should be unreachable. Tree:"+tree);
+    }
+
+    // "core"
+    private AB<BigInteger,Integer> getBall_app_core(BigInteger base, AppTree F, AppTree X, Type t_NF, Type t_F, Type t_X, SubsRes res_F, SubsRes res_X, int lvl) {
+
+        BigInteger num_X = res_X.getNum();
+        int n3 = res_X.getNextVarId();
+        Sub sigma_F = res_F.getSigma();
+        Sub sigma_X = res_X.getSigma();
+
+        AB<Type,Set<Integer>> skol_F = selectAndSkolemize(sigma_F, t_F);
+        AB<Type,Set<Integer>> skol_X = selectAndSkolemize(sigma_X, t_X);
+
+        AB<BigInteger,Integer> ball_F_res = getBall(F, skol_F._1() , n3, lvl+1);
+        BigInteger ball_F = ball_F_res._1();
+        int n4 = ball_F_res._2();
+
+        AB<BigInteger,Integer> ball_X_res = getBall(X, skol_X._1(), n4, lvl+1);
+        BigInteger ball_X = ball_X_res._1();
+        int n5 = ball_X_res._2();
+
+        BigInteger ball = base.add(num_X.multiply(ball_F)).add(ball_X);
+        return AB.mk(ball,n5);
+    }
+
+
+    // -- STATS ----------------------------------------------------------------------------------
 
     public Cache getCache() {
         return cache;
     }
 
-    // -- toString and Serialization to json ----------------------------------------------------------------
+    // -- toString and Serialization to json -----------------------------------------------------
 
     private JSONObject toJson() {
         return F.obj(
@@ -537,22 +552,31 @@ public class Gen {
     // -- OPTIONS -----------------------------------
 
     public static class Opts {
+
+        public enum BallMode {GenerateSubBalls, ComputeSubBalls}
+
         private final boolean isCachingUsed;
         private final boolean isNormalizationPerformed;
+        private final BallMode ballMode;
         private final boolean isLogging;
 
-        Opts(boolean isCachingUsed, boolean isNormalizationPerformed, boolean isLogging) {
+
+        Opts(boolean isCachingUsed, boolean isNormalizationPerformed, BallMode ballMode, boolean isLogging) {
             this.isCachingUsed = isCachingUsed;
             this.isNormalizationPerformed = isNormalizationPerformed;
+            this.ballMode = ballMode;
             this.isLogging = isLogging;
         }
 
         boolean isCachingUsed() {return isCachingUsed;}
         public boolean isNormalizationPerformed() {return isNormalizationPerformed;}
         boolean isLogging() {return isLogging;}
+        //boolean generateSubBalls() {return ballMode == BallMode.GenerateSubBalls;}
+        boolean computeSubBalls() {return ballMode == BallMode.ComputeSubBalls;}
+
 
         public static Opts mkDefault(boolean isLogging) {
-            return new Opts(true,true,isLogging);
+            return new Opts(true,true, BallMode.GenerateSubBalls, isLogging);
         }
 
         public static Opts mkDefault() {
