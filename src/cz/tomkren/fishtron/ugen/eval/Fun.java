@@ -4,7 +4,7 @@ import java.util.function.Function;
 
 /** Created by tom on 14. 2. 2017. */
 
-public interface FunCode extends EvalCode {
+public interface Fun extends EvalCode {
 
     Object applyFun(Object arg);
 

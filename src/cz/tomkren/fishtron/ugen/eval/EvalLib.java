@@ -11,17 +11,21 @@ public class EvalLib {
 
     private Map<String,EvalCode> codes;
 
-    public EvalLib(Object... args) {
+    public static EvalLib mk(Object... args) {
+        return new EvalLib(Arrays.asList(args));
+    }
+
+    private EvalLib(List<Object> args) {
 
         codes = new HashMap<>();
 
-        if (args.length % 2 != 0) {
+        if (args.size() % 2 != 0) {
             throw new Error("There must be an even number of args.");
         }
 
-        for (int i = 0; i<args.length; i+=2) {
-            Object key = args[i];
-            Object val = args[i+1];
+        for (int i = 0; i < args.size(); i+=2) {
+            Object key = args.get(i);
+            Object val = args.get(i+1);
 
             if (!(key instanceof String)) {
                 throw new Error("Arg on index "+i+" is not a String.");

@@ -30,7 +30,7 @@ public class Gen {
     private Random rand;
     private Cache cache;
 
-    Gen(Gamma gamma, Random rand) {
+    public Gen(Gamma gamma, Random rand) {
         this(Opts.mkDefault(), gamma, rand);
     }
 
@@ -43,6 +43,11 @@ public class Gen {
 
 
     // -- GEN ONE -----------------------------------------------
+
+    // "public random strType api"
+    public AppTree genOne(int k, String rawTypeStr) {
+        return genOne(k, Types.parse(rawTypeStr));
+    }
 
     // "public random api"
     public AppTree genOne(int k, Type rawType) {
@@ -77,6 +82,7 @@ public class Gen {
 
         nf.denormalizeIf(res._1());
 
+        // todo pozor spadne z nějakyho duvodu, když dám uplne nahoře typ "n", viz eval tester (imho nic vážnýho ale vyřešit)
         if (!Types.isSameType(res._1().getType(), rawType)) {
             throw new Error("Result tree hasn't the input rawType.");
         }
