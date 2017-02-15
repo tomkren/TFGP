@@ -1,14 +1,16 @@
 package cz.tomkren.fishtron.ugen.apps;
 
 import cz.tomkren.fishtron.types.Type;
+import cz.tomkren.fishtron.types.TypeTerm;
 import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.AppTree;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
-import cz.tomkren.utils.Checker;
-import cz.tomkren.utils.F;
-import cz.tomkren.utils.Log;
-import cz.tomkren.utils.Stopwatch;
+import cz.tomkren.fishtron.ugen.eval.*;
+import cz.tomkren.fishtron.workflows.MyList;
+import cz.tomkren.fishtron.workflows.TypedDag;
+import cz.tomkren.utils.*;
+import org.json.JSONObject;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -17,6 +19,11 @@ import java.util.List;
 /** Created by user on 14. 2. 2017. */
 
 public class Workflows {
+
+    public static void main(String[] args) {
+        //test_generating();
+        test_evaluating(64);
+    }
 
     private static final Type  goal  = Types.parse("Dag D LD");
     private static final Gamma gamma = Gamma.mk(
@@ -45,7 +52,73 @@ public class Workflows {
             "booEnd",     "Dag Boo LD"
     );
 
-    public static void main(String[] args) {
+    private static final Type Dag = Types.parse("Dag");
+    private static final Type D   = Types.parse("D");
+    private static final Type LD  = Types.parse("LD");
+
+    private static final EvalLib lib = EvalLib.mk(
+            "dia",        (TD.Op3) TypedDag::dia,
+            "dia0",       (TD.Op2) TypedDag::dia0,
+            "split",      (TD.DL)  TypedDag::split,
+            "cons",       (TD.OL)  MyList::cons,
+            "nil",        MyList.NIL,
+
+            "PCA",         mkMethod("PCA"),
+            "kBest",       mkMethod("kBest"),
+            "kMeans",      mkMethod("kMeans"),
+            "copy",        mkMethod("copy"),
+            "SVC",         mkMethod("SVC"),
+            "logR",        mkMethod("logR"),
+            "gaussianNB",  mkMethod("gaussianNB"),
+            "DT",          mkMethod("DT"),
+            "vote",        mkMethod("vote"),
+
+            "stacking",    (TD.Op2) TypedDag::stacking,
+            "stacker",     mkMethod("stacker"),
+
+            "boosting",    (TD.DLD) TypedDag::boosting,
+            "booBegin",    mkMethod("booBegin"),
+            "booster",     (TD.Op) TypedDag::booster,
+            "booEnd",      mkMethod("booEnd")
+    );
+
+    private static AA<Type> getDagInOutTypes(Type type) {
+        if (type instanceof TypeTerm) {
+            TypeTerm tt = (TypeTerm) type;
+            List<Type> args = tt.getArgs();
+            if (args.size() == 3 && args.get(0).equals(Dag)) {
+                return new AA<>(args.get(1),args.get(2));
+            }
+        }
+        throw new Error("Type "+type+" was expected to be (Dag a b) type!");
+    }
+
+
+    private static EvalCode mkMethod(String name) {
+        return t -> {
+            AA<Type> p = getDagInOutTypes(t);
+            //Log.it(p);
+            return new TypedDag(name, p._1(), p._2());
+        };
+    }
+
+    private static TypedDag mkSVC(JSONObject params) {
+        return new TypedDag("SVC", D, LD, params, null);
+    }
+
+
+
+    private static void test_evaluating(int k_max) {
+        Checker ch = new Checker();
+
+        EvalTester.testLib(ch, k_max, lib, gamma, goal, true, dag -> ((TypedDag)dag).toJson());
+
+        ch.results();
+    }
+
+
+
+    private static void test_generating() {
         Checker ch = new Checker();
 
         Log.it();

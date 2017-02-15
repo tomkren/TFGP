@@ -1,10 +1,14 @@
 package cz.tomkren.fishtron.ugen.eval;
 
+import cz.tomkren.fishtron.types.Type;
+import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.AppTree;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.Log;
+
+import java.util.function.Function;
 
 /** Created by user on 14. 2. 2017. */
 
@@ -41,16 +45,19 @@ public class EvalTester {
         ch.results();
     }
 
-
     private static void testLib(Checker ch, int k_max, EvalLib lib, Gamma gamma, String goalStr, boolean testEvaluation) {
+        testLib(ch, k_max, lib, gamma, Types.parse(goalStr), testEvaluation, x->x);
+    }
 
-        Log.it("Goal = "+goalStr);
+    public static void testLib(Checker ch, int k_max, EvalLib lib, Gamma gamma, Type goal, boolean testEvaluation, Function<Object,Object> transformResult) {
+
+        Log.it("Goal = "+goal);
 
         Gen gen = new Gen(gamma, ch.getRandom());
         boolean allTreesAreWellTyped = true;
 
         for (int k = 1; k <= k_max; k++) {
-            AppTree tree = gen.genOne(k, goalStr);
+            AppTree tree = gen.genOne(k, goal);
 
             if (tree != null) {
 
@@ -62,7 +69,8 @@ public class EvalTester {
                 String resultStr = "";
                 if (testEvaluation) {
                     Object result = lib.eval(tree);
-                    resultStr = result + " \t = \t ";
+                    Object transformedResult = transformResult.apply(result);
+                    resultStr = transformedResult + " \t = \t ";
                 }
 
                 Log.it("("+k+") \t "+ resultStr + tree);

@@ -44,11 +44,6 @@ public class Gen {
 
     // -- GEN ONE -----------------------------------------------
 
-    // "public random strType api"
-    public AppTree genOne(int k, String rawTypeStr) {
-        return genOne(k, Types.parse(rawTypeStr));
-    }
-
     // "public random api"
     public AppTree genOne(int k, Type rawType) {
         return genOne(randomBall(k, rawType), k, rawType);

@@ -207,7 +207,7 @@ public class TypedDag {
     }
 
 
-    public TypedDag split(MyList dagList) {
+    public TypedDag split_someOld(MyList dagList) {
         seri(fromMyList_noCopy(dagList) );
         return this;
     }
@@ -234,7 +234,7 @@ public class TypedDag {
     }
 
 
-    public TypedDag dia(TypedDag dag2, TypedDag dag3) {
+    public TypedDag dia_someOld(TypedDag dag2, TypedDag dag3) {
         seri(dag2);
         seri(dag3);
         return this;
@@ -389,12 +389,12 @@ public class TypedDag {
 
 
     public static SmartSymbol mkSplit(String name, String outType, String inType1, String inType2) {
-        Comb0 comb = xs -> ((TypedDag)xs.get(0)).split((MyList)xs.get(1));
+        Comb0 comb = xs -> ((TypedDag)xs.get(0)).split_someOld((MyList)xs.get(1));
         return mkDagOperationNode(name, comb, outType, inType1, inType2);
     }
 
     public static SmartSymbol mkDia(String name, String outType, String inType1, String inType2, String inType3) {
-        Comb0 comb = xs -> ((TypedDag)xs.get(0)).dia((TypedDag) xs.get(1), (TypedDag) xs.get(2));
+        Comb0 comb = xs -> ((TypedDag)xs.get(0)).dia_someOld((TypedDag) xs.get(1), (TypedDag) xs.get(2));
         return mkDagOperationNode(name, comb, outType, inType1, inType2, inType3);
     }
 
