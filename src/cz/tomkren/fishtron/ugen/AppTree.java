@@ -1,6 +1,8 @@
 package cz.tomkren.fishtron.ugen;
 
+import cz.tomkren.fishtron.terms.SubtreePos;
 import cz.tomkren.fishtron.types.Sub;
+import cz.tomkren.fishtron.types.TMap;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.utils.AA;
@@ -8,10 +10,12 @@ import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
 
 import com.google.common.base.Joiner;
+import cz.tomkren.utils.TODO;
 import org.json.JSONObject;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /** Created by user on 27. 7. 2016.*/
 
@@ -42,6 +46,16 @@ public interface AppTree {
     AB<Boolean,Integer> isStrictlyWellTyped(Map<String, Type> gammaMap, int nextVarId);
     JSONObject getTypeTrace();
 
+    List<SubtreePos> getAllSubtreePosesWhere(Predicate<AppTree> isTrue);
+
+    default List<SubtreePos> getAllSubtreePoses() {
+        return getAllSubtreePosesWhere(t->true);
+    }
+
+    default TMap<SubtreePos> getAllSubtreePoses_byTypes() {
+        return new TMap<>(getAllSubtreePoses(), SubtreePos::getType);
+    }
+
     default boolean isStrictlyWellTyped(Gamma gamma) {
         Map<String,Type> gammaMap = new HashMap<>();
         for(AB<String,Type> p : gamma.getSymbols()) {
@@ -63,6 +77,13 @@ public interface AppTree {
             this.type = type;
             this.originalType = type;
             this.debugInfo = null;
+        }
+
+
+        @Override
+        public List<SubtreePos> getAllSubtreePosesWhere(Predicate<AppTree> isTrue) {
+            // TODO !!!!
+            throw new TODO();
         }
 
         @Override public Type getOriginalType() {return originalType;}
@@ -121,6 +142,12 @@ public interface AppTree {
             this.type = type;
             this.originalType = type;
             this.debugInfo = null;
+        }
+
+        @Override
+        public List<SubtreePos> getAllSubtreePosesWhere(Predicate<AppTree> isTrue) {
+            // TODO !!!!
+            throw new TODO();
         }
 
         public AppTree getFunTree() {return funTree;}

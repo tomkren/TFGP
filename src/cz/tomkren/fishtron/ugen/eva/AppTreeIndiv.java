@@ -19,6 +19,14 @@ public class AppTreeIndiv implements FitIndiv {
         this.fitVal = null;
     }
 
+    public AppTree getTree() {
+        return tree;
+    }
+
+    public EvalLib getLib() {
+        return lib;
+    }
+
     @Override
     public Object computeValue() {
         return lib.eval(tree);
