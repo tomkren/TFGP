@@ -25,8 +25,8 @@ public class Workflows {
         test_evaluating(64);
     }
 
-    private static final Type  goal  = Types.parse("Dag D LD");
-    private static final Gamma gamma = Gamma.mk(
+    public static final Type  goal  = Types.parse("Dag D LD");
+    public static final Gamma gamma = Gamma.mk(
             "dia",        "(Dag D D) -> ((Dag D (V LD n an)) -> ((Dag (V LD n an) LD) -> (Dag D LD)))",
             "dia0",       "(Dag D (V LD n an)) -> ((Dag (V LD n an) LD) -> (Dag D LD))",
             "split",      "(Dag D (V D n an)) -> ((V (Dag D LD) n an) -> (Dag D (V LD n an)))",

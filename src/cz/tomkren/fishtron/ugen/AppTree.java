@@ -42,11 +42,21 @@ public interface AppTree {
     void applySub(Sub sub);
     void applyTypeTransform(Function<Type,Type> tt);
     String toRawString();
+    String toStringWithTypes();
 
     AB<Boolean,Integer> isStrictlyWellTyped(Map<String, Type> gammaMap, int nextVarId);
     JSONObject getTypeTrace();
 
     List<SubtreePos> getAllSubtreePosesWhere(Predicate<AppTree> isTrue);
+
+    AppTree getSubtree(SubtreePos pos);
+    AppTree changeSubtree(SubtreePos pos, AppTree newSubtree);
+
+    static AA<AppTree> xover(AppTree mum, AppTree dad, SubtreePos mumPos, SubtreePos dadPos) {
+        AppTree child1 = mum.changeSubtree(mumPos, dad.getSubtree(dadPos));
+        AppTree child2 = dad.changeSubtree(dadPos, mum.getSubtree(mumPos));
+        return new AA<>(child1,child2);
+    }
 
     default List<SubtreePos> getAllSubtreePoses() {
         return getAllSubtreePosesWhere(t->true);
@@ -79,11 +89,24 @@ public interface AppTree {
             this.debugInfo = null;
         }
 
+        @Override
+        public AppTree getSubtree(SubtreePos pos) {
+            return pos.isRoot() ? this : null;
+        }
+
+        @Override
+        public AppTree changeSubtree(SubtreePos pos, AppTree newSubtree) {
+            return pos.isRoot() ? newSubtree : null;
+        }
+
 
         @Override
         public List<SubtreePos> getAllSubtreePosesWhere(Predicate<AppTree> isTrue) {
-            // TODO !!!!
-            throw new TODO();
+            if (isTrue.test(this)) {
+                return Collections.singletonList(SubtreePos.root(type));
+            } else {
+                return Collections.emptyList();
+            }
         }
 
         @Override public Type getOriginalType() {return originalType;}
@@ -98,6 +121,11 @@ public interface AppTree {
         @Override public String toString() {return sym;}
         @Override public String toRawString() {return sym;}
         public String getSym() {return sym;}
+
+        @Override
+        public String toStringWithTypes() {
+            return "<"+sym+":"+type+">";
+        }
 
         @Override public AB<Boolean,Integer> isStrictlyWellTyped(Map<String, Type> gammaMap, int nextVarId) {
             Type t_s = gammaMap.get(sym);
@@ -145,9 +173,46 @@ public interface AppTree {
         }
 
         @Override
+        public AppTree getSubtree(SubtreePos pos) {
+            if (pos.isRoot()) {
+                return this;
+            } else {
+                AppTree subtree = (pos.getSonIndex() == 0 ? funTree : argTree);
+                return subtree.getSubtree(pos.getTail());
+            }
+        }
+
+        @Override
+        public AppTree changeSubtree(SubtreePos pos, AppTree newSubtree) {
+            if (pos.isRoot()) {
+                return newSubtree;
+            } else {
+                SubtreePos tailPos = pos.getTail();
+                if (pos.getSonIndex() == 0) {
+                    AppTree newFunTree = funTree.changeSubtree(tailPos, newSubtree);
+                    return new AppTree.App(newFunTree, argTree, type);
+                } else {
+                    AppTree newArgTree = argTree.changeSubtree(tailPos, newSubtree);
+                    return new AppTree.App(funTree, newArgTree, type);
+                }
+            }
+        }
+
+        @Override
         public List<SubtreePos> getAllSubtreePosesWhere(Predicate<AppTree> isTrue) {
-            // TODO !!!!
-            throw new TODO();
+            List<SubtreePos> ret = new ArrayList<>();
+
+            if (isTrue.test(this)) {
+                ret.add(SubtreePos.root(type));
+            }
+
+            List<SubtreePos> funPoses = funTree.getAllSubtreePosesWhere(isTrue);
+            ret.addAll(F.map(funPoses, pos -> SubtreePos.reverseStep(0,pos)));
+
+            List<SubtreePos> argPoses = argTree.getAllSubtreePosesWhere(isTrue);
+            ret.addAll(F.map(argPoses, pos -> SubtreePos.reverseStep(1,pos)));
+
+            return ret;
         }
 
         public AppTree getFunTree() {return funTree;}
@@ -237,6 +302,13 @@ public interface AppTree {
 
             Collections.reverse(argTrees);
             return new AB<>((Leaf)acc, argTrees);
+        }
+
+        @Override
+        public String toStringWithTypes() {
+            return "(<"+type+"> "+
+                    funTree.toStringWithTypes()+" "+
+                    argTree.toStringWithTypes()+")";
         }
 
         @Override

@@ -146,7 +146,7 @@ public class BasicTypedXover implements Operator<PolyTree> {
 
         }
 
-
+        Log.it("numPossiblePairs: "+numPossiblePairs);
 
         int numTries = 100000;
 
