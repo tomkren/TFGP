@@ -11,6 +11,7 @@ import cz.tomkren.utils.F;
 
 import com.google.common.base.Joiner;
 import cz.tomkren.utils.TODO;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.*;
@@ -35,6 +36,9 @@ public interface AppTree {
         F.writeJsonAsJsFile("www/data/lastErrTree.js", "mkLastErrTree", typeTrace);
     }
 
+    AppTree randomizeParams(JSONObject allParamsInfo, Random rand);
+    boolean hasParams();
+
     Type getType();
     Type getOriginalType();
     int size();
@@ -56,6 +60,10 @@ public interface AppTree {
         AppTree child1 = mum.changeSubtree(mumPos, dad.getSubtree(dadPos));
         AppTree child2 = dad.changeSubtree(dadPos, mum.getSubtree(mumPos));
         return new AA<>(child1,child2);
+    }
+
+    default SubtreePos getRandomSubtreePos(Random rand) {
+        return F.randomElement(getAllSubtreePoses(), rand);
     }
 
     default List<SubtreePos> getAllSubtreePoses() {
@@ -81,12 +89,38 @@ public interface AppTree {
         private Type type;
         private Type originalType;
         private JSONObject debugInfo;
+        private Params params;
 
         private Leaf(String sym, Type type) {
+            this(sym, type, type, null, null);
+        }
+
+        private Leaf(String sym, Type type, Type originalType, JSONObject debugInfo, Params params) {
             this.sym = sym;
             this.type = type;
-            this.originalType = type;
-            this.debugInfo = null;
+            this.originalType = originalType;
+            this.debugInfo = debugInfo;
+            this.params = params;
+        }
+
+        @Override
+        public boolean hasParams() {
+            return params != null;
+        }
+
+        @Override
+        public AppTree randomizeParams(JSONObject allParamsInfo, Random rand) {
+            JSONObject paramsInfo = allParamsInfo.has(sym) ? allParamsInfo.getJSONObject(sym) : null;
+            if (paramsInfo == null) {
+                return this;
+            } else {
+                return new Leaf(sym, type, originalType, debugInfo, new Params(paramsInfo, rand));
+            }
+        }
+
+        public Leaf randomlyShiftOneParam(Random rand, List<AB<Integer,Double>> shiftsWithProbabilities) {
+            Params newParams = params.randomlyShiftOneParam(rand, shiftsWithProbabilities);
+            return new Leaf(sym, type, originalType, debugInfo, newParams);
         }
 
         @Override
@@ -165,11 +199,27 @@ public interface AppTree {
 
 
         private App(AppTree funTree, AppTree argTree, Type type) {
+            this(funTree, argTree, type, type, null);
+        }
+
+        private App(AppTree funTree, AppTree argTree, Type type, Type originalType, JSONObject debugInfo) {
             this.funTree = funTree;
             this.argTree = argTree;
             this.type = type;
-            this.originalType = type;
-            this.debugInfo = null;
+            this.originalType = originalType;
+            this.debugInfo = debugInfo;
+        }
+
+        @Override
+        public boolean hasParams() {
+            return false;
+        }
+
+        @Override
+        public AppTree randomizeParams(JSONObject allParamsInfo, Random rand) {
+            AppTree newFunTree = funTree.randomizeParams(allParamsInfo, rand);
+            AppTree newArgTree = argTree.randomizeParams(allParamsInfo, rand);
+            return new App(newFunTree, newArgTree, type, originalType, debugInfo);
         }
 
         @Override

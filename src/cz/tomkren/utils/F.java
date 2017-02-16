@@ -60,12 +60,12 @@ public class F {
         }
 
         public ListResult<T> sort(Function<T,Double> f) {
-            stream = stream.sorted( (o1, o2) -> Double.compare( f.apply(o1) , f.apply(o2) ) );
+            stream = stream.sorted(Comparator.comparingDouble(f::apply));
             return this;
         }
 
         public ListResult<T> sort_(Function<T, Integer> f) {
-            stream = stream.sorted( (o1, o2) -> Integer.compare( f.apply(o1) , f.apply(o2) ) );
+            stream = stream.sorted(Comparator.comparingInt(f::apply));
             return this;
         }
 
@@ -146,7 +146,7 @@ public class F {
     }
 
     public static <A,B> List<B> map(A[] xs, Function<A,B> f) {
-        return Arrays.asList(xs).stream().map(f).collect(Collectors.toList());
+        return Arrays.stream(xs).map(f).collect(Collectors.toList());
     }
 
     public static <B> List<B> map(JSONArray jsonArr, Function<Object,B> f) {
@@ -482,6 +482,16 @@ public class F {
         JSONObject ret = new JSONObject();
         for (Map.Entry<K,V> e : mapa.entrySet()) {
             ret.put(e.getKey().toString(), f.apply(e.getValue()));
+        }
+        return ret;
+    }
+
+    public static <K,V> JSONObject jsonMap(Map<K,V> mapa, BiFunction<K,V,Object> f) {
+        JSONObject ret = new JSONObject();
+        for (Map.Entry<K,V> e : mapa.entrySet()) {
+            K key = e.getKey();
+            V val = e.getValue();
+            ret.put(key.toString(), f.apply(key,val));
         }
         return ret;
     }
