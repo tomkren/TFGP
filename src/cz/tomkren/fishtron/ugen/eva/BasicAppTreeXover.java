@@ -1,13 +1,12 @@
 package cz.tomkren.fishtron.ugen.eva;
 
 import cz.tomkren.fishtron.eva.Operator;
-import cz.tomkren.fishtron.reusegen.QuerySolver;
 import cz.tomkren.fishtron.terms.SubtreePos;
 import cz.tomkren.fishtron.types.TMap;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.AppTree;
 import cz.tomkren.fishtron.ugen.Gen;
-import cz.tomkren.fishtron.ugen.apps.Workflows;
+import cz.tomkren.fishtron.ugen.apps.workflows.Workflows;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import cz.tomkren.utils.*;
 import org.json.JSONObject;
@@ -132,7 +131,7 @@ public class BasicAppTreeXover implements Operator<AppTreeIndiv> {
         BasicAppTreeXover xOver = new BasicAppTreeXover(1.0, 50, ch.getRandom());
 
         int numTries = 100000;
-        Map<String,Integer> combos = new TreeMap<>(QuerySolver.compareStrs);
+        Map<String,Integer> combos = new TreeMap<>(AppTree.compareStrs);
         for (int i = 0; i < numTries; i++) {
             AA<AppTree> children = xOver.xover(mum, dad);
             combos.merge(children.toString(), 1, F::plus);

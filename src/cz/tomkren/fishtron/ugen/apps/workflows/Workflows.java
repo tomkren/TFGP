@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen.apps;
+package cz.tomkren.fishtron.ugen.apps.workflows;
 
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.TypeTerm;
@@ -56,7 +56,7 @@ public class Workflows {
     private static final Type D   = Types.parse("D");
     private static final Type LD  = Types.parse("LD");
 
-    private static final EvalLib lib = EvalLib.mk(
+    public static final EvalLib lib = EvalLib.mk(
             "dia",        (TD.Op3) TypedDag::dia,
             "dia0",       (TD.Op2) TypedDag::dia0,
             "split",      (TD.DL)  TypedDag::split,

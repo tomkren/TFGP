@@ -37,11 +37,15 @@ class Params {
         this.selectedParamIndices = selectedParamIndices;
     }
 
-
     public JSONObject toJson() {
         return F.jsonMap(selectedParamIndices, (paramName,selectedIndex) ->
                 paramsInfo.getJSONArray(paramName).get(selectedIndex)
         );
+    }
+
+    @Override
+    public String toString() {
+        return toJson().toString();
     }
 
     Params randomlyShiftOneParam(Random rand, List<AB<Integer,Double>> shiftsWithProbabilities) {

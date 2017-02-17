@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen.apps;
+package cz.tomkren.fishtron.ugen.apps.workflows;
 
 import cz.tomkren.fishtron.ugen.eval.Value;
 import cz.tomkren.fishtron.workflows.MyList;

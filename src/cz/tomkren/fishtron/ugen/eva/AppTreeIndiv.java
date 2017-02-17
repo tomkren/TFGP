@@ -10,7 +10,7 @@ import cz.tomkren.fishtron.ugen.eval.EvalLib;
 public class AppTreeIndiv implements FitIndiv {
 
     private final AppTree tree;
-    private final EvalLib lib;
+    private final EvalLib lib; // todo pokud to pude elegantně, tak odebrat a radši mít jen jednou v evaluatoru
     private FitVal fitVal;
 
     public AppTreeIndiv(AppTree tree, EvalLib lib) {

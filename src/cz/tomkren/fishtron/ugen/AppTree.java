@@ -84,6 +84,21 @@ public interface AppTree {
 
     void updateDebugInfo(Function<JSONObject,JSONObject> updateFun);
 
+    Comparator<String> compareStrs = (s1, s2) -> {
+        int len1 = s1.length();
+        int len2 = s2.length();
+        if (len1 == len2) {return s1.compareTo(s2);}
+        return Integer.compare(len1, len2);
+    };
+
+    Comparator<AppTree> compareTrees = (t1, t2) -> {
+        int size1 = t1.size();
+        int size2 = t2.size();
+        if (size1 == size2) {return compareStrs.compare(t1.toString(), t2.toString());}
+        return Integer.compare(size1, size2);
+    };
+
+
     class Leaf implements AppTree {
         private String sym;
         private Type type;
@@ -152,9 +167,21 @@ public interface AppTree {
         @Override public void applySub(Sub sub) {type = sub.apply(type);}
         @Override public void applyTypeTransform(Function<Type, Type> tt) {type = tt.apply(type);}
 
-        @Override public String toString() {return sym;}
-        @Override public String toRawString() {return sym;}
-        public String getSym() {return sym;}
+        @Override public String toString() {
+            if (params == null) {
+                return sym;
+            } else {
+                return sym + params.toJson().toString();
+            }
+        }
+
+        @Override public String toRawString() {
+            return sym;
+        }
+
+        public String getSym() {
+            return sym;
+        }
 
         @Override
         public String toStringWithTypes() {
