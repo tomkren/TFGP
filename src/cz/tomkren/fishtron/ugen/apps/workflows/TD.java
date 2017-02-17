@@ -6,9 +6,10 @@ import cz.tomkren.fishtron.workflows.TypedDag;
 
 import java.util.function.Function;
 
-/**  Created by tom on 15. 2. 2017. */
+/** TypedDag helper interfaces for EvalLib construction
+ * Created by tom on 15. 2. 2017. */
 
-public class TD {
+class TD {
 
     public interface Op extends Value {
         Object apply(TypedDag dag);
@@ -76,14 +77,4 @@ public class TD {
         }
     }
 
-
-
-    /*Object applyTDFun2(TypedDag dag1, TypedDag dag2);
-
-    @Override
-    default Object getValue() {
-        Function<Object,Function<Object,Object>> fun =
-                (d1 -> (d2 -> applyTDFun2((TypedDag)d1,(TypedDag)d2)));
-        return fun;
-    }*/
 }

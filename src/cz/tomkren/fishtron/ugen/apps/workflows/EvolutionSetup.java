@@ -7,7 +7,7 @@ import cz.tomkren.fishtron.eva.Selection;
 import cz.tomkren.fishtron.sandbox2.BasicEvolutionOpts;
 import cz.tomkren.fishtron.sandbox2.Dag_EvalManager;
 
-
+import cz.tomkren.fishtron.sandbox2.Dag_IEvalManager;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
@@ -29,9 +29,9 @@ import java.util.function.BiFunction;
 public class EvolutionSetup {
 
     private BasicEvolutionOpts<AppTreeIndiv> opts;
-    private Dag_EvalManager<AppTreeIndiv> evalManager;
+    private Dag_IEvalManager<AppTreeIndiv> evalManager;
 
-    public EvolutionSetup(JSONObject config, Checker checker) throws XmlRpcException {
+    EvolutionSetup(JSONObject config, Checker checker) throws XmlRpcException {
 
         int numEvaluations = getInt(config,"numEvaluations", 32768);
 
@@ -55,9 +55,12 @@ public class EvolutionSetup {
         String evalServerUrl   = getString(config, "serverUrl", "http://localhost:8080/");
         String datasetFilename = getString(config, "dataset",   "winequality-white.csv");
 
-        evalManager = new Dag_EvalManager<>("get_param_sets", "get_core_count", "submit", "get_evaluated", evalServerUrl, datasetFilename);
+        //todo
+        boolean dummyFitnessMode = getBoolean(config, "dummyFitness", false);
 
-        //JSONObject allParamsInfo = DagEvaTester.testParamsInfo;
+        evalManager = new Dag_EvalManager<>("get_param_sets", "get_core_count", "submit", "get_evaluated",
+                                            evalServerUrl, datasetFilename);
+
         JSONObject allParamsInfo = evalManager.getAllParamsInfo(datasetFilename);
 
 
@@ -80,7 +83,11 @@ public class EvolutionSetup {
         );
     }
 
-    public String quitServer() {
+    public BasicEvolutionOpts<AppTreeIndiv> getOpts() {
+        return opts;
+    }
+
+    String quitServer() {
         return evalManager.quitServer();
     }
 

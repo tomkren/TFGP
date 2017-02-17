@@ -2,6 +2,7 @@ package cz.tomkren.fishtron.sandbox2;
 
 import cz.tomkren.fishtron.eva.FitIndiv;
 import cz.tomkren.fishtron.eva.FitVal;
+import cz.tomkren.fishtron.mains.DagEvaTester;
 import cz.tomkren.fishtron.workflows.TypedDag;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
@@ -33,13 +34,13 @@ public class Dag_EvalManager<Indiv extends FitIndiv> implements Dag_IEvalManager
     private Map<Integer, AB<Indiv,JSONObject>> id2indivData;
     private int nextId;
 
+    public Dag_EvalManager(String getParamSetsMethodName, String getCoreCountMethodName, String submitMethodName,
+                           String getEvaluatedMethodName, String evaluatorURL, String datasetFilename) {
 
-    public Dag_EvalManager(String getParamSetsMethodName, String getCoreCountMethodName, String submitMethodName, String getEvaluatedMethodName, String evaluatorURL, String datasetFilename) {
         this.getParamSetsMethodName = getParamSetsMethodName;
         this.getCoreCountMethodName = getCoreCountMethodName;
         this.submitMethodName = submitMethodName;
         this.getEvaluatedMethodName = getEvaluatedMethodName;
-
         this.datasetFilename = datasetFilename;
 
         //this.toJsonObject = toJsonObject;
@@ -50,9 +51,10 @@ public class Dag_EvalManager<Indiv extends FitIndiv> implements Dag_IEvalManager
     }
 
     public JSONObject getAllParamsInfo(String datasetFilename) throws XmlRpcException {
-        String json = dagEvaluator.getMethodParams(getParamSetsMethodName, datasetFilename);
-        Log.itln("allParamsInfo = "+ json);
-        return new JSONObject(json);
+        String jsonStr = dagEvaluator.getMethodParams(getParamSetsMethodName, datasetFilename);
+        JSONObject allParamsInfo = new JSONObject(jsonStr);
+        Log.itln("allParamsInfo = "+ allParamsInfo);
+        return allParamsInfo;
     }
 
     public String quitServer() {
@@ -86,7 +88,7 @@ public class Dag_EvalManager<Indiv extends FitIndiv> implements Dag_IEvalManager
             indivJson.put("id",nextId);
 
             Object indivValue = indiv.computeValue();
-            Object jsonCode = dagToJson(indivValue);
+            JSONObject jsonCode = dagToJson(indivValue);
 
             JSONObject indivDataToSubmit = F.obj(
                 "id",   nextId,

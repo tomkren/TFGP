@@ -17,7 +17,7 @@ import java.util.Random;
 
 
 
-class Params {
+public class Params {
 
     private final JSONObject paramsInfo;
     private final Map<String,Integer> selectedParamIndices;

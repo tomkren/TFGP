@@ -91,7 +91,7 @@ class Dag_JsonEvalInterface {
 
     JSONArray getEvaluated(String methodName) {
         try {
-            Checker checker = new Checker(true);
+            //Checker checker = new Checker(true);
 
             //Log.it_noln("Getting evaluated individuals back ... ");
 

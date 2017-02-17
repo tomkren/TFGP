@@ -46,6 +46,7 @@ public interface AppTree {
     void applySub(Sub sub);
     void applyTypeTransform(Function<Type,Type> tt);
     String toRawString();
+    String toShortString();
     String toStringWithTypes();
 
     AB<Boolean,Integer> isStrictlyWellTyped(Map<String, Type> gammaMap, int nextVarId);
@@ -123,6 +124,10 @@ public interface AppTree {
             return params != null;
         }
 
+        public Params getParams() {
+            return params;
+        }
+
         @Override
         public AppTree randomizeParams(JSONObject allParamsInfo, Random rand) {
             JSONObject paramsInfo = allParamsInfo.has(sym) ? allParamsInfo.getJSONObject(sym) : null;
@@ -175,7 +180,12 @@ public interface AppTree {
             }
         }
 
-        @Override public String toRawString() {
+        @Override
+        public String toRawString() {
+            return sym;
+        }
+
+        public String toShortString() {
             return sym;
         }
 
@@ -365,6 +375,13 @@ public interface AppTree {
         public String toString() {
             AB<AppTree.Leaf,List<AppTree>> p = getFunLeafWithArgs();
             return "("+p._1()+" "+ Joiner.on(' ').join(p._2())+")";
+        }
+
+        public String toShortString() {
+            AB<AppTree.Leaf,List<AppTree>> p = getFunLeafWithArgs();
+            String head = p._1().toShortString();
+            List<String> tail = F.map(p._2(), AppTree::toShortString);
+            return "("+head+" "+ Joiner.on(' ').join(tail)+")";
         }
 
         private AB<Leaf,List<AppTree>> getFunLeafWithArgs() {

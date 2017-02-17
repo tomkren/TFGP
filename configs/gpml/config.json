@@ -1,0 +1,25 @@
+{
+
+  "dummyFitness": true,
+
+  "serverUrl" : "http://127.0.0.1:8080",
+  "dataset" : "winequality-white.csv",
+  "killServer": true,
+
+  "numEvaluations": 32768,
+  "numIndividualsToGenerate": 256,
+  "minPopulationSizeToOperate": 64,
+  "maxPopulationSize": 512,
+
+  "generatingMaxTreeSize":  20,
+
+  "tournamentBetterWinsProbability" : 0.8,
+  "saveBest" : true,
+
+  "operators" : [
+    {"name": "basicTypedXover", "probability": 0.4 , "maxTreeSize": 50},
+    {"name": "sameSizeSubtreeMutation", "probability": 0.3, "maxSubtreeSize": 20},
+    {"name": "oneParamMutation", "probability" : 0.3, "shiftsWithProbabilities": [[-2, 0.1], [-1, 0.4], [1, 0.4], [2, 0.1]]}
+  ]
+
+}

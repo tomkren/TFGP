@@ -82,6 +82,14 @@ public class Workflows {
             "booEnd",      mkMethod("booEnd")
     );
 
+    private static EvalCode mkMethod(String name) {
+        return (params,type) -> {
+            AA<Type> p = getDagInOutTypes(type);
+            JSONObject jsonParams = params == null ? new JSONObject() : params.toJson();
+            return new TypedDag(name, p._1(), p._2(), jsonParams, null);
+        };
+    }
+
     private static AA<Type> getDagInOutTypes(Type type) {
         if (type instanceof TypeTerm) {
             TypeTerm tt = (TypeTerm) type;
@@ -94,29 +102,13 @@ public class Workflows {
     }
 
 
-    private static EvalCode mkMethod(String name) {
-        return t -> {
-            AA<Type> p = getDagInOutTypes(t);
-            //Log.it(p);
-            return new TypedDag(name, p._1(), p._2());
-        };
-    }
-
-    private static TypedDag mkSVC(JSONObject params) {
-        return new TypedDag("SVC", D, LD, params, null);
-    }
-
-
+    // -- Testing ----------------------------------
 
     private static void test_evaluating(int k_max) {
         Checker ch = new Checker();
-
         EvalTester.testLib(ch, k_max, lib, gamma, goal, true, dag -> ((TypedDag)dag).toJson());
-
         ch.results();
     }
-
-
 
     private static void test_generating() {
         Checker ch = new Checker();
@@ -173,17 +165,15 @@ public class Workflows {
 
                 double meanGenOneTime = sumGenOneTime / numToGenerate;
 
-                Log.it( k +"\t\t\t| "+
-                        num + " \t\t\t| "+
+                Log.it( k +"\t\t\t| "+ num + " \t\t\t| "+
                         F.prettyDouble(buildTime, 3)+ " s   \t| "+
                         F.prettyDouble(meanGenOneTime, 3)+" s");
 
 
 
             } else {
-                Log.it(k +"\t\t\t| "+
-                       num + " \t\t\t| "+
-                       F.prettyDouble(buildTime, 3)+ " s   \t|");
+                Log.it( k +"\t\t\t| "+ num + " \t\t\t| "+
+                        F.prettyDouble(buildTime, 3)+ " s   \t|");
             }
 
 

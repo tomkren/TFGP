@@ -32,7 +32,7 @@ public class EvalLib {
             }
 
             String sym = (String) key;
-            EvalCode code = (val instanceof EvalCode) ? (EvalCode) val : t -> val;
+            EvalCode code = (val instanceof EvalCode) ? (EvalCode) val : (p,t) -> val;
 
             codes.put(sym, code);
         }
@@ -58,7 +58,7 @@ public class EvalLib {
             throw new Error("Undefined symbol "+sym+".");
         }
 
-        return code.evalCode(leaf.getType());
+        return code.evalCode(leaf.getParams(), leaf.getType());
     }
 
     @SuppressWarnings("unchecked")
