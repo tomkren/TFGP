@@ -22,6 +22,8 @@ public class Evolution<Indiv extends FitIndiv> {
     private int numSentIndividuals;
     private int numEvaluatedIndividuals;
 
+    private long startTime;
+
     public Evolution(EvolutionOpts<Indiv> opts, Logger<Indiv> logger) {
         this.opts = opts;
         this.logger = logger;
@@ -32,6 +34,7 @@ public class Evolution<Indiv extends FitIndiv> {
     // -- ITERATIVE EVOLUTION ------------------------------------------------------------------------
 
     public void startIterativeEvolution(int run) {
+        startTime = System.nanoTime();
         checkOptions_IE();
 
         makeEmptyPopulation();
@@ -56,7 +59,6 @@ public class Evolution<Indiv extends FitIndiv> {
             if (evalResult.isEmpty()) {
                 F.sleep(sleepTime);
             }
-
         }
 
     }
@@ -89,8 +91,13 @@ public class Evolution<Indiv extends FitIndiv> {
         }
     }
 
+    private boolean isEvaluationUnfinished_IE() {
+        double runTimeInSeconds = (System.nanoTime()-startTime)/1E9;
+        boolean stillSomeTime = opts.getTimeLimit() - runTimeInSeconds > 0.0;
+        return stillSomeTime && numEvaluatedIndividuals < opts.getNumEvaluations();
+    }
+
     private boolean isGeneratingNeeded_IE() {return numSentIndividuals < opts.getNumIndividualsToGenerate();}
-    private boolean isEvaluationUnfinished_IE() {return numEvaluatedIndividuals < opts.getNumEvaluations();}
     private boolean isSendingNeeded_IE() {return numSentIndividuals < opts.getNumEvaluations();}
     private boolean isPopulationLargeEnoughForOperating_IE() {
         return numEvaluatedIndividuals >= opts.getMinPopulationSizeToOperate();

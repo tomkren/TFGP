@@ -16,6 +16,7 @@ public interface EvolutionOpts<Indiv extends FitIndiv> {
     int getMaxPopulationSize();
     boolean isUniquenessCheckPerform();
     boolean saveBest();
+    int getTimeLimit(); // in seconds
 
     // Generator
     IndivGenerator<Indiv> getGenerator();

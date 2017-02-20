@@ -60,7 +60,7 @@ public class YampaAnt2 {
 
 
         EvolutionOpts<PolyTree> opts = new BasicEvolutionOpts<>(
-                numGens*popSize, popSize/2, popSize, 4*popSize, true, true,
+                numGens*popSize, popSize/2, popSize, 4*popSize, true, true, -1,
                 generator, eval, tournament7, operators, r
         );
 

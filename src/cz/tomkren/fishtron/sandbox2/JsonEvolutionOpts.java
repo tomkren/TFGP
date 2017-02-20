@@ -123,11 +123,11 @@ public class JsonEvolutionOpts implements EvolutionOpts<PolyTree>  {
 
         }
 
-
+        int timeLimit = getInt(config, "timeLimit", -1);
 
         opts = new BasicEvolutionOpts<>(
                 numEvaluations, minPopulationSizeToOperate, numIndividualsToGenerate, maxPopulationSize, isUniquenessCheckPerformed, saveBest,
-                generator, evalManager, parentSelection, operators, rand);
+                timeLimit, generator, evalManager, parentSelection, operators, rand);
     }
 
     private Distribution<Operator<PolyTree>> mkOperators_oldSchool(JSONObject config, Random rand, QuerySolver qs) {
@@ -244,6 +244,7 @@ public class JsonEvolutionOpts implements EvolutionOpts<PolyTree>  {
     @Override public int getMaxPopulationSize()                      {return opts.getMaxPopulationSize();}
     @Override public boolean isUniquenessCheckPerform()              {return opts.isUniquenessCheckPerform();}
     @Override public boolean saveBest()                              {return opts.saveBest();}
+    @Override public int getTimeLimit()                              {return opts.getTimeLimit();}
     @Override public IndivGenerator<PolyTree> getGenerator()         {return opts.getGenerator();}
     @Override public EvalManager<PolyTree> getEvalManager()          {return opts.getEvalManager();}
     @Override public Selection<PolyTree> getParentSelection()        {return opts.getParentSelection();}

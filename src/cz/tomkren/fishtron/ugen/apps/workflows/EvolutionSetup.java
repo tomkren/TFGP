@@ -55,11 +55,15 @@ public class EvolutionSetup {
         String evalServerUrl   = getString(config, "serverUrl", "http://localhost:8080/");
         String datasetFilename = getString(config, "dataset",   "winequality-white.csv");
 
-        //todo
+        int timeLimit = getInt(config, "timeLimit", -1);
+
         boolean dummyFitnessMode = getBoolean(config, "dummyFitness", false);
 
-        evalManager = new Dag_EvalManager<>("get_param_sets", "get_core_count", "submit", "get_evaluated",
-                                            evalServerUrl, datasetFilename);
+        if (dummyFitnessMode) {
+            evalManager = new DummyManager<>();
+        } else {
+            evalManager = new Dag_EvalManager<>("get_param_sets", "get_core_count", "submit", "get_evaluated", evalServerUrl, datasetFilename);
+        }
 
         JSONObject allParamsInfo = evalManager.getAllParamsInfo(datasetFilename);
 
@@ -78,7 +82,7 @@ public class EvolutionSetup {
         operators = GenOpFactory.mkOperators(operatorsConfig, rand, gen, allParamsInfo);
 
         opts = new BasicEvolutionOpts<>(
-                numEvaluations, minPopToOperate, numToGen, maxPopSize, isUniquenessCheckedPerformed, saveBest,
+                numEvaluations, minPopToOperate, numToGen, maxPopSize, isUniquenessCheckedPerformed, saveBest, timeLimit,
                 generator, evalManager, parentSelection, operators, rand
         );
     }

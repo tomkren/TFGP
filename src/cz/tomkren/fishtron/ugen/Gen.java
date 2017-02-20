@@ -78,7 +78,15 @@ public class Gen {
         nf.denormalizeIf(res._1());
 
         // todo pozor spadne z nějakyho duvodu, když dám uplne nahoře typ "n", viz eval tester (imho nic vážnýho ale vyřešit)
-        if (!Types.isSameType(res._1().getType(), rawType)) {
+        // TODO Taky už při dummy běhu evoluce jednou spadlo, ale zjistil jsem že to byly jen renamingy, tak jsem to zvolnil
+        // TODO proto pořádně promyslet až bude čas jestli je to ok aby to přemenovalo ten typ...
+        // bylo to swe seedem -8674298408011838851, ale těžko říct esli to do ty doby nerozvrtam že už to nereplikuje
+        if (!Types.isRenamedType(res._1().getType(), rawType)) {
+
+            Log.it("!!! VS:");
+            Log.it(res._1().getType());
+            Log.it(rawType);
+
             throw new Error("Result tree hasn't the input rawType.");
         }
 
