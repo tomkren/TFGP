@@ -3,7 +3,7 @@
   "serverUrl" : "http://127.0.0.1:8080",
   "dataset" : "winequality-white.csv",
   "killServer": true,
-  "dummyFitness": true,
+  "dummyFitness": false,
 
   "timeLimit": 14400,
 

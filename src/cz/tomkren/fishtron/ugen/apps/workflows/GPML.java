@@ -21,7 +21,7 @@ import cz.tomkren.utils.Log;
 
 public class GPML {
 
-    private static final String version = "1.0.1";
+    private static final String version = "1.0.2";
 
     private static void run(String jsonConfigFilename, String logPath) throws JSONException, IOException, XmlRpcException {
         Log.it("Program arguments:");
@@ -39,7 +39,6 @@ public class GPML {
         Logger<AppTreeIndiv> dagLogger = new DagLogger(config, logPath, checker, opts);
 
         Log.it("Config [OK] ...");
-        Log.it("Generating initial population...");
 
         Evolution<AppTreeIndiv> eva = new Evolution<>(opts, dagLogger);
         eva.startIterativeEvolution(1);

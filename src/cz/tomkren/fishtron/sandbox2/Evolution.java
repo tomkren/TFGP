@@ -3,6 +3,7 @@ package cz.tomkren.fishtron.sandbox2;
 import cz.tomkren.fishtron.eva.*;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
+import cz.tomkren.utils.Log;
 import org.json.JSONObject;
 
 import java.util.*;
@@ -197,6 +198,8 @@ public class Evolution<Indiv extends FitIndiv> {
         int evaluatorCapabilities = evalResult == null ? opts.getEvalManager().getEvalPoolSize(yetToGenerate)
                 : evalResult.getNumEvaluatedIndividuals();
         int numToGenerate = Math.max(evaluatorCapabilities, yetToGenerate);
+
+        Log.it("Generating initial population...");
 
         List<Indiv> genIndivs = opts.getGenerator().generate(numToGenerate);
         return F.map(genIndivs, indiv -> new AB<>(indiv, mkIndivJson_forGenerated()));
