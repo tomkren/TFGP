@@ -21,6 +21,8 @@ import cz.tomkren.utils.Log;
 
 public class GPML {
 
+    private static final String version = "1.0.1";
+
     private static void run(String jsonConfigFilename, String logPath) throws JSONException, IOException, XmlRpcException {
         Log.it("Program arguments:");
         Log.it("  jsonConfigFileName : " + jsonConfigFilename);
@@ -51,7 +53,7 @@ public class GPML {
     }
 
     public static void main(String[] args) {
-        Log.it("GP-ML [v 1.0.1 beta]");
+        Log.it("GP-ML [v "+version+"]");
 
         if (args.length < 2 || args[0].equals("--help")) {
             Log.it("You must provide two program arguments: <json-config-filename> <log-dir-path>");

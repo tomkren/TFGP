@@ -1,1 +1,1 @@
-java -jar dageva2.jar config.json logs
+java -jar gpml.jar config.json logs
