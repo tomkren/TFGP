@@ -1,6 +1,11 @@
 package cz.tomkren.fishtron.ugen.eval;
 
 import cz.tomkren.fishtron.ugen.AppTree;
+import cz.tomkren.utils.AB;
+import cz.tomkren.utils.F;
+import cz.tomkren.utils.TODO;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.*;
 import java.util.function.Function;
@@ -11,31 +16,62 @@ public class EvalLib {
 
     private Map<String,EvalCode> codes;
 
-    public static EvalLib mk(Object... args) {
-        return new EvalLib(Arrays.asList(args));
+    private EvalLib(List<AB<String,Object>> defs) {
+        codes = new HashMap<>();
+        for (AB<String,Object> def : defs) {
+            String sym = def._1();
+            Object val = def._2();
+            EvalCode code = (val instanceof EvalCode) ? (EvalCode) val : (p,t) -> val;
+            codes.put(sym, code);
+        }
     }
 
-    private EvalLib(List<Object> args) {
+    private EvalLib(EvalLib lib1, EvalLib lib2) {
+        codes = new HashMap<>(lib1.codes.size() + lib2.codes.size());
+        codes.putAll(lib1.codes);
+        codes.putAll(lib2.codes);
+    }
 
-        codes = new HashMap<>();
+
+    public static EvalLib union(EvalLib lib1, EvalLib lib2) {
+        return new EvalLib(lib1, lib2);
+    }
+
+    public static EvalLib mk(JSONArray symbols, Function<String,Object> mkCodeFun) {
+        List<AB<String,Object>> defs;
+
+        defs = F.map(symbols, o -> {
+            if (!(o instanceof String)) {throw new Error("symbols must be strings!");}
+            String sym = (String) o;
+            return AB.mk(sym, mkCodeFun.apply(sym));
+        });
+
+        return new EvalLib(defs);
+    }
+
+    public static EvalLib mk(Object... args) {
+        return mk(Arrays.asList(args));
+    }
+
+    private static EvalLib mk(List<Object> args) {
 
         if (args.size() % 2 != 0) {
             throw new Error("There must be an even number of args.");
         }
 
+        List<AB<String,Object>> defs = new ArrayList<>(args.size() / 2);
+
         for (int i = 0; i < args.size(); i+=2) {
             Object key = args.get(i);
             Object val = args.get(i+1);
 
-            if (!(key instanceof String)) {
-                throw new Error("Arg on index "+i+" is not a String.");
-            }
+            if (!(key instanceof String)) {throw new Error("Arg on index "+i+" is not a String.");}
 
             String sym = (String) key;
-            EvalCode code = (val instanceof EvalCode) ? (EvalCode) val : (p,t) -> val;
-
-            codes.put(sym, code);
+            defs.add(AB.mk(sym, val));
         }
+
+        return new EvalLib(defs);
     }
 
     public Object eval(AppTree tree) {
@@ -74,4 +110,5 @@ public class EvalLib {
 
         return fun.apply(argObject);
     }
+
 }

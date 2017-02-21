@@ -10,6 +10,7 @@ import cz.tomkren.fishtron.ugen.eval.*;
 import cz.tomkren.fishtron.workflows.MyList;
 import cz.tomkren.fishtron.workflows.TypedDag;
 import cz.tomkren.utils.*;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.math.BigInteger;
@@ -23,6 +24,8 @@ public class Workflows {
     public static void main(String[] args) {
         //test_generating();
         test_evaluating(64);
+
+        //test_dynamicMagic();
     }
 
     public static final Type  goal  = Types.parse("Dag D LD");
@@ -53,8 +56,6 @@ public class Workflows {
     );
 
     private static final Type Dag = Types.parse("Dag");
-    private static final Type D   = Types.parse("D");
-    private static final Type LD  = Types.parse("LD");
 
     public static final EvalLib lib = EvalLib.mk(
             "dia",        (TD.Op3) TypedDag::dia,
@@ -82,6 +83,16 @@ public class Workflows {
             "booEnd",      mkMethod("booEnd")
     );
 
+    private static EvalLib mkLib(JSONObject workflowsConfig) {
+
+        JSONArray methodNames = workflowsConfig.getJSONArray("methods");
+
+
+        EvalLib evalLib = EvalLib.mk(methodNames, Workflows::mkMethod);
+
+        throw new TODO();
+    }
+
     private static EvalCode mkMethod(String name) {
         return (params,type) -> {
             AA<Type> p = getDagInOutTypes(type);
@@ -103,6 +114,15 @@ public class Workflows {
 
 
     // -- Testing ----------------------------------
+
+
+    private static void test_dynamicMagic() {
+        JSONObject code = F.obj(
+                "cast", "cz.tomkren.fishtron.ugen.apps.workflows.TD.Op3",
+                "method", "cz.tomkren.fishtron.workflows.TypedDag.dia"
+        );
+        // todo....
+    }
 
     private static void test_evaluating(int k_max) {
         Checker ch = new Checker();

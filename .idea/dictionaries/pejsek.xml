@@ -2,12 +2,14 @@
   <dictionary name="pejsek">
     <words>
       <w>dataset</w>
+      <w>defs</w>
       <w>evals</w>
       <w>evolver</w>
       <w>indiv</w>
       <w>indivs</w>
       <w>jsons</w>
       <w>lclass</w>
+      <w>preprocesing</w>
       <w>xover</w>
       <w>zakomentovat</w>
       <w>zakomentováno</w>
