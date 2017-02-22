@@ -21,7 +21,7 @@ import cz.tomkren.utils.Log;
 
 public class GPML {
 
-    private static final String version = "1.0.3";
+    private static final String version = "1.0.4";
 
     private static void run(String jsonConfigFilename, String logPath) throws JSONException, IOException, XmlRpcException {
         Log.it("Program arguments:");
@@ -51,6 +51,8 @@ public class GPML {
         checker.results();
     }
 
+    private static int numRestarts = 0;
+
     public static void main(String[] args) {
         Log.it("GP-ML [v "+version+"]");
 
@@ -69,11 +71,20 @@ public class GPML {
         } catch (IOException e) {
             Log.itln("Config file error: "+e.getMessage());
         } catch (XmlRpcException e) {
-            long sleepTime = 5000;
+
             Log.it("Dag-evaluate server error: Server is probably not running, or it is starting right now..");
-            Log.it("Sleeping for "+ (sleepTime/1000) +" seconds...");
-            F.sleep(sleepTime);
-            main(args);
+
+            int maxTries = 10;
+            if (numRestarts < maxTries) {
+                numRestarts ++;
+                long sleepTime = 6000;
+                Log.it("Sleeping for "+ (sleepTime/1000) +" seconds... (try "+numRestarts+"/"+maxTries+")");
+                F.sleep(sleepTime);
+                main(args);
+            } else {
+                Log.it("Shutting down.");
+            }
+
         }
     }
 
