@@ -3,6 +3,7 @@
     <words>
       <w>dataset</w>
       <w>defs</w>
+      <w>disj</w>
       <w>evals</w>
       <w>evolver</w>
       <w>indiv</w>
@@ -10,6 +11,7 @@
       <w>jsons</w>
       <w>lclass</w>
       <w>preprocesing</w>
+      <w>preprocessing</w>
       <w>xover</w>
       <w>zakomentovat</w>
       <w>zakomentováno</w>

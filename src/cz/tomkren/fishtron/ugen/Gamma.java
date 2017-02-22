@@ -15,8 +15,24 @@ public class Gamma {
 
     private final List<AB<String, Type>> gamma;
 
-    private Gamma(List<AB<String, Type>> gamma) {
+    public Gamma(List<AB<String, Type>> gamma) {
         this.gamma = gamma;
+    }
+
+    private Gamma(List<Gamma> gammas, boolean checkUniqueness /*todo*/) {
+        int size = F.sumInt(F.map(gammas, g -> g.gamma.size()));
+        gamma = new ArrayList<>(size);
+        for (Gamma g : gammas) {
+            gamma.addAll(g.gamma);
+        }
+    }
+
+    public static Gamma union(List<Gamma> gammas) {
+        return new Gamma(gammas, true);
+    }
+
+    public int size() {
+        return gamma.size();
     }
 
     public List<AB<String, Type>> getSymbols() {

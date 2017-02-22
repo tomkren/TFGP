@@ -21,6 +21,16 @@
     {"name": "basicTypedXover", "probability": 0.4 , "maxTreeSize": 128},
     {"name": "sameSizeSubtreeMutation", "probability": 0.3, "maxSubtreeSize": 32},
     {"name": "oneParamMutation", "probability" : 0.3, "shiftsWithProbabilities": [[-2, 0.1], [-1, 0.4], [1, 0.4], [2, 0.1]]}
-  ]
+  ],
+
+  "methods": {
+    "basic": ["SVC", "logR", "gaussianNB", "DT", "Perceptron", "SGD", "PAC", "LDA", "QDA", "MLP"],
+    "preprocessing": ["PCA", "kBest"],
+    "splitter_disjoint": ["kMeans"],
+    "splitter_copy": ["copy"],
+    "merger": ["vote"],
+    "stacking": true,
+    "boosting": true
+  }
 
 }

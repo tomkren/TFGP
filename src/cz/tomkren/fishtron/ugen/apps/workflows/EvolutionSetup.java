@@ -15,8 +15,10 @@ import cz.tomkren.fishtron.ugen.eva.AppTreeIndiv;
 import cz.tomkren.fishtron.ugen.eva.AppTreeIndivGenerator;
 import cz.tomkren.fishtron.ugen.eva.GenOpFactory;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
+import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Checker;
 
+import cz.tomkren.utils.Log;
 import org.apache.xmlrpc.XmlRpcException;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -68,9 +70,16 @@ public class EvolutionSetup {
         JSONObject allParamsInfo = evalManager.getAllParamsInfo(datasetFilename);
 
 
-        Type goal   = Workflows.goal;
-        Gamma gamma = Workflows.gamma;
-        EvalLib lib = Workflows.lib;
+        Type goal = Workflows.goal;
+
+        JSONObject methods = config.getJSONObject("methods"); // TODO dát defaultní
+
+        AB<EvalLib,Gamma> libAndGamma = Workflows.mkLibAndGamma(methods);
+
+        EvalLib lib = libAndGamma._1(); //Workflows.lib;
+        Gamma gamma = libAndGamma._2(); //Workflows.gamma;
+
+        Log.it("Gamma = \n"+gamma);
 
         Gen gen = new Gen(gamma, rand);
 

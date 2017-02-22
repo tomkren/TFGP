@@ -24,10 +24,13 @@
   ],
 
   "methods": {
-    "basic": ["SVC", "logR", "gaussianNB", "DT"],
-    "preprocesing": ["PCA", "kBest"],
-    "splitter": ["kMeans", "copy"],
-    "merger": ["vote"]
+    "basic": ["SVC", "logR", "gaussianNB", "DT", "Perceptron", "SGD", "PAC", "LDA", "QDA", "MLP"],
+    "preprocessing": ["PCA", "kBest"],
+    "splitter_disjoint": ["kMeans"],
+    "splitter_copy": ["copy"],
+    "merger": ["vote"],
+    "stacking": true,
+    "boosting": true
   }
 
 }

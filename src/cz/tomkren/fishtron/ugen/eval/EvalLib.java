@@ -27,14 +27,33 @@ public class EvalLib {
     }
 
     private EvalLib(EvalLib lib1, EvalLib lib2) {
-        codes = new HashMap<>(lib1.codes.size() + lib2.codes.size());
+        codes = new HashMap<>(lib1.size() + lib2.size());
         codes.putAll(lib1.codes);
         codes.putAll(lib2.codes);
     }
 
+    private EvalLib(List<EvalLib> libs, boolean checkUniqueness /*todo*/) {
+        int size = F.sumInt(F.map(libs, EvalLib::size));
+        codes = new HashMap<>(size);
+        for (EvalLib lib : libs) {
+            codes.putAll(lib.codes);
+        }
+    }
 
     public static EvalLib union(EvalLib lib1, EvalLib lib2) {
         return new EvalLib(lib1, lib2);
+    }
+
+    public static EvalLib union(List<EvalLib> libs) {
+        return new EvalLib(libs, true);
+    }
+
+    public int size() {
+        return codes.size();
+    }
+
+    public boolean contains(String sym) {
+        return codes.containsKey(sym);
     }
 
     public static EvalLib mk(JSONArray symbols, Function<String,Object> mkCodeFun) {

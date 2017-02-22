@@ -55,6 +55,27 @@ public class Workflows {
             "booEnd",     "Dag Boo LD"
     );
 
+    private static final Gamma gamma_general = Gamma.mk(
+            "dia",        "(Dag D D) -> ((Dag D (V LD n an)) -> ((Dag (V LD n an) LD) -> (Dag D LD)))",
+            "dia0",       "(Dag D (V LD n an)) -> ((Dag (V LD n an) LD) -> (Dag D LD))",
+            "split",      "(Dag D (V D n an)) -> ((V (Dag D LD) n an) -> (Dag D (V LD n an)))",
+            "cons",       "a -> ((V a n an) -> (V a (S n) an))",
+            "nil",        "V a 0 an"
+    );
+
+    private static final Gamma gamma_stacking = Gamma.mk(
+            "stacking",   "(Dag (V LD n Copy) D) -> ((Dag D LD) -> (Dag (V LD n Copy) LD))",
+            "stacker",    "Dag (V LD (S(S n)) Copy) D"
+    );
+
+    private static final Gamma gamma_boosting = Gamma.mk(
+            "boosting",   "(Dag D Boo) -> ((V (Dag Boo Boo) (S(S n)) an) -> ((Dag Boo LD) -> (Dag D LD)))",
+            "booBegin",   "Dag D Boo",
+            "booster",    "(Dag D LD) -> (Dag Boo Boo)",
+            "booEnd",     "Dag Boo LD"
+    );
+
+
     private static final Type Dag = Types.parse("Dag");
 
     public static final EvalLib lib = EvalLib.mk(
@@ -83,14 +104,88 @@ public class Workflows {
             "booEnd",      mkMethod("booEnd")
     );
 
-    private static EvalLib mkLib(JSONObject workflowsConfig) {
+    private static final EvalLib lib_general = EvalLib.mk(
+            "dia",        (TD.Op3) TypedDag::dia,
+            "dia0",       (TD.Op2) TypedDag::dia0,
+            "split",      (TD.DL)  TypedDag::split,
+            "cons",       (TD.OL)  MyList::cons,
+            "nil",        MyList.NIL
+    );
 
-        JSONArray methodNames = workflowsConfig.getJSONArray("methods");
+    private static final EvalLib lib_stacking = EvalLib.mk(
+            "stacking",    (TD.Op2) TypedDag::stacking,
+            "stacker",     mkMethod("stacker")
+    );
 
+    private static final EvalLib lib_boosting = EvalLib.mk(
+            "boosting",    (TD.DLD) TypedDag::boosting,
+            "booBegin",    mkMethod("booBegin"),
+            "booster",     (TD.Op) TypedDag::booster,
+            "booEnd",      mkMethod("booEnd")
+    );
 
-        EvalLib evalLib = EvalLib.mk(methodNames, Workflows::mkMethod);
+    public static AB<EvalLib,Gamma> mkLibAndGamma(JSONObject methods) {
 
-        throw new TODO();
+        //JSONObject methods = workflowsConfig.getJSONObject("methods");
+
+        List<EvalLib> libs = new ArrayList<>();
+        List<Gamma> gammas = new ArrayList<>();
+
+        addAndCheck(lib_general, gamma_general, libs, gammas);
+
+        addLibAndGamma(methods, "basic", "Dag D LD", libs, gammas);
+        addLibAndGamma(methods, "preprocessing", "Dag D D", libs, gammas);
+        addLibAndGamma(methods, "splitter_disjoint", "Dag D (V D (S(S n)) Disj)", libs, gammas);
+        addLibAndGamma(methods, "splitter_copy", "Dag D (V D (S(S n)) Copy)", libs, gammas);
+        addLibAndGamma(methods, "merger", "Dag (V LD (S(S n)) an) LD", libs, gammas);
+
+        if (methods.getBoolean("stacking")) {
+            addAndCheck(lib_stacking, gamma_stacking, libs, gammas);
+        }
+
+        if (methods.getBoolean("boosting")) {
+            addAndCheck(lib_boosting, gamma_boosting, libs, gammas);
+        }
+
+        EvalLib unionLib = EvalLib.union(libs);
+        Gamma unionGamma = Gamma.union(gammas);
+
+        return AB.mk(unionLib, unionGamma);
+    }
+
+    private static void addLibAndGamma(JSONObject methods, String groupName, String typeStr,
+                                       List<EvalLib> libs, List<Gamma> gammas) {
+        JSONArray names = methods.getJSONArray(groupName);
+        EvalLib lib = EvalLib.mk(names, Workflows::mkMethod);
+
+        Type commonType = Types.parse(typeStr);
+
+        List<AB<String,Type>> gammaList = F.map(names, o -> {
+            if (!(o instanceof String)) {throw new Error("symbols must be strings!");}
+            String sym = (String) o;
+            return AB.mk(sym, commonType);
+        });
+
+        Gamma gamma = new Gamma(gammaList);
+
+        addAndCheck(lib, gamma, libs, gammas);
+    }
+
+    private static void addAndCheck(EvalLib lib, Gamma gamma, List<EvalLib> libs, List<Gamma> gammas) {
+
+        if (lib.size() != gamma.size()) {
+            throw new Error("lib size and gamma size must be equal!");
+        }
+
+        for (AB<String,Type> p : gamma.getSymbols()) {
+            String sym = p._1();
+            if (!lib.contains(sym)) {
+                throw new Error("lib does not contain symbol "+sym+", which is in the gamma!");
+            }
+        }
+
+        libs.add(lib);
+        gammas.add(gamma);
     }
 
     private static EvalCode mkMethod(String name) {
