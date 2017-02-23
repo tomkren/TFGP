@@ -8,8 +8,8 @@ import cz.tomkren.fishtron.sandbox2.EvalResult;
 import cz.tomkren.fishtron.workflows.TypedDag;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
-import cz.tomkren.utils.TODO;
 import org.apache.xmlrpc.XmlRpcException;
+import org.eclipse.jetty.util.ArrayQueue;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -20,13 +20,13 @@ import java.util.*;
 public class DummyManager<Indiv extends FitIndiv> implements Dag_IEvalManager<Indiv> {
 
 
-    private Stack<JSONObject> zasobnikNaVyhodnoceni;
+    private Queue<JSONObject> frontaNaVyhodnoceni;
 
     private Map<Integer, AB<Indiv,JSONObject>> id2indivData;
     private int nextId;
 
     DummyManager() {
-        zasobnikNaVyhodnoceni = new Stack<>();
+        frontaNaVyhodnoceni = new ArrayQueue<>();
 
         id2indivData = new HashMap<>();
         nextId = 0;
@@ -73,14 +73,14 @@ public class DummyManager<Indiv extends FitIndiv> implements Dag_IEvalManager<In
 
         List<JSONObject> listIndivs = F.map(jsonIndivs, x->(JSONObject) x);
 
-        zasobnikNaVyhodnoceni.addAll(listIndivs);
+        frontaNaVyhodnoceni.addAll(listIndivs);
 
         return "FAKE SUBMIT SUCCESSFUL";
     }
 
     private JSONArray fakeGetEvaluated() {
 
-        JSONObject submittedIndivData = zasobnikNaVyhodnoceni.pop();
+        JSONObject submittedIndivData = frontaNaVyhodnoceni.poll();
 
         int id = submittedIndivData.getInt("id");
         JSONObject indivDagJson = submittedIndivData.getJSONObject("code");

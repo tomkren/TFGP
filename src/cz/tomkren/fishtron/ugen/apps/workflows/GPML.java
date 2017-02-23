@@ -21,7 +21,7 @@ import cz.tomkren.utils.Log;
 
 public class GPML {
 
-    private static final String version = "1.0.4";
+    private static final String version = "1.0.5";
 
     private static void run(String jsonConfigFilename, String logPath) throws JSONException, IOException, XmlRpcException {
         Log.it("Program arguments:");
