@@ -65,6 +65,8 @@
 
 \section{Osnova}
 
+\subsection{Mantry}
+
 \textbf{Jak to napsat?}
 
 - Jako bych psal TFGP blogísek, todle je trénink.
@@ -73,7 +75,7 @@
 
 ~\\
 
-\subsection{Halabala témata}
+\subsection{High-level osnova}
 
 \textbf{Problém popisu dagů} : 
 
@@ -133,7 +135,7 @@ Dosud jsme popsali co je cílem tvořit, ted popíšem jak na to jdeme.
 
 ~\\
 
-\textbf{Obecnej výhled osnovy}:
+\subsection{Low-level osnova}
 
 - Čim začít: 
 Co je to ml workflow. 
@@ -171,10 +173,98 @@ Dagy reprezentujeme jako výrazy.
 ~\\
 
 
-\section{Individual representation}
+\section{Our approach}
 
-\section{Generating}
+\red{Nasleduje rozdelana verze our approache, jeste to budu dost menit, tak se nelekejte, nebude tam tolik nadpisu nebude tam nic cesky atd.}
 
+\subsection{Individual representation}
+
+\subsubsection{What is a machine learning workflow?}
+Let us start with brief clarification of what we mean by term machine learning workflow. We can distinguish two kinds of machine learning methods: basic and combined. The basic methods are particular \textit{named} methods such as specific classification, regression, clustering, preprocessing or voting algorithms. On the other hand, the combined methods are \textit{anonymous} results of combining several basic methods into one compound by means of some specific ensemble method (such as stacking or boosting) or by simply putting outputs of one method as inputs to other ones. We call these combined method \textit{machine learning workflows}.
+
+\subsubsection{ML workflows as graphs}
+ML workflows are naturally representable as directed graphs; vertices represent basic methods and edges represent flows of data.
+Figure xxx. shows an example of such a workflow containing all above mentioned kinds of basic methods and ensembles.
+[Example picture with everything]
+To train and evaluate a significant number of such workflows - which may possibly be rather huge beasts -  presents a seriously time consuming task (thanks especially to nested cross-validations). Therefore we decided to take into account only workflows without cycles in their graph, i.e. directed acyclic graphs (DAGs). Doing so we limit the training and evaluation time by limiting the size of generated workflows, since the evaluation time of a DAG workflow is reasonably proportional to the number of basic methods.
+
+\subsubsection{DAG combinators}
+
+The DAG representation is an intermediate representation of a workflow. 
+
+During the evolution we need to generate and manipulate the workflow individuals. Rather than direct manipulation of the DAGs we prefer an indirect tree representation. From the evolution point of view the individuals are program expressions that may be  evaluated to give a value. This value is a JSON representation of the DAG encoding a ML workflow. This JSON value serves as a blueprint from which the actual ML workflow is build.
+
+Our approach to constructing the workflow DAGs is based on strongly typed pure functional programming style. In the terms of classical genetic programming, one specifies a library from which the syntactic trees of program individuals are build by specifying a set of terminals (leaf symbols) and a set of functions (interior function symbols). Roughly speaking, we may say that our terminal set consists of basic methods and function set consists of dag combinators; operators that connect two or more smaller DAGs in a single more complicated one by some kind of serial or parallel composition. A careful reader may spot that some high-orderism is in order here, since basic methods are basically functions, thus DAG combinators are functions over functions, i.e. higher-order functions.
+
+We see three major benefits of the tree representation of individuals in comparison with a more direct representation:
+
+(1) Trees are simple yet rich enough structures to support natural ways of substructure manipulation satisfying recombination needs of evolution driven search. Most notably in a cross-over operator. 
+
+(2) Extensibility. Functional programming - simple yet powerful tool for writing extensible programs. 
+
+(3) Satisfaction of semantically imposed constraints. Because not all the possible DAGs are meaningful ML workflows. We manage to satisfy these constraints by transforming them onto type level in a way which we are going to demonstrate on the following simple example.
+
+\subsubsection{Generality and Correctness of the combinators}
+
+- ! predvest nad prikladem s jednoduchym stackingem, kde muzeme ukazat jak zakladni kombinátory, tak distinction of disjoint and copy data vector.
+- Parametricky polymorfní Typovej systém
+- chceme konstruovat jen korektní dagy
+- chceme aby na sebe navazovali správně počty atd
+
+
+\subsubsection{Applicative notation}
+
+- klasicka představa je že funkce jsou ve vnitřních uzlech a jejich parametry jsou syni
+- aplikativní notace využívá toho, že každou funkci si díky curringu mužu chápat jako fci 1 proměný. 
+- pak mužu vzit stromovou reprezentaci explicitně zachycující jednotlivé aplikace
+
+\subsection{Generating}
+
+- Dosud jsme popsali co je cílem tvořit a co to omezuje, aby to dávalo smysl. Ted popíšem jak na to jdeme. Nejprve to ilustrujem jednoduchym prikladem to provide a context, pak formalneji predstavime general notions on which the approach is based and after that we describe the algorithm together with techniques which make it fast enough for massive use in generating and mutation.
+
+\subsubsection{A simple example}
+
+- to by šlo snad názorně ukázat na příkladě generování stromu k>1:
+- Generujem Dag D LD, k>1 -> v kořeni stromu je aplikace tedy:
+- levej syn je funkce z něčeho do (Dag D LD), pravej syn je to něco
+… az se dostanem do listů (strom velikosti 1) - výběr symbolu z gammy aby to pasovalo..
+
+\subsubsection{Existential queries}
+
+- 1. základ našeho přístupu: ex. sigma že z gamma de vyvodit že M je typu sigma(tau)
+  - k tomu je potřeba definovat prerekvizitní pojmy, minimálně tyto:
+    - substituce
+    - a to jakym způsobem vypadá dotaz (k,tau) - a že je teda obecnejší to tau než přímo typ že pak M:Tau
+
+to kulminuje v hodící se funkci subs, která pro danej dotaz (k,tau) vrátí substituce spolu s počtama stromů
+
+
+\subsubsection{Generating based on sizes}
+
+- 2. základ našeho přístupu: generuje strom pro danou velikost stromu (počet symbolů).
+  - což mimojiné umožnuje mnohem přímější kontrolu nad tím, z jakého rozložení taháme naše jhedince 
+  - zde popsat to jak to děláme (32, 16,16, 8,8,8,8, ...)
+
+\subsubsection{Counting the trees}
+
+- 2. základ našeho přístupu: počítáme si počty stromů pro jednotlivý dotazy 
+     - abychom byli schopný generovat (semi-)uniformě
+
+\subsubsection{More involved example}
+
+- jen pokud nebude stacit ten simple
+
+\subsubsection{Final overview of generating}
+
+- pridáme skolemizaci aby to fungovalo
+- kesování aby se dalo generovat rychle
+    - předpočítání pomocných dat pro generování
+    - "semi-unfiromní" generování - pozn o nedokonalosti 
+- kulminující v pseudokódu
+
+\subsection{Formalization of our library}
+
+- Ted když máme vybudovanou intuici pro to vo co tam de tak můžem na čtenář vyblít to co se na nějblije zhurta v ictai článku, s tim ze to muzem zestrucnit/zrychlit pac mnohe veci byly uz receny víše.
 
 
 \chapter{Gecco}
