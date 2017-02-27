@@ -1,9 +1,12 @@
 \documentclass[a4paper,oneside]{memoir}
 
+
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 
 \usepackage{lmodern}
+
+
 
 %\usepackage[czech]{babel}
 \usepackage{amsmath,amssymb,mathtools,amsthm,bm}
@@ -60,6 +63,49 @@
 %\clearpage
 
 \newcommand{\red}[1]{{\color{red} #1}}
+
+
+
+\newcommand{\sigmaPr}{\sigma^\prime}
+\newcommand{\tauPr}{\tau^\prime}
+\newcommand{\xPr}{x^\prime}
+\newcommand{\nPr}{n^\prime}
+\newcommand{\nPrr}{n^{\prime\prime}}
+\newcommand{\nPrrr}{n^{\prime\prime\prime}}
+\newcommand{\tausPr}{\tau_s^\prime}
+\newcommand{\s}{\sigma}
+\newcommand{\Th}{\theta}
+\newcommand{\sPr}{\sigmaPr}
+\newcommand{\thPr}{\theta^\prime}
+
+
+
+\newcommand{\then}{\Rightarrow}
+\newcommand{\E}[2]{(\exists #1)\ #2}
+\newcommand{\A}[2]{(\forall #1)\ #2}
+\newcommand{\Ain}[3]{(\forall #1 \in #2)\ #3}
+
+
+\newcommand{\op}{\operatorname}
+
+\newcommand{\ar}{\rightarrow}
+\newcommand{\ap}[2]{(#1\,#2)}
+\newcommand{\defi}{\coloneqq}
+\newcommand{\defe}{\mathrel{\vcentcolon\equiv}}
+
+\newcommand{\binRule}[3]{\dfrac{#1\ ,\ #2}{#3}}
+\newcommand{\triRule}[4]{\dfrac{#1\ ,\ #2\ , \ #3}{#4}}
+\newcommand{\isSub}[1]{#1\ \mathit{substitution}}
+\newcommand{\MGU}[2]{\op{MGU}(#1,#2)}
+\newcommand{\mgu}[1]{\op{MGU}(#1)}
+
+\newcommand{\AX}{\textit{AX}\xspace}
+\newcommand{\subAx}{\textit{SUB-AX}\xspace}
+\newcommand{\mguMp}{\textit{MGU-MP}\xspace}
+\newcommand{\abs}[1]{\lvert #1 \rvert}
+
+
+
 
 \chapter{i já it}
 
@@ -173,7 +219,41 @@ Dagy reprezentujeme jako výrazy.
 ~\\
 
 
+
 \section{Our approach}
+
+
+\newcommand{\Dlong}{unlabeled data\xspace}
+\newcommand{\LDlong}{labeled data\xspace}
+\newcommand{\Dshort}{\textit{$D$}\xspace}
+\newcommand{\LDshort}{\textit{$LD$}\xspace}
+\newcommand{\dia}{\textit{$ens_1$}\xspace}
+\newcommand{\diaZero}{\textit{$ens_0$}\xspace}
+\newcommand{\splitComb}{\textit{$split$}\xspace}
+\newcommand{\cons}{\textit{$cons$}\xspace}
+
+\newcommand{\komb}[1]{\textit{#1}}
+\newcommand{\kons}[1]{\textbf{#1}}
+
+\newcommand{\Dag}{\kons{Dag}}
+\newcommand{\D}{\kons{D}}
+\newcommand{\LD}{\kons{LD}}
+\newcommand{\Boo}{\kons{Boo}}
+\newcommand{\V}{\kons{V}}
+\newcommand{\Succ}{\kons{S}}
+\newcommand{\Zero}{\kons{0}}
+\newcommand{\Same}{\kons{Same}}
+\newcommand{\Disjoint}{\kons{Disjoint}}
+
+\newcommand{\Suc}[1]{(\Succ\ #1)}
+\newcommand{\Ve}[3]{(\V\ #1\ #2\ #3)}
+
+\newcommand{\DAG}[2]{(\Dag\ #1\ #2)}
+\newcommand{\splitter}[4]{\DAG{#1}{\Ve{#2}{#3}{#4}}}
+\newcommand{\merger}[4]{\DAG{\Ve{#1}{#3}{#4}}{#2}}
+\newcommand{\dvaPlus}[1]{\Suc{\Suc{#1}}}
+\newcommand{\dva}{\dvaPlus{\Zero}}
+
 
 \red{Nasleduje rozdelana verze our approache, jeste to budu dost menit, tak se nelekejte, nebude tam tolik nadpisu nebude tam nic cesky atd.}
 
@@ -185,31 +265,81 @@ Let us start with brief clarification of what we mean by term machine learning w
 \subsubsection{ML workflows as graphs}
 ML workflows are naturally representable as directed graphs; vertices represent basic methods and edges represent flows of data.
 Figure xxx. shows an example of such a workflow containing all above mentioned kinds of basic methods and ensembles.
+
 [Example picture with everything]
+
+Each edge has a type corresponding to the type of data flowing through it. 
+From the high level machine learning point of view we distinguish two basic types o data;
+input \Dlong ($\D$) and output \LDlong ($\LD$) containing the predictions.
+
+Workflow graphs are slightly different from standard graphs in that some of the edges may start nowhere (input edges) or end nowhere (output edges). 
+Alternatively we may add two special nodes, \textit{input} and \textit{output}, and let these special edges star or end in them.
+One way or another, the special edges determine a \textit{type} of a workflow.
+
+A workflow (such as the one on fig. xxx.) representing a classifier has one input edge of type $\D$ and one output edge of type $\LD$.
+
 To train and evaluate a significant number of such workflows - which may possibly be rather huge beasts -  presents a seriously time consuming task (thanks especially to nested cross-validations). Therefore we decided to take into account only workflows without cycles in their graph, i.e. directed acyclic graphs (DAGs). Doing so we limit the training and evaluation time by limiting the size of generated workflows, since the evaluation time of a DAG workflow is reasonably proportional to the number of basic methods.
+
+Consider a DAG with one input edge of type $a$ and with one output edge of type $b$, then we say that the dag has type $\DAG{a}{b}$. 
+For example the DAG from fig. xxx has type $\DAG{\D}{\LD}$ which is the type of a classifier.
+Type $\Dag$ is an example of a \textit{parametric type}, that is a type that takes two other types (e.g. $\D$ and $\LD$) as parameters to construct a specific type (e.g. $\DAG{\D}{\LD}$).
+Parametric types are extensively used and exploited in our approach.
+To deal with DAGs with multiple input or output edges is a slightly more complicated business explained below.
 
 \subsubsection{DAG combinators}
 
-The DAG representation is an intermediate representation of a workflow. 
+During the evolution we need to generate and manipulate the workflow individuals. Rather than direct manipulation of the DAGs we prefer an indirect tree representation. From the evolution point of view the individuals are program expressions that may be  evaluated to give a value. This value is a JSON\footnote{Javascript object notation \red{jednou vetou popsat mozna}.} representation of the DAG encoding a ML workflow. This JSON value serves as a blueprint from which the actual ML workflow is build. Thus the DAG representation is an intermediate representation of a workflow.
 
-During the evolution we need to generate and manipulate the workflow individuals. Rather than direct manipulation of the DAGs we prefer an indirect tree representation. From the evolution point of view the individuals are program expressions that may be  evaluated to give a value. This value is a JSON representation of the DAG encoding a ML workflow. This JSON value serves as a blueprint from which the actual ML workflow is build.
+Our approach to constructing the workflow DAGs is based on strongly typed pure functional programming style. In the terms of classical genetic programming, one specifies a library from which the syntactic trees of program individuals are build by specifying a set of terminals (leaf node symbols) and a set of functions (interior node symbols). 
 
-Our approach to constructing the workflow DAGs is based on strongly typed pure functional programming style. In the terms of classical genetic programming, one specifies a library from which the syntactic trees of program individuals are build by specifying a set of terminals (leaf symbols) and a set of functions (interior function symbols). Roughly speaking, we may say that our terminal set consists of basic methods and function set consists of dag combinators; operators that connect two or more smaller DAGs in a single more complicated one by some kind of serial or parallel composition. A careful reader may spot that some high-orderism is in order here, since basic methods are basically functions, thus DAG combinators are functions over functions, i.e. higher-order functions.
+Roughly speaking, we may say that our terminal set consists of basic machine learning methods and function set consists of dag combinators; operators that connect two or more smaller DAGs in a single more complicated one by some kind of serial or parallel composition. A careful reader may spot that some higher-orderism is in order here, since basic methods are basically functions, thus DAG combinators are functions over functions, i.e. higher-order functions.
 
 We see three major benefits of the tree representation of individuals in comparison with a more direct representation:
 
 (1) Trees are simple yet rich enough structures to support natural ways of substructure manipulation satisfying recombination needs of evolution driven search. Most notably in a cross-over operator. 
 
-(2) Extensibility. Functional programming - simple yet powerful tool for writing extensible programs. 
+(2) \red{Extensibility. Functional programming - simple yet powerful tool for writing extensible programs.}
 
 (3) Satisfaction of semantically imposed constraints. Because not all the possible DAGs are meaningful ML workflows. We manage to satisfy these constraints by transforming them onto type level in a way which we are going to demonstrate on the following simple example.
 
 \subsubsection{Generality and Correctness of the combinators}
 
+In the case of classical untyped genetic programming the terminal and function set consists only of the symbols accompanied with information about number of arguments that each function takes. In the typed situation we accompany the symbols with their types. Since the information whether a symbol is a terminal or function (and its arity) is already contained in the types, we can marge the terminal and function set into one library\footnote{\red{poznamka o tom ze v typový teorii se tomu řika context or basis a tak to pouzivame aby se propojila souvyslost.}} set $\Gamma$. This merge is also natural for applicative tree notation we use, which is described below.  
+
+Let us consider a small yet illustrative workflow depicted on figure \ref{simple_stacking} together with its tree representation, on which we demonstrate some of our combinators and why they have rather complicated types.
+
+\begin{figure}[th]
+\centerline{\includegraphics[width=10cm]{simple_stacking.jpg}}
+\vspace*{8pt}
+\caption{Simple stacking example.}
+\label{simple_stacking}
+\end{figure}
+
+Although we internally use more general applicative tree representation (with all the symbols in leaf nodes),
+here we present the tree as an S-expression with function symbols in the interior nodes.
+Let us start in the root of the tree, where is the $dia_0$ symbol standing for DAG combinator with type:
+ 
+$\splitter{\D}{\LD}{n}{c} \ar \merger{\LD}{\LD}{n}{c} \ar \DAG{\D}{\LD}$
+  
+So it is a function taking two arguments\footnote{we use the functional convention for functions with multiple arguments discussed below in the subsection about applicative notation}, 
+first of type $\splitter{\D}{\LD}{n}{c}$ and second of type $\merger{\LD}{\LD}{n}{c}$, 
+and producing result of type $\DAG{\D}{\LD}$, that is a DAG with one input edge of type $\D$ and one output edge of type $\LD$ representing a classifier model.
+We use names starting with uppercase letter for specific (possibly parametric) types ($\Dag, \D, \LD, \V$) 
+and names starting with lowercase letter for \textit{type variables} ($n, c$).
+
+The result of the $dia_0$ combinator is a combined classifier workflow serially composing its two arguments, 
+which are again workflows but now with a slightly more complicated type in the middle; 
+the output type of the first and the input type of the second is the same type $\Ve{\LD}{n}{c}$. 
+
+
+
+
 - ! predvest nad prikladem s jednoduchym stackingem, kde muzeme ukazat jak zakladni kombinátory, tak distinction of disjoint and copy data vector.
 - Parametricky polymorfní Typovej systém
 - chceme konstruovat jen korektní dagy
 - chceme aby na sebe navazovali správně počty atd
+
+We may say that our approach balances two mutually counteractive tendencies: generality and correctness.
 
 
 \subsubsection{Applicative notation}
@@ -264,7 +394,9 @@ to kulminuje v hodící se funkci subs, která pro danej dotaz (k,tau) vrátí s
 
 \subsection{Formalization of our library}
 
-- Ted když máme vybudovanou intuici pro to vo co tam de tak můžem na čtenář vyblít to co se na nějblije zhurta v ictai článku, s tim ze to muzem zestrucnit/zrychlit pac mnohe veci byly uz receny víše.
+- Ted když máme vybudovanou intuici pro to vo co tam de tak můžem na čtenář vyblít to co se na nějblije zhurta v ictai článku, s tim ze to muzem zestrucnit/zrychlit pac mnohe veci byly uz receny výše.
+
+
 
 
 \chapter{Gecco}
@@ -285,43 +417,6 @@ Often we will write $s : \tau_s$ to emphasize that $\tau_s$ is the type of symbo
 A \textit{context} is set of declarations with distinct term symbols.\footnote{Interestingly, the definition of a \textit{context} and definition of a \textit{substitution} are almost the same. The difference is that "keys" in a context are term symbols/variables, whereas substitution "keys" are type variables. Maybe this fact could be utilized in an interesting way...}
 \end{definition}
 
-\newcommand{\sigmaPr}{\sigma^\prime}
-\newcommand{\tauPr}{\tau^\prime}
-\newcommand{\xPr}{x^\prime}
-\newcommand{\nPr}{n^\prime}
-\newcommand{\nPrr}{n^{\prime\prime}}
-\newcommand{\nPrrr}{n^{\prime\prime\prime}}
-\newcommand{\tausPr}{\tau_s^\prime}
-\newcommand{\s}{\sigma}
-\newcommand{\Th}{\theta}
-\newcommand{\sPr}{\sigmaPr}
-\newcommand{\thPr}{\theta^\prime}
-
-
-
-\newcommand{\then}{\Rightarrow}
-\newcommand{\E}[2]{(\exists #1)\ #2}
-\newcommand{\A}[2]{(\forall #1)\ #2}
-\newcommand{\Ain}[3]{(\forall #1 \in #2)\ #3}
-
-
-\newcommand{\op}{\operatorname}
-
-\newcommand{\ar}{\rightarrow}
-\newcommand{\ap}[2]{(#1\,#2)}
-\newcommand{\defi}{\coloneqq}
-\newcommand{\defe}{\mathrel{\vcentcolon\equiv}}
-
-\newcommand{\binRule}[3]{\dfrac{#1\ ,\ #2}{#3}}
-\newcommand{\triRule}[4]{\dfrac{#1\ ,\ #2\ , \ #3}{#4}}
-\newcommand{\isSub}[1]{#1\ \mathit{substitution}}
-\newcommand{\MGU}[2]{\op{MGU}(#1,#2)}
-\newcommand{\mgu}[1]{\op{MGU}(#1)}
-
-\newcommand{\AX}{\textit{AX}\xspace}
-\newcommand{\subAx}{\textit{SUB-AX}\xspace}
-\newcommand{\mguMp}{\textit{MGU-MP}\xspace}
-\newcommand{\abs}[1]{\lvert #1 \rvert}
 
 Suppose we have a context $\Gamma$. Let us consider $\mathit{term:type}$ statements derivable from the following rules (let us call them \subAx and \mguMp):
 
