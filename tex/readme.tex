@@ -16,6 +16,21 @@
 
 \usepackage{lipsum}
 
+
+
+
+
+\usepackage{qtree}
+\usepackage[usenames,dvipsnames,table]{xcolor}
+\usepackage{amsfonts}
+% \usepackage{amsmath}
+\usepackage{graphicx}
+
+\usepackage[vlined,ruled,norelsize]{algorithm2e}
+
+
+
+
 \usepackage{hyperref}
 \hypersetup{
     colorlinks,
@@ -24,6 +39,10 @@
     linkcolor=black,
     urlcolor=black
 }
+
+
+
+
 
 %\usepackage{enumitem}
 
@@ -104,8 +123,23 @@
 \newcommand{\mguMp}{\textit{MGU-MP}\xspace}
 \newcommand{\abs}[1]{\lvert #1 \rvert}
 
+\newcommand{\Pseudokod}[4]{
+	\begin{figure}[!t]
+	\removelatexerror
+	\begin{algorithm}[H]
+		\caption{\label{#4}#1}
+		\DontPrintSemicolon
+		\SetKwProg{Fn}{function}{}{}
+		\Fn{#2}{#3}
+	\end{algorithm}
+	\end{figure}
+}
 
+\makeatletter
+\newcommand{\removelatexerror}{\let\@latex@error\@gobble}
+\makeatother
 
+\newcommand{\la}{\leftarrow\xspace}
 
 \chapter{i já it}
 
@@ -331,9 +365,6 @@ The result of the $dia_0$ combinator is a combined classifier workflow serially 
 which are again workflows but now with a slightly more complicated type in the middle; 
 the output type of the first and the input type of the second is the same type $\Ve{\LD}{n}{c}$. 
 
-
-
-
 - ! predvest nad prikladem s jednoduchym stackingem, kde muzeme ukazat jak zakladni kombinátory, tak distinction of disjoint and copy data vector.
 - Parametricky polymorfní Typovej systém
 - chceme konstruovat jen korektní dagy
@@ -380,10 +411,6 @@ to kulminuje v hodící se funkci subs, která pro danej dotaz (k,tau) vrátí s
 - 2. základ našeho přístupu: počítáme si počty stromů pro jednotlivý dotazy 
      - abychom byli schopný generovat (semi-)uniformě
 
-\subsubsection{More involved example}
-
-- jen pokud nebude stacit ten simple
-
 \subsubsection{Final overview of generating}
 
 - pridáme skolemizaci aby to fungovalo
@@ -391,6 +418,53 @@ to kulminuje v hodící se funkci subs, která pro danej dotaz (k,tau) vrátí s
     - předpočítání pomocných dat pro generování
     - "semi-unfiromní" generování - pozn o nedokonalosti 
 - kulminující v pseudokódu
+
+
+\newcommand{\nv}     {v}
+\newcommand{\nvp}    {\nv^{\prime}}
+\newcommand{\nvpp}   {\nv^{\prime\prime}}
+\newcommand{\nvppp}  {\nv^{\prime\prime\prime}}
+\newcommand{\nvpppp} {\nv^{\prime\prime\prime\prime}}
+\newcommand{\nvppppp}{\nv^{\prime\prime\prime\prime\prime}}
+\newcommand{\ball}{\op{treeID}}
+
+\Pseudokod{Get tree individual of size 1.}
+{\textbf{getTree$_1$}($\tau$, $\ball$, $\nv_0$)}{
+	\For {$(s,\tau_s) \in \Gamma$}{
+		$(\tau_s^{\prime},\nv_1) \la fresh_\tau(\tau_s,\nv_0)$ \;
+		\If {$\exists ~ \mu = \mgu{\tau,\tau_s^{\prime}}$} {
+			\If {$\ball = 0$} {
+				\Return $(s:\mu(\tau), \nv_1)$
+			} \Else {
+				$\ball \la \ball - 1$				
+			}
+		}	
+	}
+}{genOne1}
+
+\Pseudokod{Get tree individual of size $k > 1$.}
+{\textbf{getTree}($k$, $\tau$, $\ball$, $\nv_0$)}{
+	\For {$i \in \{1,\dots,k-1\}$}{
+		$j \la k - i$ \;
+		$(\alpha, \nv_1) \la newVar(\tau,\nv_0)$ \;
+		\For {$(n_F,\sigma_F,\nv_2) \in subs_i(\alpha \ar \tau, \nv_1 )$}{
+			\For {$(n_X,\sigma_X,\nv_3) \in subs_j(\sigma_F(\alpha), \nv_2 )$}{
+				$n_{FX} \la n_F \cdot n_X $ \;
+				\If {$\ball < n_{FX}$} {
+					\textbf{random} $\ball_F \in \{0,\dots,n_F - 1\}$ \;
+					\textbf{random} $\ball_X \in \{0,\dots,n_X - 1\}$ \;					
+					$(F, \nv_4)  \la getTree_i(\overline{\sigma_F(\alpha \ar \tau)}, \ball_F,\nv_3)$ \;
+					$(X, \nv_5) \la getTree_j(\overline{\sigma_X(\sigma_F(\alpha)}), \ball_X,\nv_4)$ \;
+					\Return $((F~X) : \sigma_X(\sigma_F(\tau)), \nv_5)$				
+				} \Else {
+					$\ball \la \ball - n_{FX}$				
+				}			
+			}
+		}	
+	}
+}{genOneK}
+
+
 
 \subsection{Formalization of our library}
 
