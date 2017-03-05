@@ -4,7 +4,7 @@ import org.json.JSONObject;
 
 /** Created by sekol on 05.03.2017. */
 
-public abstract class EvaJob {
+public abstract class EvaJobProcess {
 
     enum Status {beforeStart, running, finished}
 
@@ -15,7 +15,7 @@ public abstract class EvaJob {
 
     public abstract void run(JSONObject jobOpts);
 
-    public EvaJob(JSONObject jobOpts) {
+    public EvaJobProcess(JSONObject jobOpts) {
         setStatus(Status.beforeStart);
         this.jobOpts = jobOpts;
         output = new StringBuffer();
