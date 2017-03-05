@@ -20,8 +20,15 @@ public class ApiManager {
 
     private final Map<String,ApiCmd> apiCmds;
 
-    public ApiManager() {
+
+    public ApiManager(JobManager jobMan) {
         apiCmds = new HashMap<>();
+
+        addApiCmd("run", jobMan::makeJob);
+        addApiCmd("job", jobMan::getJobInfo);
+        addApiCmd("log", jobMan::getJobLog);
+        addApiCmd("jobs", (p,q) -> jobMan.getJobsInfo());
+
     }
 
     private void addApiCmd(String cmdName, ApiCmd apiCmd) {
@@ -88,13 +95,15 @@ public class ApiManager {
     }
 
     private static JSONObject mkIndexResponse() {
-        return F.obj(
-                "status","ok",
-                "msg","Welcome to EvaServer API!"
-        );
+        return addOk(F.obj("msg","Welcome to EvaServer API!"));
     }
 
-    private static JSONObject mkErrorResponse(String msg) {
+    static JSONObject addOk(JSONObject response) {
+        response.put("status", "ok");
+        return response;
+    }
+
+    static JSONObject mkErrorResponse(String msg) {
         return F.obj(
                 "status","error",
                 "msg",msg

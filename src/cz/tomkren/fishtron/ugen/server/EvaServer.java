@@ -29,8 +29,8 @@ public class EvaServer extends AbstractHandler {
     public EvaServer(JSONObject config) {
         int port = config.getInt("port");
 
-        apiMan = new ApiManager();
         jobMan = new JobManager();
+        apiMan = new ApiManager(jobMan);
 
         server = new Server(port);
         server.setHandler(this);

@@ -1,5 +1,8 @@
 package cz.tomkren.fishtron.ugen.server;
 
+import cz.tomkren.fishtron.server.EvolutionJob;
+import cz.tomkren.utils.F;
+import cz.tomkren.utils.Log;
 import org.json.JSONObject;
 
 /** Created by tom on 05.03.2017. */
@@ -9,12 +12,14 @@ public class EvaJobProcess {
     enum Status {beforeStart, running, finished}
 
     private Status status;
+    private final int jobId;
     private final EvaJob job;
     private final JSONObject jobOpts;
     private final StringBuffer output;
 
-    EvaJobProcess(EvaJob job, JSONObject jobOpts) {
+    EvaJobProcess(int jobId, EvaJob job, JSONObject jobOpts) {
         setStatus(Status.beforeStart);
+        this.jobId = jobId;
         this.job = job;
         this.jobOpts = jobOpts;
         output = new StringBuffer();
@@ -28,8 +33,29 @@ public class EvaJobProcess {
         })).start();
     }
 
+    public void log(Object x) {
+        output.append(x).append('\n');
+        Log.it(x);
+    }
+
+    public String getLog() {
+        return output.toString();
+    }
+
     private synchronized void setStatus(Status newStatus) {
         status = newStatus;
+    }
+
+    private synchronized Status getStatus() {
+        return status;
+    }
+
+    public JSONObject toJson() {
+        return F.obj(
+                "jobId", jobId,
+                "jobOpts", jobOpts,
+                "jobStatus", getStatus().name()
+        );
     }
 
 }

@@ -1,0 +1,18 @@
+html {
+    font-family: 'Open Sans', sans-serif;
+}
+
+input {
+    border: 1px solid #C9E6F2;
+}
+
+pre {
+    font-family: Consolas,monospace;
+    font-size: 9pt;
+}
+
+.job-tab {
+    border: 1px solid #C9E6F2;
+    background-color: #F2F9FC;
+}
+
