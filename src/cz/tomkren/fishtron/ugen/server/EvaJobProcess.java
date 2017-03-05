@@ -2,21 +2,20 @@ package cz.tomkren.fishtron.ugen.server;
 
 import org.json.JSONObject;
 
-/** Created by sekol on 05.03.2017. */
+/** Created by tom on 05.03.2017. */
 
-public abstract class EvaJobProcess {
+public class EvaJobProcess {
 
     enum Status {beforeStart, running, finished}
 
     private Status status;
-    private final StringBuffer output;
+    private final EvaJob job;
     private final JSONObject jobOpts;
+    private final StringBuffer output;
 
-
-    public abstract void run(JSONObject jobOpts);
-
-    public EvaJobProcess(JSONObject jobOpts) {
+    EvaJobProcess(EvaJob job, JSONObject jobOpts) {
         setStatus(Status.beforeStart);
+        this.job = job;
         this.jobOpts = jobOpts;
         output = new StringBuffer();
     }
@@ -24,7 +23,7 @@ public abstract class EvaJobProcess {
     public void start() {
         setStatus(Status.running);
         (new Thread(()->{
-            run(jobOpts);
+            job.run(jobOpts, this);
             setStatus(Status.finished);
         })).start();
     }
