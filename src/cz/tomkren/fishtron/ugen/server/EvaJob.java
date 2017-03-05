@@ -1,6 +1,5 @@
 package cz.tomkren.fishtron.ugen.server;
 
-import cz.tomkren.fishtron.server.EvolutionJob;
 import org.json.JSONObject;
 
 /** Created by sekol on 05.03.2017. */
