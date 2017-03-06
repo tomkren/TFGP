@@ -16,3 +16,18 @@ pre {
     background-color: #F2F9FC;
 }
 
+.job-tab td {
+    padding: 4px;
+}
+
+.job-starter {
+    padding-bottom: 4px;
+}
+
+.job-starter button {
+    margin: 4px;
+}
+
+.job-dropdown {
+    width: 160px;
+}

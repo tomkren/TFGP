@@ -10,14 +10,14 @@ function mkJobsView($container, dispatch) {
         //log(jobs);
         $container.html('');
         $container.append([
-            mkJobsTable(jobs),
-            mkJobStarter()
+            mkJobStarter(),
+            mkJobsTable(jobs)
         ]);
     }
 
     function mkJobStarter() {
         var $select = mkJobDropdown();
-        return $('<div>').append([
+        return $('<div>').addClass("job-starter").append([
             $select,
             mkJobRunButton($select)
         ]);
@@ -26,7 +26,7 @@ function mkJobsView($container, dispatch) {
     var jobNames = ["test","test2","hax"];
 
     function mkJobDropdown() {
-        var $select = $('<select>');
+        var $select = $('<select>').addClass("job-dropdown");
         $select.append(_.map(jobNames, function (jobName) {
             return $('<option>').val(jobName).html(jobName)
         }));
@@ -44,7 +44,7 @@ function mkJobsView($container, dispatch) {
 
     function mkJobsTable(jobs) {
         var $table = $('<table>');
-        $table.addClass("job-tab").html('<tr><th>id</th><th>opts</th><th>status</th></tr>');
+        $table.addClass("job-tab").html('<tr><th>id</th><th>status</th><th>opts</th></tr>');
         _.each(jobs, function (job) {
             $table.append(mkJobRow(job));
         });
@@ -55,8 +55,8 @@ function mkJobsView($container, dispatch) {
 
         return $('<tr>').append([
             mkTd(job, 'jobId'),
-            mkTd(job, 'jobOpts'),
-            mkTd(job, 'jobStatus')
+            mkTd(job, 'jobStatus'),
+            mkTd(job, 'jobOpts')
             //mkUpdateButt(job)
         ]);
 

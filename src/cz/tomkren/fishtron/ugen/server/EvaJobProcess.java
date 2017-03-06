@@ -22,6 +22,11 @@ public class EvaJobProcess {
         this.jobId = jobId;
         this.job = job;
         this.jobOpts = jobOpts;
+
+        if (jobOpts.has("cmd")) {
+            jobOpts.remove("cmd");
+        }
+
         output = new StringBuffer();
     }
 
