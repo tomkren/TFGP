@@ -2,6 +2,7 @@
   <dictionary name="sekol">
     <words>
       <w>cmds</w>
+      <w>vals</w>
     </words>
   </dictionary>
 </component>
