@@ -1,10 +1,6 @@
 package cz.tomkren.fishtron.ugen.multi;
 
-import com.sun.org.apache.xpath.internal.operations.Mult;
-import cz.tomkren.fishtron.eva.FitVal;
-
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -90,21 +86,23 @@ public class MultiUtils {
             throw new Error("This implementation of the algorithm assumes bi-objective problem.");
         }
 
-        // TODO ujistit se že nevadí že se fronta přesortí (martin to tam castoval a kopíroval...)
-
-
+        // ujistit se že nevadí že se fronta přesortí (martin to tam castoval a kopíroval...) --- ujištěno nevádí :)
         front.sort(new ObjectiveValueComparator(0, isMaxis));
 
         front.get(0).setSsc(Double.MAX_VALUE);
         front.get(front.size()-1).setSsc(Double.MAX_VALUE);
 
         for (int i = 1; i < front.size() - 1; i++) {
-            double ssc;
-            ssc  = Math.abs(front.get(i+1).getValue(0) - front.get(i-1).getValue(0));
-            ssc += Math.abs(front.get(i-1).getValue(1) - front.get(i+1).getValue(1)); // TODO zkonzultovat zda abs stačí kuli isMaxis
-            front.get(i).setSsc(ssc);
-        }
 
+            MultiFitIndiv prev  = front.get(i-1);
+            MultiFitIndiv indiv = front.get(i);
+            MultiFitIndiv next  = front.get(i+1);
+
+            double d0 = next.getValue(0) - prev.getValue(0);
+            double d1 = prev.getValue(1) - next.getValue(1);
+
+            indiv.setSsc(Math.abs(d0) + Math.abs(d1));
+        }
     }
 
 
@@ -143,23 +141,25 @@ public class MultiUtils {
 
         double volume = 0.0;
         int size = front.size();
+        double x0,x1;
+
         for (int i = 0; i < size - 1; i++) {
 
             MultiFitIndiv indiv = front.get(i);
             MultiFitIndiv next  = front.get(i+1);
 
-            double q1 = reference.get(1) - indiv.getValue(1);
-            double q2 = next.getValue(0) - indiv.getValue(0);
+            x0 = next.getValue(0) - indiv.getValue(0);
+            x1 = reference.get(1) - indiv.getValue(1);
 
-            volume += Math.abs(q1) * Math.abs(q2); // TODO zkonzultovat zda abs stačí kuli isMaxis
+            volume += Math.abs(x0) * Math.abs(x1);
         }
 
         MultiFitIndiv last = front.get(size - 1);
 
-        double p1 = reference.get(1) - last.getValue(1);
-        double p2 = reference.get(0) - last.getValue(0);
+        x0 = reference.get(0) - last.getValue(0);
+        x1 = reference.get(1) - last.getValue(1);
 
-        volume += Math.abs(p1) * Math.abs(p2); // TODO zkonzultovat zda abs stačí kuli isMaxis
+        volume += Math.abs(x0) * Math.abs(x1);
 
         return volume;
     }
