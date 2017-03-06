@@ -4,11 +4,46 @@ function mkStateManager(config) {
         jobs: undefined
     };
 
+    var jobsListeners = [];
+
     var apiUrl = config.apiUrl || 'http://localhost:2342';
     if (_.last(apiUrl) !== '/') {
         apiUrl = apiUrl + '/';
     }
     log(apiUrl);
+
+    function dispatch(action) {
+        if (action.cmd === 'run') {
+            var json = JSON.stringify(action);
+            var encodedJson = encodeURIComponent(json);
+
+            //log(json);
+            //log(encodedJson);
+
+            $.get(apiUrl+'?'+encodedJson).done(function (result) {
+                log(result);
+
+
+                loadJobsAndInformListeners();
+
+            }).error(function () {
+                log("ERROR !");
+            });
+
+        }
+    }
+
+    function addJobsListener(callback) {
+        jobsListeners.push(callback);
+    }
+
+    function loadJobsAndInformListeners() {
+        loadJobs(function (jobs) {
+            _.each(jobsListeners, function (callback) {
+                callback(jobs);
+            });
+        });
+    }
 
     function mkLoadStateFun(apiCmdStr, stateKey, projection) {
         return function (callback, errCallback) {
@@ -33,8 +68,10 @@ function mkStateManager(config) {
     var loadJobs = mkLoadStateFun('jobs', 'jobs', function (r) {return r.jobs;});
 
     return {
-        loadJobs        : loadJobs,
-        getState        : function () {return state;},
-        getJobs         : function () {return state.jobs;}
+        loadJobs: loadJobs,
+        loadJobsAndInformListeners: loadJobsAndInformListeners,
+        addJobsListener: addJobsListener,
+        dispatch: dispatch,
+        getState: function () {return state;}
     };
 }

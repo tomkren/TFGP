@@ -1,4 +1,4 @@
-function mkJobsView($container) {
+function mkJobsView($container, dispatch) {
 
 
     function render(jobs) {
@@ -7,9 +7,39 @@ function mkJobsView($container) {
             return;
         }
 
-        log(jobs);
+        //log(jobs);
         $container.html('');
-        $container.append(mkJobsTable(jobs));
+        $container.append([
+            mkJobsTable(jobs),
+            mkJobStarter()
+        ]);
+    }
+
+    function mkJobStarter() {
+        var $select = mkJobDropdown();
+        return $('<div>').append([
+            $select,
+            mkJobRunButton($select)
+        ]);
+    }
+
+    var jobNames = ["test","test2","hax"];
+
+    function mkJobDropdown() {
+        var $select = $('<select>');
+        $select.append(_.map(jobNames, function (jobName) {
+            return $('<option>').val(jobName).html(jobName)
+        }));
+        return $select;
+    }
+
+    function mkJobRunButton($select) {
+        return $('<button>').html("run").click(function () {
+            dispatch({
+                cmd: 'run',
+                job: $select.val()
+            });
+        });
     }
 
     function mkJobsTable(jobs) {

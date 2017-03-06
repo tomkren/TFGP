@@ -21,7 +21,7 @@ public class ApiManager {
     private final Map<String,ApiCmd> apiCmds;
 
 
-    public ApiManager(JobManager jobMan) {
+    ApiManager(JobManager jobMan) {
         apiCmds = new HashMap<>();
 
         addApiCmd("run", jobMan::makeJob);
@@ -35,7 +35,7 @@ public class ApiManager {
         apiCmds.put(cmdName, apiCmd);
     }
 
-    public JSONObject process(String path, String query) {
+    JSONObject process(String path, String query) {
 
         String[] pathParts = path.split("/");
         JSONArray pathJson = F.jsonMap(F.filter(Arrays.asList(pathParts), x->!x.equals("")), x->x);
