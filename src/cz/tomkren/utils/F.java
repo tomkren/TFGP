@@ -478,6 +478,10 @@ public class F {
         return ret;
     }
 
+    public static <A> JSONArray jsonMap(Collection<A> xs) {
+        return jsonMap(xs, x->x);
+    }
+
     public static <K,V> JSONObject jsonMap(Map<K,V> mapa, Function<V,Object> f) {
         JSONObject ret = new JSONObject();
         for (Map.Entry<K,V> e : mapa.entrySet()) {
