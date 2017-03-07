@@ -1,27 +1,23 @@
-package cz.tomkren.fishtron.ugen.apps.workflows;
+package cz.tomkren.fishtron.ugen.multi.gpml;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
-import org.apache.xmlrpc.XmlRpcException;
-import org.json.JSONException;
-import org.json.JSONObject;
-import java.io.File;
-import java.io.IOException;
-
-import cz.tomkren.fishtron.eva.Logger;
-import cz.tomkren.fishtron.sandbox2.Evolution;
-import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
-import cz.tomkren.fishtron.ugen.eva.AppTreeIndiv;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
+import org.apache.xmlrpc.XmlRpcException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-/** Aka DagEva3
- * Created by tom on 17. 2. 2017. */
+import java.io.File;
+import java.io.IOException;
 
-public class GPML {
 
-    private static final String version = "1.0.6";
+/**Created by tom on 07.03.2017.*/
+
+public class MultiGPML {
+
+    private static final String version = "4.0.1 beta";
 
     private static void run(String jsonConfigFilename, String logPath) throws JSONException, IOException, XmlRpcException {
         Log.it("Program arguments:");
@@ -34,7 +30,8 @@ public class GPML {
 
         Checker checker = Checker.mk(config);
 
-        EvolutionSetup setup = new EvolutionSetup(config, checker);
+        /*
+        MultiEvolutionSetup setup = new MultiEvolutionSetup(config, checker);
         EvolutionOpts<AppTreeIndiv> opts = setup.getOpts();
         Logger<AppTreeIndiv> dagLogger = new DagLogger(config, logPath, checker, opts);
 
@@ -49,6 +46,7 @@ public class GPML {
         }
 
         checker.results();
+        */
     }
 
     private static int numRestarts = 0;
@@ -66,7 +64,7 @@ public class GPML {
             run(args[0], args[1]);
 
         } catch (JSONException e) {
-            Log.err("JSON error: " + e.getMessage());
+            Log.err("JSON error:  " + e.getMessage());
             throw new Error(e);
         } catch (IOException e) {
             Log.itln("Config file error: "+e.getMessage());
@@ -78,7 +76,7 @@ public class GPML {
             if (numRestarts < maxTries) {
                 numRestarts ++;
                 long sleepTime = 6000;
-                Log.it("Sleeping for "+ (sleepTime/1000) +" seconds... (try "+numRestarts+"/"+maxTries+")");
+                Log.it("Sleeping for "+ (sleepTime/1000) +" seconds ... (try "+numRestarts+"/"+maxTries+")");
                 F.sleep(sleepTime);
                 main(args);
             } else {

@@ -16,7 +16,7 @@ public interface MultiEvaOpts<Indiv extends MultiIndiv> {
     int getNumIndividualsToGenerate();
     int getMinPopulationSizeToOperate();
     int getMaxPopulationSize();
-    //boolean isUniquenessCheckPerform();
+
     boolean saveBests();
 
     int getTimeLimit(); // in seconds

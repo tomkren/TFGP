@@ -119,6 +119,22 @@ public interface AppTree {
             this.params = params;
         }
 
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Leaf leaf = (Leaf) o;
+            return sym.equals(leaf.sym) && (params != null ? params.equals(leaf.params) : leaf.params == null);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = sym.hashCode();
+            result = 31 * result + (params != null ? params.hashCode() : 0);
+            return result;
+        }
+
         @Override
         public boolean hasParams() {
             return params != null;
@@ -234,6 +250,21 @@ public interface AppTree {
         private Type originalType;
         private JSONObject debugInfo;
 
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            App app = (App) o;
+            return funTree.equals(app.funTree) && argTree.equals(app.argTree);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = funTree.hashCode();
+            result = 31 * result + argTree.hashCode();
+            return result;
+        }
 
         private App(AppTree funTree, AppTree argTree, Type type) {
             this(funTree, argTree, type, type, null);

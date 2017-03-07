@@ -4,14 +4,10 @@ import cz.tomkren.fishtron.eva.Distribution;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
-import cz.tomkren.utils.TODO;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 /** Created by user on 16. 2. 2017.*/
 
@@ -20,7 +16,21 @@ import java.util.Random;
 public class Params {
 
     private final JSONObject paramsInfo;
-    private final Map<String,Integer> selectedParamIndices;
+    private final HashMap<String,Integer> selectedParamIndices;
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Params params = (Params) o;
+        return selectedParamIndices.equals(params.selectedParamIndices);
+    }
+
+    @Override
+    public int hashCode() {
+        return selectedParamIndices.hashCode();
+    }
 
     Params(JSONObject paramsInfo, Random rand) {
         this.paramsInfo = paramsInfo;
@@ -32,7 +42,7 @@ public class Params {
         }
     }
 
-    private Params(JSONObject paramsInfo, Map<String, Integer> selectedParamIndices) {
+    private Params(JSONObject paramsInfo, HashMap<String, Integer> selectedParamIndices) {
         this.paramsInfo = paramsInfo;
         this.selectedParamIndices = selectedParamIndices;
     }
@@ -52,7 +62,7 @@ public class Params {
         if (selectedParamIndices.isEmpty()) {return this;}
 
         String paramName = F.list(selectedParamIndices.entrySet()).randomElement(rand).getKey();
-        Map<String,Integer> newIndices = new HashMap<>(selectedParamIndices);
+        HashMap<String,Integer> newIndices = new HashMap<>(selectedParamIndices);
 
         newIndices.compute(paramName, (k,index)-> {
             int numValues =  paramsInfo.getJSONArray(paramName).length();

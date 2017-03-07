@@ -15,11 +15,11 @@ import java.util.function.Function;
 
 /** Created by tom on 21.2.2016.*/
 
-class Dag_JsonEvalInterface {
+public class Dag_JsonEvalInterface {
 
     private XmlRpcClient client;
 
-    Dag_JsonEvalInterface(String evaluatorURL) {
+    public Dag_JsonEvalInterface(String evaluatorURL) {
         try {
 
             XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
@@ -35,7 +35,7 @@ class Dag_JsonEvalInterface {
         }
     }
 
-    String getMethodParams(String methodName, String datasetFilename) throws XmlRpcException {
+    public String getMethodParams(String methodName, String datasetFilename) throws XmlRpcException {
         //try {
             Checker checker = new Checker(true);
 
@@ -46,22 +46,9 @@ class Dag_JsonEvalInterface {
             Log.it("getMethodParams completed in " + checker.getTime() + " seconds.");
 
             return (String) result;
-
-        /*} catch (XmlRpcException e) {
-
-            Log.it("\nDag-evaluate server error: Server is probably not running (or it is starting right now). Start the server and try again, please.\n");
-
-            throw new Error("Dag-evaluate server error: Server is probably not running (or it is starting right now). Start the server and try again, please.");
-        }*/
-
-        /*} catch (Exception e) {
-            System.err.println("JavaClient(2): " + e);
-            //throw new Error(e);
-            return null;
-        }*/
     }
 
-    String quitServer() {
+    public String quitServer() {
         try {
             return (String) client.execute("quit", Collections.emptyList());
         } catch (Exception ignored) {
@@ -69,7 +56,7 @@ class Dag_JsonEvalInterface {
         }
     }
 
-    Object submit(String methodName, JSONArray indivs, String datasetFilename) {
+    public Object submit(String methodName, JSONArray indivs, String datasetFilename) {
         try {
             Checker checker = new Checker(true);
 
@@ -89,18 +76,11 @@ class Dag_JsonEvalInterface {
         }
     }
 
-    JSONArray getEvaluated(String methodName) {
+    public JSONArray getEvaluated(String methodName) {
         try {
-            //Checker checker = new Checker(true);
-
-            //Log.it_noln("Getting evaluated individuals back ... ");
 
             List<Object> params = Collections.emptyList();
-
             String resultJsonStr = (String) client.execute(methodName, params);
-
-            //Log.it("completed in "+ checker.getTime()+" seconds.");
-
             return new JSONArray(resultJsonStr);
 
         } catch (Exception e) {

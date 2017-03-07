@@ -6,28 +6,25 @@ import java.util.List;
 
 public interface MultiIndiv {
 
+    Object computeValue();
+
     List<Double> getFitness();
+    void setFitness(List<Double> fitness);
 
     int getId();
     void setId(int id);
 
     int getFront();
-    void setFront(int frontNumber);
+    void setFront(int front);
 
     double getCrowdingDistance();
-    void setCrowdingDistance(double ssc);
+    void setCrowdingDistance(double crowdingDistance);
 
 
-    default boolean isTerminator() {
-        return false;
-    }
+    default boolean isTerminator() {return false;} // todo asi lépe udělat
 
-    default int getFitnessSize() {
-        return getFitness().size();
-    }
+    default int getFitnessSize() {return getFitness().size();}
 
-    default double getFitness(int i) {
-        return getFitness().get(i);
-    }
+    default double getFitness(int i) {return getFitness().get(i);}
 
 }
