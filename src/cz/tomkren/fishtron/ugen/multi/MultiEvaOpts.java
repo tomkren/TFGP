@@ -17,7 +17,7 @@ public interface MultiEvaOpts<Indiv extends MultiIndiv> {
     int getMinPopulationSizeToOperate();
     int getMaxPopulationSize();
 
-    boolean saveBests();
+    //boolean saveBests();
 
     int getTimeLimit(); // in seconds
     long getSleepTime(); // in milliseconds (was hardcoded 2000)

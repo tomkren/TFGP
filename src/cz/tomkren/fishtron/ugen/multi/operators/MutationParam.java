@@ -1,27 +1,23 @@
-package cz.tomkren.fishtron.ugen.eva;
+package cz.tomkren.fishtron.ugen.multi.operators;
 
-import cz.tomkren.fishtron.terms.SubtreePos;
 import cz.tomkren.fishtron.ugen.AppTree;
+import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.Params;
 import cz.tomkren.utils.AB;
-import cz.tomkren.utils.F;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-/** One Parameter Mutation
- * Created by user on 16. 2. 2017. */
+/**Created by tom on 09.03.2017.*/
 
-public class ParamMutation extends AppTreeMutation {
+public class MutationParam extends MutationAppTreeMI {
 
     private final Random rand;
     private final List<AB<Integer,Double>> shiftsWithProbabilities;
     private final JSONObject opts;
 
-    ParamMutation(JSONObject opts, Random rand) {
+    MutationParam(JSONObject opts, Random rand) {
         super(opts.getDouble("probability"));
         this.shiftsWithProbabilities = Params.parseShifts(opts.getJSONArray("shiftsWithProbabilities"));
         this.rand = rand;

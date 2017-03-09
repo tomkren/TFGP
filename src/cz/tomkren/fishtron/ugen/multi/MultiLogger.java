@@ -4,6 +4,6 @@ package cz.tomkren.fishtron.ugen.multi;
 
 public interface MultiLogger<Indiv extends MultiIndiv> {
 
-    void iterativeLog(int run, int numEvaluatedIndivs, MultiPopulation<Indiv> pop, MultiEvalResult<Indiv> evalResult);
+    void iterativeLog(int run, int evalId, MultiPopulation<Indiv> pop, MultiEvalResult<Indiv> evalResult);
 
 }

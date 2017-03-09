@@ -9,7 +9,7 @@ import java.util.Set;
 
 /** Created by tom on 07.03.2017. */
 
-class MultiPopulation<Indiv extends MultiIndiv> {
+public class MultiPopulation<Indiv extends MultiIndiv> {
 
     private final List<Boolean> isMaxis;
 

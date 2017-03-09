@@ -1,19 +1,26 @@
 package cz.tomkren.fishtron.ugen.multi.gpml;
 
+import cz.tomkren.fishtron.eva.Distribution;
+import cz.tomkren.fishtron.eva.IndivGenerator;
+import cz.tomkren.fishtron.eva.Operator;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.apps.workflows.Workflows;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
-import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
-import cz.tomkren.fishtron.ugen.multi.MultiEvaOpts;
+import cz.tomkren.fishtron.ugen.multi.*;
+import cz.tomkren.fishtron.ugen.multi.operators.AppTreeMIGenerator;
+import cz.tomkren.fishtron.ugen.multi.operators.MultiGenOpFactory;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.Log;
 import cz.tomkren.utils.TODO;
 import org.apache.xmlrpc.XmlRpcException;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import java.util.function.BiFunction;
 
@@ -32,7 +39,7 @@ public class MultiEvaSetup {
         int minPopToOperate = getInt(config, "minPopulationSizeToOperate", numToGen/2);
         int maxPopSize      = getInt(config, "maxPopulationSize",          numToGen*4);
 
-        boolean saveBest = getBoolean(config,"saveBest", true);
+        //boolean saveBest = getBoolean(config,"saveBest", true);
 
         int generatingMaxTreeSize = getInt(config, "generatingMaxTreeSize", 37);
         double tournamentBetterWinsProbability = getDouble(config, "tournamentBetterWinsProbability", 0.8);
@@ -46,6 +53,7 @@ public class MultiEvaSetup {
         String datasetFilename = getString(config, "dataset",   "winequality-white.csv");
 
         int timeLimit = getInt(config, "timeLimit", Integer.MAX_VALUE);
+        long sleepTime = getInt(config, "sleepTime", 2000);
 
         boolean dummyFitnessMode = getBoolean(config, "dummyFitness", false);
 
@@ -71,16 +79,27 @@ public class MultiEvaSetup {
 
         Gen gen = new Gen(gamma, rand);
 
+        IndivGenerator<AppTreeMI> generator = new AppTreeMIGenerator(goal, generatingMaxTreeSize, gen, lib, allParamsInfo);
+        MultiSelection<AppTreeMI> parentSelection = new MultiSelection.Tournament<>(tournamentBetterWinsProbability, rand);
 
-        throw new TODO(); // TODO...
+        JSONArray operatorsConfig = config.has("operators") ? config.getJSONArray("operators") : new JSONArray();
+        Distribution<Operator<AppTreeMI>> operators;
+        operators = MultiGenOpFactory.mkOperators(operatorsConfig, rand, gen, allParamsInfo);
 
-        //IndivGenerator<AppTreeMI> generator = new AppTreeIndivGenerator(goal, generatingMaxTreeSize, gen, lib, allParamsInfo);
-        //Selection<AppTreeIndiv> parentSelection = new Selection.Tournament<>(tournamentBetterWinsProbability, rand);
-        //....
+        // TODO načíst z konfigu !
+        List<Boolean> isMaxims = Arrays.asList(true, false); // performance maximization , time minimization
+
+        opts = new BasicMultiEvaOpts<>(numEvaluations, numToGen, minPopToOperate, maxPopSize, /*saveBest,*/ timeLimit, sleepTime,
+                generator, isMaxims, evalManager, parentSelection, operators, rand);
     }
 
+    public MultiEvaOpts<AppTreeMI> getOpts() {
+        return opts;
+    }
 
-
+    String quitServer() {
+        return evalManager.quitServer();
+    }
 
 
 

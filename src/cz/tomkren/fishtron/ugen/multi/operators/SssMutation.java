@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen.eva;
+package cz.tomkren.fishtron.ugen.multi.operators;
 
 import cz.tomkren.fishtron.ugen.AppTree;
 import cz.tomkren.fishtron.ugen.Gen;
@@ -6,10 +6,9 @@ import org.json.JSONObject;
 
 import java.util.Random;
 
-/** Same Size Subtree Mutation
- * Created by tom on 16. 2. 2017. */
+/**Created by tom on 09.03.2017.*/
 
-public class SSSMutation extends AppTreeMutation {
+public class SssMutation extends MutationAppTreeMI {
 
     private final Gen gen;
     private final int maxSubtreeSize;
@@ -19,7 +18,7 @@ public class SSSMutation extends AppTreeMutation {
 
     private static final int MAX_TRIES = 10;
 
-    SSSMutation(JSONObject opts, JSONObject allParamsInfo, Gen gen) {
+    SssMutation(JSONObject opts, JSONObject allParamsInfo, Gen gen) {
         super(opts.getDouble("probability"));
         this.maxSubtreeSize = opts.getInt("maxSubtreeSize");
         this.gen = gen;

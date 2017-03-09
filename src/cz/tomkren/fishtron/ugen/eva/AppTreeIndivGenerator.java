@@ -43,12 +43,13 @@ public class AppTreeIndivGenerator implements IndivGenerator<AppTreeIndiv> {
 
     @Override
     public List<AppTreeIndiv> generate(int numToGenerate) {
-        //return generate_randomSize(numToGenerate);
-        return generate_cleverSizes(numToGenerate);
+        //vs: generate_randomSize(numToGenerate);
+        Set<AppTree> treeSet = generate_cleverSizes(numToGenerate, goalType, maxTreeSize,gen, allParamsInfo, rand);
+        return F.map(treeSet, tree -> new AppTreeIndiv(tree, lib));
     }
 
     // TODO zpřehlednit
-    private List<AppTreeIndiv> generate_cleverSizes(int numToGenerate) {
+    public static Set<AppTree> generate_cleverSizes(int numToGenerate, Type goalType, int maxTreeSize, Gen gen, JSONObject allParamsInfo, Random rand) {
         SortedSet<AppTree> treeSet = new TreeSet<>(AppTree.compareTrees);
 
         Stopwatch sw = new Stopwatch();
@@ -149,7 +150,8 @@ public class AppTreeIndivGenerator implements IndivGenerator<AppTreeIndiv> {
 
         Log.it("Generating "+treeSet.size()+" individuals took "+sw.getTime(3)+" sec.");
 
-        return F.map(treeSet, tree -> new AppTreeIndiv(tree, lib));
+        return treeSet;
+        //return F.map(treeSet, tree -> new AppTreeIndiv(tree, lib));
     }
 
     private List<AppTreeIndiv> generate_randomSize(int numToGenerate) {

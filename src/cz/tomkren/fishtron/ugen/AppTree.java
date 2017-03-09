@@ -57,10 +57,93 @@ public interface AppTree {
     AppTree getSubtree(SubtreePos pos);
     AppTree changeSubtree(SubtreePos pos, AppTree newSubtree);
 
+    static AppTree mutate_sss(AppTree tree, Gen gen, int maxSubtreeSize, JSONObject allParamsInfo, Random rand) {
+        // select subtree
+        SubtreePos subtreePos;
+        AppTree subTree;
+        do {
+            subtreePos = tree.getRandomSubtreePos(rand);
+            subTree = tree.getSubtree(subtreePos);
+        } while (subTree.size() > maxSubtreeSize);
+
+        // generate new subtree with same size and type
+        Type goalType = subTree.getType();
+        int treeSize = subTree.size();
+        AppTree newSubtree = gen.genOne(treeSize, goalType);
+        AppTree newSubtreeWithParams = newSubtree.randomizeParams(allParamsInfo, rand);
+
+        // create new tree with that subtree
+        return tree.changeSubtree(subtreePos, newSubtreeWithParams);
+    }
+
     static AA<AppTree> xover(AppTree mum, AppTree dad, SubtreePos mumPos, SubtreePos dadPos) {
         AppTree child1 = mum.changeSubtree(mumPos, dad.getSubtree(dadPos));
         AppTree child2 = dad.changeSubtree(dadPos, mum.getSubtree(mumPos));
         return new AA<>(child1,child2);
+    }
+
+    static AppTree mutate_param(AppTree tree, List<AB<Integer,Double>> shiftsWithProbabilities, Random rand) {
+        List<SubtreePos> posesWithParams = tree.getAllSubtreePosesWhere(AppTree::hasParams);
+        if (posesWithParams.isEmpty()) {return tree;}
+
+        SubtreePos subtreePos = F.randomElement(posesWithParams, rand);
+        AppTree selectedSubtree = tree.getSubtree(subtreePos);
+
+        if (selectedSubtree instanceof AppTree.Leaf) {
+            AppTree.Leaf selectedLeaf = (AppTree.Leaf) selectedSubtree;
+            AppTree.Leaf newLeaf = selectedLeaf.randomlyShiftOneParam(rand, shiftsWithProbabilities);
+            return tree.changeSubtree(subtreePos, newLeaf);
+        } else {
+            throw new Error("Selected subtree must be leaf, should be unreachable.");
+        }
+    }
+
+    static AA<AppTree> xover(AppTree mum, AppTree dad, int maxTreeSize, Random rand) {
+
+        TMap<SubtreePos> mumPoses = mum.getAllSubtreePoses_byTypes();
+        TMap<SubtreePos> dadPoses = dad.getAllSubtreePoses_byTypes();
+
+        Map<Type,AA<List<SubtreePos>>> intersection = TMap.intersection(mumPoses, dadPoses);
+
+        int numPossiblePairs = getNumPossibleXoverPairs(intersection);
+        int ball = rand.nextInt(numPossiblePairs);
+        AA<SubtreePos> selectedPoses = selectXoverPoses(ball, intersection, rand);
+        SubtreePos mumPos = selectedPoses._1();
+        SubtreePos dadPos = selectedPoses._2();
+
+        AA<AppTree> children = AppTree.xover(mum, dad, mumPos, dadPos);
+
+        return new AA<>(
+                children._1().size() <= maxTreeSize ? children._1() : mum ,
+                children._2().size() <= maxTreeSize ? children._2() : dad
+        );
+    }
+
+    static int getNumPossibleXoverPairs(Map<Type, AA<List<SubtreePos>>> intersection) {
+        int sum = 0;
+        for (Map.Entry<Type,AA<List<SubtreePos>>> e : intersection.entrySet()) {
+            List<SubtreePos> mumList = e.getValue()._1();
+            List<SubtreePos> dadList = e.getValue()._2();
+            sum += mumList.size() * dadList.size();
+        }
+        return sum;
+    }
+
+    static AA<SubtreePos> selectXoverPoses(int ball, Map<Type,AA<List<SubtreePos>>> intersection, Random rand) {
+        int sum = 0;
+        for (Map.Entry<Type,AA<List<SubtreePos>>> e : intersection.entrySet()) {
+            AA<List<SubtreePos>> pair = e.getValue();
+            List<SubtreePos> mumList = pair._1();
+            List<SubtreePos> dadList = pair._2();
+
+            sum += mumList.size() * dadList.size();
+            if (sum > ball) {
+                SubtreePos mumPos = F.randomElement(mumList,rand);
+                SubtreePos dadPos = F.randomElement(dadList,rand);
+                return new AA<>(mumPos, dadPos);
+            }
+        }
+        throw new Error("Unreachable!");
     }
 
     default SubtreePos getRandomSubtreePos(Random rand) {
@@ -154,7 +237,7 @@ public interface AppTree {
             }
         }
 
-        public Leaf randomlyShiftOneParam(Random rand, List<AB<Integer,Double>> shiftsWithProbabilities) {
+        Leaf randomlyShiftOneParam(Random rand, List<AB<Integer,Double>> shiftsWithProbabilities) {
             Params newParams = params.randomlyShiftOneParam(rand, shiftsWithProbabilities);
             return new Leaf(sym, type, originalType, debugInfo, newParams);
         }

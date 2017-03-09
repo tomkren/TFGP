@@ -2,6 +2,10 @@ package cz.tomkren.fishtron.ugen.multi.gpml;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
+import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
+import cz.tomkren.fishtron.ugen.multi.MultiEvaOpts;
+import cz.tomkren.fishtron.ugen.multi.MultiEvolution;
+import cz.tomkren.fishtron.ugen.multi.MultiLogger;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
@@ -17,12 +21,13 @@ import java.io.IOException;
 
 public class MultiGPML {
 
-    private static final String version = "4.0.1 beta";
+    private static final String version = "4.0.1 alpha";
 
     private static void run(String jsonConfigFilename, String logPath) throws JSONException, IOException, XmlRpcException {
         Log.it("Program arguments:");
         Log.it("  jsonConfigFileName : " + jsonConfigFilename);
-        Log.itln("  logPath            : " + logPath);
+        Log.it("  logPath            : " + logPath);
+        Log.it();
 
         String configStr = Files.toString(new File(jsonConfigFilename), Charsets.UTF_8);
         Log.itln(jsonConfigFilename +" = "+ configStr);
@@ -30,23 +35,22 @@ public class MultiGPML {
 
         Checker checker = Checker.mk(config);
 
-        /*
-        MultiEvolutionSetup setup = new MultiEvolutionSetup(config, checker);
-        EvolutionOpts<AppTreeIndiv> opts = setup.getOpts();
-        Logger<AppTreeIndiv> dagLogger = new DagLogger(config, logPath, checker, opts);
+        MultiEvaSetup setup = new MultiEvaSetup(config, checker);
+        MultiEvaOpts<AppTreeMI> opts = setup.getOpts();
+        MultiLogger<AppTreeMI> dagLogger = new DagMultiLogger(config, logPath, checker, opts);
 
         Log.it("Config [OK] ...");
 
-        Evolution<AppTreeIndiv> eva = new Evolution<>(opts, dagLogger);
+        MultiEvolution<AppTreeMI> eva = new MultiEvolution<>(opts, dagLogger);
         eva.startIterativeEvolution(1);
 
         if (config.getBoolean("killServer")) {
             String quitMsg = setup.quitServer();
-            Log.it("\n\nKilling server, server kill response: "+ quitMsg);
+            Log.it("\n\n");
+            Log.it("Killing server, server kill response: "+ quitMsg);
         }
 
         checker.results();
-        */
     }
 
     private static int numRestarts = 0;

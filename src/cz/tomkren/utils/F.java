@@ -277,6 +277,11 @@ public class F {
         return xs.get(r.nextInt(xs.size()));
     }
 
+    public static <T> T randomElement(Collection<T> xs, Random r) {
+        return randomElement(F.map(xs,x->x),r);
+    }
+
+
     public static <T> T removeRandomElement(List<T> xs, Random r) {
         int i = r.nextInt(xs.size());
         return xs.remove(i);

@@ -21,7 +21,6 @@ import java.util.List;
 
 public class DagLogger implements Logger<AppTreeIndiv> {
 
-
     private final Checker checker;
 
     private final File runLogDir;

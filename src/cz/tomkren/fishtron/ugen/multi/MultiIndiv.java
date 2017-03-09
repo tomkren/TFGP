@@ -27,4 +27,23 @@ public interface MultiIndiv {
 
     default double getFitness(int i) {return getFitness().get(i);}
 
+
+
+    static <Indiv extends MultiIndiv> int compare(Indiv i1, Indiv i2) {
+
+        int front1 = i1.getFront();
+        int front2 = i2.getFront();
+
+        if (front1 < front2) {return -1;} // i1 wins
+        if (front1 > front2) {return  1;} // i2 wins
+
+        double dist1 = i1.getCrowdingDistance();
+        double dist2 = i2.getCrowdingDistance();
+
+        if (dist1 > dist2) {return -1;} // i1 wins
+        if (dist1 < dist2) {return  1;} // i2 wins
+
+        return 0; // tie
+    }
+
 }

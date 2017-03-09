@@ -24,15 +24,11 @@ public class BasicAppTreeXover implements Operator<AppTreeIndiv> {
     private final int maxTreeSize;
     private final JSONObject opts;
 
-    public BasicAppTreeXover(JSONObject opts, Random rand) {
+    BasicAppTreeXover(JSONObject opts, Random rand) {
         this.opts = opts;
         this.operatorProbability = opts.getDouble("probability");
         this.maxTreeSize = opts.getInt("maxTreeSize");
         this.rand = rand;
-    }
-
-    public BasicAppTreeXover(double operatorProbability, int maxTreeSize, Random rand) {
-        this(F.obj("probability", operatorProbability, "maxTreeSize", maxTreeSize), rand);
     }
 
     @Override public JSONObject getOperatorInfo() {return opts;}
@@ -45,7 +41,7 @@ public class BasicAppTreeXover implements Operator<AppTreeIndiv> {
         AppTreeIndiv dad = parents.get(1);
         EvalLib lib = mum.getLib();
 
-        AA<AppTree> children = xover(mum.getTree(), dad.getTree());
+        AA<AppTree> children = AppTree.xover(mum.getTree(), dad.getTree(), maxTreeSize, rand);
 
         AppTreeIndiv child1 = new AppTreeIndiv(children._1(), lib);
         AppTreeIndiv child2 = new AppTreeIndiv(children._2(), lib);
@@ -53,53 +49,6 @@ public class BasicAppTreeXover implements Operator<AppTreeIndiv> {
     }
 
 
-    private AA<AppTree> xover(AppTree mum, AppTree dad) {
-
-        TMap<SubtreePos> mumPoses = mum.getAllSubtreePoses_byTypes();
-        TMap<SubtreePos> dadPoses = dad.getAllSubtreePoses_byTypes();
-
-        Map<Type,AA<List<SubtreePos>>> intersection = TMap.intersection(mumPoses, dadPoses);
-
-        int numPossiblePairs = getNumPossiblePairs(intersection);
-        int ball = rand.nextInt(numPossiblePairs);
-        AA<SubtreePos> selectedPoses = selectPoses(ball, intersection);
-        SubtreePos mumPos = selectedPoses._1();
-        SubtreePos dadPos = selectedPoses._2();
-
-        AA<AppTree> children = AppTree.xover(mum, dad, mumPos, dadPos);
-
-        return new AA<>(
-                children._1().size() <= maxTreeSize ? children._1() : mum ,
-                children._2().size() <= maxTreeSize ? children._2() : dad
-        );
-    }
-
-    private static int getNumPossiblePairs(Map<Type, AA<List<SubtreePos>>> intersection) {
-        int sum = 0;
-        for (Map.Entry<Type,AA<List<SubtreePos>>> e : intersection.entrySet()) {
-            List<SubtreePos> mumList = e.getValue()._1();
-            List<SubtreePos> dadList = e.getValue()._2();
-            sum += mumList.size() * dadList.size();
-        }
-        return sum;
-    }
-
-    private AA<SubtreePos> selectPoses(int ball, Map<Type,AA<List<SubtreePos>>> intersection) {
-        int sum = 0;
-        for (Map.Entry<Type,AA<List<SubtreePos>>> e : intersection.entrySet()) {
-            AA<List<SubtreePos>> pair = e.getValue();
-            List<SubtreePos> mumList = pair._1();
-            List<SubtreePos> dadList = pair._2();
-
-            sum += mumList.size() * dadList.size();
-            if (sum > ball) {
-                SubtreePos mumPos = F.randomElement(mumList,rand);
-                SubtreePos dadPos = F.randomElement(dadList,rand);
-                return new AA<>(mumPos, dadPos);
-            }
-        }
-        throw new Error("Unreachable!");
-    }
 
 
     public static void main(String[] args) {
@@ -119,7 +68,7 @@ public class BasicAppTreeXover implements Operator<AppTreeIndiv> {
         TMap<SubtreePos> mumPoses = mum.getAllSubtreePoses_byTypes();
         TMap<SubtreePos> dadPoses = dad.getAllSubtreePoses_byTypes();
         Map<Type,AA<List<SubtreePos>>> intersection = TMap.intersection(mumPoses, dadPoses);
-        int numPossiblePairs = getNumPossiblePairs(intersection);
+        int numPossiblePairs = AppTree.getNumPossibleXoverPairs(intersection);
 
         Log.it("numPossiblePairs: "+numPossiblePairs);
 
@@ -128,12 +77,12 @@ public class BasicAppTreeXover implements Operator<AppTreeIndiv> {
             Log.it(type);
         }
 
-        BasicAppTreeXover xOver = new BasicAppTreeXover(1.0, 50, ch.getRandom());
+        int maxTreeSize = 50;
 
         int numTries = 100000;
         Map<String,Integer> combos = new TreeMap<>(AppTree.compareStrs);
         for (int i = 0; i < numTries; i++) {
-            AA<AppTree> children = xOver.xover(mum, dad);
+            AA<AppTree> children = AppTree.xover(mum, dad, maxTreeSize, ch.getRandom());
             combos.merge(children.toString(), 1, F::plus);
         }
 

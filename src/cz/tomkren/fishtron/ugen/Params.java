@@ -84,6 +84,15 @@ public class Params {
         return ret;
     }
 
+    public static List<AB<Integer,Double>> parseShifts(JSONArray jsonArray) {
+        List<AB<Integer,Double>> ret = new ArrayList<>(jsonArray.length());
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONArray pair = jsonArray.getJSONArray(i);
+            ret.add(new AB<>(pair.getInt(0), pair.getDouble(1)));
+        }
+        return ret;
+    }
+
 
     public static void main(String[] args) {
 

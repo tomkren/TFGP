@@ -15,7 +15,7 @@ public class BasicMultiEvaOpts<Indiv extends MultiIndiv> implements MultiEvaOpts
     private int numIndividualsToGenerate;
     private int minPopulationSizeToOperate;
     private int maxPopulationSize;
-    private boolean saveBests;
+    //private boolean saveBests;
     private int timeLimit;
     private long sleepTime;
     private IndivGenerator<Indiv> generator;
@@ -26,7 +26,7 @@ public class BasicMultiEvaOpts<Indiv extends MultiIndiv> implements MultiEvaOpts
     private Random rand;
 
     public BasicMultiEvaOpts(int numEvaluations, int numIndividualsToGenerate, int minPopulationSizeToOperate,
-                             int maxPopulationSize, boolean saveBests, int timeLimit, long sleepTime,
+                             int maxPopulationSize, /*boolean saveBests,*/ int timeLimit, long sleepTime,
                              IndivGenerator<Indiv> generator,
                              List<Boolean> isMaxims, MultiEvalManager<Indiv> evalManager,
                              MultiSelection<Indiv> parentSelection,
@@ -36,7 +36,7 @@ public class BasicMultiEvaOpts<Indiv extends MultiIndiv> implements MultiEvaOpts
         this.numIndividualsToGenerate = numIndividualsToGenerate;
         this.minPopulationSizeToOperate = minPopulationSizeToOperate;
         this.maxPopulationSize = maxPopulationSize;
-        this.saveBests = saveBests;
+        //this.saveBests = saveBests;
         this.timeLimit = timeLimit;
         this.sleepTime = sleepTime;
         this.generator = generator;
@@ -51,7 +51,7 @@ public class BasicMultiEvaOpts<Indiv extends MultiIndiv> implements MultiEvaOpts
     @Override public int getMinPopulationSizeToOperate() {return minPopulationSizeToOperate;}
     @Override public int getNumIndividualsToGenerate() {return numIndividualsToGenerate;}
     @Override public int getMaxPopulationSize() {return maxPopulationSize;}
-    @Override public boolean saveBests() {return saveBests;}
+    //@Override public boolean saveBests() {return saveBests;}
     @Override public int getTimeLimit() {return timeLimit;}
     @Override public long getSleepTime() {return sleepTime;}
     @Override public IndivGenerator<Indiv> getGenerator() {return generator;}
