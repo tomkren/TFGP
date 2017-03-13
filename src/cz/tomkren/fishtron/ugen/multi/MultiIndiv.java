@@ -1,12 +1,15 @@
 package cz.tomkren.fishtron.ugen.multi;
 
+import cz.tomkren.fishtron.ugen.eval.EvalLib;
+
 import java.util.List;
 
 /**Created by tom on 06.03.2017.*/
 
 public interface MultiIndiv {
 
-    Object computeValue();
+    Object computeValue(EvalLib lib);
+    Object getValue();
 
     List<Double> getFitness();
     void setFitness(List<Double> fitness);

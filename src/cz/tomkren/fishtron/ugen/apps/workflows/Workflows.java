@@ -6,6 +6,7 @@ import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.AppTree;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
+import cz.tomkren.fishtron.ugen.Params;
 import cz.tomkren.fishtron.ugen.eval.*;
 import cz.tomkren.fishtron.workflows.MyList;
 import cz.tomkren.fishtron.workflows.TypedDag;
@@ -189,7 +190,9 @@ public class Workflows {
     }
 
     private static EvalCode mkMethod(String name) {
-        return (params,type) -> {
+        return (leaf,eval) -> {
+            Type type = leaf.getType();
+            Params params = leaf.getParams();
             AA<Type> p = getDagInOutTypes(type);
             JSONObject jsonParams = params == null ? new JSONObject() : params.toJson();
             return new TypedDag(name, p._1(), p._2(), jsonParams, null);

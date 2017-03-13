@@ -1,10 +1,10 @@
 package cz.tomkren.fishtron.ugen.eval;
 
-import cz.tomkren.fishtron.types.Type;
-import cz.tomkren.fishtron.ugen.Params;
+import cz.tomkren.fishtron.ugen.AppTree;
+import java.util.function.Function;
 
 /** Created by user on 14. 2. 2017. */
 
 public interface EvalCode {
-    Object evalCode(Params params, Type t);
+    Object evalCode(AppTree.Leaf leaf, Function<AppTree,Object> evalFun);
 }

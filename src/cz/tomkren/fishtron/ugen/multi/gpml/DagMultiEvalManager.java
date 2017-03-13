@@ -1,6 +1,7 @@
 package cz.tomkren.fishtron.ugen.multi.gpml;
 
 import cz.tomkren.fishtron.sandbox2.Dag_JsonEvalInterface;
+import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import cz.tomkren.fishtron.ugen.multi.MultiEvalResult;
 import cz.tomkren.fishtron.ugen.multi.MultiIndiv;
 import cz.tomkren.fishtron.workflows.TypedDag;
@@ -18,6 +19,8 @@ public class DagMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcServ
 
     private Dag_JsonEvalInterface dagEvaluator;
 
+    private EvalLib lib;
+
     private String getParamSetsMethodName;
     private String getCoreCountMethodName;
     private String submitMethodName;
@@ -28,8 +31,10 @@ public class DagMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcServ
     private Map<Integer, AB<Indiv,JSONObject>> id2indivData;
     private int nextId;
 
-    DagMultiEvalManager(String getParamSetsMethodName, String getCoreCountMethodName, String submitMethodName,
-                               String getEvaluatedMethodName, String evaluatorURL, String datasetFilename) {
+    DagMultiEvalManager(EvalLib lib, String getParamSetsMethodName, String getCoreCountMethodName, String submitMethodName,
+                        String getEvaluatedMethodName, String evaluatorURL, String datasetFilename) {
+
+        this.lib = lib;
 
         this.getParamSetsMethodName = getParamSetsMethodName;
         this.getCoreCountMethodName = getCoreCountMethodName;
@@ -66,7 +71,7 @@ public class DagMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcServ
             indivJson.put("id",nextId);
             id2indivData.put(nextId, indivData);
 
-            Object indivValue = indiv.computeValue();
+            Object indivValue = indiv.computeValue(lib); // INDIVIDUAL EVALUATION
             JSONObject jsonCode = dagToJson(indivValue);
 
             JSONObject indivDataToSubmit = F.obj(

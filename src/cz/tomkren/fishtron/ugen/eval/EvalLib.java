@@ -21,7 +21,7 @@ public class EvalLib {
         for (AB<String,Object> def : defs) {
             String sym = def._1();
             Object val = def._2();
-            EvalCode code = (val instanceof EvalCode) ? (EvalCode) val : (p,t) -> val;
+            EvalCode code = (val instanceof EvalCode) ? (EvalCode) val : (l,e) -> val;
             codes.put(sym, code);
         }
     }
@@ -100,7 +100,7 @@ public class EvalLib {
         } else if (tree instanceof AppTree.App) {
             return eval_app((AppTree.App) tree);
         } else {
-            throw new Error("Unsupported AppTree subclass: "+tree.getClass());
+            throw new Error("Unsupported AppTree implementation: "+tree.getClass());
         }
 
     }
@@ -113,7 +113,7 @@ public class EvalLib {
             throw new Error("Undefined symbol "+sym+".");
         }
 
-        return code.evalCode(leaf.getParams(), leaf.getType());
+        return code.evalCode(leaf/*.getParams(), leaf.getType()*/, this::eval);
     }
 
     @SuppressWarnings("unchecked")
@@ -123,11 +123,19 @@ public class EvalLib {
         AppTree argTree = app.getArgTree();
 
         Object funObject = eval(funTree);
-        Object argObject = eval(argTree);
 
-        Function<Object,Object> fun = (Function<Object,Object>) funObject;
+        if (funObject instanceof LazyFunObject) {
 
-        return fun.apply(argObject);
+            LazyFunObject lazyFunObject = (LazyFunObject) funObject;
+            return lazyFunObject.lazyApply(argTree);
+
+        } else {
+
+            Object argObject = eval(argTree);
+            Function<Object,Object> fun = (Function<Object,Object>) funObject;
+            return fun.apply(argObject);
+
+        }
     }
 
 }

@@ -22,16 +22,13 @@ public class AppTreeMIGenerator implements IndivGenerator<AppTreeMI> {
     private final Type goalType;
     private final int maxTreeSize;
     private final Gen gen;
-    private final EvalLib lib;
     private final JSONObject allParamsInfo;
     private final Random rand;
 
-    public AppTreeMIGenerator(Type goalType, int maxTreeSize, Gen gen, EvalLib lib,
-                                 JSONObject allParamsInfo) {
+    public AppTreeMIGenerator(Type goalType, int maxTreeSize, Gen gen, JSONObject allParamsInfo) {
         this.goalType = goalType;
         this.maxTreeSize = maxTreeSize;
         this.gen = gen;
-        this.lib = lib;
         this.allParamsInfo = allParamsInfo;
         this.rand = gen.getRand();
     }
@@ -39,7 +36,7 @@ public class AppTreeMIGenerator implements IndivGenerator<AppTreeMI> {
     @Override
     public List<AppTreeMI> generate(int numToGenerate) {
         Set<AppTree> treeSet = AppTreeIndivGenerator.generate_cleverSizes(numToGenerate, goalType, maxTreeSize,gen, allParamsInfo, rand);
-        return F.map(treeSet, tree -> new AppTreeMI(tree, lib));
+        return F.map(treeSet, AppTreeMI::new);
     }
 
 }

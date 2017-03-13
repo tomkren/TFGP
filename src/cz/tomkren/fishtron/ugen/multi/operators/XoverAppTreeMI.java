@@ -34,12 +34,11 @@ public class XoverAppTreeMI implements Operator<AppTreeMI> {
     public List<AppTreeMI> operate(List<AppTreeMI> parents) {
         AppTreeMI mum = parents.get(0);
         AppTreeMI dad = parents.get(1);
-        EvalLib lib = mum.getLib();
 
         AA<AppTree> children = AppTree.xover(mum.getTree(), dad.getTree(), maxTreeSize, rand);
 
-        AppTreeMI child1 = new AppTreeMI(children._1(), lib);
-        AppTreeMI child2 = new AppTreeMI(children._2(), lib);
+        AppTreeMI child1 = new AppTreeMI(children._1());
+        AppTreeMI child2 = new AppTreeMI(children._2());
         return Arrays.asList(child1,child2);
     }
 

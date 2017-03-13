@@ -57,15 +57,6 @@ public class MultiEvaSetup {
 
         boolean dummyFitnessMode = getBoolean(config, "dummyFitness", false);
 
-        if (dummyFitnessMode) {
-            //evalManager = new DummyManager<>();
-            throw new TODO(); // todo
-        } else {
-            evalManager = new DagMultiEvalManager<>("get_param_sets", "get_core_count", "submit", "get_evaluated", evalServerUrl, datasetFilename);
-        }
-
-        JSONObject allParamsInfo = evalManager.getAllParamsInfo(datasetFilename);
-        Log.itln("allParamsInfo = "+ allParamsInfo);
 
         Type goal = Workflows.goal;
 
@@ -75,11 +66,24 @@ public class MultiEvaSetup {
         EvalLib lib = libAndGamma._1();
         Gamma gamma = libAndGamma._2();
 
+
+        if (dummyFitnessMode) {
+            //evalManager = new DummyManager<>();
+            throw new TODO(); // todo
+        } else {
+            evalManager = new DagMultiEvalManager<>(lib,"get_param_sets", "get_core_count", "submit", "get_evaluated", evalServerUrl, datasetFilename);
+        }
+
+        JSONObject allParamsInfo = evalManager.getAllParamsInfo(datasetFilename);
+        Log.itln("allParamsInfo = "+ allParamsInfo);
+
+
+
         Log.it("Gamma = \n"+gamma);
 
         Gen gen = new Gen(gamma, rand);
 
-        IndivGenerator<AppTreeMI> generator = new AppTreeMIGenerator(goal, generatingMaxTreeSize, gen, lib, allParamsInfo);
+        IndivGenerator<AppTreeMI> generator = new AppTreeMIGenerator(goal, generatingMaxTreeSize, gen, allParamsInfo);
         MultiSelection<AppTreeMI> parentSelection = new MultiSelection.Tournament<>(tournamentBetterWinsProbability, rand);
 
         JSONArray operatorsConfig = config.has("operators") ? config.getJSONArray("operators") : new JSONArray();

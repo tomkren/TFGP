@@ -1,6 +1,7 @@
 package cz.tomkren.fishtron.ugen.multi.gpml;
 
 import com.google.common.base.Strings;
+import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import cz.tomkren.fishtron.ugen.multi.*;
 import cz.tomkren.fishtron.workflows.TypedDag;
 import cz.tomkren.utils.Checker;
@@ -57,6 +58,8 @@ public class DagMultiLogger implements MultiLogger<AppTreeMI> {
         return dir;
     }
 
+    // TODO pročesat to tu například geValue je tu dvakrát a přišlo mi letmo že by to šlo nějak pročistit
+
     @Override
     public void iterativeLog(int run, int evalId, MultiPopulation<AppTreeMI> pop, MultiEvalResult<AppTreeMI> evalResult) {
 
@@ -82,7 +85,7 @@ public class DagMultiLogger implements MultiLogger<AppTreeMI> {
     }
 
     private static String showIndivRow(int ods, String label, AppTreeMI ind) {
-        String indivCode = new JSONObject(((TypedDag) ind.computeValue()).toJson()).toString();
+        String indivCode = new JSONObject(((TypedDag) ind.getValue()).toJson()).toString();
         return Strings.repeat(" ",ods)+ label +(label.length()>0?": ":"")+ "performance: "+ind.getFitness(0)+ ", time: "+ind.getFitness(1) + "\t" + indivCode;
     }
 
@@ -91,7 +94,7 @@ public class DagMultiLogger implements MultiLogger<AppTreeMI> {
     }
 
     private static JSONObject dagTreeToJson(AppTreeMI indiv, JSONObject indivData) {
-        TypedDag dag = (TypedDag) indiv.computeValue();
+        TypedDag dag = (TypedDag) indiv.getValue();
         return F.obj(
                 "indivData", indivData,
                 "descriptions", F.obj(

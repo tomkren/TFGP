@@ -25,6 +25,6 @@ public abstract class MutationAppTreeMI implements Operator<AppTreeMI> {
     public List<AppTreeMI> operate(List<AppTreeMI> parents) {
         AppTreeMI parent = parents.get(0);
         AppTree child = mutate(parent.getTree());
-        return F.singleton(new AppTreeMI(child, parent.getLib()));
+        return F.singleton(new AppTreeMI(child));
     }
 }

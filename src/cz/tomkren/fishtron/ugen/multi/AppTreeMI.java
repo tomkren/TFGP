@@ -10,8 +10,8 @@ import java.util.List;
 public class AppTreeMI implements MultiIndiv {
 
     private final AppTree tree;
-    private final EvalLib lib; // todo pokud to pude elegantně, tak odebrat a radši mít jen jednou v evaluatoru
-    private Object computedValue;
+    //private final EvalLib lib; // todo pokud to pude elegantně, tak odebrat a radši mít jen jednou v evaluatoru
+    private Object value;
 
     private int id;
     private List<Double> fitness;
@@ -19,20 +19,23 @@ public class AppTreeMI implements MultiIndiv {
     private double crowdingDistance;
 
 
-    public AppTreeMI(AppTree tree, EvalLib lib) {
+    public AppTreeMI(AppTree tree/*, EvalLib lib*/) {
         this.tree = tree;
-        this.lib = lib;
+        //this.lib = lib;
     }
 
     public AppTree getTree() {return tree;}
-    public EvalLib getLib() {return lib;}
+    //public EvalLib getLib() {return lib;}
 
     @Override
-    public Object computeValue() {
-        if (computedValue == null) {
-            computedValue = lib.eval(tree);
-        }
-        return computedValue;
+    public Object computeValue(EvalLib lib) {
+        value = lib.eval(tree);
+        return value;
+    }
+
+    @Override
+    public Object getValue() {
+        return value;
     }
 
     @Override
