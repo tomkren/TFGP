@@ -7,6 +7,8 @@ import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.Log;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.function.Function;
 
@@ -46,10 +48,14 @@ public class EvalTester {
     }
 
     private static void testLib(Checker ch, int k_max, EvalLib lib, Gamma gamma, String goalStr, boolean testEvaluation) {
-        testLib(ch, k_max, lib, gamma, Types.parse(goalStr), testEvaluation, x->x);
+        testLib(ch, k_max, lib, gamma, Types.parse(goalStr), testEvaluation, x->x, null);
     }
 
     public static void testLib(Checker ch, int k_max, EvalLib lib, Gamma gamma, Type goal, boolean testEvaluation, Function<Object,Object> transformResult) {
+        testLib(ch, k_max, lib, gamma, goal, testEvaluation, transformResult, null);
+    }
+
+    public static void testLib(Checker ch, int k_max, EvalLib lib, Gamma gamma, Type goal, boolean testEvaluation, Function<Object,Object> transformResult, JSONObject allParamsInfo) {
 
         Log.it("Goal = "+goal);
 
@@ -68,6 +74,9 @@ public class EvalTester {
 
                 String resultStr = "";
                 if (testEvaluation) {
+                    if (allParamsInfo != null) {
+                        tree = tree.randomizeParams(allParamsInfo, ch.getRandom());
+                    }
                     Object result = lib.eval(tree);
                     Object transformedResult = transformResult.apply(result);
                     resultStr = transformedResult + " \t = \t ";

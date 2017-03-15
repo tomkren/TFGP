@@ -3,7 +3,6 @@ package cz.tomkren.fishtron.ugen.apps.cellplaza;
 import cz.tomkren.utils.F;
 
 import java.util.*;
-import java.util.function.Function;
 
 /**Created by tom on 12.03.2017.*/
 
@@ -21,10 +20,10 @@ public interface Rule {
             bits.add(code % 2 == 1);
             code /= 2;
         }
-        return mk(bits);
+        return fromBits(bits);
     }
 
-    static Rule mk(List<Boolean> bits) {
+    static Rule fromBits(List<Boolean> bits) {
         if (bits.size() != numBits) {throw new Error("bits has wrong size: "+bits.size());}
 
         int num1 = F.filter(bits.subList(0,neighbourCases),x->x).size();

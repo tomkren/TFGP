@@ -236,6 +236,14 @@ public class CellWorld {
         stateImg.writeImage(plazaDir+"/run/state"+getStepXXX()+".png");
     }
 
+    String writeState(int indivId) {
+        PlazaImg stateImg = toStateImg();
+        String filename = "indivs/indiv"+indivId+".png";
+        stateImg.writeImage(plazaDir+"/"+filename);
+        return filename;
+    }
+
+
     private String getStepXXX() {
         return (step<100?"0":"") + (step<10?"0":"") + step;
     }
