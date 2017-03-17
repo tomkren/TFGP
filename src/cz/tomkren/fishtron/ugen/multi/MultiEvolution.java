@@ -46,7 +46,7 @@ public class MultiEvolution<Indiv extends MultiIndiv> {
             }
 
             updatePopulation(evalResult);
-            logger.iterativeLog(run, numEvaluatedIndividuals, population, evalResult);
+            logger.log(run, numEvaluatedIndividuals, evalResult);
 
             if (evalResult.isEmpty()) {
                 F.sleep(opts.getSleepTime());

@@ -4,6 +4,7 @@
   "dataset" : "winequality-white.csv",
   "killServer": true,
   "dummyFitness": false,
+  "isMaxims": [true,false],
 
   "timeLimit": 14400,
 

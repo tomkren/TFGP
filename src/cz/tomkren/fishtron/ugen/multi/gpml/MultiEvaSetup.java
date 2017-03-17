@@ -11,10 +11,7 @@ import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import cz.tomkren.fishtron.ugen.multi.*;
 import cz.tomkren.fishtron.ugen.multi.operators.AppTreeMIGenerator;
 import cz.tomkren.fishtron.ugen.multi.operators.MultiGenOpFactory;
-import cz.tomkren.utils.AB;
-import cz.tomkren.utils.Checker;
-import cz.tomkren.utils.Log;
-import cz.tomkren.utils.TODO;
+import cz.tomkren.utils.*;
 import org.apache.xmlrpc.XmlRpcException;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -68,8 +65,7 @@ public class MultiEvaSetup {
 
 
         if (dummyFitnessMode) {
-            //evalManager = new DummyManager<>();
-            throw new TODO(); // todo
+            evalManager = new DummyMultiEvalManager<>(lib);
         } else {
             evalManager = new DagMultiEvalManager<>(lib,"get_param_sets", "get_core_count", "submit", "get_evaluated", evalServerUrl, datasetFilename);
         }
@@ -90,8 +86,8 @@ public class MultiEvaSetup {
         Distribution<Operator<AppTreeMI>> operators;
         operators = MultiGenOpFactory.mkOperators(operatorsConfig, rand, gen, allParamsInfo);
 
-        // TODO načíst z konfigu !
-        List<Boolean> isMaxims = Arrays.asList(true, false); // performance maximization , time minimization
+        // todo udelat bezpečnějc dyštak
+        List<Boolean> isMaxims = F.map(config.getJSONArray("isMaxims"), x->(boolean)x); //Arrays.asList(true, false); // performance maximization , time minimization
 
         opts = new BasicMultiEvaOpts<>(numEvaluations, numToGen, minPopToOperate, maxPopSize, /*saveBest,*/ timeLimit, sleepTime,
                 generator, isMaxims, evalManager, parentSelection, operators, rand);

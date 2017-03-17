@@ -1,9 +1,12 @@
 package cz.tomkren.fishtron.ugen.multi.gpml;
 
 import com.google.common.base.Strings;
+import com.sun.org.apache.xpath.internal.operations.Bool;
+import cz.tomkren.fishtron.ugen.AppTree;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import cz.tomkren.fishtron.ugen.multi.*;
 import cz.tomkren.fishtron.workflows.TypedDag;
+import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
@@ -11,6 +14,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**Created by tom on 09.03.2017.*/
 
@@ -27,6 +32,7 @@ public class DagMultiLogger implements MultiLogger<AppTreeMI> {
         this.opts = opts;
         this.checker = checker;
 
+        initBestSoFar();
 
         if (!(new File(logPath).exists())) {
             boolean success = new File(logPath).mkdirs();
@@ -61,28 +67,95 @@ public class DagMultiLogger implements MultiLogger<AppTreeMI> {
     // TODO pročesat to tu například geValue je tu dvakrát a přišlo mi letmo že by to šlo nějak pročistit
 
     @Override
-    public void iterativeLog(int run, int evalId, MultiPopulation<AppTreeMI> pop, MultiEvalResult<AppTreeMI> evalResult) {
+    public void log(int run, int evalId, MultiEvalResult<AppTreeMI> evalResult) {
 
         if (evalResult.isEmpty()) {
             Log.it_noln("=");
             return;
         }
 
+        // stdout logging :
         Log.it();
         Log.it("eval #"+ evalId + (opts==null ? "" : "/"+opts.getNumEvaluations() ) );
-
+        JSONObject bestInfo = logBest(evalId, evalResult);
         Log.it(" Evaluated individuals:");
         Log.list(F.map(evalResult.getIndividuals(), indiv -> showIndivRow(2,"",indiv) ));
 
+        // to json file logging :
         JSONObject evalInfo = F.obj(
                 "evalId", evalId,
                 "time", checker.getTime(),
-                "evalResult", evalResultToJson(evalResult)
+                "evalResult", evalResultToJson(evalResult),
+                "bestInfo", bestInfo
         );
-
         String evalLogFilename = "eval_" + evalId + ".json";
         writeToFile(evalsLogDir, evalLogFilename, evalInfo.toString(2));
     }
+
+
+    private AppTreeMI bestIndivSoFar;
+    private int bestEvalIdSoFar;
+    private int bestIndivIdSoFar;
+    private List<Double> bestFitnessSoFar;
+
+    private void initBestSoFar() {
+        List<Boolean> isMaxims = opts.getIsMaximizationList();
+
+        bestIndivSoFar = null;
+        bestEvalIdSoFar = -1;
+        bestIndivIdSoFar = -1;
+        bestFitnessSoFar = new ArrayList<>(isMaxims.size());
+
+        for (Boolean isMaxim : isMaxims) {
+            bestFitnessSoFar.add(isMaxim ? -Double.MAX_VALUE : Double.MAX_VALUE);
+        }
+    }
+
+    private JSONObject logBest(int evalId, MultiEvalResult<AppTreeMI> evalResult) {
+        boolean bestInThisResult = false;
+
+        for (AB<AppTreeMI,JSONObject> evalRes : evalResult.getEvalResult()) {
+            AppTreeMI indiv = evalRes._1();
+            List<Double> newFitness = indiv.getFitness();
+            if (isNewBest(newFitness)) {
+                bestFitnessSoFar = newFitness;
+                bestIndivSoFar = indiv;
+                bestEvalIdSoFar  = evalId; // TODO pokud je evalResult víc nežjeden jedinec tak se chová trochu divně
+                bestIndivIdSoFar = evalRes._2().getInt("id");
+                bestInThisResult = true;
+            }
+        }
+
+        JSONObject bestInfo = F.obj(
+                "isInThisResult", bestInThisResult,
+                "fitness", F.jsonMap(bestFitnessSoFar),
+                "indivId", bestIndivIdSoFar,
+                "evalId", bestEvalIdSoFar
+        );
+
+        String bestLabel = bestInThisResult ? "FOUND NEW BEST" : "previous best so far";
+
+        Log.it(showIndivRow(1, bestLabel, bestIndivSoFar));
+
+        return bestInfo;
+    }
+
+    private boolean isNewBest(List<Double> newFitness) {
+        List<Boolean> isMaxims = opts.getIsMaximizationList();
+        for (int iFitness = 0; iFitness < isMaxims.size(); iFitness++) {
+            double oldVal = bestFitnessSoFar.get(iFitness);
+            double newVal = newFitness.get(iFitness);
+            boolean isNewBetter = isMaxims.get(iFitness) ? newVal > oldVal : newVal < oldVal;
+
+            if (isNewBetter)      {return true;}
+            if (oldVal != newVal) {return false;}
+        }
+
+        // reachable only for the same fitness values in every sub-fitness
+        return true;
+    }
+
+
 
     private static String showIndivRow(int ods, String label, AppTreeMI ind) {
         String indivCode = new JSONObject(((TypedDag) ind.getValue()).toJson()).toString();
