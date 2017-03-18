@@ -1,6 +1,7 @@
 package cz.tomkren.fishtron.ugen.eval;
 
 import cz.tomkren.fishtron.ugen.trees.AppTree;
+import cz.tomkren.fishtron.ugen.trees.Leaf;
 
 import java.util.function.Function;
 
@@ -11,7 +12,7 @@ public interface Value extends EvalCode {
     Object getValue();
 
     @Override
-    default Object evalCode(AppTree.Leaf leaf, Function<AppTree,Object> eval) {
+    default Object evalCode(Leaf leaf, Function<AppTree,Object> eval) {
         return getValue();
     }
 }

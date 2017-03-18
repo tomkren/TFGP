@@ -5,6 +5,7 @@ import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.eval.*;
+import cz.tomkren.fishtron.ugen.trees.Leaf;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.F;
@@ -179,14 +180,14 @@ public class CellLib {
 
     private static class SeedImg implements EvalCode {
         @Override
-        public Object evalCode(AppTree.Leaf leaf, Function<AppTree, Object> evalFun) {
+        public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun) {
             return leaf.getParams().toJson().getString("filename");
         }
     }
 
     private static class NumSteps implements EvalCode {
         @Override
-        public Object evalCode(AppTree.Leaf leaf, Function<AppTree, Object> evalFun) {
+        public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun) {
             return leaf.getParams().toJson().getInt("n");
         }
     }

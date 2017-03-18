@@ -1,6 +1,8 @@
 package cz.tomkren.fishtron.ugen.eval;
 
+import cz.tomkren.fishtron.ugen.trees.App;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
+import cz.tomkren.fishtron.ugen.trees.Leaf;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
 import org.json.JSONArray;
@@ -93,17 +95,17 @@ public class EvalLib {
 
     public Object eval(AppTree tree) {
 
-        if (tree instanceof AppTree.Leaf) {
-            return eval_leaf((AppTree.Leaf) tree);
-        } else if (tree instanceof AppTree.App) {
-            return eval_app((AppTree.App) tree);
+        if (tree instanceof Leaf) {
+            return eval_leaf((Leaf) tree);
+        } else if (tree instanceof App) {
+            return eval_app((App) tree);
         } else {
             throw new Error("Unsupported AppTree implementation: "+tree.getClass());
         }
 
     }
 
-    private Object eval_leaf(AppTree.Leaf leaf) {
+    private Object eval_leaf(Leaf leaf) {
         String sym = leaf.getSym();
         EvalCode code = codes.get(sym);
 
@@ -115,7 +117,7 @@ public class EvalLib {
     }
 
     @SuppressWarnings("unchecked")
-    private Object eval_app(AppTree.App app) {
+    private Object eval_app(App app) {
 
         AppTree funTree = app.getFunTree();
         AppTree argTree = app.getArgTree();

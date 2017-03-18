@@ -1,6 +1,7 @@
 package cz.tomkren.fishtron.ugen.eval;
 
 import cz.tomkren.fishtron.ugen.trees.AppTree;
+import cz.tomkren.fishtron.ugen.trees.Leaf;
 import cz.tomkren.utils.Log;
 
 import java.util.function.Function;
@@ -11,7 +12,7 @@ public class If implements EvalCode {
 
 
     @Override
-    public Object evalCode(AppTree.Leaf leaf, Function<AppTree,Object> eval) {
+    public Object evalCode(Leaf leaf, Function<AppTree,Object> eval) {
 
         return (Function<Boolean,LazyFunObject>) p ->
             p ? (LazyFunObject) (a_tree -> (LazyFunObject) (b_tree -> eval.apply(a_tree)))
@@ -25,7 +26,7 @@ public class If implements EvalCode {
         If if1 = new If();
 
         Object if1val = if1.evalCode(null, x-> {
-            if(((AppTree.Leaf)x).getSym().equals("ERROR")) {
+            if(((Leaf)x).getSym().equals("ERROR")) {
                 throw new Error("ERROR!!!1!");
             } else {
                 return x;

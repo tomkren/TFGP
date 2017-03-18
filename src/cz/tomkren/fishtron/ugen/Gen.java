@@ -12,7 +12,9 @@ import cz.tomkren.fishtron.ugen.data.TsRes;
 import cz.tomkren.fishtron.ugen.data.PreTs1Res;
 import cz.tomkren.fishtron.ugen.nf.NF;
 import cz.tomkren.fishtron.ugen.tests.StaticGen;
+import cz.tomkren.fishtron.ugen.trees.App;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
+import cz.tomkren.fishtron.ugen.trees.Leaf;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
@@ -447,9 +449,9 @@ public class Gen {
 
     // "sym case"
     private AB<BigInteger,Integer> getBall_sym(AppTree tree, Type t_NF, int n, int lvl) {
-        if (!(tree instanceof AppTree.Leaf)) {throw new Error("Input tree must be a Leaf.");}
+        if (!(tree instanceof Leaf)) {throw new Error("Input tree must be a Leaf.");}
 
-        AppTree.Leaf leaf = (AppTree.Leaf) tree;
+        Leaf leaf = (Leaf) tree;
         String sym = leaf.getSym();
         BigInteger ball = BigInteger.ZERO;
 
@@ -466,9 +468,9 @@ public class Gen {
 
     // "app case"
     private  AB<BigInteger,Integer> getBall_app(AppTree tree, Type t_NF, int n, int lvl) {
-        if (!(tree instanceof AppTree.App)) {throw new Error("Input tree must be an App.");}
+        if (!(tree instanceof App)) {throw new Error("Input tree must be an App.");}
         int k = tree.size();
-        AppTree.App FX = (AppTree.App) tree;
+        App FX = (App) tree;
         AppTree F = FX.getFunTree();
         AppTree X = FX.getArgTree();
         int i_goal = FX.getFunTree().size();
