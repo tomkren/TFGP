@@ -33,9 +33,11 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
         return selection.select(individuals);
     }
 
-    // TODO určitě předělat na addIndividuals, pač neefektivní vzledem k tomu že se furt přepočítávaj ty fronty
+    // !!! TODO určitě předělat na addIndividuals, pač neefektivní vzledem k tomu že se furt přepočítávaj ty fronty !!! !!!
 
     boolean addIndividual(Indiv indiv) {
+
+        // todo mělo by se kontrolovat ještě před evaluací!
 
         if (individuals.contains(indiv) || removedIndividuals.contains(indiv)) {
             numUniqueCheckFails ++;
