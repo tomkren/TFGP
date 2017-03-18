@@ -1,11 +1,9 @@
 package cz.tomkren.fishtron.ugen.eval;
 
-import cz.tomkren.fishtron.ugen.AppTree;
+import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
-import cz.tomkren.utils.TODO;
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.*;
 import java.util.function.Function;

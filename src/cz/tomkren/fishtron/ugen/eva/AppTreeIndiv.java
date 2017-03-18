@@ -2,7 +2,7 @@ package cz.tomkren.fishtron.ugen.eva;
 
 import cz.tomkren.fishtron.eva.FitIndiv;
 import cz.tomkren.fishtron.eva.FitVal;
-import cz.tomkren.fishtron.ugen.AppTree;
+import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
 
 /** Created by user on 15. 2. 2017. */

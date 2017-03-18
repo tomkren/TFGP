@@ -1,17 +1,19 @@
-package cz.tomkren.fishtron.ugen;
+package cz.tomkren.fishtron.ugen.trees;
 
 import cz.tomkren.fishtron.terms.SubtreePos;
 import cz.tomkren.fishtron.types.Sub;
 import cz.tomkren.fishtron.types.TMap;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.Types;
+import cz.tomkren.fishtron.ugen.Fresh;
+import cz.tomkren.fishtron.ugen.Gamma;
+import cz.tomkren.fishtron.ugen.Gen;
+import cz.tomkren.fishtron.ugen.Params;
 import cz.tomkren.utils.AA;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
 
 import com.google.common.base.Joiner;
-import cz.tomkren.utils.TODO;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.*;

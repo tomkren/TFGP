@@ -1,14 +1,10 @@
 package cz.tomkren.fishtron.ugen.eva;
 
-import cz.tomkren.fishtron.terms.SubtreePos;
-import cz.tomkren.fishtron.ugen.AppTree;
+import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.Params;
 import cz.tomkren.utils.AB;
-import cz.tomkren.utils.F;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 

@@ -5,11 +5,11 @@ import cz.tomkren.utils.AB;
 
 /** Created by user on 2. 2. 2017. */
 
-class Fresh {
+public class Fresh {
     private final Type freshType;
     private final int nextVarId;
 
-    Fresh(Type typeToFresh, Type typeToAvoid, int n) {
+    public Fresh(Type typeToFresh, Type typeToAvoid, int n) {
         int n1 = typeToAvoid.getNextVarId(n);
         int n2 = typeToFresh.getNextVarId(n1);
         AB<Type,Integer> res = typeToFresh.freshenVars(n2);
@@ -17,6 +17,6 @@ class Fresh {
         nextVarId = res._2();
     }
 
-    Type getFreshType() {return freshType;}
-    int getNextVarId() {return nextVarId;}
+    public Type getFreshType() {return freshType;}
+    public int getNextVarId() {return nextVarId;}
 }

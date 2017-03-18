@@ -32,7 +32,7 @@ public class Params {
         return selectedParamIndices.hashCode();
     }
 
-    Params(JSONObject paramsInfo, Random rand) {
+    public Params(JSONObject paramsInfo, Random rand) {
         this.paramsInfo = paramsInfo;
         selectedParamIndices = new HashMap<>();
         for (Object key : paramsInfo.keySet()) {
@@ -58,7 +58,7 @@ public class Params {
         return toJson().toString();
     }
 
-    Params randomlyShiftOneParam(Random rand, List<AB<Integer,Double>> shiftsWithProbabilities) {
+    public Params randomlyShiftOneParam(Random rand, List<AB<Integer,Double>> shiftsWithProbabilities) {
         if (selectedParamIndices.isEmpty()) {return this;}
 
         String paramName = F.list(selectedParamIndices.entrySet()).randomElement(rand).getKey();

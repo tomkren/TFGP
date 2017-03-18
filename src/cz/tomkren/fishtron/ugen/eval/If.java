@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.ugen.eval;
 
-import cz.tomkren.fishtron.ugen.AppTree;
+import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.utils.Log;
 
 import java.util.function.Function;

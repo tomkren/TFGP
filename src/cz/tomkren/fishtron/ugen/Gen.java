@@ -12,6 +12,7 @@ import cz.tomkren.fishtron.ugen.data.TsRes;
 import cz.tomkren.fishtron.ugen.data.PreTs1Res;
 import cz.tomkren.fishtron.ugen.nf.NF;
 import cz.tomkren.fishtron.ugen.tests.StaticGen;
+import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;

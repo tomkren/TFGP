@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.ugen.eva;
 
 import cz.tomkren.fishtron.eva.Operator;
-import cz.tomkren.fishtron.ugen.AppTree;
+import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.utils.F;
 
 import java.util.List;

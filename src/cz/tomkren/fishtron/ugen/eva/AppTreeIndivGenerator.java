@@ -2,7 +2,7 @@ package cz.tomkren.fishtron.ugen.eva;
 
 import cz.tomkren.fishtron.eva.IndivGenerator;
 import cz.tomkren.fishtron.types.Type;
-import cz.tomkren.fishtron.ugen.AppTree;
+import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import cz.tomkren.utils.F;

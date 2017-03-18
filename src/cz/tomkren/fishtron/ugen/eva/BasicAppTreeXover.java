@@ -4,7 +4,7 @@ import cz.tomkren.fishtron.eva.Operator;
 import cz.tomkren.fishtron.terms.SubtreePos;
 import cz.tomkren.fishtron.types.TMap;
 import cz.tomkren.fishtron.types.Type;
-import cz.tomkren.fishtron.ugen.AppTree;
+import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.apps.workflows.Workflows;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;

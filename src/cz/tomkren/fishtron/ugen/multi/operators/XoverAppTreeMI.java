@@ -1,8 +1,7 @@
 package cz.tomkren.fishtron.ugen.multi.operators;
 
 import cz.tomkren.fishtron.eva.Operator;
-import cz.tomkren.fishtron.ugen.AppTree;
-import cz.tomkren.fishtron.ugen.eval.EvalLib;
+import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
 import cz.tomkren.utils.AA;
 import org.json.JSONObject;

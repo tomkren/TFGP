@@ -1,9 +1,6 @@
 package cz.tomkren.fishtron.ugen.multi.gpml;
 
 import com.google.common.base.Strings;
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import cz.tomkren.fishtron.ugen.AppTree;
-import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import cz.tomkren.fishtron.ugen.multi.*;
 import cz.tomkren.fishtron.workflows.TypedDag;
 import cz.tomkren.utils.AB;
