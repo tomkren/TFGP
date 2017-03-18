@@ -7,7 +7,9 @@ import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.F;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /** Created by tom on 7.11.2015.*/
@@ -129,6 +131,18 @@ public class Types {
         } else {
             throw new Error("funType must be TypeTerm, but it is: "+funType);
         }
+    }
+
+
+    public static AB<List<Type>,Type> fullSplitFunType(Type type) {
+        List<Type> argTypes = new ArrayList<>();
+        Type acc = type;
+        while (isFunType(acc)) {
+            AA<Type> parts = splitFunType(acc);
+            argTypes.add(parts._1());
+            acc = parts._2();
+        }
+        return AB.mk(argTypes, acc);
     }
 
     public static void main(String[] args) {

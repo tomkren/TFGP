@@ -3,12 +3,18 @@ package cz.tomkren.fishtron.ugen;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.data.GammaSym;
+import cz.tomkren.fishtron.ugen.trees.AppTree;
+import cz.tomkren.fishtron.ugen.trees.Lam;
 import cz.tomkren.utils.AB;
+import cz.tomkren.utils.ABC;
 import cz.tomkren.utils.F;
+import cz.tomkren.utils.TODO;
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 /**  Created by user on 31. 1. 2017. */
 
@@ -34,6 +40,82 @@ public class Gamma {
 
     public static Gamma union(List<Gamma> gammas) {
         return new Gamma(gammas, true);
+    }
+
+
+    public ABC<Type,Gamma,Function<AppTree,AppTree>> mkGammaWithGoalTypeVars(Type goalType, List<String> varNames) {
+
+        AB<List<Type>,Type> p = Types.fullSplitFunType(goalType);
+        List<Type> argTypes = p._1();
+        Type newGoalType = p._2();
+
+        List<GammaSym> varList = new ArrayList<>(argTypes.size());
+
+        int i = 0;
+        for (Type argType : argTypes) {
+
+            if (argType.hasTypeVars()) {
+                throw new TODO("Type variables in goalType arguments are not yet supported, sorry!!!");
+            }
+
+            String varName = (i < varNames.size()) ? varNames.get(i) : "x"+i;
+
+            if (has(varName)) {
+                throw new Error("Var name '"+varName+"' already in use (has type "+getType(varName)+").");
+            }
+
+            varList.add(new GammaSym(varName, argType, true));
+
+            i++;
+        }
+
+        int newGammaSize = argTypes.size() + size();
+        List<GammaSym> newSymList = new ArrayList<>(newGammaSize);
+
+        newSymList.addAll(varList);
+        newSymList.addAll(gamma);
+
+        if (newSymList.size() != newGammaSize) {throw new Error("New gamma size assert failed.");}
+
+        Gamma newGamma = new Gamma(newSymList);
+        Function<AppTree,AppTree> addLambdasFun = bodyTree -> addLambdas(varList, bodyTree);
+        return ABC.mk(newGoalType, newGamma, addLambdasFun);
+    }
+
+    private static AppTree addLambdas(List<GammaSym> varList, AppTree bodyTree) {
+        AppTree acc = bodyTree;
+        for (int i = varList.size() - 1; i >= 0; i --) {
+
+            GammaSym varSym = varList.get(i);
+
+            if (!varSym.isVar()) {throw new Error("Sym "+varSym+" is not a var!");}
+
+            String varName = varSym.getSym();
+            Type   varType = varSym.getType();
+
+            Type newType         = Types.mkFunType(varType, acc.getType());
+            Type newOriginalType = Types.mkFunType(varType, acc.getOriginalType()); // TODO promyslet, taková nouzovka spolehající na dočasnou vlastnost že argTypes jsou bez type vars zatim
+
+            acc = new Lam(varName, acc, newType, newOriginalType, null);
+        }
+        return acc;
+    }
+
+
+    private Type getType(String symName) {
+        GammaSym gs = getGammaSym(symName);
+        return gs == null ? null : gs.getType();
+    }
+
+    private boolean has(String symName) {
+        return getGammaSym(symName) != null;
+    }
+
+    private GammaSym getGammaSym(String symName) {
+        for (GammaSym gs : gamma) {
+            if (gs.getSym().equals(symName)) {return gs;}
+        }
+        return null;
     }
 
     public int size() {

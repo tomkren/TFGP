@@ -54,7 +54,9 @@ public interface Type {
         return getNextVarId_onlySkolemVars(0);
     }
 
-
+    default boolean hasTypeVars() {
+        return !getVarIds().isEmpty();
+    }
 
     Object toJson();
 

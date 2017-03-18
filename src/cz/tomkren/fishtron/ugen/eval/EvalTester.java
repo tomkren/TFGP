@@ -71,11 +71,12 @@ public class EvalTester {
                     allTreesAreWellTyped = false;
                 }
 
+                if (allParamsInfo != null) {
+                    tree = tree.randomizeParams(allParamsInfo, ch.getRandom());
+                }
+
                 String resultStr = "";
                 if (testEvaluation) {
-                    if (allParamsInfo != null) {
-                        tree = tree.randomizeParams(allParamsInfo, ch.getRandom());
-                    }
                     Object result = lib.eval(tree);
                     Object transformedResult = transformResult.apply(result);
                     resultStr = transformedResult + " \t = \t ";

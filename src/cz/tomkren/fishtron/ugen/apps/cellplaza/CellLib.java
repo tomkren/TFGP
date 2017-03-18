@@ -6,12 +6,11 @@ import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.eval.*;
 import cz.tomkren.fishtron.ugen.trees.Leaf;
-import cz.tomkren.utils.AB;
-import cz.tomkren.utils.Checker;
-import cz.tomkren.utils.F;
+import cz.tomkren.utils.*;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -22,9 +21,75 @@ import java.util.function.Function;
 
 public class CellLib {
 
-    private  static final Type sk_goal = Types.parse("S -> (N -> S)");
+    public static void main(String[] args) {
+        Checker ch = new Checker();
+
+        //testBitVersion(ch);
+        testSimpleVarVersion(ch);
+
+        ch.results();
+    }
 
 
+    private static final Type goal = Types.parse("S -> (N -> S)");
+    private static final List<String> inputVarNames = Arrays.asList("s","nn");
+
+
+
+    private static final EvalLib simpleVarLib = EvalLib.mk(
+            "if",  new If(),
+            "not", (IUtils.Bool1) x -> !x,
+            "or",  (IUtils.Bool2) x -> y -> x || y,
+            "and", (IUtils.Bool2) x -> y -> x && y,
+
+            "eqs",  (Fun2) x -> y -> x == y,
+            "eqn",  (Fun2) x -> y -> x == y,
+            "<",    (Fun2) x -> y -> (int)x < (int)y,
+
+            "alive", Cell.State.ALIVE, "dead",  Cell.State.DEAD,
+            "0",0, "1",1, "2",2, "3",3, "4",4, "5",5, "6",6, "7",7, "8",8
+    );
+
+    private static final Gamma simpleVarGamma = Gamma.mk(
+            "if",    "B -> (x -> (x -> x))",
+            "not",   "B -> B",
+            "or",    "B -> (B -> B)",
+            "and",   "B -> (B -> B)",
+
+            "eqs",    "S -> (S -> B)",
+            "eqn",    "N -> (N -> B)",
+            "<",      "N -> (N -> B)",
+
+            "S","S",
+            "N","N"
+    );
+
+    private static final JSONObject allParamsInfo_varVersion = F.obj(
+            "N", F.obj("val", F.arr(0,1,2,3,4,5,6,7,8)),
+            "S", F.obj("val", F.arr("alive","dead"))
+    );
+
+    private static void testSimpleVarVersion(Checker ch) {
+
+        int k_max = 64;
+
+        ABC<Type,Gamma,Function<AppTree,AppTree>> res = simpleVarGamma.mkGammaWithGoalTypeVars(goal, inputVarNames);
+        Type newGoal   = res._1();
+        Gamma newGamma = res._2();
+        Function<AppTree,AppTree> addLams = res._3();
+
+        Log.it(newGamma);
+
+        EvalTester.testLib(ch, k_max, null, newGamma, newGoal, false, null, allParamsInfo_varVersion);
+    }
+
+
+
+
+
+
+
+    // goalType = goal
     private static final EvalLib lib_sk = EvalLib.mk(
             "s", (IUtils.S) f -> g -> x -> f.apply(x).apply(g.apply(x)),
             "k", (Fun2) x -> y -> x,
@@ -67,7 +132,7 @@ public class CellLib {
             "ordN",  "Ord N"
     );
 
-    private static final EvalLib simpleLib = EvalLib.mk(
+    private static final EvalLib simpleLib_sk = EvalLib.mk(
             "s", (IUtils.S) f -> g -> x -> f.apply(x).apply(g.apply(x)),
             "k", (Fun2) x -> y -> x,
 
@@ -85,7 +150,7 @@ public class CellLib {
             "0",0, "1",1, "2",2, "3",3, "4",4, "5",5, "6",6, "7",7, "8",8
     );
 
-    private static final Gamma simpleGamma = Gamma.mk(
+    private static final Gamma simpleGamma_sk = Gamma.mk(
             "s", "(a -> (b -> c)) -> ((a -> b) -> (a -> c))",
             "k", "a -> (b -> a)",
 
@@ -102,6 +167,14 @@ public class CellLib {
 
             "0","N", "1","N", "2","N", "3","N", "4","N", "5","N", "6","N", "7","N", "8","N"
     );
+
+
+
+
+
+
+
+
 
     static final int bitIndivSize_0 = 40;
 
@@ -153,7 +226,7 @@ public class CellLib {
             "runRule", (Fun3) rule -> img -> n -> MiniPlaza.runRule((Rule)rule, (String)img, (int)n)
     );
 
-    static final JSONObject allParamsInfo = F.obj(
+    static final JSONObject allParamsInfo_bitVersion = F.obj(
             "seedImg",  F.obj("filename", F.arr("core01","core02","core03","core04","core05","core06","core07")),
             "numSteps", F.obj("n", F.arr(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42))
             /*"rule", F.obj(
@@ -207,18 +280,11 @@ public class CellLib {
         return "(S "+ unary(n-1) +")";
     }
 
-    public static void main(String[] args) {
-        Checker ch = new Checker();
 
+
+    private static void testBitVersion(Checker ch) {
         int k_max = 84;
-        Type goal = bitGoal;
-        Gamma gamma = bitGamma;
-        EvalLib lib = bitLib;
-
-
-        EvalTester.testLib(ch, k_max, lib, gamma, goal, true, CellLib::showRule3, allParamsInfo);
-
-        ch.results();
+        EvalTester.testLib(ch, k_max, bitLib, bitGamma, bitGoal, true, CellLib::showRule3, allParamsInfo_bitVersion);
     }
 
     private static String showRule3(Object indivObj) {
