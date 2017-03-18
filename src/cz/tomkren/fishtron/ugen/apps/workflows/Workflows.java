@@ -7,6 +7,7 @@ import cz.tomkren.fishtron.ugen.AppTree;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.Params;
+import cz.tomkren.fishtron.ugen.data.GammaSym;
 import cz.tomkren.fishtron.ugen.eval.*;
 import cz.tomkren.fishtron.workflows.MyList;
 import cz.tomkren.fishtron.workflows.TypedDag;
@@ -161,10 +162,9 @@ public class Workflows {
 
         Type commonType = Types.parse(typeStr);
 
-        List<AB<String,Type>> gammaList = F.map(names, o -> {
-            if (!(o instanceof String)) {throw new Error("symbols must be strings!");}
-            String sym = (String) o;
-            return AB.mk(sym, commonType);
+        List<GammaSym> gammaList = F.map(names, name -> {
+            if (!(name instanceof String)) {throw new Error("symbols must be strings!");}
+            return new GammaSym((String) name, commonType, false);
         });
 
         Gamma gamma = new Gamma(gammaList);
