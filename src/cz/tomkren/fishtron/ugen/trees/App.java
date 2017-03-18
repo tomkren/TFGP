@@ -21,6 +21,7 @@ public class App implements AppTree {
     private AppTree funTree;
     private AppTree argTree;
     private Type type;
+
     private Type originalType;
     private JSONObject debugInfo;
 
@@ -61,7 +62,7 @@ public class App implements AppTree {
     public AppTree randomizeParams(JSONObject allParamsInfo, Random rand) {
         AppTree newFunTree = funTree.randomizeParams(allParamsInfo, rand);
         AppTree newArgTree = argTree.randomizeParams(allParamsInfo, rand);
-        return new cz.tomkren.fishtron.ugen.trees.App(newFunTree, newArgTree, type, originalType, debugInfo);
+        return new App(newFunTree, newArgTree, type, originalType, debugInfo);
     }
 
     @Override
@@ -82,10 +83,10 @@ public class App implements AppTree {
             SubtreePos tailPos = pos.getTail();
             if (pos.getSonIndex() == 0) {
                 AppTree newFunTree = funTree.changeSubtree(tailPos, newSubtree);
-                return new cz.tomkren.fishtron.ugen.trees.App(newFunTree, argTree, type);
+                return new App(newFunTree, argTree, type);
             } else {
                 AppTree newArgTree = argTree.changeSubtree(tailPos, newSubtree);
-                return new cz.tomkren.fishtron.ugen.trees.App(funTree, newArgTree, type);
+                return new App(funTree, newArgTree, type);
             }
         }
     }

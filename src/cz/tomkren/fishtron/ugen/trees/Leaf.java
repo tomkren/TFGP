@@ -16,11 +16,13 @@ import java.util.function.Predicate;
 /** Created by tom on 18.03.2017. */
 
 public class Leaf implements AppTree {
+
     private String sym;
     private Type type;
+    private Params params;
+
     private Type originalType;
     private JSONObject debugInfo;
-    private Params params;
 
     Leaf(String sym, Type type) {
         this(sym, type, type, null, null);
@@ -65,13 +67,13 @@ public class Leaf implements AppTree {
         if (paramsInfo == null) {
             return this;
         } else {
-            return new cz.tomkren.fishtron.ugen.trees.Leaf(sym, type, originalType, debugInfo, new Params(paramsInfo, rand));
+            return new Leaf(sym, type, originalType, debugInfo, new Params(paramsInfo, rand));
         }
     }
 
-    cz.tomkren.fishtron.ugen.trees.Leaf randomlyShiftOneParam(Random rand, List<AB<Integer, Double>> shiftsWithProbabilities) {
+    Leaf randomlyShiftOneParam(Random rand, List<AB<Integer, Double>> shiftsWithProbabilities) {
         Params newParams = params.randomlyShiftOneParam(rand, shiftsWithProbabilities);
-        return new cz.tomkren.fishtron.ugen.trees.Leaf(sym, type, originalType, debugInfo, newParams);
+        return new Leaf(sym, type, originalType, debugInfo, newParams);
     }
 
     @Override

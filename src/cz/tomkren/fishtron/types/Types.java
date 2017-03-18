@@ -97,7 +97,7 @@ public class Types {
         }
     }
 
-    private static boolean isFunType(Type t) {
+    public static boolean isFunType(Type t) {
         if (t instanceof TypeTerm) {
             List<Type> args = ((TypeTerm) t).getArgs();
             return args.size() == 3 && args.get(0).equals(FUN_ARROW);
