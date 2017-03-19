@@ -17,17 +17,15 @@ public class CellWorld {
     private Cell[][] cells;
     private int step;
     private Rule rule;
-    private Random rand;
     private String plazaDir;
 
-    CellWorld(String plazaDir, Rule rule, Random rand) {
-        this(plazaDir, null, rule, rand, false);
+    CellWorld(String plazaDir, Rule rule) {
+        this(plazaDir, null, rule, false);
     }
 
-    CellWorld(String plazaDir, String coreName, Rule rule, Random rand, boolean writeTestImages) {
+    CellWorld(String plazaDir, String coreName, Rule rule, boolean writeTestImages) {
 
         this.rule = rule;
-        this.rand = rand;
         this.step = 0;
         this.plazaDir = plazaDir;
 
@@ -168,7 +166,7 @@ public class CellWorld {
     }
 
     private void computeNextState(Cell cell) {
-        cell.computeNextState(rule, rand);
+        cell.computeNextState(rule);
     }
 
     private void eachCell(Consumer<Cell> processCell) {

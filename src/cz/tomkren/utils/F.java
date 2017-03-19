@@ -281,6 +281,11 @@ public class F {
         return randomElement(F.map(xs,x->x),r);
     }
 
+    public static Object randomElement(JSONArray xs, Random r) {
+        return randomElement(F.map(xs,x->x),r);
+    }
+
+
 
     public static <T> T removeRandomElement(List<T> xs, Random r) {
         int i = r.nextInt(xs.size());

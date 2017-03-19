@@ -44,7 +44,7 @@ class Cell {
         return state == ALIVE;
     }
 
-    void computeNextState(Rule rule, Random rand) {
+    void computeNextState(Rule rule) {
         nextState = rule.nextState(this);
     }
 

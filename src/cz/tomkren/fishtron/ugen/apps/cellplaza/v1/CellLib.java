@@ -2,6 +2,7 @@ package cz.tomkren.fishtron.ugen.apps.cellplaza.v1;
 
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.Types;
+import cz.tomkren.fishtron.ugen.apps.cellplaza.CellEvalCodes;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.eval.*;
@@ -198,7 +199,7 @@ public class CellLib {
             "[]",  Collections.emptyList(),
             ":", (Fun2) x -> xs -> cons_bool((boolean) x, (List<Boolean>)xs),
             "rule", (Fun) bits -> Rule.fromBits((List<Boolean>)bits),
-            "seedImg", new SeedImg(),
+            "seedImg", new CellEvalCodes.SeedImg(),
             "pair", (Fun2) a -> b -> AB.mk(a,b)
     );
 
@@ -223,8 +224,8 @@ public class CellLib {
             "[]",  Collections.emptyList(),
             ":", (Fun2) x -> xs -> cons_bool((boolean) x, (List<Boolean>)xs),
             "mkRule", (Fun) bits -> Rule.fromBits((List<Boolean>)bits),
-            "seedImg", new SeedImg(),
-            "numSteps", new NumSteps(),
+            "seedImg", new  CellEvalCodes.SeedImg(),
+            "numSteps", new  CellEvalCodes.NumSteps(),
             "runRule", (Fun3) rule -> img -> n -> MiniPlaza.runRule((Rule)rule, (String)img, (int)n)
     );
 
@@ -263,8 +264,8 @@ public class CellLib {
 
     static final EvalLib bitLib_2 = EvalLib.mk(
             "bitRule", new BitRule(),
-            "seedImg", new SeedImg(),
-            "numSteps", new NumSteps(),
+            "seedImg", new CellEvalCodes.SeedImg(),
+            "numSteps", new CellEvalCodes.NumSteps(),
             "runRule", (Fun3) rule -> img -> n -> MiniPlaza.runRule((Rule)rule, (String)img, (int)n)
     );
 
@@ -283,21 +284,6 @@ public class CellLib {
         public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun) {
             JSONArray bits = leaf.getParams().toJson().getJSONArray("bits");
             return Rule.fromBits(bits);
-        }
-    }
-
-
-    private static class SeedImg implements EvalCode {
-        @Override
-        public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun) {
-            return leaf.getParams().toJson().getString("filename");
-        }
-    }
-
-    private static class NumSteps implements EvalCode {
-        @Override
-        public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun) {
-            return leaf.getParams().toJson().getInt("n");
         }
     }
 
