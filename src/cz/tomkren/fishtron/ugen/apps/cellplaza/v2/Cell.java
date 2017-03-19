@@ -5,7 +5,6 @@ import cz.tomkren.utils.AA;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**Created by tom on 12.03.2017.*/
 
@@ -84,7 +83,7 @@ class Cell {
         }
     }
 
-    static double colorToPRule(Color gradColor, int x, int y) {
+    /*static double colorToPRule(Color gradColor, int x, int y) {
         if (!isGrayScale(gradColor)) {
             throw new Error("GradImage not in gray scale: "+gradColor.toString()+" on pos [x="+x+", y="+y+"].");
         }
@@ -99,7 +98,7 @@ class Cell {
             throw new Error("r = "+r+", pRule = "+pRule);
         }
         return new Color(r,r,r);
-    }
+    }*/
 
 
     private static boolean isGrayScale(Color color) {

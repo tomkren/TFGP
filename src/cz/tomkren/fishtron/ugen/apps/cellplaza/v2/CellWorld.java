@@ -6,7 +6,6 @@ import cz.tomkren.utils.Log;
 
 import java.awt.*;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -19,8 +18,8 @@ public class CellWorld {
     private Rule rule;
     private String plazaDir;
 
-    CellWorld(String plazaDir, Rule rule) {
-        this(plazaDir, null, rule, false);
+    CellWorld(String plazaDir, String coreName, Rule rule) {
+        this(plazaDir, coreName, rule, false);
     }
 
     CellWorld(String plazaDir, String coreName, Rule rule, boolean writeTestImages) {

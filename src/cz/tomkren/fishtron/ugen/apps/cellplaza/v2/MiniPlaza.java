@@ -32,18 +32,13 @@ public class MiniPlaza {
     private static void main_1(Checker ch) {
         Random rand = ch.getRandom();
 
-
-        JSONArray names = Libs.allParamsInfo.getJSONObject("seedImg").getJSONArray("filename");
-
-        String coreName = (String) F.randomElement(names, rand);
-
+        JSONArray coreNames = Libs.allParamsInfo.getJSONObject("seedImg").getJSONArray("filename");
+        String coreName = (String) F.randomElement(coreNames, rand);
 
         AB<AppTree,Rule> rule = genBitRule(rand);
-
-        CellWorld w = new CellWorld("mini_100", coreName, rule._2(), false);
+        CellWorld w = new CellWorld("mini_100", coreName, rule._2());
 
         int numSteps = 100;
-
         w.writeState();
         for (int s = 0; s < numSteps; s++) {
             w.step();
@@ -53,7 +48,6 @@ public class MiniPlaza {
         Log.it();
         Log.it("ruleCode = "+rule._1());
         Log.it("coreName = "+coreName);
-
     }
 
 
