@@ -15,8 +15,8 @@ import java.util.*;
 
 public class Params {
 
-    private final JSONObject paramsInfo;
-    private final HashMap<String,Integer> selectedParamIndices;
+    private final JSONObject paramInfos;
+    private final HashMap<String,ParamValue> paramValues;
 
 
     @Override
@@ -24,32 +24,33 @@ public class Params {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Params params = (Params) o;
-        return selectedParamIndices.equals(params.selectedParamIndices);
+        return paramValues.equals(params.paramValues);
     }
 
     @Override
     public int hashCode() {
-        return selectedParamIndices.hashCode();
+        return paramValues.hashCode();
     }
 
-    public Params(JSONObject paramsInfo, Random rand) {
-        this.paramsInfo = paramsInfo;
-        selectedParamIndices = new HashMap<>();
-        for (Object key : paramsInfo.keySet()) {
+    public Params(JSONObject paramInfos, Random rand) {
+        this.paramInfos = paramInfos;
+        paramValues = new HashMap<>();
+        for (Object key : paramInfos.keySet()) {
             String paramName = (String) key;
-            JSONArray possibleValues = paramsInfo.getJSONArray(paramName);
-            selectedParamIndices.put(paramName, rand.nextInt(possibleValues.length()));
+            Object paramInfo = paramInfos.get(paramName);
+            ParamValue paramValue = ParamValue.selectParamValue(paramInfo, rand);
+            paramValues.put(paramName, paramValue);
         }
     }
 
-    private Params(JSONObject paramsInfo, HashMap<String, Integer> selectedParamIndices) {
-        this.paramsInfo = paramsInfo;
-        this.selectedParamIndices = selectedParamIndices;
+    private Params(JSONObject paramInfos, HashMap<String, ParamValue> paramValues) {
+        this.paramInfos = paramInfos;
+        this.paramValues = paramValues;
     }
 
     public JSONObject toJson() {
-        return F.jsonMap(selectedParamIndices, (paramName,selectedIndex) ->
-                paramsInfo.getJSONArray(paramName).get(selectedIndex)
+        return F.jsonMap(paramValues, (paramName, paramValue) ->
+            paramValue.toJson(paramInfos.get(paramName))
         );
     }
 
@@ -59,21 +60,18 @@ public class Params {
     }
 
     public Params randomlyShiftOneParam(Random rand, List<AB<Integer,Double>> shiftsWithProbabilities) {
-        if (selectedParamIndices.isEmpty()) {return this;}
+        if (paramValues.isEmpty()) {return this;}
 
-        String paramName = F.list(selectedParamIndices.entrySet()).randomElement(rand).getKey();
-        HashMap<String,Integer> newIndices = new HashMap<>(selectedParamIndices);
+        String paramNameToShift = F.randomElement(paramValues.keySet(), rand);
+        Object paramInfo = paramInfos.get(paramNameToShift);
 
-        newIndices.compute(paramName, (k,index)-> {
-            int numValues =  paramsInfo.getJSONArray(paramName).length();
-            Distribution<AB<Integer,Double>> shiftDist = mkShiftDist(shiftsWithProbabilities, index, numValues);
-            return index + (shiftDist.isEmpty() ? 0 : shiftDist.get(rand)._1());
-        });
+        HashMap<String,ParamValue> newParamValues = new HashMap<>(paramValues);
+        newParamValues.compute(paramNameToShift, (paramName,paramValue)-> paramValue.randomlyShift(paramInfo, shiftsWithProbabilities, rand));
 
-        return new Params(paramsInfo, newIndices);
+        return new Params(paramInfos, newParamValues);
     }
 
-    private static Distribution<AB<Integer,Double>> mkShiftDist(List<AB<Integer,Double>> shiftsWithProbabilities, int currentIndex, int numValues) {
+    static Distribution<AB<Integer,Double>> mkShiftDist(List<AB<Integer,Double>> shiftsWithProbabilities, int currentIndex, int numValues) {
         Distribution<AB<Integer,Double>> ret = new Distribution<>();
         for (AB<Integer,Double> shiftWithProbability: shiftsWithProbabilities) {
             int resultIndex = currentIndex + shiftWithProbability._1();
@@ -97,15 +95,15 @@ public class Params {
     public static void main(String[] args) {
 
         Map<String,Integer> map1 = new HashMap<>();
-        map1.put("hovno", 1024);
-        map1.put("mrdečka", 1024);
+        map1.put("how to", 1024);
+        map1.put("mr", 1024);
 
         Map<String,Integer> map2 = new HashMap<>(map1);
 
-        map2.compute("hovno", (k,v)-> v*2);
+        map2.compute("how to", (k,v)-> v*2);
 
-        Log.it(map1.get("hovno"));
-        Log.it(map2.get("hovno"));
+        Log.it(map1.get("how to"));
+        Log.it(map2.get("how to"));
 
 
     }
