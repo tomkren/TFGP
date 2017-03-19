@@ -3,6 +3,7 @@ package cz.tomkren.fishtron.ugen.apps.cellplaza.v2;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.PlazaImg;
 import cz.tomkren.utils.AA;
 import cz.tomkren.utils.Log;
+import org.json.JSONArray;
 
 import java.awt.*;
 import java.util.List;
@@ -13,16 +14,23 @@ import java.util.function.Function;
 
 public class CellWorld {
 
+    private final int numStates;
+
     private Cell[][] cells;
     private int step;
     private Rule rule;
     private String plazaDir;
 
-    CellWorld(String plazaDir, String coreName, Rule rule) {
-        this(plazaDir, coreName, rule, false);
+    private final JSONArray pixelSizes;
+
+    CellWorld(int numStates, String plazaDir, String coreName, Rule rule, JSONArray pixelSizes) {
+        this(numStates, plazaDir, coreName, rule, false, pixelSizes);
     }
 
-    CellWorld(String plazaDir, String coreName, Rule rule, boolean writeTestImages) {
+    CellWorld(int numStates, String plazaDir, String coreName, Rule rule, boolean writeTestImages, JSONArray pixelSizes) {
+
+        this.numStates = numStates;
+        this.pixelSizes = pixelSizes;
 
         this.rule = rule;
         this.step = 0;
@@ -31,7 +39,7 @@ public class CellWorld {
         String filename_seed = plazaDir + "/seed.png";
         //String filename_grad = plazaDir + "/grad.png";
         String filename_sens = plazaDir + "/sens.png";
-        String filename_core = coreName == null ? null : plazaDir +"/"+ coreName + ".png";
+        String filename_core = coreName == null ? null : plazaDir +"/cores/"+ coreName;
 
         PlazaImg seed = PlazaImg.mk(filename_seed);
         PlazaImg core = PlazaImg.mk(filename_core);
@@ -68,7 +76,7 @@ public class CellWorld {
                 Color seedColor = seed.getColor(x, y);
 
                 if (seedColor.equals(Color.red)) {
-                    seedColor = Cell.DEAD_COLOR;
+                    seedColor = Cell.stateToColor(Cell.DEAD, numStates);  //Cell.DEAD_COLOR;
                     AA<Integer> coreMarker = AA.mk(x,y);
                     if (coreMarker1 == null) {
                         coreMarker1 = coreMarker;
@@ -79,7 +87,7 @@ public class CellWorld {
                     }
                 }
 
-                int state = Cell.colorToState(seedColor, x, y);
+                int state = Cell.colorToState(seedColor, x, y, numStates);
                 cellRow[x] = new Cell(state);
             }
             cells[y] = cellRow;
@@ -119,7 +127,7 @@ public class CellWorld {
                     int yCell = y + coreDy;
                     Color seedColor = core.getColor(x, y);
                     if (!seedColor.equals(Color.white)) {
-                        int state = Cell.colorToState(seedColor, xCell, yCell);
+                        int state = Cell.colorToState(seedColor, xCell, yCell, numStates);
                         getCell(xCell, yCell).setState(state);
                     }
                 }
@@ -209,11 +217,11 @@ public class CellWorld {
         }
 
         Log.it("done");
-        return new PlazaImg(pixels);
+        return new PlazaImg(pixels, pixelSizes);
     }
 
     private PlazaImg toStateImg() {
-        return toImg(Cell::getStateColor);
+        return toImg(cell -> Cell.stateToColor(cell.getState(), numStates));
     }
 
     //private PlazaImg toGradImg() {return toImg(Cell::getPRuleColor);}
@@ -225,14 +233,15 @@ public class CellWorld {
 
     void writeState() {
         PlazaImg stateImg = toStateImg();
-        stateImg.writeImage(plazaDir+"/run/state"+getStepXXX()+".png");
+        stateImg.writeImage(plazaDir+"/run", "state"+getStepXXX()+".png");
     }
 
     String writeState(int indivId) {
         PlazaImg stateImg = toStateImg();
-        String filename = "indivs/indiv"+indivId+".png";
-        stateImg.writeImage(plazaDir+"/"+filename);
-        return filename;
+        String locDir = "indivs";
+        String filename = "indiv"+indivId+".png";
+        stateImg.writeImage(plazaDir+"/"+locDir, filename);
+        return locDir+"/"+filename;
     }
 
 
@@ -244,7 +253,7 @@ public class CellWorld {
 
     private void writeCellsImgs() {
         //toGradImg().writeImage(plazaDir+"/out/cells_grad.png");
-        toNumNeighbourImg().writeImage(plazaDir+"/out/cells_sens.png");
+        toNumNeighbourImg().writeImage(plazaDir+"/out","cells_sens.png");
     }
 
     private void checkSizes(PlazaImg seed, /*PlazaImg grad,*/ PlazaImg sens) {
@@ -255,8 +264,8 @@ public class CellWorld {
     }
 
     private void writeTests(PlazaImg seed, /*PlazaImg grad,*/ PlazaImg sens) {
-        if (seed != null) {seed.writeImage(plazaDir+"/out/test_seed.png");}
-        //if (grad != null) {grad.writeImage(plazaDir+"/out/test_grad.png");}
-        if (sens != null) {sens.writeImage(plazaDir+"/out/test_sens.png");}
+        if (seed != null) {seed.writeImage(plazaDir+"/out","test_seed.png");}
+        //if (grad != null) {grad.writeImage(plazaDir+"/out","test_grad.png");}
+        if (sens != null) {sens.writeImage(plazaDir+"/out","test_sens.png");}
     }
 }

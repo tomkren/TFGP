@@ -1,6 +1,7 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza.v2;
 
 import cz.tomkren.utils.AA;
+import cz.tomkren.utils.Log;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -11,11 +12,11 @@ import java.util.List;
 class Cell {
 
     static final int DEAD = 0;
-    static final int ALIVE = 1;
+    private static int ALIVE(int numStates) {return numStates - 1;}
 
-    static final Color DEAD_COLOR = Color.white;
-    private static final Color ALIVE_COLOR = Color.black;
-    private static final Color CHESSBOARD_COLOR = Color.gray;
+    //static final Color DEAD_COLOR = Color.white;
+    //private static final Color ALIVE_COLOR = Color.black;
+    //private static final Color CHESSBOARD_COLOR = Color.gray;
 
     private int state;
     private int nextState;
@@ -27,21 +28,20 @@ class Cell {
         this.neighbours = null;
     }
 
+    public int getState() {return state;}
     void setState(int state) {this.state = state;}
     void setNeighbours(Cell[] neighbours) {this.neighbours = neighbours;}
 
 
-    int getNumAliveNeighbours() {
-        int numAlive = 0;
+    int getSumNeighbourState() {
+        int sum = 0;
         for (Cell n : neighbours) {
-            if (n.isAlive()) {numAlive ++;}
+            sum += n.state;
         }
-        return numAlive;
+        return sum;
     }
 
-    boolean isAlive() {
-        return state == ALIVE;
-    }
+    //boolean isAlive() {return state == ALIVE;}
 
     void computeNextState(Rule rule) {
         nextState = rule.nextState(this);
@@ -52,18 +52,34 @@ class Cell {
         nextState = -1;
     }
 
-    Color getStateColor() {
-        return stateToColor(state);
-    }
-
     Color getNumNeighbourColor() {
         int numNeighbours = neighbours.length;
         int r = (int) Math.round(255.0 * numNeighbours / 8.0);
         return new Color(r,r,r);
     }
 
-    static int colorToState(Color seedColor, int x, int y) {
-        if (seedColor.equals(ALIVE_COLOR)) {
+    // todo nefektivní ale vadí mín než inverz imho .. dyštak udělat tabulku barev v CellWorld
+    static int colorToState(Color seedColor, int x, int y, int numStates) {
+
+        if (isGrayScale(seedColor)) {
+
+            double b = numStates - 1.0;
+            double a = (1.0 - numStates) / 255;
+
+            int r = seedColor.getRed();
+            int state = (int) Math.round(a * r + b);
+
+            if (state < 0 || state >= numStates) {
+                throw new Error("Illegal state: "+state+" r= "+r+" a= "+a+" b= "+b);
+            }
+
+            return state;
+
+        } else { // anything non-gray is chessboard
+            return (x+y) % 2 == 0 ? ALIVE(numStates) : DEAD;
+        }
+
+        /*if (seedColor.equals(ALIVE_COLOR)) {
             return ALIVE;
         } else if (seedColor.equals(DEAD_COLOR)) {
             return DEAD;
@@ -72,33 +88,28 @@ class Cell {
         } else {
             return DEAD;
             //throw new Error("Unsupported seed color "+seedColor.toString()+" on pos [x="+x+", y="+y+"].");
-        }
+        }*/
     }
 
-    private static Color stateToColor(int state) {
-        switch (state) {
+
+    // TODO nefektivní !! udělat tabulku barev v CellWorld
+    static Color stateToColor(int state, int numStates) {
+
+        double beta  = 255.0;
+        double alpha = beta / (1.0 - numStates);
+
+        int r = (int) Math.round(alpha * state + beta);
+
+        //Log.it(state +" "+ r);
+
+        return new Color(r,r,r);
+
+        /*switch (state) {
             case DEAD: return DEAD_COLOR;
             case ALIVE: return ALIVE_COLOR;
             default: throw new Error("State without a color: "+state);
-        }
+        }*/
     }
-
-    /*static double colorToPRule(Color gradColor, int x, int y) {
-        if (!isGrayScale(gradColor)) {
-            throw new Error("GradImage not in gray scale: "+gradColor.toString()+" on pos [x="+x+", y="+y+"].");
-        }
-        int r = gradColor.getRed();
-        if (r > 100) {r = 100;}
-        return r / 100.0;
-    }
-
-    private static Color pRuleToColor(double pRule) {
-        int r = (int) Math.round(pRule*255.0);
-        if (r > 255) {
-            throw new Error("r = "+r+", pRule = "+pRule);
-        }
-        return new Color(r,r,r);
-    }*/
 
 
     private static boolean isGrayScale(Color color) {

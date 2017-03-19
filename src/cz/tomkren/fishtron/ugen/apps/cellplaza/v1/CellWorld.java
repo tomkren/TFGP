@@ -2,6 +2,7 @@ package cz.tomkren.fishtron.ugen.apps.cellplaza.v1;
 
 import cz.tomkren.fishtron.ugen.apps.cellplaza.PlazaImg;
 import cz.tomkren.utils.AA;
+import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
 
 import java.awt.Color;
@@ -216,7 +217,7 @@ public class CellWorld {
         }
 
         Log.it("done");
-        return new PlazaImg(pixels);
+        return new PlazaImg(pixels, F.arr(1));
     }
 
     private PlazaImg toStateImg() {

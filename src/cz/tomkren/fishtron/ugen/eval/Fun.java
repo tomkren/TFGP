@@ -10,8 +10,7 @@ public interface Fun extends Value {
 
     @Override
     default Object getValue() {
-        Function<Object,Object> fun = (this::applyFun);
-        return fun;
+        return (Function<Object,Object>) this::applyFun;
     }
 
 }

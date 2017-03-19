@@ -1,6 +1,7 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza.v2;
 
 import cz.tomkren.utils.F;
+import cz.tomkren.utils.TODO;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
@@ -13,71 +14,52 @@ public interface Rule {
 
     int nextState(Cell cell);
 
-    int neighbourCases = 9;
-    int numBits = 2 * neighbourCases;
 
-    static Rule mk(int code) {
-        List<Boolean> bits = new ArrayList<>(numBits);
-        for (int i = 0; i < numBits; i++) {
-            bits.add(code % 2 == 1);
-            code /= 2;
-        }
-        return fromBits(bits);
+    //int numStates = 2;
+    int numNeighbours = 8;
+
+    //int neighbourCases = (numStates - 1) * numNeighbours + 1;
+    //int numBits = numStates * neighbourCases;
+
+    static int neighbourCases(int numStates) {return (numStates - 1) * numNeighbours + 1;}
+    static int numBits(int numStates) {return numStates * neighbourCases(numStates);}
+
+
+
+    static Rule fromBits(JSONArray bits, int numStates) {
+        return fromBits(F.map(bits, x->(int)x), numStates);
     }
 
-    static Rule fromBits(JSONArray bits) {
-        return fromBits(F.map(bits, x -> (int)x == 1));
-    }
+    static Rule fromBits(List<Integer> bits, int numStates) {
 
-    static Rule fromBits(List<Boolean> bits) {
-        if (bits.size() != numBits) {throw new Error("bits have wrong size: "+bits.size());}
+        if (bits.size() != numBits(numStates)) {throw new Error("bits have wrong size: "+bits.size());}
 
-        int num1 = F.filter(bits.subList(0,neighbourCases),x->x).size();
-        int num2 = F.filter(bits.subList(neighbourCases,numBits),x->x).size();
+        int nCases = neighbourCases(numStates);
 
-        List<Integer> resurrectNums = new ArrayList<>(num1);
-        List<Integer> surviveNums   = new ArrayList<>(num2);
+        List<List<Integer>> ruleTable = new ArrayList<>(numStates);
 
-        for (int n = 0; n < neighbourCases; n++) {
-            if (bits.get(neighbourCases + n)) {surviveNums.add(n);}
-            if (bits.get(n)) {resurrectNums.add(n);}
-        }
-
-        return mk(resurrectNums, surviveNums);
-    }
-
-    static Rule mk(Integer... args) {
-        List<Integer> list1 = new ArrayList<>();
-        List<Integer> current = list1;
-        List<Integer> list2 = new ArrayList<>();
-        for (Integer arg : args) {
-            if (arg == null) {
-                current = list2;
-            } else {
-                current.add(arg);
+        int i = 0;
+        for (int s = 0; s < numStates; s++) {
+            List<Integer> tableRow = new ArrayList<>(nCases);
+            for (int nSum = 0; nSum < nCases; nSum++) {
+                tableRow.add(bits.get(i));
+                i++;
             }
+            ruleTable.add(tableRow);
         }
-        return mk(list1, list2);
+
+        return mk(ruleTable);
     }
 
-    static Rule mk(Collection<Integer> resurrectNums, Collection<Integer> surviveNums) {
-        return cell -> {
-            int numAlive = cell.getNumAliveNeighbours();
-            if (cell.isAlive()) {
-                return surviveNums.contains(numAlive) ? Cell.ALIVE : Cell.DEAD;
-            } else {
-                return resurrectNums.contains(numAlive) ? Cell.ALIVE : Cell.DEAD;
-            }
-        };
+
+    static Rule mk(List<List<Integer>> ruleTable) {
+        return cell -> ruleTable.get(cell.getState()).get(cell.getSumNeighbourState());
     }
 
     static int GOL(Cell cell) {
-        int numAlive = cell.getNumAliveNeighbours();
-        if (cell.isAlive()) {
-            return (numAlive == 2 || numAlive == 3) ? Cell.ALIVE : Cell.DEAD;
-        } else {
-            return numAlive == 3 ? Cell.ALIVE : Cell.DEAD;
-        }
+        int nSum = cell.getSumNeighbourState();
+        if (cell.getState() == 0) {return nSum == 3 ? 1 : 0;}
+        else {return (nSum == 2 || nSum == 3) ? 1 : 0;}
     }
 
 

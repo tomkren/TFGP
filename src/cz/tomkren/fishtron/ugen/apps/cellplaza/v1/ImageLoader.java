@@ -1,6 +1,7 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza.v1;
 
 import cz.tomkren.fishtron.ugen.apps.cellplaza.PlazaImg;
+import cz.tomkren.utils.F;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -70,6 +71,6 @@ public class ImageLoader {
         System.out.println("amount red pixel: "+numRedPixels);
         System.out.println("amount pixel red percent: "+percentPixel+" %");
 
-        return new PlazaImg(pixels);
+        return new PlazaImg(pixels, F.arr(1));
     }
 }
