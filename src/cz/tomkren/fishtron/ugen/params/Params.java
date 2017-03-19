@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen;
+package cz.tomkren.fishtron.ugen.params;
 
 import cz.tomkren.fishtron.eva.Distribution;
 import cz.tomkren.utils.AB;

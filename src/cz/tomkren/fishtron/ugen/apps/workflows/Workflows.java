@@ -6,7 +6,7 @@ import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
-import cz.tomkren.fishtron.ugen.Params;
+import cz.tomkren.fishtron.ugen.params.Params;
 import cz.tomkren.fishtron.ugen.data.GammaSym;
 import cz.tomkren.fishtron.ugen.eval.*;
 import cz.tomkren.fishtron.workflows.MyList;

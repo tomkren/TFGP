@@ -4,7 +4,7 @@ import cz.tomkren.fishtron.terms.SubtreePos;
 import cz.tomkren.fishtron.types.Sub;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.Fresh;
-import cz.tomkren.fishtron.ugen.Params;
+import cz.tomkren.fishtron.ugen.params.Params;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
 import org.json.JSONObject;
