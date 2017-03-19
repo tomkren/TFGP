@@ -1,10 +1,10 @@
-package cz.tomkren.fishtron.ugen.apps.cellplaza.v1;
+package cz.tomkren.fishtron.ugen.apps.cellplaza.v2;
 
 import cz.tomkren.fishtron.ugen.apps.cellplaza.PlazaImg;
 import cz.tomkren.utils.AA;
 import cz.tomkren.utils.Log;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
@@ -32,28 +32,28 @@ public class CellWorld {
         this.plazaDir = plazaDir;
 
         String filename_seed = plazaDir + "/seed.png";
-        String filename_grad = plazaDir + "/grad.png";
+        //String filename_grad = plazaDir + "/grad.png";
         String filename_sens = plazaDir + "/sens.png";
         String filename_core = coreName == null ? null : plazaDir +"/"+ coreName + ".png";
 
         PlazaImg seed = PlazaImg.mk(filename_seed);
         PlazaImg core = PlazaImg.mk(filename_core);
-        PlazaImg grad = PlazaImg.mk(filename_grad);
+        //PlazaImg grad = PlazaImg.mk(filename_grad);
         PlazaImg sens = PlazaImg.mk(filename_sens);
 
-        checkSizes(seed, grad, sens);
+        checkSizes(seed, /*grad,*/ sens);
 
-        mkCells(seed, core, grad, sens);
+        mkCells(seed, core, /*grad,*/ sens);
 
         if (writeTestImages) {
             writeCellsImgs();
-            writeTests(seed, grad, sens);
+            writeTests(seed, /*grad,*/ sens);
         }
 
         Log.it("CellWorld created!\n");
     }
 
-    private void mkCells(PlazaImg seed, PlazaImg core, PlazaImg grad, PlazaImg sens) {
+    private void mkCells(PlazaImg seed, PlazaImg core, /*PlazaImg grad,*/ PlazaImg sens) {
 
         int width = seed.getWidth();
         int height = seed.getHeight();
@@ -78,17 +78,17 @@ public class CellWorld {
                     } else if (coreMarker2 == null) {
                         coreMarker2 = coreMarker;
                     } else {
-                        throw new Error("More then two core markers, third: "+coreMarker);
+                        throw new Error("More then two core markers, third : "+coreMarker);
                     }
                 }
 
-                Cell.State state = Cell.colorToState(seedColor, x, y);
-                cellRow[x] = new Cell(state, 1.0);
+                int state = Cell.colorToState(seedColor, x, y);
+                cellRow[x] = new Cell(state);
             }
             cells[y] = cellRow;
         }
 
-        if (grad != null) {
+        /*if (grad != null) {
             // set gradients
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
@@ -97,7 +97,7 @@ public class CellWorld {
                     getCell(x, y).setPRule(pRule);
                 }
             }
-        }
+        }*/
 
         if (core != null) {
 
@@ -122,7 +122,7 @@ public class CellWorld {
                     int yCell = y + coreDy;
                     Color seedColor = core.getColor(x, y);
                     if (!seedColor.equals(Color.white)) {
-                        Cell.State state = Cell.colorToState(seedColor, xCell, yCell);
+                        int state = Cell.colorToState(seedColor, xCell, yCell);
                         getCell(xCell, yCell).setState(state);
                     }
                 }
@@ -137,16 +137,14 @@ public class CellWorld {
             for (int x = 0; x < width; x++) {
                 Cell cell = getCell(x, y);
 
-                Color sensorColor = sens != null ? sens.getColor(x,y) : Color.white;
+                Color sensorColor = sens == null ? Color.white : sens.getColor(x,y);
 
                 List<AA<Integer>> diffs = Cell.colorToSensorDiffs(sensorColor, x, y, x_max, y_max);
                 Cell[] neighbours = new Cell[diffs.size()];
 
                 int n = 0;
                 for (AA<Integer> diff : diffs) {
-                    int dx = diff._1();
-                    int dy = diff._2();
-                    neighbours[n] = getCell(x + dx, y + dy);
+                    neighbours[n] = getCell(x + diff._1(), y + diff._2());
                     n++;
                 }
 
@@ -159,8 +157,8 @@ public class CellWorld {
         Log.it_noln("Computing next step ("+(step+1)+") ... ");
         eachCell(this::computeNextState);
         eachCell(Cell::setStateToNextState);
-        step++;
         Log.it("done");
+        step++;
     }
 
     void step(int numSteps) {
@@ -200,17 +198,15 @@ public class CellWorld {
 
         Log.it_noln("Converting cells to image ... ");
 
-        int height = getHeight();
         int width  = getWidth();
+        int height = getHeight();
 
         Color[][] pixels = new Color[height][width];
 
         for (int y = 0; y<height; y++) {
             Color[] pixelRow = new Color[width];
             for (int x = 0; x<width; x++) {
-                Cell cell = getCell(x,y);
-                Color color = showFun.apply(cell);
-                pixelRow[x] = color;
+                pixelRow[x] = showFun.apply(getCell(x,y));
             }
             pixels[y] = pixelRow;
         }
@@ -223,9 +219,7 @@ public class CellWorld {
         return toImg(Cell::getStateColor);
     }
 
-    private PlazaImg toGradImg() {
-        return toImg(Cell::getPRuleColor);
-    }
+    //private PlazaImg toGradImg() {return toImg(Cell::getPRuleColor);}
 
     private PlazaImg toNumNeighbourImg() {
         return toImg(Cell::getNumNeighbourColor);
@@ -252,20 +246,20 @@ public class CellWorld {
 
 
     private void writeCellsImgs() {
-        toGradImg().writeImage(plazaDir+"/out/cells_grad.png");
+        //toGradImg().writeImage(plazaDir+"/out/cells_grad.png");
         toNumNeighbourImg().writeImage(plazaDir+"/out/cells_sens.png");
     }
 
-    private void checkSizes(PlazaImg seed, PlazaImg grad, PlazaImg sens) {
+    private void checkSizes(PlazaImg seed, /*PlazaImg grad,*/ PlazaImg sens) {
         Log.it_noln("Checking sizes ... ");
-        if (grad != null) {grad.checkSize(seed);}
+        //if (grad != null) {grad.checkSize(seed);}
         if (sens != null) {sens.checkSize(seed);}
         Log.it("OK");
     }
 
-    private void writeTests(PlazaImg seed, PlazaImg grad, PlazaImg sens) {
+    private void writeTests(PlazaImg seed, /*PlazaImg grad,*/ PlazaImg sens) {
         if (seed != null) {seed.writeImage(plazaDir+"/out/test_seed.png");}
-        if (grad != null) {grad.writeImage(plazaDir+"/out/test_grad.png");}
+        //if (grad != null) {grad.writeImage(plazaDir+"/out/test_grad.png");}
         if (sens != null) {sens.writeImage(plazaDir+"/out/test_sens.png");}
     }
 }

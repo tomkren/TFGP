@@ -22,7 +22,7 @@ class Cell {
     private int nextState;
     private Cell[] neighbours;
 
-    Cell(int state, double pRule) {
+    Cell(int state) {
         this.state = state;
         this.nextState = -1;
         this.neighbours = null;

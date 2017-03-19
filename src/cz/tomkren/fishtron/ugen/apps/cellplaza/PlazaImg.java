@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen.apps.cellplaza.v1;
+package cz.tomkren.fishtron.ugen.apps.cellplaza;
 
 import cz.tomkren.utils.Log;
 
@@ -16,7 +16,7 @@ public class PlazaImg {
 
     private final Color[][] pixels;
 
-    static PlazaImg mk(String filename) {
+    public static PlazaImg mk(String filename) {
         if (filename == null) {return null;}
 
         Log.it_noln("Trying to load "+filename+" ... ");
@@ -31,7 +31,7 @@ public class PlazaImg {
         }
     }
 
-    PlazaImg(Color[][] pixels) {
+    public PlazaImg(Color[][] pixels) {
         this.pixels = pixels;
     }
 
@@ -75,18 +75,18 @@ public class PlazaImg {
         return pixels.length;
     }
 
-    void checkSize(PlazaImg img2) {
+    public void checkSize(PlazaImg img2) {
         int w = img2.getWidth();
         int h = img2.getHeight();
         if (getWidth() != w) {throw new Error("Width "+getWidth()+" is not matching desired w = "+w);}
         if (getHeight() != h) {throw new Error("Height "+getHeight()+" is not matching desired h = "+h);}
     }
 
-    Color getColor(int x, int y) {
+    public Color getColor(int x, int y) {
         return pixels[y][x];
     }
 
-    void writeImage(String filename) {
+    public void writeImage(String filename) {
         try {
 
             Log.it_noln("Writing "+filename+" ... ");
