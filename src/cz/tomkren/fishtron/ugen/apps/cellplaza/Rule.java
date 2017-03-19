@@ -1,6 +1,7 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza;
 
 import cz.tomkren.utils.F;
+import org.json.JSONArray;
 
 import java.util.*;
 
@@ -21,6 +22,10 @@ public interface Rule {
             code /= 2;
         }
         return fromBits(bits);
+    }
+
+    static Rule fromBits(JSONArray bits) {
+        return fromBits(F.map(bits, x -> (int)x == 1));
     }
 
     static Rule fromBits(List<Boolean> bits) {

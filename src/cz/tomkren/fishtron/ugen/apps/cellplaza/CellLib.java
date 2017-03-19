@@ -7,6 +7,7 @@ import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.eval.*;
 import cz.tomkren.fishtron.ugen.trees.Leaf;
 import cz.tomkren.utils.*;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -25,16 +26,19 @@ public class CellLib {
         Checker ch = new Checker();
 
         //testBitVersion(ch);
-        testSimpleVarVersion(ch);
+        testBitVersion_2(ch);
+        //testSimpleVarVersion(ch);
 
         ch.results();
     }
 
 
-    private static final Type goal = Types.parse("S -> (N -> S)");
+
+
+
+
+    private static final Type simpleVarGoal = Types.parse("S -> (N -> S)");
     private static final List<String> inputVarNames = Arrays.asList("s","nn");
-
-
 
     private static final EvalLib simpleVarLib = EvalLib.mk(
             "if",  new If(),
@@ -44,10 +48,9 @@ public class CellLib {
 
             "eqs",  (Fun2) x -> y -> x == y,
             "eqn",  (Fun2) x -> y -> x == y,
-            "<",    (Fun2) x -> y -> (int)x < (int)y,
+            "<",    (Fun2) x -> y -> (int)x < (int)y
 
-            "alive", Cell.State.ALIVE, "dead",  Cell.State.DEAD,
-            "0",0, "1",1, "2",2, "3",3, "4",4, "5",5, "6",6, "7",7, "8",8
+            //todo
     );
 
     private static final Gamma simpleVarGamma = Gamma.mk(
@@ -73,7 +76,7 @@ public class CellLib {
 
         int k_max = 64;
 
-        ABC<Type,Gamma,Function<AppTree,AppTree>> res = simpleVarGamma.mkGammaWithGoalTypeVars(goal, inputVarNames);
+        ABC<Type,Gamma,Function<AppTree,AppTree>> res = simpleVarGamma.mkGammaWithGoalTypeVars(simpleVarGoal, inputVarNames);
         Type newGoal   = res._1();
         Gamma newGamma = res._2();
         Function<AppTree,AppTree> addLams = res._3();
@@ -89,7 +92,6 @@ public class CellLib {
 
 
 
-    // goalType = goal
     private static final EvalLib lib_sk = EvalLib.mk(
             "s", (IUtils.S) f -> g -> x -> f.apply(x).apply(g.apply(x)),
             "k", (Fun2) x -> y -> x,
@@ -200,11 +202,11 @@ public class CellLib {
             "pair", (Fun2) a -> b -> AB.mk(a,b)
     );
 
-    static final int bitIndivSize = 40; //todo;
+    static final int bitIndivSize_1 = 40;
 
-    static final Type bitGoal = Types.parse("Img");
+    static final Type bitGoal_1 = Types.parse("Img");
 
-    static final Gamma bitGamma = Gamma.mk(
+    static final Gamma bitGamma_1 = Gamma.mk(
             "0",       "B",
             "1",       "B",
             "[]",     "V a 0",
@@ -215,7 +217,7 @@ public class CellLib {
             "runRule", "Rule -> (Img -> (N -> Img))"
     );
 
-    static final EvalLib bitLib = EvalLib.mk(
+    static final EvalLib bitLib_1 = EvalLib.mk(
             "0",    false,
             "1",    true,
             "[]",  Collections.emptyList(),
@@ -226,30 +228,64 @@ public class CellLib {
             "runRule", (Fun3) rule -> img -> n -> MiniPlaza.runRule((Rule)rule, (String)img, (int)n)
     );
 
-    static final JSONObject allParamsInfo_bitVersion = F.obj(
+    static final JSONObject allParamsInfo_bitVersion_1 = F.obj(
             "seedImg",  F.obj("filename", F.arr("core01","core02","core03","core04","core05","core06","core07")),
             "numSteps", F.obj("n", F.arr(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42))
-            /*"rule", F.obj(
-                    "0",  F.arr(0,1),
-                    "1",  F.arr(0,1),
-                    "2",  F.arr(0,1),
-                    "3",  F.arr(0,1),
-                    "4",  F.arr(0,1),
-                    "5",  F.arr(0,1),
-                    "6",  F.arr(0,1),
-                    "7",  F.arr(0,1),
-                    "8",  F.arr(0,1),
-                    "9",  F.arr(0,1),
-                    "10", F.arr(0,1),
-                    "11", F.arr(0,1),
-                    "12", F.arr(0,1),
-                    "13", F.arr(0,1),
-                    "14", F.arr(0,1),
-                    "15", F.arr(0,1),
-                    "16", F.arr(0,1),
-                    "17", F.arr(0,1)
-            )*/
     );
+
+
+    // -- bit V2 -----------------------------------------------------
+
+    private static void testBitVersion_2(Checker ch) {
+        int k_max = 100;
+        EvalTester.testLib(ch, k_max, bitLib_2, bitGamma_2, bitGoal_2, true, CellLib::showRule_2, allParamsInfo_bitVersion_2);
+    }
+
+    static final JSONObject allParamsInfo_bitVersion_2 = F.obj(
+            "bitRule", F.obj("bits", F.obj(
+                    "type", "list",
+                    "length", Rule.numBits,
+                    "values", F.arr(0,1)
+            )),
+            "seedImg",  F.obj("filename", F.arr("core01","core02","core03","core04","core05","core06","core07")),
+            "numSteps", F.obj("n", F.arr(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42))
+    );
+
+
+    static final Type bitGoal_2 = Types.parse("Img");
+
+    static final Gamma bitGamma_2 = Gamma.mk(
+            "bitRule", "Rule",
+            "seedImg", "Img",
+            "numSteps", "N",
+            "runRule", "Rule -> (Img -> (N -> Img))"
+    );
+
+    static final EvalLib bitLib_2 = EvalLib.mk(
+            "bitRule", new BitRule(),
+            "seedImg", new SeedImg(),
+            "numSteps", new NumSteps(),
+            "runRule", (Fun3) rule -> img -> n -> MiniPlaza.runRule((Rule)rule, (String)img, (int)n)
+    );
+
+    private static Object showRule_2(Object ruleObj) {
+        if (ruleObj instanceof String) {
+            return ruleObj;
+        } else {
+            throw new Error("ruleObj should be a String");
+        }
+    }
+
+
+
+    private static class BitRule implements EvalCode {
+        @Override
+        public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun) {
+            JSONArray bits = leaf.getParams().toJson().getJSONArray("bits");
+            return Rule.fromBits(bits);
+        }
+    }
+
 
     private static class SeedImg implements EvalCode {
         @Override
@@ -282,9 +318,11 @@ public class CellLib {
 
 
 
+
+
     private static void testBitVersion(Checker ch) {
         int k_max = 84;
-        EvalTester.testLib(ch, k_max, bitLib, bitGamma, bitGoal, true, CellLib::showRule3, allParamsInfo_bitVersion);
+        EvalTester.testLib(ch, k_max, bitLib_1, bitGamma_1, bitGoal_1, true, CellLib::showRule3, allParamsInfo_bitVersion_1);
     }
 
     private static String showRule3(Object indivObj) {

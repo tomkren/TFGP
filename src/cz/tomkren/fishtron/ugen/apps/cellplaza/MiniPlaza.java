@@ -55,13 +55,13 @@ public class MiniPlaza {
 
 
 
-        Gen gen = new Gen(CellLib.bitGamma, rand);
-        AppTree tree = gen.genOne(CellLib.bitIndivSize, CellLib.bitGoal);
-        tree = tree.randomizeParams(CellLib.allParamsInfo_bitVersion, rand);
+        Gen gen = new Gen(CellLib.bitGamma_1, rand);
+        AppTree tree = gen.genOne(CellLib.bitIndivSize_1, CellLib.bitGoal_1);
+        tree = tree.randomizeParams(CellLib.allParamsInfo_bitVersion_1, rand);
 
         Log.it(tree.toString());
 
-        EvalLib lib = CellLib.bitLib;
+        EvalLib lib = CellLib.bitLib_1;
 
         Object indivObj = lib.eval(tree);
         if (!(indivObj instanceof AB)) {throw new Error("Indiv object is not a pair.");}

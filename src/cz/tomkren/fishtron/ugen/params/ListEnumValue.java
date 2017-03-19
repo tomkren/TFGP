@@ -14,6 +14,7 @@ import java.util.Random;
 
 public class ListEnumValue implements ParamValue {
 
+    static final String TYPE_VALUE = "list";
     private static final String LENGTH_KEY = "length";
     private static final String VALUES_KEY = "values";
 
