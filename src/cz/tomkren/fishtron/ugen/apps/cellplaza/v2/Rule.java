@@ -1,16 +1,17 @@
-package cz.tomkren.fishtron.ugen.apps.cellplaza;
+package cz.tomkren.fishtron.ugen.apps.cellplaza.v2;
 
 import cz.tomkren.utils.F;
 import org.json.JSONArray;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**Created by tom on 12.03.2017.*/
 
 public interface Rule {
 
-    Cell.State nextState(Cell cell);
-
+    int nextState(Cell cell);
 
     int neighbourCases = 9;
     int numBits = 2 * neighbourCases;
@@ -29,7 +30,7 @@ public interface Rule {
     }
 
     static Rule fromBits(List<Boolean> bits) {
-        if (bits.size() != numBits) {throw new Error("bits has wrong size: "+bits.size());}
+        if (bits.size() != numBits) {throw new Error("bits have wrong size: "+bits.size());}
 
         int num1 = F.filter(bits.subList(0,neighbourCases),x->x).size();
         int num2 = F.filter(bits.subList(neighbourCases,numBits),x->x).size();
@@ -38,8 +39,8 @@ public interface Rule {
         List<Integer> surviveNums   = new ArrayList<>(num2);
 
         for (int n = 0; n < neighbourCases; n++) {
-            if (bits.get(n)) {resurrectNums.add(n);}
             if (bits.get(neighbourCases + n)) {surviveNums.add(n);}
+            if (bits.get(n)) {resurrectNums.add(n);}
         }
 
         return mk(resurrectNums, surviveNums);
@@ -47,8 +48,8 @@ public interface Rule {
 
     static Rule mk(Integer... args) {
         List<Integer> list1 = new ArrayList<>();
-        List<Integer> list2 = new ArrayList<>();
         List<Integer> current = list1;
+        List<Integer> list2 = new ArrayList<>();
         for (Integer arg : args) {
             if (arg == null) {
                 current = list2;
@@ -63,19 +64,19 @@ public interface Rule {
         return cell -> {
             int numAlive = cell.getNumAliveNeighbours();
             if (cell.isAlive()) {
-                return surviveNums.contains(numAlive) ? Cell.State.ALIVE : Cell.State.DEAD;
+                return surviveNums.contains(numAlive) ? Cell.ALIVE : Cell.DEAD;
             } else {
-                return resurrectNums.contains(numAlive) ? Cell.State.ALIVE : Cell.State.DEAD;
+                return resurrectNums.contains(numAlive) ? Cell.ALIVE : Cell.DEAD;
             }
         };
     }
 
-    static Cell.State GOL(Cell cell) {
+    static int GOL(Cell cell) {
         int numAlive = cell.getNumAliveNeighbours();
         if (cell.isAlive()) {
-            return (numAlive == 2 || numAlive == 3) ? Cell.State.ALIVE : Cell.State.DEAD;
+            return (numAlive == 2 || numAlive == 3) ? Cell.ALIVE : Cell.DEAD;
         } else {
-            return numAlive == 3 ? Cell.State.ALIVE : Cell.State.DEAD;
+            return numAlive == 3 ? Cell.ALIVE : Cell.DEAD;
         }
     }
 

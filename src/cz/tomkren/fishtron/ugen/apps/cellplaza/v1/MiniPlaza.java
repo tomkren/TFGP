@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen.apps.cellplaza;
+package cz.tomkren.fishtron.ugen.apps.cellplaza.v1;
 
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.Gen;

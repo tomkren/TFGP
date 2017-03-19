@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen.apps.cellplaza;
+package cz.tomkren.fishtron.ugen.apps.cellplaza.v1;
 
 import java.awt.Color;
 import java.awt.Graphics2D;

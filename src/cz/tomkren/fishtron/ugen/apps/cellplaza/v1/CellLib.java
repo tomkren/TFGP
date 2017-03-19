@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen.apps.cellplaza;
+package cz.tomkren.fishtron.ugen.apps.cellplaza.v1;
 
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.Types;
