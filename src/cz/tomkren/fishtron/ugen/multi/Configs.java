@@ -22,7 +22,7 @@ public class Configs {
     public static final String timeLimit = "timeLimit";
     public static final String sleepTime = "sleepTime";
     public static final String dummyFitness = "dummyFitness";
-    //public static final String
+    public static final String poolSize = "poolSize";
     //public static final String
     //public static final String
     //public static final String

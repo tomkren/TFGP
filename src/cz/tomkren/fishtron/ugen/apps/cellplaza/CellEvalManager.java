@@ -16,10 +16,12 @@ class CellEvalManager<Indiv extends MultiIndiv> implements MultiEvalManager<Indi
 
     private final EvalLib lib;
     private final boolean dummyMode;
+    private final int poolSize;
 
-    CellEvalManager(EvalLib lib, boolean dummyMode) {
+    CellEvalManager(EvalLib lib, int poolSize, boolean dummyMode) {
         this.lib = lib;
         this.dummyMode = dummyMode;
+        this.poolSize =poolSize;
     }
 
     @Override
@@ -34,6 +36,6 @@ class CellEvalManager<Indiv extends MultiIndiv> implements MultiEvalManager<Indi
 
     @Override
     public int getEvalPoolSize(int suggestedPoolSize) {
-        throw new TODO();
+        return poolSize;
     }
 }

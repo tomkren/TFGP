@@ -1,7 +1,20 @@
 {
 
-  "isMaxims": [true],
+  "generatingMaxTreeSize": 10,
 
+  "numEvaluations": 2147483647,
+  "numIndividualsToGenerate": 64,
+  "maxPopulationSize": 256,
+  "minPopulationSizeToOperate": 0,
+
+  "timeLimit": 2147483647,
+  "sleepTime": 2000,
+
+  "tournamentBetterWinsProbability": 1,
+
+  "dummyFitness": false,
+  "poolSize": 16,
+  "isMaxims": [true],
 
   "cellPlaza": {
     "evaPlaza": "mini_50",
@@ -21,4 +34,5 @@
       }
     }
   }
+
 }

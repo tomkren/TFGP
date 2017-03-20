@@ -68,8 +68,9 @@ class EvaSetup_CellEva {
 
         List<Boolean> isMaxims = Configs.getIsMaxims(config);
 
+        int poolSize = Configs.getInt(config, Configs.poolSize, 16);
         boolean dummyFitnessMode = Configs.getBoolean(config, Configs.dummyFitness, false);
-        evalManager = new CellEvalManager<>(lib, dummyFitnessMode);
+        evalManager = new CellEvalManager<>(lib, poolSize, dummyFitnessMode);
 
         opts = new BasicMultiEvaOpts<>(numEvaluations, numToGen, minPopToOperate, maxPopSize, /*saveBest,*/ timeLimit, sleepTime,
                 generator, isMaxims, evalManager, parentSelection, operators, rand);

@@ -1,10 +1,7 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza;
 
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.CellPlaza;
-import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
-import cz.tomkren.fishtron.ugen.multi.MultiEvaOpts;
-import cz.tomkren.fishtron.ugen.multi.MultiEvolution;
-import cz.tomkren.fishtron.ugen.multi.MultiLogger;
+import cz.tomkren.fishtron.ugen.multi.*;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
@@ -22,7 +19,7 @@ public class CellEva {
 
         EvaSetup_CellEva setup = new EvaSetup_CellEva(config, ch);
         MultiEvaOpts<AppTreeMI> opts = setup.getOpts();
-        MultiLogger<AppTreeMI> logger = new CellEvaLogger(config, logPath, ch, opts);
+        MultiLogger<AppTreeMI> logger = new EvaLogger<>(config, logPath, ch, opts, new CellShower());
 
         MultiEvolution<AppTreeMI> eva = new MultiEvolution<>(opts, logger);
         eva.startIterativeEvolution(1);
@@ -37,7 +34,7 @@ public class CellEva {
         String configPath = useDefaultConfig ? CellPlaza.CONFIG_PATH : args[0];
 
         boolean useDefaultLogPath = args.length < 2;
-        String logPath = useDefaultLogPath ? CellPlaza.BASE_DIR+"/"+"eva" : args[1];
+        String logPath = useDefaultLogPath ? CellPlaza.BASE_DIR+"/"+"evaLog" : args[1];
 
         try {
             JSONObject config = F.tryLoadJson(configPath);

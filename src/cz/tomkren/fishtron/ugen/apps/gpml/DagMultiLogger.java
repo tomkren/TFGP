@@ -61,7 +61,7 @@ public class DagMultiLogger implements MultiLogger<AppTreeMI> {
         return dir;
     }
 
-    // TODO pročesat to tu například geValue je tu dvakrát a přišlo mi letmo že by to šlo nějak pročistit
+    // TODO pročesat to tu například getValue je tu dvakrát a přišlo mi letmo že by to šlo nějak pročistit
 
     @Override
     public void log(int run, int evalId, MultiEvalResult<AppTreeMI> evalResult) {
