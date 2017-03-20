@@ -1,5 +1,6 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza;
 
+import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.CellPlaza;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
 import org.json.JSONArray;
@@ -16,8 +17,6 @@ import java.util.List;
 
 public class PlazaImg {
 
-    public static final String BASE_DIR = "cellplaza";
-
     private final Color[][] pixels;
     private List<Integer> pixelSizes;
 
@@ -25,7 +24,7 @@ public class PlazaImg {
         if (filename == null) {return null;}
 
         Log.it_noln("Trying to load "+filename+" ... ");
-        File file = new File(BASE_DIR +"/"+ filename);
+        File file = new File(CellPlaza.BASE_DIR +"/"+ filename);
         if (file.exists()) {
             PlazaImg ret = new PlazaImg(file);
             Log.it("done.");
@@ -115,7 +114,7 @@ public class PlazaImg {
             int pixelSize = pixelSizes.get(i);
 
             String dirPath = dir+"/px"+pixelSize;
-            String fullDirPath = BASE_DIR+"/"+dirPath;
+            String fullDirPath = CellPlaza.BASE_DIR+"/"+dirPath;
 
             if (!(new File(fullDirPath).exists())) {
                 if (!(new File(fullDirPath).mkdirs())) {throw new Error("Unable to create "+dir+" directory!");}
@@ -150,7 +149,7 @@ public class PlazaImg {
                 }
             }
 
-            ImageIO.write(bi, "PNG", new File(BASE_DIR +"/"+ (dir.equals("") ? "" : dir+"/")+ filename));
+            ImageIO.write(bi, "PNG", new File(CellPlaza.BASE_DIR +"/"+ (dir.equals("") ? "" : dir+"/")+ filename));
 
             Log.it("done");
 

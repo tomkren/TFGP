@@ -4,7 +4,6 @@ import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.CellEvalCodes;
-import cz.tomkren.fishtron.ugen.apps.cellplaza.PlazaImg;
 import cz.tomkren.fishtron.ugen.eval.*;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.trees.Leaf;
@@ -44,7 +43,7 @@ public class Libs {
         JSONArray states = new JSONArray();
         for (int s = 0; s < numStates; s++) {states.put(s);}
 
-        File coresDir = new File(PlazaImg.BASE_DIR+"/"+plazaDir+"/cores/");
+        File coresDir = new File(CellPlaza.BASE_DIR+"/"+plazaDir+"/cores/");
 
         String[] coreFilenames = coresDir.list();
         JSONArray coresJson = F.jsonMap(coreFilenames == null ? Collections.emptyList() : Arrays.asList(coreFilenames));

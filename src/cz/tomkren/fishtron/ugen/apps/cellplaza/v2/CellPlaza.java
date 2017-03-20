@@ -1,7 +1,6 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza.v2;
 
 import cz.tomkren.fishtron.ugen.Gen;
-import cz.tomkren.fishtron.ugen.apps.cellplaza.PlazaImg;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.utils.AB;
@@ -15,21 +14,15 @@ import java.util.Random;
 
 /** Created by tom on 19.03.2017 */
 
-public class MiniPlaza {
+public class CellPlaza {
 
-    private static final String CONFIG_PATH = PlazaImg.BASE_DIR + "/config.json";
-
-
-    /*private static final JSONObject config = F.obj(
-        "numStates", 3,
-        "plazaDir", "mini_10",
-        "pixelSizes", F.arr(5,1)
-    );*/
+    public static final String BASE_DIR = "cellplaza";
+    private static final String CONFIG_PATH = BASE_DIR + "/config.json";
 
     public static void main(String[] args) {
         Checker ch = new Checker();
-        JSONObject config = F.loadJson(CONFIG_PATH);
 
+        JSONObject config = F.loadJson(CONFIG_PATH);
         main_1(config, ch);
 
         ch.results();
@@ -71,7 +64,6 @@ public class MiniPlaza {
 
     }
 
-
     private static AB<AppTree,Rule> genBitRule(EvalLib lib, JSONObject allParamsInfo, Random rand) {
         Gen gen = new Gen(Libs.gamma, rand);
         AppTree tree = gen.genOne(1, Libs.ruleType);
@@ -79,8 +71,6 @@ public class MiniPlaza {
         Rule rule = (Rule) lib.eval(tree);
         return AB.mk(tree,rule);
     }
-
-
 
 
 }
