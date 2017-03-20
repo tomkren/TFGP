@@ -1,6 +1,7 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza.v2;
 
 import cz.tomkren.fishtron.ugen.Gen;
+import cz.tomkren.fishtron.ugen.apps.cellplaza.PlazaImg;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.utils.AB;
@@ -16,14 +17,18 @@ import java.util.Random;
 
 public class MiniPlaza {
 
-    private static final JSONObject config = F.obj(
+    private static final String CONFIG_PATH = PlazaImg.BASE_DIR + "/config.json";
+
+
+    /*private static final JSONObject config = F.obj(
         "numStates", 3,
         "plazaDir", "mini_10",
         "pixelSizes", F.arr(5,1)
-    );
+    );*/
 
     public static void main(String[] args) {
         Checker ch = new Checker();
+        JSONObject config = F.loadJson(CONFIG_PATH);
 
         main_1(config, ch);
 
@@ -32,10 +37,16 @@ public class MiniPlaza {
 
     private static void main_1(JSONObject config, Checker ch) {
         Random rand = ch.getRandom();
+        JSONArray plazasToRun = config.getJSONArray("run");
+        JSONObject plazaConfigs = config.getJSONObject("plazas");
+        for (String plazaDir : F.map(plazasToRun, x->(String)x)) {
+            runPlaza(plazaDir, plazaConfigs.getJSONObject(plazaDir), rand);
+        }
+    }
 
-        int numStates = config.getInt("numStates");
-        String plazaDir = config.getString("plazaDir");
-        JSONArray pixelSizes = config.getJSONArray("pixelSizes");
+    private static void runPlaza(String plazaDir, JSONObject plazaConfig, Random rand) {
+        int numStates = plazaConfig.getInt("numStates");
+        JSONArray pixelSizes = plazaConfig.getJSONArray("pixelSizes");
 
         EvalLib lib = Libs.mkLib(numStates, plazaDir, pixelSizes);
         JSONObject allParamsInfo = Libs.mkAllParamsInfo(numStates, plazaDir);
@@ -57,7 +68,9 @@ public class MiniPlaza {
         Log.it();
         Log.it("ruleCode = "+rule._1());
         Log.it("coreName = "+coreName);
+
     }
+
 
     private static AB<AppTree,Rule> genBitRule(EvalLib lib, JSONObject allParamsInfo, Random rand) {
         Gen gen = new Gen(Libs.gamma, rand);

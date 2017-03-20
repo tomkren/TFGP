@@ -1,0 +1,17 @@
+{
+  "run": ["mini_10", "mini_50", "mini_100"],
+  "plazas": {
+    "mini_10": {
+      "numStates": 3,
+      "pixelSizes": [50, 1]
+    },
+    "mini_50": {
+      "numStates": 3,
+      "pixelSizes": [10, 1]
+    },
+    "mini_100": {
+      "numStates": 3,
+      "pixelSizes": [5, 1]
+    }
+  }
+}

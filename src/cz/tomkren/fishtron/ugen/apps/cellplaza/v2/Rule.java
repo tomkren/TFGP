@@ -1,11 +1,9 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza.v2;
 
 import cz.tomkren.utils.F;
-import cz.tomkren.utils.TODO;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**Created by tom on 12.03.2017.*/
@@ -14,16 +12,10 @@ public interface Rule {
 
     int nextState(Cell cell);
 
+    int NUM_NEIGHBOURS = 8;
 
-    //int numStates = 2;
-    int numNeighbours = 8;
-
-    //int neighbourCases = (numStates - 1) * numNeighbours + 1;
-    //int numBits = numStates * neighbourCases;
-
-    static int neighbourCases(int numStates) {return (numStates - 1) * numNeighbours + 1;}
+    static int neighbourCases(int numStates) {return (numStates - 1) * NUM_NEIGHBOURS + 1;}
     static int numBits(int numStates) {return numStates * neighbourCases(numStates);}
-
 
 
     static Rule fromBits(JSONArray bits, int numStates) {

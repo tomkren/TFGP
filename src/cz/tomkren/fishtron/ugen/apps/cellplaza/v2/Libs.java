@@ -75,16 +75,15 @@ public class Libs {
 
     static EvalLib mkLib(int numStates, String plazaDir, JSONArray pixelSizes) {
         return EvalLib.mk(
-            "bitRule", new BitRule(numStates),
-            "seedImg", new CellEvalCodes.SeedImg(),
+            "bitRule",  new BitRule(numStates),
+            "seedImg",  new CellEvalCodes.SeedImg(),
             "numSteps", new CellEvalCodes.NumSteps(),
-            "runRule", new RunRule(numStates, plazaDir, pixelSizes)
+            "runRule",  new RunRule(numStates, plazaDir, pixelSizes)
         );
     }
 
 
     private static class BitRule implements EvalCode {
-
         private final int numStates;
         BitRule(int numStates) {this.numStates = numStates;}
 
@@ -96,7 +95,6 @@ public class Libs {
     }
 
     private static class RunRule implements F3 {
-
         private static int nextIndivId = 1;
 
         private final int numStates;

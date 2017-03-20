@@ -1,7 +1,6 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza.v2;
 
 import cz.tomkren.utils.AA;
-import cz.tomkren.utils.Log;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -13,10 +12,6 @@ class Cell {
 
     static final int DEAD = 0;
     private static int ALIVE(int numStates) {return numStates - 1;}
-
-    //static final Color DEAD_COLOR = Color.white;
-    //private static final Color ALIVE_COLOR = Color.black;
-    //private static final Color CHESSBOARD_COLOR = Color.gray;
 
     private int state;
     private int nextState;
@@ -41,8 +36,6 @@ class Cell {
         return sum;
     }
 
-    //boolean isAlive() {return state == ALIVE;}
-
     void computeNextState(Rule rule) {
         nextState = rule.nextState(this);
     }
@@ -60,55 +53,25 @@ class Cell {
 
     // todo nefektivní ale vadí mín než inverz imho .. dyštak udělat tabulku barev v CellWorld
     static int colorToState(Color seedColor, int x, int y, int numStates) {
-
         if (isGrayScale(seedColor)) {
 
             double b = numStates - 1.0;
             double a = (1.0 - numStates) / 255;
-
             int r = seedColor.getRed();
-            int state = (int) Math.round(a * r + b);
-
-            if (state < 0 || state >= numStates) {
-                throw new Error("Illegal state: "+state+" r= "+r+" a= "+a+" b= "+b);
-            }
-
-            return state;
+            return (int) Math.round(a * r + b);
 
         } else { // anything non-gray is chessboard
             return (x+y) % 2 == 0 ? ALIVE(numStates) : DEAD;
         }
-
-        /*if (seedColor.equals(ALIVE_COLOR)) {
-            return ALIVE;
-        } else if (seedColor.equals(DEAD_COLOR)) {
-            return DEAD;
-        } else if (seedColor.equals(CHESSBOARD_COLOR)) {
-            return (x+y) % 2 == 0 ? ALIVE : DEAD;
-        } else {
-            return DEAD;
-            //throw new Error("Unsupported seed color "+seedColor.toString()+" on pos [x="+x+", y="+y+"].");
-        }*/
     }
 
 
     // TODO nefektivní !! udělat tabulku barev v CellWorld
     static Color stateToColor(int state, int numStates) {
-
         double beta  = 255.0;
         double alpha = beta / (1.0 - numStates);
-
         int r = (int) Math.round(alpha * state + beta);
-
-        //Log.it(state +" "+ r);
-
         return new Color(r,r,r);
-
-        /*switch (state) {
-            case DEAD: return DEAD_COLOR;
-            case ALIVE: return ALIVE_COLOR;
-            default: throw new Error("State without a color: "+state);
-        }*/
     }
 
 

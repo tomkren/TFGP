@@ -1,10 +1,14 @@
 package cz.tomkren.utils;
 
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
+import com.google.common.io.Files;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -444,6 +448,15 @@ public class F {
             writer.close();
             Log.it("File "+filename+" written..");
         } catch (Exception e) {
+            throw new Error(e);
+        }
+    }
+
+    public static JSONObject loadJson(String jsonPath) {
+        try {
+            String jsonStr = Files.toString(new File(jsonPath), Charsets.UTF_8);
+            return new JSONObject(jsonStr);
+        } catch (IOException e) {
             throw new Error(e);
         }
     }
