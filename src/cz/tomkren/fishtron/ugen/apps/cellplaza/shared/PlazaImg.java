@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen.apps.cellplaza;
+package cz.tomkren.fishtron.ugen.apps.cellplaza.shared;
 
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.CellPlaza;
 import cz.tomkren.utils.F;

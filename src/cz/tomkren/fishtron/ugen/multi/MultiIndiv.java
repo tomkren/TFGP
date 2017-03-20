@@ -32,8 +32,14 @@ public interface MultiIndiv {
 
 
 
-    static <Indiv extends MultiIndiv> int compare(Indiv i1, Indiv i2) {
+    // TODO | zefektivnit aby se nemuselo pokazdy kontrolovat kolikanasobna je to optimalizace atd...
+    // todo | asi tak, že selekci předáme compare funkci kterou bude furt volat
 
+    static <Indiv extends MultiIndiv> int compare(Indiv i1, Indiv i2, List<Boolean> isMaxis) {
+        return (isMaxis.size() > 1) ? multiCompare(i1,i2) : singleCompare(i1,i2, isMaxis.get(0));
+    }
+
+    static <Indiv extends MultiIndiv> int multiCompare(Indiv i1, Indiv i2) {
         int front1 = i1.getFront();
         int front2 = i2.getFront();
 
@@ -45,6 +51,22 @@ public interface MultiIndiv {
 
         if (dist1 > dist2) {return -1;} // i1 wins
         if (dist1 < dist2) {return  1;} // i2 wins
+
+        return 0; // tie
+    }
+
+    static <Indiv extends MultiIndiv> int singleCompare(Indiv i1, Indiv i2, boolean isMaximization) {
+
+        double f1 = i1.getFitness(0);
+        double f2 = i2.getFitness(0);
+
+        if (isMaximization) {
+            if (f1 > f2) {return -1;} // i1 wins
+            if (f1 < f2) {return  1;} // i2 wins
+        } else {
+            if (f1 < f2) {return -1;} // i1 wins
+            if (f1 > f2) {return  1;} // i2 wins
+        }
 
         return 0; // tie
     }

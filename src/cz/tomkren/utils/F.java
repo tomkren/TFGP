@@ -454,12 +454,17 @@ public class F {
 
     public static JSONObject loadJson(String jsonPath) {
         try {
-            String jsonStr = Files.toString(new File(jsonPath), Charsets.UTF_8);
-            return new JSONObject(jsonStr);
+            return tryLoadJson(jsonPath);
         } catch (IOException e) {
             throw new Error(e);
         }
     }
+
+    public static JSONObject tryLoadJson(String jsonPath) throws IOException {
+        String jsonStr = Files.toString(new File(jsonPath), Charsets.UTF_8);
+        return new JSONObject(jsonStr);
+    }
+
 
     public static void writeJsonAsJsFile(String filename, String mkFunName, JSONObject json) {
         writeFile(filename,

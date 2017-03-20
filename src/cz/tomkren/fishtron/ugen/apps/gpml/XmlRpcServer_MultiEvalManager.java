@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen.multi.gpml;
+package cz.tomkren.fishtron.ugen.apps.gpml;
 
 
 import cz.tomkren.fishtron.ugen.multi.MultiEvalManager;

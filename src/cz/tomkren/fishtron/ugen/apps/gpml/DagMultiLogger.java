@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen.multi.gpml;
+package cz.tomkren.fishtron.ugen.apps.gpml;
 
 import com.google.common.base.Strings;
 import cz.tomkren.fishtron.ugen.multi.*;

@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen.apps.cellplaza;
+package cz.tomkren.fishtron.ugen.apps.cellplaza.shared;
 
 import cz.tomkren.fishtron.ugen.eval.EvalCode;
 import cz.tomkren.fishtron.ugen.trees.AppTree;

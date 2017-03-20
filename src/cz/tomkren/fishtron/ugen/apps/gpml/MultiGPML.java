@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen.multi.gpml;
+package cz.tomkren.fishtron.ugen.apps.gpml;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -35,7 +35,7 @@ public class MultiGPML {
 
         Checker checker = Checker.mk(config);
 
-        MultiEvaSetup setup = new MultiEvaSetup(config, checker);
+        EvaSetup_GPML setup = new EvaSetup_GPML(config, checker);
         MultiEvaOpts<AppTreeMI> opts = setup.getOpts();
         MultiLogger<AppTreeMI> dagLogger = new DagMultiLogger(config, logPath, checker, opts);
 

@@ -2,10 +2,7 @@ package cz.tomkren.fishtron.ugen.multi;
 
 import cz.tomkren.utils.TODO;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /** Created by tom on 07.03.2017. */
 
@@ -21,6 +18,8 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
 
 
     MultiPopulation(List<Boolean> isMaxis) {
+        if (isMaxis.isEmpty()) {throw new Error("0-fitness error : isMaxis is empty.");}
+
         this.isMaxis = isMaxis;
         individuals = new HashSet<>();
         removedIndividuals = new HashSet<>();
@@ -30,7 +29,7 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
     }
 
     Indiv select(MultiSelection<Indiv> selection) {
-        return selection.select(individuals);
+        return selection.select(individuals, isMaxis);
     }
 
     // !!! TODO určitě předělat na addIndividuals, pač neefektivní vzledem k tomu že se furt přepočítávaj ty fronty !!! !!!
@@ -50,7 +49,12 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
 
         individuals.add(indiv);
 
-        worstIndividual = MultiUtils.assignFrontsAndDistances(individuals, isMaxis);
+
+        if (isMaxis.size() > 1) {
+            worstIndividual = MultiUtils.assignFrontsAndDistances(individuals, isMaxis);
+        } else {
+            worstIndividual = findWorstIndividual_singleFitness();
+        }
 
         return true;
     }
@@ -60,6 +64,16 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
         individuals.remove(worstIndividual);
         removedIndividuals.add(worstIndividual);
     }
+
+
+    // TODO ověřit že max fakt dává nejhoršího :)
+    private Indiv findWorstIndividual_singleFitness() {
+        Comparator<Indiv> singleComparator = (i1, i2) -> MultiIndiv.singleCompare(i1,i2,isMaxis.get(0));
+        return individuals.stream().max(singleComparator).orElse(null);
+    }
+
+
+
 
     public int size() {
         return individuals.size();

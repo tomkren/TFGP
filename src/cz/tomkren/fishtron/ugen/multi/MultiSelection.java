@@ -3,13 +3,14 @@ package cz.tomkren.fishtron.ugen.multi;
 import cz.tomkren.utils.F;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Random;
 
 /** Created by tom on 07.03.2017.*/
 
 public interface MultiSelection<Indiv extends MultiIndiv> {
 
-    Indiv select(Collection<Indiv> pop);
+    Indiv select(Collection<Indiv> pop, List<Boolean> isMaxis);
 
     class Tournament<T extends MultiIndiv> implements MultiSelection<T> {
 
@@ -22,12 +23,12 @@ public interface MultiSelection<Indiv extends MultiIndiv> {
         }
 
         @Override
-        public T select(Collection<T> pop) {
+        public T select(Collection<T> pop, List<Boolean> isMaxis) {
 
             T i1 = F.randomElement(pop, rand);
             T i2 = F.randomElement(pop, rand);
 
-            int comparison = MultiIndiv.compare(i1, i2);
+            int comparison = MultiIndiv.compare(i1, i2, isMaxis);
             boolean i1wins = comparison < 0;
 
             if (rand.nextDouble() < pReturnWinner) {

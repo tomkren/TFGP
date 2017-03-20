@@ -1,6 +1,6 @@
-package cz.tomkren.fishtron.ugen.multi.gpml;
+package cz.tomkren.fishtron.ugen.apps.gpml;
 
-import cz.tomkren.fishtron.mains.DagEvaTester;
+import cz.tomkren.fishtron.sandbox2.Dag_JsonEvalInterface;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import cz.tomkren.fishtron.ugen.multi.MultiEvalResult;
 import cz.tomkren.fishtron.ugen.multi.MultiIndiv;
@@ -8,52 +8,71 @@ import cz.tomkren.fishtron.workflows.TypedDag;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
 import org.apache.xmlrpc.XmlRpcException;
-import org.eclipse.jetty.util.ArrayQueue;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.*;
 
-/**Created by tom on 17.03.2017.*/
+/**Created by tom on 07.03.2017.*/
 
-public class DummyMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcServer_MultiEvalManager<Indiv> {
+public class DagMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcServer_MultiEvalManager<Indiv> {
+
+    private Dag_JsonEvalInterface dagEvaluator;
 
     private EvalLib lib;
-    private Queue<JSONObject> fakeEvalQueue;
+
+    private String getParamSetsMethodName;
+    private String getCoreCountMethodName;
+    private String submitMethodName;
+    private String getEvaluatedMethodName;
+
+    private String datasetFilename;
+
     private Map<Integer, AB<Indiv,JSONObject>> id2indivData;
     private int nextId;
 
-    DummyMultiEvalManager(EvalLib lib) {
+    DagMultiEvalManager(EvalLib lib, String getParamSetsMethodName, String getCoreCountMethodName, String submitMethodName,
+                        String getEvaluatedMethodName, String evaluatorURL, String datasetFilename) {
+
         this.lib = lib;
-        fakeEvalQueue = new ArrayQueue<>();
+
+        this.getParamSetsMethodName = getParamSetsMethodName;
+        this.getCoreCountMethodName = getCoreCountMethodName;
+        this.submitMethodName = submitMethodName;
+        this.getEvaluatedMethodName = getEvaluatedMethodName;
+        this.datasetFilename = datasetFilename;
+
+        dagEvaluator = new Dag_JsonEvalInterface(evaluatorURL);
+
         id2indivData = new HashMap<>();
         nextId = 0;
     }
 
     @Override
     public JSONObject getAllParamsInfo(String datasetFilename) throws XmlRpcException {
-        return DagEvaTester.testParamsInfo;
+        String jsonStr = dagEvaluator.getMethodParams(getParamSetsMethodName, datasetFilename);
+        return new JSONObject(jsonStr);
     }
 
     @Override
     public int getCoreCount() {
-        return 16;
+        return dagEvaluator.getInt(getCoreCountMethodName);
     }
 
     @Override
     public Object submit(List<AB<Indiv, JSONObject>> indivs) {
+
         JSONArray jsonIndivs = new JSONArray();
 
         for (AB<Indiv,JSONObject> indivData : indivs) {
+            Indiv      indiv     = indivData._1();
+            JSONObject indivJson = indivData._2();
 
+            indivJson.put("id",nextId);
             id2indivData.put(nextId, indivData);
 
-            JSONObject indivJson = indivData._2();
-            indivJson.put("id", nextId);
-
-            Indiv indiv = indivData._1();
-            Object indivValue = indiv.computeValue(lib);
-            JSONObject jsonCode = new JSONObject(((TypedDag) indivValue).toJson());
+            Object indivValue = indiv.computeValue(lib); // INDIVIDUAL EVALUATION
+            JSONObject jsonCode = dagToJson(indivValue);
 
             JSONObject indivDataToSubmit = F.obj(
                     "id",   nextId,
@@ -64,36 +83,21 @@ public class DummyMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcSe
             jsonIndivs.put(indivDataToSubmit);
         }
 
-        return fakeInnerSubmit(jsonIndivs); // returns submitMsg
+        return dagEvaluator.submit(submitMethodName, jsonIndivs, datasetFilename); // returns submitMsg
     }
 
-    private Object fakeInnerSubmit(JSONArray jsonIndivs) {
-        List<JSONObject> listIndivs = F.map(jsonIndivs, x->(JSONObject) x);
-        fakeEvalQueue.addAll(listIndivs);
-        return "FAKE SUBMIT SUCCESSFUL";
-    }
-
-    private JSONArray fakeGetEvaluated() {
-
-        JSONObject submittedIndivData = fakeEvalQueue.poll();
-
-        int id = submittedIndivData.getInt("id");
-        JSONObject indivDagJson = submittedIndivData.getJSONObject("code");
-
-        double fakeScore1 = indivDagJson.keySet().size();
-        double fakeStdDevScore = Math.random();
-        double fakeScore2 = Math.random();
-
-        JSONArray oneIndivResult = F.arr(id, F.arr(fakeScore1,fakeStdDevScore,fakeScore2));
-        return F.arr(oneIndivResult);
+    private JSONObject dagToJson(Object indivValue) {
+        TypedDag dag = (TypedDag) indivValue;
+        String jsonStr = dag.toJson(); // todo prasarna.. že toJson vrací string
+        return new JSONObject(jsonStr);
     }
 
     @Override
     public MultiEvalResult<Indiv> getEvaluated() {
-        JSONArray json = fakeGetEvaluated();
+
+        JSONArray json = dagEvaluator.getEvaluated(getEvaluatedMethodName);
 
         List<AB<Indiv,JSONObject>> evaluatedIndividuals = new ArrayList<>(json.length());
-
         for (int i = 0; i < json.length(); i++) {
             JSONArray evalRes = json.getJSONArray(i);
             evaluatedIndividuals.add(getIndivBack(evalRes));
@@ -101,6 +105,7 @@ public class DummyMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcSe
 
         return () -> evaluatedIndividuals;
     }
+
 
     private AB<Indiv,JSONObject> getIndivBack(JSONArray evalResJsonArr) {
 
@@ -121,19 +126,23 @@ public class DummyMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcSe
         List<Double> fitness = Arrays.asList(performanceScore, timeScore);
         indiv.setFitness(fitness);
 
-        indivJson.put("rawScores", scores);
         indivJson.put("fitness", F.jsonMap(fitness));
+        indivJson.put("rawScores", scores);
 
         return indivData;
     }
 
-    private static double mkErrorPerformanceScore(){return -Double.MAX_VALUE;}
-    private static double mkErrorTimeScore(){return Double.MAX_VALUE;}
+    private static double mkErrorPerformanceScore(){
+        return -Double.MAX_VALUE;
+    }
 
+    private static double mkErrorTimeScore(){
+        return Double.MAX_VALUE;
+    }
 
 
     @Override
     public String quitServer() {
-        return "Timmmmmmmmmmmy!";
+        return dagEvaluator.quitServer();
     }
 }

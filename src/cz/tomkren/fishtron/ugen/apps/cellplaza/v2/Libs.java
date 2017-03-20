@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.ugen.apps.cellplaza.v2;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.Gamma;
-import cz.tomkren.fishtron.ugen.apps.cellplaza.CellEvalCodes;
+import cz.tomkren.fishtron.ugen.apps.cellplaza.shared.CellEvalCodes;
 import cz.tomkren.fishtron.ugen.eval.*;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.trees.Leaf;
@@ -38,7 +38,7 @@ public class Libs {
 
 
 
-    static JSONObject mkAllParamsInfo(int numStates, String plazaDir) {
+    public static JSONObject mkAllParamsInfo(int numStates, String plazaDir) {
 
         JSONArray states = new JSONArray();
         for (int s = 0; s < numStates; s++) {states.put(s);}
@@ -62,17 +62,17 @@ public class Libs {
     }
 
 
-    private static final Type goal = Types.parse("Img");
+    public static final Type goal = Types.parse("Img");
     static final Type ruleType = Types.parse("Rule");
 
-    static final Gamma gamma = Gamma.mk(
+    public static final Gamma gamma = Gamma.mk(
             "bitRule", "Rule",
             "seedImg", "Img",
             "numSteps", "N",
             "runRule", "Rule -> (Img -> (N -> Img))"
     );
 
-    static EvalLib mkLib(int numStates, String plazaDir, JSONArray pixelSizes) {
+    public static EvalLib mkLib(int numStates, String plazaDir, JSONArray pixelSizes) {
         return EvalLib.mk(
             "bitRule",  new BitRule(numStates),
             "seedImg",  new CellEvalCodes.SeedImg(),

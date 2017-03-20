@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen.multi.gpml;
+package cz.tomkren.fishtron.ugen.apps.gpml;
 
 import cz.tomkren.fishtron.eva.Distribution;
 import cz.tomkren.fishtron.eva.IndivGenerator;
@@ -16,46 +16,43 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.function.BiFunction;
 
 /**Created by tom on 07.03.2017.*/
 
-public class MultiEvaSetup {
+public class EvaSetup_GPML {
 
     private MultiEvaOpts<AppTreeMI> opts;
     private XmlRpcServer_MultiEvalManager<AppTreeMI> evalManager;
 
-    MultiEvaSetup(JSONObject config, Checker checker) throws XmlRpcException {
+    EvaSetup_GPML(JSONObject config, Checker checker) throws XmlRpcException {
 
-        int numEvaluations = getInt(config,"numEvaluations", 32768);
+        int numEvaluations = Configs.getInt(config, Configs.numEvaluations, 32768);
 
-        int numToGen        = getInt(config, "numIndividualsToGenerate",   256);
-        int minPopToOperate = getInt(config, "minPopulationSizeToOperate", numToGen/2);
-        int maxPopSize      = getInt(config, "maxPopulationSize",          numToGen*4);
+        int numToGen        = Configs.getInt(config, Configs.numIndividualsToGenerate,   256);
+        int minPopToOperate = Configs.getInt(config, Configs.minPopulationSizeToOperate, numToGen/2);
+        int maxPopSize      = Configs.getInt(config, Configs.maxPopulationSize,          numToGen*4);
 
         //boolean saveBest = getBoolean(config,"saveBest", true);
 
-        int generatingMaxTreeSize = getInt(config, "generatingMaxTreeSize", 37);
-        double tournamentBetterWinsProbability = getDouble(config, "tournamentBetterWinsProbability", 0.8);
+        int generatingMaxTreeSize = Configs.getInt(config, Configs.generatingMaxTreeSize, 37);
+        double tournamentBetterWinsProbability = Configs.getDouble(config, Configs.tournamentBetterWinsProbability, 0.8);
 
-        Long seed = config.has("seed") ? config.getLong("seed") : null;
+        /*Long seed = config.has(Configs.seed) ? config.getLong(Configs.seed) : null;
         if (checker == null) {checker = new Checker(seed);}
-        if (seed    == null) {config.put("seed", checker.getSeed());}
-        Random rand = checker.getRandom();
+        if (seed    == null) {config.put(Configs.seed, checker.getSeed());}
+        Random rand = checker.getRandom();*/
+        Random rand = Configs.handleRandomSeed(config, checker);
 
-        String evalServerUrl   = getString(config, "serverUrl", "http://localhost:8080/");
-        String datasetFilename = getString(config, "dataset",   "winequality-white.csv");
+        String evalServerUrl   = Configs.getString(config, "serverUrl", "http://localhost:8080/");
+        String datasetFilename = Configs.getString(config, "dataset",   "winequality-white.csv");
 
-        int timeLimit = getInt(config, "timeLimit", Integer.MAX_VALUE);
-        long sleepTime = getInt(config, "sleepTime", 2000);
+        int timeLimit  = Configs.getInt(config, Configs.timeLimit, Integer.MAX_VALUE);
+        long sleepTime = Configs.getInt(config, Configs.sleepTime, 2000);
 
-        boolean dummyFitnessMode = getBoolean(config, "dummyFitness", false);
+        boolean dummyFitnessMode = Configs.getBoolean(config, Configs.dummyFitness, false);
 
-
-        Type goal = Workflows.goal;
 
         JSONObject methods = config.getJSONObject("methods"); // todo .. dát defaultní
 
@@ -78,6 +75,7 @@ public class MultiEvaSetup {
         Log.it("Gamma = \n"+gamma);
 
         Gen gen = new Gen(gamma, rand);
+        Type goal = Workflows.goal;
 
         IndivGenerator<AppTreeMI> generator = new AppTreeMIGenerator(goal, generatingMaxTreeSize, gen, allParamsInfo);
         MultiSelection<AppTreeMI> parentSelection = new MultiSelection.Tournament<>(tournamentBetterWinsProbability, rand);
@@ -86,8 +84,8 @@ public class MultiEvaSetup {
         Distribution<Operator<AppTreeMI>> operators;
         operators = MultiGenOpFactory.mkOperators(operatorsConfig, rand, gen, allParamsInfo);
 
-        // todo udelat bezpečnějc dyštak
-        List<Boolean> isMaxims = F.map(config.getJSONArray("isMaxims"), x->(boolean)x); //Arrays.asList(true, false); // performance maximization , time minimization
+        List<Boolean> isMaxims = Configs.getIsMaxims(config);
+
 
         opts = new BasicMultiEvaOpts<>(numEvaluations, numToGen, minPopToOperate, maxPopSize, /*saveBest,*/ timeLimit, sleepTime,
                 generator, isMaxims, evalManager, parentSelection, operators, rand);
@@ -101,33 +99,5 @@ public class MultiEvaSetup {
         return evalManager.quitServer();
     }
 
-
-
-
-
-    private static String getString(JSONObject config, String key, String defaultValue) {
-        return getValue(config,key,defaultValue, JSONObject::getString);
-    }
-
-    public static int getInt(JSONObject config, String key, int defaultValue) {
-        return getValue(config,key,defaultValue, JSONObject::getInt);
-    }
-
-    private static double getDouble(JSONObject config, String key, double defaultValue) {
-        return getValue(config,key,defaultValue, JSONObject::getDouble);
-    }
-
-    private static boolean getBoolean(JSONObject config, String key, boolean defaultValue) {
-        return getValue(config,key,defaultValue, JSONObject::getBoolean);
-    }
-
-    private static <A> A getValue(JSONObject config, String key, A defaultValue, BiFunction<JSONObject, String, A> accessFun) {
-        if (config.has(key)) {
-            return accessFun.apply(config,key);
-        } else {
-            config.put(key, defaultValue);
-            return defaultValue;
-        }
-    }
 
 }

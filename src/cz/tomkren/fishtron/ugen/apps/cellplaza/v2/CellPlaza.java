@@ -17,18 +17,16 @@ import java.util.Random;
 public class CellPlaza {
 
     public static final String BASE_DIR = "cellplaza";
-    private static final String CONFIG_PATH = BASE_DIR + "/config.json";
+    public static final String CONFIG_PATH = BASE_DIR + "/config.json";
 
     public static void main(String[] args) {
         Checker ch = new Checker();
-
-        JSONObject config = F.loadJson(CONFIG_PATH);
-        main_1(config, ch);
-
+        JSONObject config = F.loadJson(CONFIG_PATH).getJSONObject("cellPlaza");
+        run(config, ch);
         ch.results();
     }
 
-    private static void main_1(JSONObject config, Checker ch) {
+    private static void run(JSONObject config, Checker ch) {
         Random rand = ch.getRandom();
         JSONArray plazasToRun = config.getJSONArray("run");
         JSONObject plazaConfigs = config.getJSONObject("plazas");
