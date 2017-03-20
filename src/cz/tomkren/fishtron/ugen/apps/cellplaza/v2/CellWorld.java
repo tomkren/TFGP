@@ -5,7 +5,8 @@ import cz.tomkren.utils.AA;
 import cz.tomkren.utils.Log;
 import org.json.JSONArray;
 
-import java.awt.*;
+import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -23,9 +24,11 @@ public class CellWorld {
 
     private final JSONArray pixelSizes;
 
-    CellWorld(int numStates, String plazaDir, String coreName, Rule rule, JSONArray pixelSizes) {
-        this(numStates, plazaDir, coreName, rule, false, pixelSizes);
-    }
+    private final Color[] state2color;
+    private final double c2s_beta;
+    private final double c2s_alpha;
+
+
 
     CellWorld(int numStates, String plazaDir, String coreName, Rule rule, boolean writeTestImages, JSONArray pixelSizes) {
 
@@ -35,6 +38,12 @@ public class CellWorld {
         this.rule = rule;
         this.step = 0;
         this.plazaDir = plazaDir;
+
+        state2color = new Color[numStates];
+        initStateToColor();
+        c2s_alpha = (1.0 - numStates) / 255;
+        c2s_beta = numStates - 1.0;
+
 
         String filename_seed = plazaDir + "/seed.png";
         //String filename_grad = plazaDir + "/grad.png";
@@ -76,7 +85,7 @@ public class CellWorld {
                 Color seedColor = seed.getColor(x, y);
 
                 if (seedColor.equals(Color.red)) {
-                    seedColor = Cell.stateToColor(Cell.DEAD, numStates);  //Cell.DEAD_COLOR;
+                    seedColor = stateToColor(Cell.DEAD_STATE);  //Cell.DEAD_COLOR;
                     AA<Integer> coreMarker = AA.mk(x,y);
                     if (coreMarker1 == null) {
                         coreMarker1 = coreMarker;
@@ -87,7 +96,7 @@ public class CellWorld {
                     }
                 }
 
-                int state = Cell.colorToState(seedColor, x, y, numStates);
+                int state = colorToState(seedColor, x, y);
                 cellRow[x] = new Cell(state);
             }
             cells[y] = cellRow;
@@ -127,7 +136,7 @@ public class CellWorld {
                     int yCell = y + coreDy;
                     Color seedColor = core.getColor(x, y);
                     if (!seedColor.equals(Color.white)) {
-                        int state = Cell.colorToState(seedColor, xCell, yCell, numStates);
+                        int state = colorToState(seedColor, xCell, yCell);
                         getCell(xCell, yCell).setState(state);
                     }
                 }
@@ -144,7 +153,7 @@ public class CellWorld {
 
                 Color sensorColor = sens == null ? Color.white : sens.getColor(x,y);
 
-                List<AA<Integer>> diffs = Cell.colorToSensorDiffs(sensorColor, x, y, x_max, y_max);
+                List<AA<Integer>> diffs = colorToSensorDiffs(sensorColor, x, y, x_max, y_max);
                 Cell[] neighbours = new Cell[diffs.size()];
 
                 int n = 0;
@@ -175,6 +184,76 @@ public class CellWorld {
     private void computeNextState(Cell cell) {
         cell.computeNextState(rule);
     }
+
+    private void initStateToColor() {
+
+        double beta = 255.0;
+        double alpha = beta / (1.0 - numStates);
+
+        for (int s = 0; s < numStates; s++) {
+            int r = (int) Math.round(alpha * s + beta);
+            state2color[s] = new Color(r, r, r);
+        }
+    }
+
+    private Color stateToColor(int state) {
+        return state2color[state];
+    }
+
+    private int colorToState(Color seedColor, int x, int y) {
+        if (isGrayScale(seedColor)) {
+            return (int) Math.round(c2s_alpha * seedColor.getRed() + c2s_beta);
+        } else { // anything non-gray is chessboard
+            return (x+y) % 2 == 0 ? Cell.ALIVE_STATE(numStates) : Cell.DEAD_STATE;
+        }
+    }
+
+    private static boolean isGrayScale(Color color) {
+        int r = color.getRed();
+        int g = color.getGreen();
+        int b = color.getBlue();
+        return r == g && r == b;
+    }
+
+    private static List<AA<Integer>> colorToSensorDiffs(Color sensorColor, int x, int y, int x_max, int y_max) {
+        List<AA<Integer>> diffs = new ArrayList<>(8);
+
+        boolean isLeft   = x == 0;
+        boolean isTop    = y == 0;
+        boolean isRight  = x == x_max;
+        boolean isBottom = y == y_max;
+
+        if (!sensorColor.equals(Color.white)) {
+            if (sensorColor.equals(Color.red)) {
+                isLeft = true;
+            } else if (sensorColor.equals(Color.green)) {
+                isRight = true;
+            } else if (sensorColor.equals(Color.blue)) {
+                isBottom = true;
+            } else if (sensorColor.equals(Color.magenta)) {
+                isLeft = true;
+                isBottom = true;
+            } else if (sensorColor.equals(Color.cyan)) {
+                isRight = true;
+                isBottom = true;
+            } else if (!isGrayScale(sensorColor)) {
+                throw new Error("Unsupported sensor color : " + sensorColor.toString() + " on pos [x=" + x + ", y=" + y + "].");
+            }
+        }
+
+        if (!isTop)                {diffs.add(AA.mk( 0,-1));}
+        if (!isBottom)             {diffs.add(AA.mk( 0, 1));}
+        if (!isLeft)               {diffs.add(AA.mk(-1, 0));}
+        if (!isRight)              {diffs.add(AA.mk( 1, 0));}
+        if (!isTop    && !isLeft)  {diffs.add(AA.mk(-1,-1));}
+        if (!isTop    && !isRight) {diffs.add(AA.mk( 1,-1));}
+        if (!isBottom && !isLeft)  {diffs.add(AA.mk(-1, 1));}
+        if (!isBottom && !isRight) {diffs.add(AA.mk( 1, 1));}
+
+        return diffs;
+    }
+
+
 
     private void eachCell(Consumer<Cell> processCell) {
         int width  = getWidth();
@@ -221,13 +300,18 @@ public class CellWorld {
     }
 
     private PlazaImg toStateImg() {
-        return toImg(cell -> Cell.stateToColor(cell.getState(), numStates));
+        return toImg(cell -> stateToColor(cell.getState()));
     }
 
     //private PlazaImg toGradImg() {return toImg(Cell::getPRuleColor);}
 
     private PlazaImg toNumNeighbourImg() {
-        return toImg(Cell::getNumNeighbourColor);
+        return toImg(this::getNumNeighbourColor);
+    }
+
+    private Color getNumNeighbourColor(Cell cell) {
+        int r = (int) Math.round(255.0 * cell.getNumNeighbours() / 8.0);
+        return new Color(r,r,r);
     }
 
 

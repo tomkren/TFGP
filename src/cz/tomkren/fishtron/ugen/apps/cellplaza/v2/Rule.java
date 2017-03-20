@@ -45,11 +45,11 @@ public interface Rule {
 
 
     static Rule mk(List<List<Integer>> ruleTable) {
-        return cell -> ruleTable.get(cell.getState()).get(cell.getSumNeighbourState());
+        return cell -> ruleTable.get(cell.getState()).get(cell.getNeighbourStateSum());
     }
 
     static int GOL(Cell cell) {
-        int nSum = cell.getSumNeighbourState();
+        int nSum = cell.getNeighbourStateSum();
         if (cell.getState() == 0) {return nSum == 3 ? 1 : 0;}
         else {return (nSum == 2 || nSum == 3) ? 1 : 0;}
     }

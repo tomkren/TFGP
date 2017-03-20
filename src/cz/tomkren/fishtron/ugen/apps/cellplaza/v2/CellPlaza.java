@@ -49,7 +49,7 @@ public class CellPlaza {
         JSONArray coreNames = allParamsInfo.getJSONObject("seedImg").getJSONArray("filename");
         String coreName = (String) F.randomElement(coreNames, rand);
 
-        CellWorld w = new CellWorld(numStates, plazaDir, coreName, rule._2(), pixelSizes);
+        CellWorld w = new CellWorld(numStates, plazaDir, coreName, rule._2(), false, pixelSizes);
 
         int numSteps = 100;
         w.writeState();
