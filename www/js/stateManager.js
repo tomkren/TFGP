@@ -38,14 +38,18 @@ function mkStateManager(config) {
     }
 
     function loadJobsAndInformListeners() {
-        loadJobs(function (jobs) {
+        loadJobs(function (jobsInfo) {
             _.each(jobsListeners, function (callback) {
-                callback(jobs);
+                callback(jobsInfo);
             });
         });
     }
 
     function mkLoadStateFun(apiCmdStr, stateKey, projection) {
+        if (projection === undefined) {
+            projection = function (x) {return x;};
+        }
+
         return function (callback, errCallback) {
             if (callback === undefined) {
                 callback = function () {};
@@ -65,7 +69,7 @@ function mkStateManager(config) {
         }
     }
 
-    var loadJobs = mkLoadStateFun('jobs', 'jobs', function (r) {return r.jobs;});
+    var loadJobs = mkLoadStateFun('jobs', 'jobs' /*, function (r) {return r.jobs;}*/);
 
     return {
         loadJobs: loadJobs,

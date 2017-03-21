@@ -39,7 +39,10 @@ class JobManager {
 
     JSONObject getJobsInfo() {
          JSONArray jobsArr = F.jsonMap(jobs.keySet(), this::getJobInfo);
-         return Api.addOk(F.obj(Api.JOBS, jobsArr));
+         return Api.ok(
+                 Api.JOBS, jobsArr,
+                 Api.JOB_NAMES, jobFactory.getJobNames()
+         );
     }
 
     private JSONObject getJobInfo(int jobId) {

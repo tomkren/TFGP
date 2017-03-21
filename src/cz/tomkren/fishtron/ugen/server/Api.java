@@ -10,6 +10,7 @@ public interface Api {
 
     String JOB_NAME = "job";
     String JOBS = "jobs";
+    String JOB_NAMES = "jobNames";
     String JOB_ID = "jobId";
     String JOB_CMD = "jobCmd";
 

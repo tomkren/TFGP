@@ -1,6 +1,7 @@
 package cz.tomkren.fishtron.ugen.server;
 
-import cz.tomkren.fishtron.ugen.server.jobs.Test;
+import cz.tomkren.utils.F;
+import org.json.JSONArray;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -22,7 +23,6 @@ class JobFactory {
         jobClasses.put(jobName, jobClass);
     }
 
-
     EvaJob mkJob(String jobName) {
 
         Class<? extends EvaJob> jobClass = jobClasses.get(jobName);
@@ -37,11 +37,10 @@ class JobFactory {
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
             return null;
         }
+    }
 
-        /* if (jobName.equals("test")) {
-            return new Test();
-        }
-        return null;*/
+    JSONArray getJobNames() {
+        return F.jsonMap(jobClasses.keySet());
     }
 
 }

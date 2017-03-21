@@ -1,31 +1,35 @@
 function mkJobsView($container, dispatch) {
 
+    //var jobNames = ["test","test2","hax"];
 
-    function render(jobs) {
-        if (jobs === null) {
+    function render(jobsInfo) {
+        if (jobsInfo === null) {
             $container.html('Error: Unable to load jobs!');
             return;
         }
 
+        var jobs = jobsInfo['jobs'];
+        var jobNames = jobsInfo['jobNames'];
+
         //log(jobs);
         $container.html('');
         $container.append([
-            mkJobStarter(),
+            mkJobStarter(jobNames),
             mkJobsTable(jobs)
         ]);
     }
 
-    function mkJobStarter() {
-        var $select = mkJobDropdown();
+    function mkJobStarter(jobNames) {
+        var $select = mkJobDropdown(jobNames);
         return $('<div>').addClass("job-starter").append([
             $select,
             mkJobRunButton($select)
         ]);
     }
 
-    var jobNames = ["test","test2","hax"];
 
-    function mkJobDropdown() {
+
+    function mkJobDropdown(jobNames) {
         var $select = $('<select>').addClass("job-dropdown");
         $select.append(_.map(jobNames, function (jobName) {
             return $('<option>').val(jobName).html(jobName)
