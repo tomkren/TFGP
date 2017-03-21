@@ -24,7 +24,7 @@ import java.util.Random;
 class EvaSetup_CellEva {
 
     private MultiEvaOpts<AppTreeMI> opts;
-    private MultiEvalManager<AppTreeMI> evalManager; // todo zřejmě bude potřeba zobecnit pro komparativní selekci
+    //private  evalManager; // todo zřejmě bude potřeba zobecnit pro komparativní selekci
 
     EvaSetup_CellEva(JSONObject config, Checker checker) {
 
@@ -70,7 +70,7 @@ class EvaSetup_CellEva {
 
         int poolSize = Configs.getInt(config, Configs.poolSize, 16);
         boolean dummyFitnessMode = Configs.getBoolean(config, Configs.dummyFitness, false);
-        evalManager = new CellEvalManager<>(lib, poolSize, dummyFitnessMode);
+        MultiEvalManager<AppTreeMI> evalManager = new CellEvalManager<>(lib, poolSize, dummyFitnessMode);
 
         opts = new BasicMultiEvaOpts<>(numEvaluations, numToGen, minPopToOperate, maxPopSize, /*saveBest,*/ timeLimit, sleepTime,
                 generator, isMaxims, evalManager, parentSelection, operators, rand);

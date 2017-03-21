@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -506,7 +507,17 @@ public class F {
         return ret;
     }
 
+    public static <A> JSONArray jsonMap(A[] xs, Function<A,Object> f) {
+        JSONArray ret = new JSONArray();
+        Arrays.stream(xs).map(f).forEach(ret::put);
+        return ret;
+    }
+
     public static <A> JSONArray jsonMap(Collection<A> xs) {
+        return jsonMap(xs, x->x);
+    }
+
+    public static <A> JSONArray jsonMap(A[] xs) {
         return jsonMap(xs, x->x);
     }
 

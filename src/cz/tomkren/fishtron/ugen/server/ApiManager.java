@@ -9,31 +9,32 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /** Created by Tomáš Křen on 19.2.2017.*/
 
-public class ApiManager {
+class ApiManager implements Api {
 
-    private interface ApiCmd {
-        JSONObject runApiCmd(JSONArray path, JSONObject query);
-    }
-
-    private final Map<String,ApiCmd> apiCmds;
+    private final Map<String,Api> apiCmds;
 
 
     ApiManager(JobManager jobMan) {
         apiCmds = new HashMap<>();
 
-        addApiCmd("run", jobMan::makeJob);
-        addApiCmd("job", jobMan::getJobInfo);
-        addApiCmd("log", jobMan::getJobLog);
-        addApiCmd("jobs", (p,q) -> jobMan.getJobsInfo());
-
+        addApiCmd("run",  jobMan::makeJob);
+        addApiCmd("job",  jobMan::getJobInfo);
+        addApiCmd("log",  jobMan::getJobLog);
+        addApiCmd("jobs", jobMan::getJobsInfo);
     }
 
-    private void addApiCmd(String cmdName, ApiCmd apiCmd) {
+    private void addApiCmd(String cmdName, Api apiCmd) {
         apiCmds.put(cmdName, apiCmd);
     }
+
+    private void addApiCmd(String cmdName, Supplier<JSONObject> apiCmd) {
+        addApiCmd(cmdName, (p,q) -> apiCmd.get());
+    }
+
 
     JSONObject process(String path, String query) {
 
@@ -63,7 +64,8 @@ public class ApiManager {
         }
     }
 
-    private JSONObject process(JSONArray path, JSONObject query) {
+    @Override
+    public JSONObject process(JSONArray path, JSONObject query) {
 
         if (query == null) {
             query = F.obj();
@@ -73,16 +75,17 @@ public class ApiManager {
 
         if (path.length() > 0) {
             cmd = path.getString(0); // higher priority than cmd field in query
+            query.put("cmd", cmd);   // and it overrides it, so we know that actual cmd is in the query
         } else if (query.has("cmd") && query.get("cmd") instanceof String) {
             cmd = query.getString("cmd");
         }
 
         if (cmd != null) {
 
-            ApiCmd apiCmd = apiCmds.get(cmd);
+            Api apiCmd = apiCmds.get(cmd);
 
             if (apiCmd != null) {
-                return apiCmd.runApiCmd(path, query);
+                return apiCmd.process(path, query);
             }
         }
 
@@ -95,12 +98,7 @@ public class ApiManager {
     }
 
     private static JSONObject mkIndexResponse() {
-        return addOk(F.obj("msg","Welcome to EvaServer API!"));
-    }
-
-    static JSONObject addOk(JSONObject response) {
-        response.put("status", "ok");
-        return response;
+        return Api.addOk(F.obj("msg","Welcome to EvaServer API!"));
     }
 
     static JSONObject mkErrorResponse(String msg) {

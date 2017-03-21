@@ -55,6 +55,10 @@ public class EvaJobProcess {
         return status;
     }
 
+    Api getJobApi() {
+        return job;
+    }
+
     public JSONObject toJson() {
         return F.obj(
                 "jobId", jobId,

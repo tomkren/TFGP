@@ -2,6 +2,7 @@ package cz.tomkren.fishtron.ugen.multi;
 
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.F;
+import cz.tomkren.utils.Log;
 import org.json.JSONObject;
 
 import java.util.List;
@@ -66,5 +67,4 @@ public class Configs {
             return defaultValue;
         }
     }
-
 }
