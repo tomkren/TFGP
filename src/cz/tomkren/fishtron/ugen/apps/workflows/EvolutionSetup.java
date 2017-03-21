@@ -82,7 +82,7 @@ public class EvolutionSetup {
 
         Log.it("Gamma = \n"+gamma);
 
-        Gen gen = new Gen(gamma, rand);
+        Gen gen = new Gen(gamma, checker);
 
         IndivGenerator<AppTreeIndiv> generator = new AppTreeIndivGenerator(goal, generatingMaxTreeSize, gen, lib, allParamsInfo);
         Selection<AppTreeIndiv> parentSelection = new Selection.Tournament<>(tournamentBetterWinsProbability, rand);

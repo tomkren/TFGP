@@ -12,12 +12,10 @@ import cz.tomkren.fishtron.ugen.multi.*;
 import cz.tomkren.fishtron.ugen.multi.operators.AppTreeMIGenerator;
 import cz.tomkren.fishtron.ugen.multi.operators.MultiGenOpFactory;
 import cz.tomkren.utils.Checker;
-import cz.tomkren.utils.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.List;
-import java.util.Random;
 
 /** Created by tom on 20.03.2017.*/
 
@@ -26,7 +24,7 @@ class EvaSetup_CellEva {
     private MultiEvaOpts<AppTreeMI> opts;
     //private  evalManager; // todo zřejmě bude potřeba zobecnit pro komparativní selekci
 
-    EvaSetup_CellEva(JSONObject config, Checker checker) {
+    EvaSetup_CellEva(JSONObject config, Checker ch) {
 
         int numEvaluations  = Configs.getInt(config,  Configs.numEvaluations, Integer.MAX_VALUE);
 
@@ -37,7 +35,7 @@ class EvaSetup_CellEva {
         int generatingMaxTreeSize = Configs.getInt(config, Configs.generatingMaxTreeSize, 10);
         double tournamentBetterWinsProbability = Configs.getDouble(config, Configs.tournamentBetterWinsProbability, 1.0);
 
-        Random rand = Configs.handleRandomSeed(config, checker);
+        Configs.handleRandomSeed(config, ch);
 
         int timeLimit  = Configs.getInt(config, Configs.timeLimit, Integer.MAX_VALUE);
         long sleepTime = Configs.getInt(config, Configs.sleepTime, 2000);
@@ -46,7 +44,7 @@ class EvaSetup_CellEva {
         String plazaDir = config.getJSONObject("cellPlaza").getString("evaPlaza");
         JSONObject plazaConfig = config.getJSONObject("cellPlaza").getJSONObject("plazas").getJSONObject(plazaDir);
 
-        Log.it("plazaConfig: "+ plazaConfig);
+        ch.it("plazaConfig: "+ plazaConfig);
 
         int numStates = Configs.getInt(plazaConfig, "numStates", 3);
         JSONArray pixelSizes = plazaConfig.getJSONArray("pixelSizes");
@@ -54,17 +52,17 @@ class EvaSetup_CellEva {
 
         Gamma gamma = Libs.gamma;
         EvalLib lib = Libs.mkLib(numStates, plazaDir, pixelSizes);
-        JSONObject allParamsInfo = Libs.mkAllParamsInfo(numStates, plazaDir);
+        JSONObject allParamsInfo = Libs.mkAllParamsInfo(numStates, plazaDir, ch);
 
-        Gen gen = new Gen(gamma, rand);
+        Gen gen = new Gen(gamma, ch);
         Type goal = Libs.goal;
 
         IndivGenerator<AppTreeMI> generator = new AppTreeMIGenerator(goal, generatingMaxTreeSize, gen, allParamsInfo);
-        MultiSelection<AppTreeMI> parentSelection = new MultiSelection.Tournament<>(tournamentBetterWinsProbability, rand);
+        MultiSelection<AppTreeMI> parentSelection = new MultiSelection.Tournament<>(tournamentBetterWinsProbability, ch.getRandom());
 
         JSONArray operatorsConfig = config.has("operators") ? config.getJSONArray("operators") : new JSONArray();
         Distribution<Operator<AppTreeMI>> operators;
-        operators = MultiGenOpFactory.mkOperators(operatorsConfig, rand, gen, allParamsInfo);
+        operators = MultiGenOpFactory.mkOperators(operatorsConfig, ch.getRandom(), gen, allParamsInfo);
 
         List<Boolean> isMaxims = Configs.getIsMaxims(config);
 
@@ -73,7 +71,7 @@ class EvaSetup_CellEva {
         MultiEvalManager<AppTreeMI> evalManager = new CellEvalManager<>(lib, poolSize, dummyFitnessMode);
 
         opts = new BasicMultiEvaOpts<>(numEvaluations, numToGen, minPopToOperate, maxPopSize, /*saveBest,*/ timeLimit, sleepTime,
-                generator, isMaxims, evalManager, parentSelection, operators, rand);
+                generator, isMaxims, evalManager, parentSelection, operators, ch);
     }
 
     public MultiEvaOpts<AppTreeMI> getOpts() {

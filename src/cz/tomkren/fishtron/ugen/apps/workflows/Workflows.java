@@ -237,7 +237,7 @@ public class Workflows {
         Log.it(gamma);
         Log.it();
 
-        Gen gen = new Gen(Gen.Opts.mkDefault(), gamma, ch.getRandom());
+        Gen gen = new Gen(Gen.Opts.mkDefault(), gamma, ch);
 
         int max_k = 64;
         int numToGenerate = 10000;

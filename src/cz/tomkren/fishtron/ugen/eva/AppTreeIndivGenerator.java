@@ -5,12 +5,14 @@ import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
+import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.F;
-import cz.tomkren.utils.Log;
+//import cz.tomkren.utils.Log;
 import cz.tomkren.utils.Stopwatch;
 import org.json.JSONObject;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**  Created by tom on 17. 2. 2017.*/
 
@@ -44,12 +46,14 @@ public class AppTreeIndivGenerator implements IndivGenerator<AppTreeIndiv> {
     @Override
     public List<AppTreeIndiv> generate(int numToGenerate) {
         //vs: generate_randomSize(numToGenerate);
-        Set<AppTree> treeSet = generate_cleverSizes(numToGenerate, goalType, maxTreeSize,gen, allParamsInfo, rand);
+        Set<AppTree> treeSet = generate_cleverSizes(numToGenerate, goalType, maxTreeSize,gen, allParamsInfo, rand, gen.getChecker());
         return F.map(treeSet, tree -> new AppTreeIndiv(tree, lib));
     }
 
+
+
     // TODO zpřehlednit
-    public static Set<AppTree> generate_cleverSizes(int numToGenerate, Type goalType, int maxTreeSize, Gen gen, JSONObject allParamsInfo, Random rand) {
+    public static Set<AppTree> generate_cleverSizes(int numToGenerate, Type goalType, int maxTreeSize, Gen gen, JSONObject allParamsInfo, Random rand, Checker ch) {
         SortedSet<AppTree> treeSet = new TreeSet<>(AppTree.compareTrees);
 
         Stopwatch sw = new Stopwatch();
@@ -71,7 +75,7 @@ public class AppTreeIndivGenerator implements IndivGenerator<AppTreeIndiv> {
 
             if (numTriesForThisSize_remaining == 0) {
 
-                Log.it(".. done generating treeSize "+treeSize+
+                ch.it(".. done generating treeSize "+treeSize+
                         ", now with "+ tab[treeSize]+" trees."+sw3.restart());
                 logFreshSizeGenerating = true;
                 treeSize ++;
@@ -100,25 +104,25 @@ public class AppTreeIndivGenerator implements IndivGenerator<AppTreeIndiv> {
 
             if (tab[treeSize] == 0) {
                 if (!restarted) {
-                    Log.it_noln("  Building generating data for treeSize " + treeSize + " ..");
+                    ch.it_noln("  Building generating data for treeSize " + treeSize + " ..");
                 }
 
                 Stopwatch sw2 = new Stopwatch();
                 num = gen.getNum(treeSize, goalType);
 
                 if (!restarted) {
-                    Log.it(".. done (num = "+num+")" + sw2.restart());
+                    ch.it(".. done (num = "+num+")" + sw2.restart());
                 }
             }
 
             if (num != null && F.isZero(num)) {
-                Log.it("    Skipping empty treeSize "+treeSize);
+                ch.it("    Skipping empty treeSize "+treeSize);
                 treeSize ++;
             } else {
 
                 if (logFreshSizeGenerating) {
                     sw3 = new Stopwatch();
-                    Log.it_noln("    Generating indiv trees for treeSize "+treeSize+" ..");
+                    ch.it_noln("    Generating indiv trees for treeSize "+treeSize+" ..");
                     logFreshSizeGenerating = false;
                 }
 
@@ -137,18 +141,18 @@ public class AppTreeIndivGenerator implements IndivGenerator<AppTreeIndiv> {
         }
 
         if (!logFreshSizeGenerating) {
-            Log.it(".. done generating treeSize "+treeSize+
+            ch.it(".. done generating treeSize "+treeSize+
                     ", now with "+ tab[treeSize]+" trees."+sw3.restart());
         }
 
-        Log.it();
-        Log.it("treeSize -> num individuals generated");
+        ch.it();
+        ch.it("treeSize -> num individuals generated");
 
         for (int i = 1; i < tab.length; i++) {
-            Log.it(i+" -> "+tab[i]);
+            ch.it(i+" -> "+tab[i]);
         }
 
-        Log.it("Generating "+treeSet.size()+" individuals took "+sw.getTime(3)+" sec.");
+        ch.it("Generating "+treeSet.size()+" individuals took "+sw.getTime(3)+" sec.");
 
         return treeSet;
         //return F.map(treeSet, tree -> new AppTreeIndiv(tree, lib));
@@ -173,7 +177,7 @@ public class AppTreeIndivGenerator implements IndivGenerator<AppTreeIndiv> {
                 if (!silent) {
                     if (!treeSet.contains(randomizedTree)) {
                         numGenerated ++;
-                        Log.it(numGenerated);
+                        gen.getChecker().it(numGenerated);
                     }
                 }
 
@@ -189,6 +193,8 @@ public class AppTreeIndivGenerator implements IndivGenerator<AppTreeIndiv> {
 
 
     public static void main(String[] args) {
+
+        Checker ch = new Checker();
 
         int maxTreeSize = 64;
 
@@ -241,9 +247,10 @@ public class AppTreeIndivGenerator implements IndivGenerator<AppTreeIndiv> {
 
 
         for (int i = 0; i < tab.length; i++) {
-            Log.it(i+" -> "+tab[i]);
+            ch.it(i+" -> "+tab[i]);
         }
 
+        ch.results();
     }
 
 

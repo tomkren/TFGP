@@ -58,7 +58,7 @@ public class EvalTester {
 
         Log.it("Goal = "+goal);
 
-        Gen gen = new Gen(gamma, ch.getRandom());
+        Gen gen = new Gen(gamma, ch);
         boolean allTreesAreWellTyped = true;
 
         for (int k = 1; k <= k_max; k++) {

@@ -43,7 +43,7 @@ public class EvaSetup_GPML {
         if (checker == null) {checker = new Checker(seed);}
         if (seed    == null) {config.put(Configs.seed, checker.getSeed());}
         Random rand = checker.getRandom();*/
-        Random rand = Configs.handleRandomSeed(config, checker);
+        Configs.handleRandomSeed(config, checker);
 
         String evalServerUrl   = Configs.getString(config, "serverUrl", "http://localhost:8080/");
         String datasetFilename = Configs.getString(config, "dataset",   "winequality-white.csv");
@@ -74,21 +74,21 @@ public class EvaSetup_GPML {
 
         Log.it("Gamma = \n"+gamma);
 
-        Gen gen = new Gen(gamma, rand);
+        Gen gen = new Gen(gamma, checker);
         Type goal = Workflows.goal;
 
         IndivGenerator<AppTreeMI> generator = new AppTreeMIGenerator(goal, generatingMaxTreeSize, gen, allParamsInfo);
-        MultiSelection<AppTreeMI> parentSelection = new MultiSelection.Tournament<>(tournamentBetterWinsProbability, rand);
+        MultiSelection<AppTreeMI> parentSelection = new MultiSelection.Tournament<>(tournamentBetterWinsProbability, checker.getRandom());
 
         JSONArray operatorsConfig = config.has("operators") ? config.getJSONArray("operators") : new JSONArray();
         Distribution<Operator<AppTreeMI>> operators;
-        operators = MultiGenOpFactory.mkOperators(operatorsConfig, rand, gen, allParamsInfo);
+        operators = MultiGenOpFactory.mkOperators(operatorsConfig, checker.getRandom(), gen, allParamsInfo);
 
         List<Boolean> isMaxims = Configs.getIsMaxims(config);
 
 
         opts = new BasicMultiEvaOpts<>(numEvaluations, numToGen, minPopToOperate, maxPopSize, /*saveBest,*/ timeLimit, sleepTime,
-                generator, isMaxims, evalManager, parentSelection, operators, rand);
+                generator, isMaxims, evalManager, parentSelection, operators, checker);
     }
 
     public MultiEvaOpts<AppTreeMI> getOpts() {

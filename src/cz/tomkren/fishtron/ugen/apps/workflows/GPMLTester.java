@@ -55,7 +55,6 @@ public class GPMLTester {
 
             Long seed = config.has("seed") ? config.getLong("seed") : null;
             Checker checker = new Checker(seed);
-            Random rand = checker.getRandom();
 
             if (seed == null) {
                 config.put("seed", checker.getSeed());
@@ -65,7 +64,7 @@ public class GPMLTester {
             Gamma gamma = Workflows.gamma;
             EvalLib lib = Workflows.lib;
 
-            Gen gen = new Gen(gamma, rand);
+            Gen gen = new Gen(gamma, checker);
 
             IndivGenerator<AppTreeIndiv> generator = new AppTreeIndivGenerator(
                     goal, config.getInt("generatingMaxTreeSize"), gen, lib,test_allParamsInfo, false);

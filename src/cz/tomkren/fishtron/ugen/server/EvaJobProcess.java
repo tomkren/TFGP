@@ -31,14 +31,17 @@ public class EvaJobProcess {
     public void start() {
         setStatus(Status.running);
         (new Thread(()->{
-            job.run(jobOpts, this);
+            job.runJob(jobOpts, this);
             setStatus(Status.finished);
         })).start();
     }
 
     public void log(Object x) {
         output.append(x).append('\n');
-        //Log.it(x);
+    }
+
+    public void log_noln(Object x) {
+        output.append(x);
     }
 
     public String getLog() {

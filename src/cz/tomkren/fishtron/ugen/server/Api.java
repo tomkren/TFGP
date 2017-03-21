@@ -14,7 +14,7 @@ public interface Api {
     String JOB_ID = "jobId";
     String JOB_CMD = "jobCmd";
 
-    JSONObject process(JSONArray path, JSONObject query);
+    JSONObject processApiCall(JSONArray path, JSONObject query);
 
 
     static JSONObject addOk(JSONObject response) {

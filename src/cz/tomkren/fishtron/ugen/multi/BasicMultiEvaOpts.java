@@ -3,6 +3,7 @@ package cz.tomkren.fishtron.ugen.multi;
 import cz.tomkren.fishtron.eva.Distribution;
 import cz.tomkren.fishtron.eva.IndivGenerator;
 import cz.tomkren.fishtron.eva.Operator;
+import cz.tomkren.utils.Checker;
 
 import java.util.List;
 import java.util.Random;
@@ -23,7 +24,8 @@ public class BasicMultiEvaOpts<Indiv extends MultiIndiv> implements MultiEvaOpts
     private MultiEvalManager<Indiv> evalManager;
     private MultiSelection<Indiv> parentSelection;
     private Distribution<Operator<Indiv>> operators;
-    private Random rand;
+    //private Random rand;
+    private Checker checker;
 
     public BasicMultiEvaOpts(int numEvaluations, int numIndividualsToGenerate, int minPopulationSizeToOperate,
                              int maxPopulationSize, /*boolean saveBests,*/ int timeLimit, long sleepTime,
@@ -31,7 +33,7 @@ public class BasicMultiEvaOpts<Indiv extends MultiIndiv> implements MultiEvaOpts
                              List<Boolean> isMaxims, MultiEvalManager<Indiv> evalManager,
                              MultiSelection<Indiv> parentSelection,
                              Distribution<Operator<Indiv>> operators,
-                             Random rand) {
+                             Checker checker) {
         this.numEvaluations = numEvaluations;
         this.numIndividualsToGenerate = numIndividualsToGenerate;
         this.minPopulationSizeToOperate = minPopulationSizeToOperate;
@@ -44,7 +46,7 @@ public class BasicMultiEvaOpts<Indiv extends MultiIndiv> implements MultiEvaOpts
         this.evalManager = evalManager;
         this.parentSelection = parentSelection;
         this.operators = operators;
-        this.rand = rand;
+        this.checker = checker;
     }
 
     @Override public int getNumEvaluations() {return numEvaluations;}
@@ -59,5 +61,6 @@ public class BasicMultiEvaOpts<Indiv extends MultiIndiv> implements MultiEvaOpts
     @Override public MultiEvalManager<Indiv> getEvalManager() {return evalManager;}
     @Override public MultiSelection<Indiv> getParentSelection() {return parentSelection;}
     @Override public Distribution<Operator<Indiv>> getOperators() {return operators;}
-    @Override public Random getRandom() {return rand;}
+    @Override public Random getRandom() {return checker.getRandom();}
+    @Override public Checker getChecker() {return checker;}
 }

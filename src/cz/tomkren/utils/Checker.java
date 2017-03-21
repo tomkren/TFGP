@@ -1,11 +1,9 @@
 package cz.tomkren.utils;
 
 import org.json.JSONObject;
-
-import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
+import java.util.function.Consumer;
 
 public class Checker {
 
@@ -18,6 +16,10 @@ public class Checker {
     private Random rand;
     private boolean isSeedRandom;
 
+    private Consumer<Object> logFun;
+    private Consumer<Object> logFun_noln;
+
+
     private StringBuilder errors;
 
     public static Checker mk(JSONObject config) {
@@ -29,6 +31,9 @@ public class Checker {
     }
 
     public Checker(Long seed, boolean silent) {
+
+        this.logFun = Log::it;
+        this.logFun_noln = Log::it_noln;
 
         sum = 0;
         ok = 0;
@@ -55,6 +60,15 @@ public class Checker {
     public Checker() {
         this(null);
     }
+
+    public void setLogFun(Consumer<Object> logFun) {
+        this.logFun = logFun;
+    }
+
+    public void setLogFun_noln(Consumer<Object> logFun_noln) {
+        this.logFun_noln = logFun_noln;
+    }
+
 
     public void results() {
         String hlaska = ko == 0 ? ":)" : ":( nééééé" ;
@@ -92,10 +106,23 @@ public class Checker {
         return seed;
     }
 
-    public Checker it(Object o) {
-        Log.it(o);
+
+    public Checker it() {
+        logFun.accept("");
         return this;
     }
+
+    public Checker it(Object o) {
+        //Log.it(o);
+        logFun.accept(o);
+        return this;
+    }
+
+    public Checker it_noln(Object o) {
+        logFun_noln.accept(o);
+        return this;
+    }
+
 
     public Checker itln(Object o) {
         Log.itln(o);

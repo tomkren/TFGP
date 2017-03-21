@@ -50,7 +50,7 @@ public class GenTester {
         Gen.Opts opts = Gen.Opts.mkDefault(true);
         Gamma gamma = g_testGamma;
         Type t = g_testGoal;
-        Gen gen = new Gen(opts,gamma, ch.getRandom());
+        Gen gen = new Gen(opts,gamma, ch);
         List<TsRes> allTrees =  StaticGen.ts(gamma, k, t, 0);
 
         testGenOne_sampling(ch, gen, k, t, gamma, numSamples, allTrees);
@@ -65,7 +65,7 @@ public class GenTester {
         Gen.Opts opts = Gen.Opts.mkDefault();
         Gamma gamma = g_testGamma;
         Type t = g_testGoal;
-        Gen gen = new Gen(opts, gamma, ch.getRandom());
+        Gen gen = new Gen(opts, gamma, ch);
         List<TsRes> allTrees =  StaticGen.ts(gamma, k, t, 0);
 
         testGenOne_systematicBalls(ch, gen, k, t, gamma, allTrees);
@@ -102,7 +102,7 @@ public class GenTester {
 
         String argStr = "("+k+", "+t+")";
 
-        Gen gen = new Gen(opts, gamma, ch.getRandom());
+        Gen gen = new Gen(opts, gamma, ch);
 
         Stopwatch stopwatch = new Stopwatch(3);
 
@@ -416,7 +416,7 @@ public class GenTester {
         Log.it();
 
         Log.it("Creating Gen ... initial state:");
-        Gen gen = new Gen(opts, gamma, ch.getRandom());
+        Gen gen = new Gen(opts, gamma, ch);
         Log.it(gen);
 
         List<TsRes> ts = StaticGen.ts(gamma, k, t_nf, 0);

@@ -32,8 +32,8 @@ class JobManager {
         //todo
     }
 
-    void addJobClass(String jobName, Class<? extends EvaJob> jobClass) {
-        jobFactory.addJobClass(jobName, jobClass);
+    void addJobClass(String jobName, Class<? extends EvaJob> jobClass, Object initData) {
+        jobFactory.addJobClass(jobName, jobClass, initData);
     }
 
 
@@ -60,7 +60,10 @@ class JobManager {
         }
         String logStr = jobProcess.getLog();
         JSONArray logLines = F.jsonMap(logStr.split("\\n"));
-        return Api.addOk(F.obj("log", logLines));
+        return Api.ok(
+                "log", logLines,
+                "jobId", jobId
+        );
     }
 
     private Api getJobApi(int jobId) {
@@ -154,7 +157,7 @@ class JobManager {
             //      or   ?{"cmd":"job", "jobId":1, "jobCmd":"someJobCmd"}
             Api jobApi = getJobApi(jobId);
             if (jobApi == null) {return ApiManager.mkErrorResponse("There is no job with jobId "+jobId);}
-            return jobApi.process(path, query);
+            return jobApi.processApiCall(path, query);
         }
 
         return infoFun.apply(jobId);

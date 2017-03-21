@@ -54,7 +54,7 @@ public class BasicAppTreeXover implements Operator<AppTreeIndiv> {
     public static void main(String[] args) {
         Checker ch = new Checker(5525384885671817405L);
 
-        Gen gen = new Gen(Workflows.gamma, ch.getRandom());
+        Gen gen = new Gen(Workflows.gamma, ch);
 
         AppTree mum = gen.genOne(20, Workflows.goal);
         AppTree dad = gen.genOne(15, Workflows.goal);

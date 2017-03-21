@@ -1,5 +1,6 @@
 package cz.tomkren.fishtron.ugen.server;
 
+import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
 import org.json.JSONArray;
 
@@ -13,26 +14,35 @@ import java.util.Map;
 class JobFactory {
 
 
-    private final Map<String,Class<? extends EvaJob>> jobClasses;
+    private final Map<String,AB<Class<? extends EvaJob>,Object>> jobClasses;
 
     JobFactory() {
         jobClasses = new HashMap<>();
     }
 
-    void addJobClass(String jobName, Class<? extends EvaJob> jobClass) {
-        jobClasses.put(jobName, jobClass);
+    void addJobClass(String jobName, Class<? extends EvaJob> jobClass, Object initData) {
+        jobClasses.put(jobName, AB.mk(jobClass, initData));
     }
 
     EvaJob mkJob(String jobName) {
 
-        Class<? extends EvaJob> jobClass = jobClasses.get(jobName);
+        AB<Class<? extends EvaJob>,Object> jobClassData = jobClasses.get(jobName);
+        Class<? extends EvaJob> jobClass = jobClassData._1();
+        Object initData = jobClassData._2();
 
         if (jobClass == null) {return null;}
 
         try {
-            Constructor<? extends EvaJob> jobConstructor = jobClass.getConstructor();
 
-            return jobConstructor.newInstance();
+
+            if (initData == null) {
+                Constructor<? extends EvaJob> jobConstructor = jobClass.getConstructor();
+                return jobConstructor.newInstance();
+            } else {
+                Constructor<? extends EvaJob> jobConstructor = jobClass.getConstructor(Object.class);
+                return jobConstructor.newInstance(initData);
+            }
+
 
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
             return null;

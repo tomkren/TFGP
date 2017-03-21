@@ -29,11 +29,11 @@ public class Configs {
     //public static final String
 
 
-    public static Random handleRandomSeed(JSONObject config, Checker checker) {
+    public static Checker handleRandomSeed(JSONObject config, Checker checker) {
         Long seed = config.has(Configs.seed) ? config.getLong(Configs.seed) : null;
         if (checker == null) {checker = new Checker(seed);}
         if (seed    == null) {config.put(Configs.seed, checker.getSeed());}
-        return checker.getRandom();
+        return checker;
     }
 
 

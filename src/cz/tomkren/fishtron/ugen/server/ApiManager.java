@@ -36,7 +36,7 @@ class ApiManager implements Api {
     }
 
 
-    JSONObject process(String path, String query) {
+    JSONObject processApiCall(String path, String query) {
 
         String[] pathParts = path.split("/");
         JSONArray pathJson = F.jsonMap(F.filter(Arrays.asList(pathParts), x->!x.equals("")), x->x);
@@ -45,17 +45,17 @@ class ApiManager implements Api {
             if (pathJson.length() == 0) {
                 return mkIndexResponse();
             } else {
-                return process(pathJson, null);
+                return processApiCall(pathJson, null);
             }
         }
 
         try {
             JSONObject jsonRequest = new JSONObject(query);
-            return process(pathJson, jsonRequest);
+            return processApiCall(pathJson, jsonRequest);
         } catch (JSONException e) {
             try {
                 JSONObject jsonRequest = parseStdQuery(query, "&");
-                return process(pathJson, jsonRequest);
+                return processApiCall(pathJson, jsonRequest);
             } catch (ParseException pe) {
                 return mkErrorResponse("Unsupported query detected, query must be a JSON or stdQuery.");
             }
@@ -65,7 +65,7 @@ class ApiManager implements Api {
     }
 
     @Override
-    public JSONObject process(JSONArray path, JSONObject query) {
+    public JSONObject processApiCall(JSONArray path, JSONObject query) {
 
         if (query == null) {
             query = F.obj();
@@ -85,7 +85,7 @@ class ApiManager implements Api {
             Api apiCmd = apiCmds.get(cmd);
 
             if (apiCmd != null) {
-                return apiCmd.process(path, query);
+                return apiCmd.processApiCall(path, query);
             }
         }
 

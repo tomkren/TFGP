@@ -50,3 +50,8 @@ pre {
 .job-dropdown {
     width: 160px;
 }
+
+.log-header {
+    position:relative;
+    top:-10px;
+}

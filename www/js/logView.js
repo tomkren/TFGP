@@ -15,7 +15,13 @@ function mkLogView($container, dispatch) {
             $pre.append(line + '\n');
         });
 
-        $container.html($('<table>').addClass("blue-tab").append($pre));
+        var $header = $('<div>').addClass("log-header").append([
+            $('<b>').text("jobId: "),
+            logInfo.jobId
+        ]);
+        var $log = $('<table>').addClass("blue-tab").append($pre);
+
+        $container.html([$header, $log]);
     }
 
     function renderEmpty() {

@@ -3,12 +3,12 @@ package cz.tomkren.fishtron.ugen.multi;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.F;
-import cz.tomkren.utils.Log;
+//import cz.tomkren.utils.Log;
 import org.json.JSONObject;
 
 import java.io.*;
 import java.util.Objects;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 /**Created by tom on 20.03.2017.*/
 
@@ -19,7 +19,6 @@ public class EvaLogger<Indiv extends MultiIndiv> implements MultiLogger<Indiv> {
 
     private final File runLogDir;
     private final File evalsLogDir;
-
 
     private final IndivShower<Indiv> indivShower;
 
@@ -42,25 +41,28 @@ public class EvaLogger<Indiv extends MultiIndiv> implements MultiLogger<Indiv> {
         runLogDir = new File(logPath,"run_"+i);
         if (!runLogDir.mkdir()) {throw new Error("Unable to create log directory!");}
 
-        Log.it("log directory for this run: "+runLogDir);
+        stdout("log directory for this run: "+runLogDir);
         writeToFile("config.json", config.toString(2));
         evalsLogDir = mkDir("evals");
     }
+
+    private void stdout(Object x) {checker.it(x);}
+    private void stdout() {checker.it();}
 
     @Override
     public void log(int run, int evalId, MultiEvalResult<Indiv> evalResult) {
 
         if (evalResult.isEmpty()) {
-            Log.it_noln("=");
+            stdout("=");
             return;
         }
 
         // stdout logging :
-        Log.it();
-        Log.it("eval #"+ evalId +(opts==null ? "" : "/"+opts.getNumEvaluations()));
+        stdout();
+        stdout("eval #"+ evalId +(opts==null ? "" : "/"+opts.getNumEvaluations()));
         //JSONObject bestInfo = logBest(evalId, evalResult); //todo
-        Log.it(" Evaluated individuals:");
-        Log.list(F.map(evalResult.getIndividuals(), this::showIndivRow));
+        stdout(" Evaluated individuals:");
+        stdout(F.map(evalResult.getIndividuals(), this::showIndivRow));
 
         // to json file logging :
         JSONObject evalInfo = F.obj(

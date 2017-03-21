@@ -18,7 +18,7 @@ public class Test implements EvaJob {
     private EvaJobProcess jobProcess;
 
     @Override
-    public void run(JSONObject jobOpts, EvaJobProcess jobProcess) {
+    public void runJob(JSONObject jobOpts, EvaJobProcess jobProcess) {
 
         this.jobProcess = jobProcess;
 
@@ -35,6 +35,21 @@ public class Test implements EvaJob {
         }
 
         jobProcess.log("Poslušně hlásim finiš!");
+    }
+
+    @Override
+    public JSONObject processApiCall(JSONArray path, JSONObject query) {
+        if (query.getString(Api.JOB_CMD).equals("lastLog")) {
+
+            jobProcess.log("Někdo chce last log tý vole.................");
+            return Api.ok("lastLog", getLastLog());
+
+        } else {
+
+            jobProcess.log("Olol, někdo mi zavolal moje osobní Jobový apíčko, mě testovacího EvaJoba, jaká pocta!");
+            return Api.ok("you asked maaan", F.obj("path",path, "query",query));
+
+        }
     }
 
     private static List<Long> factorize(long n) {
@@ -82,19 +97,6 @@ public class Test implements EvaJob {
     private synchronized String getLastLog() {return lastLog;}
     private synchronized void setLastLog(String lastLog) {this.lastLog = lastLog;}
 
-    @Override
-    public JSONObject process(JSONArray path, JSONObject query) {
-        if (query.getString(Api.JOB_CMD).equals("lastLog")) {
 
-            jobProcess.log("Někdo chce last log tý vole.................");
-            return Api.ok("lastLog", getLastLog());
-
-        } else {
-
-            jobProcess.log("Olol, někdo mi zavolal moje osobní Jobový apíčko, mě testovacího EvaJoba, jaká pocta!");
-            return Api.ok("you asked maaan", F.obj("path",path, "query",query));
-
-        }
-    }
 
 }

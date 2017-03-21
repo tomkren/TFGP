@@ -3,6 +3,7 @@ package cz.tomkren.fishtron.ugen.multi;
 import cz.tomkren.fishtron.eva.Distribution;
 import cz.tomkren.fishtron.eva.IndivGenerator;
 import cz.tomkren.fishtron.eva.Operator;
+import cz.tomkren.utils.Checker;
 
 import java.util.List;
 import java.util.Random;
@@ -34,5 +35,7 @@ public interface MultiEvaOpts<Indiv extends MultiIndiv> {
     MultiSelection<Indiv> getParentSelection();
     Distribution<Operator<Indiv>> getOperators();
     Random getRandom();
+
+    Checker getChecker();
 
 }

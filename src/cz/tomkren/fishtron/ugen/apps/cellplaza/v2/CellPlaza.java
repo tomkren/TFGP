@@ -27,22 +27,22 @@ public class CellPlaza {
     }
 
     private static void run(JSONObject config, Checker ch) {
-        Random rand = ch.getRandom();
         JSONArray plazasToRun = config.getJSONArray("run");
         JSONObject plazaConfigs = config.getJSONObject("plazas");
         for (String plazaDir : F.map(plazasToRun, x->(String)x)) {
-            runPlaza(plazaDir, plazaConfigs.getJSONObject(plazaDir), rand);
+            runPlaza(plazaDir, plazaConfigs.getJSONObject(plazaDir), ch);
         }
     }
 
-    private static void runPlaza(String plazaDir, JSONObject plazaConfig, Random rand) {
+    private static void runPlaza(String plazaDir, JSONObject plazaConfig, Checker ch) {
+        Random rand = ch.getRandom();
         int numStates = plazaConfig.getInt("numStates");
         JSONArray pixelSizes = plazaConfig.getJSONArray("pixelSizes");
 
         EvalLib lib = Libs.mkLib(numStates, plazaDir, pixelSizes);
-        JSONObject allParamsInfo = Libs.mkAllParamsInfo(numStates, plazaDir);
+        JSONObject allParamsInfo = Libs.mkAllParamsInfo(numStates, plazaDir, ch);
 
-        AB<AppTree,Rule> rule = genBitRule(lib, allParamsInfo, rand);
+        AB<AppTree,Rule> rule = genBitRule(lib, allParamsInfo, ch);
 
         JSONArray coreNames = allParamsInfo.getJSONObject("seedImg").getJSONArray("filename");
         String coreName = (String) F.randomElement(coreNames, rand);
@@ -62,10 +62,10 @@ public class CellPlaza {
 
     }
 
-    private static AB<AppTree,Rule> genBitRule(EvalLib lib, JSONObject allParamsInfo, Random rand) {
-        Gen gen = new Gen(Libs.gamma, rand);
+    private static AB<AppTree,Rule> genBitRule(EvalLib lib, JSONObject allParamsInfo, Checker ch) {
+        Gen gen = new Gen(Libs.gamma, ch);
         AppTree tree = gen.genOne(1, Libs.ruleType);
-        tree = tree.randomizeParams(allParamsInfo, rand);
+        tree = tree.randomizeParams(allParamsInfo, ch.getRandom());
         Rule rule = (Rule) lib.eval(tree);
         return AB.mk(tree,rule);
     }

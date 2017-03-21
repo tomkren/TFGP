@@ -55,7 +55,7 @@ public class MiniPlaza {
 
 
 
-        Gen gen = new Gen(CellLib.bitGamma_1, rand);
+        Gen gen = new Gen(CellLib.bitGamma_1, ch);
         AppTree tree = gen.genOne(CellLib.bitIndivSize_1, CellLib.bitGoal_1);
         tree = tree.randomizeParams(CellLib.allParamsInfo_bitVersion_1, rand);
 

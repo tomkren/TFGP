@@ -1,5 +1,11 @@
 {
 
+  "runOnServer": true,
+
+  "evaServer": {
+    "port": 2342
+  },
+
   "generatingMaxTreeSize": 10,
 
   "numEvaluations": 2147483647,

@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.ugen.multi;
 import cz.tomkren.fishtron.eva.Operator;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
-import cz.tomkren.utils.Log;
+//import cz.tomkren.utils.Log;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -76,8 +76,13 @@ public class MultiEvolution<Indiv extends MultiIndiv> {
         return numSentIndividuals < opts.getNumIndividualsToGenerate();
     }
 
+
+    private void log(Object x) {
+        opts.getChecker().it(x);
+    }
+
     private List<AB<Indiv,JSONObject>> generateIndividuals(MultiEvalResult<Indiv> evalResult) {
-        Log.it("Generating initial population...");
+        log("Generating initial population...");
 
         int yetToGenerate = opts.getNumIndividualsToGenerate() - numSentIndividuals;
         int evaluatorCapabilities = evalResult == null ? opts.getEvalManager().getEvalPoolSize(yetToGenerate)

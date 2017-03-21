@@ -37,7 +37,7 @@ public class EvaServer extends AbstractHandler {
         server.setHandler(this);
     }
 
-    private void startServer() {
+    public void startServer() {
         try {
 
             jobMan.start();
@@ -50,8 +50,13 @@ public class EvaServer extends AbstractHandler {
         }
     }
 
-    private void addJobClass(String jobName, Class<? extends EvaJob> jobClass) {
-        jobMan.addJobClass(jobName, jobClass);
+    public void addJobClass(String jobName, Class<? extends EvaJob> jobClass, Object initData) {
+        jobMan.addJobClass(jobName, jobClass, initData);
+        Log.it("Added class for job '"+jobName+"'.");
+    }
+
+    public void addJobClass(String jobName, Class<? extends EvaJob> jobClass) {
+        jobMan.addJobClass(jobName, jobClass, null);
         Log.it("Added class for job '"+jobName+"'.");
     }
 
@@ -77,7 +82,7 @@ public class EvaServer extends AbstractHandler {
         String encodedQueryString = request.getQueryString();
         String query = encodedQueryString == null ? null : URLDecoder.decode(encodedQueryString, "UTF-8");
 
-        JSONObject jsonResponse = apiMan.process(path, query);
+        JSONObject jsonResponse = apiMan.processApiCall(path, query);
 
         addHeaders(response);
         response.setStatus(HttpServletResponse.SC_OK);

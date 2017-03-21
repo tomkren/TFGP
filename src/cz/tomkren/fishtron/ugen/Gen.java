@@ -16,8 +16,8 @@ import cz.tomkren.fishtron.ugen.trees.App;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.trees.Leaf;
 import cz.tomkren.utils.AB;
+import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.F;
-import cz.tomkren.utils.Log;
 import org.json.JSONObject;
 
 
@@ -30,20 +30,21 @@ public class Gen {
 
     private Opts opts;
     private Gamma gamma;
-    private Random rand;
+    private Checker ch;
     private Cache cache;
 
-    public Gen(Gamma gamma, Random rand) {
-        this(Opts.mkDefault(), gamma, rand);
+    public Gen(Gamma gamma, Checker ch) {
+        this(Opts.mkDefault(), gamma, ch);
     }
 
-    public Gen(Opts opts, Gamma gamma, Random rand) {
+    public Gen(Opts opts, Gamma gamma, Checker ch) {
         this.opts = opts;
         this.gamma = gamma;
-        this.rand = rand;
+        this.ch = ch;
         this.cache = new Cache(this);
     }
 
+    public Checker getChecker() {return ch;}
 
     // -- GEN ONE -----------------------------------------------
 
@@ -86,9 +87,9 @@ public class Gen {
         // bylo to swe seedem -8674298408011838851, ale těžko říct esli to do ty doby nerozvrtam že už to nereplikuje
         if (!Types.isRenamedType(res._1().getType(), rawType)) {
 
-            Log.it("!!! VS:");
-            Log.it(res._1().getType());
-            Log.it(rawType);
+            ch.it("!!! VS:");
+            ch.it(res._1().getType());
+            ch.it(rawType);
 
             throw new Error("Result tree hasn't the input rawType.");
         }
@@ -200,26 +201,26 @@ public class Gen {
             Sub sigma_A = res_A.getSigma();
             Type t_selected_A = sigma_A.apply(t_A);
 
-            Log.it("\n-- !!! ----------------------------------------");
-            Log.it(errMsg);
-            Log.it("t_"+caseName+" = "+ t_A);
-            Log.it("sigma_"+caseName+" = "+ sigma_A);
-            Log.it("t_selected_"+caseName+" = "+ t_selected_A +" = sigma_"+caseName+"(t_"+caseName+")");
-            Log.it("t_skol_"+caseName+"     = "+ t_skol_A);
-            Log.it();
+            ch.it("\n-- !!! ----------------------------------------");
+            ch.it(errMsg);
+            ch.it("t_"+caseName+" = "+ t_A);
+            ch.it("sigma_"+caseName+" = "+ sigma_A);
+            ch.it("t_selected_"+caseName+" = "+ t_selected_A +" = sigma_"+caseName+"(t_"+caseName+")");
+            ch.it("t_skol_"+caseName+"     = "+ t_skol_A);
+            ch.it();
 
-            Log.it("res_"+caseName+" = "+ res_A);
-            Log.it("res_"+caseName+".getNum() = "+ num_A);
-            Log.it("getNum("+i+", t_skol_"+caseName+") = "+num_test_A);
-            Log.it();
+            ch.it("res_"+caseName+" = "+ res_A);
+            ch.it("res_"+caseName+".getNum() = "+ num_A);
+            ch.it("getNum("+i+", t_skol_"+caseName+") = "+num_test_A);
+            ch.it();
 
             List<TsRes> all_t_A_trees = StaticGen.ts(gamma, i, t_A, 0);
-            Log.it("|all_t_"+caseName+"_trees| = "+ all_t_A_trees.size());
+            ch.it("|all_t_"+caseName+"_trees| = "+ all_t_A_trees.size());
             List<TsRes> filteredTrees = F.filter(all_t_A_trees, res -> res.getSigma().equals(sigma_A));
-            Log.it("|filtered_t_"+caseName+"_trees| = "+ filteredTrees.size());
+            ch.it("|filtered_t_"+caseName+"_trees| = "+ filteredTrees.size());
 
             List<AppTree> trees_skol = F.map(StaticGen.ts(gamma, i, t_skol_A, 0), TsRes::getTree);
-            Log.it("|trees_skol| = "+trees_skol.size());
+            ch.it("|trees_skol| = "+trees_skol.size());
 
             Map<String,AppTree> filteredTreesMap = new TreeMap<>();
             for (TsRes res : filteredTrees) {
@@ -229,28 +230,28 @@ public class Gen {
             List<AppTree> problemTrees = F.filter(trees_skol,
                     t -> !filteredTreesMap.containsKey(t.toRawString()));
 
-            Log.it("|problem_trees| = "+problemTrees.size());
+            ch.it("|problem_trees| = "+problemTrees.size());
 
             Map<String,TsRes> allTreesMap = new TreeMap<>();
             for (TsRes res : all_t_A_trees) {
                 allTreesMap.put(res.getTree().toRawString(), res);
             }
 
-            Log.it("Problem trees:");
+            ch.it("Problem trees:");
             for (AppTree problemTree : problemTrees) {
-                Log.it_noln("\t"+problemTree.toRawString());
+                ch.it_noln("\t"+problemTree.toRawString());
 
                 TsRes problemRes = allTreesMap.get(problemTree.toRawString());
 
                 if (problemRes != null) {
-                    Log.it_noln("\t ... but it is in all_t_"+caseName+"_trees :)");
-                    Log.it(" ... with sigma = "+problemRes.getSigma());
+                    ch.it_noln("\t ... but it is in all_t_"+caseName+"_trees :)");
+                    ch.it(" ... with sigma = "+problemRes.getSigma());
                 } else {
-                    Log.it("\t ... and it is not even in all_t_"+caseName+"_trees :(");
+                    ch.it("\t ... and it is not even in all_t_"+caseName+"_trees :(");
                 }
             }
 
-            Log.it();
+            ch.it();
             try {Thread.sleep(500L);} catch (InterruptedException e) {e.printStackTrace();}
 
             throw new Error(errMsg);
@@ -275,9 +276,9 @@ public class Gen {
         log(lvl, "ball ", ball);
     }
 
-    private static void log(int lvl, String key, Object val) {
+    private void log(int lvl, String key, Object val) {
         String ods = F.fillStr(lvl, "  ");
-        Log.it(ods+key+": "+val);
+        ch.it(ods+key+": "+val);
     }
 
 
@@ -289,7 +290,7 @@ public class Gen {
 
         BigInteger num = getNum_NF(k, t_NF);
         if (F.isZero(num)) {return null;}
-        BigInteger ball = F.nextBigInteger(num, rand);
+        BigInteger ball = F.nextBigInteger(num, ch.getRandom());
         if (ball == null) {throw new Error("Ball null check failed, should be unreachable.");}
         return ball;
     }
@@ -539,7 +540,7 @@ public class Gen {
     // -- getters --------------------------------------------------------------------------------
 
     public Random getRand() {
-        return rand;
+        return ch.getRandom();
     }
 
     // -- STATS ----------------------------------------------------------------------------------

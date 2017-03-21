@@ -26,16 +26,22 @@ function mkStateManager(config) {
             $.get(apiUrl+'?'+encodedJson).done(function (result) {
                 log(result);
 
-
-                loadJobsAndInformListeners();
+                loadJobsAndInformListeners(function () {
+                    if (state.currentJobId === undefined) {
+                        log("currentJob auto-set...");
+                        dispatch({
+                            cmd: "setCurrentJob",
+                            jobId: result.jobId
+                        });
+                    }
+                });
 
             }).error(function () {
                 log("ERROR !");
             });
 
         } else if (action.cmd == 'setCurrentJob') {
-            state.currentJobId = action['jobId'];
-            //log("state.currentJobId = "+state.currentJobId);
+            state.currentJobId = action.jobId;
 
             loadLogAndInformListeners();
 
@@ -84,7 +90,9 @@ function mkStateManager(config) {
     function loadLogAndInformListeners(doAfterLoad) {
 
         if (!_.isNumber(state.currentJobId)) {
-            doAfterLoad({status:"ok", msg:"no current job"});
+            if (_.isFunction(doAfterLoad)) {
+                doAfterLoad({status: "ok", msg: "no current job"});
+            }
             return;
         }
 

@@ -9,7 +9,7 @@ import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.trees.Leaf;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.F;
-import cz.tomkren.utils.Log;
+//import cz.tomkren.utils.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -33,12 +33,12 @@ public class Libs {
         int numStates = 2;
         String plazaDir = "mini_100";
         JSONArray pixelSizes = F.arr(5);
-        EvalTester.testLib(ch, k_max, mkLib(numStates, plazaDir, pixelSizes), gamma, goal, true, x->x, mkAllParamsInfo(numStates,plazaDir));
+        EvalTester.testLib(ch, k_max, mkLib(numStates, plazaDir, pixelSizes), gamma, goal, true, x->x, mkAllParamsInfo(numStates,plazaDir, ch));
     }
 
 
 
-    public static JSONObject mkAllParamsInfo(int numStates, String plazaDir) {
+    public static JSONObject mkAllParamsInfo(int numStates, String plazaDir, Checker ch) {
 
         JSONArray states = new JSONArray();
         for (int s = 0; s < numStates; s++) {states.put(s);}
@@ -48,7 +48,7 @@ public class Libs {
         String[] coreFilenames = coresDir.list();
         JSONArray coresJson = F.jsonMap(coreFilenames == null ? Collections.emptyList() : Arrays.asList(coreFilenames));
 
-        Log.it("coresJson: "+coresJson);
+        ch.it("coresJson: "+coresJson);
 
         return F.obj(
             "bitRule", F.obj("bits", F.obj(

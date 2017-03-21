@@ -34,7 +34,7 @@ public class AppTreeMIGenerator implements IndivGenerator<AppTreeMI> {
 
     @Override
     public List<AppTreeMI> generate(int numToGenerate) {
-        Set<AppTree> treeSet = AppTreeIndivGenerator.generate_cleverSizes(numToGenerate, goalType, maxTreeSize,gen, allParamsInfo, rand);
+        Set<AppTree> treeSet = AppTreeIndivGenerator.generate_cleverSizes(numToGenerate, goalType, maxTreeSize,gen, allParamsInfo, rand, gen.getChecker());
         return F.map(treeSet, AppTreeMI::new);
     }
 
