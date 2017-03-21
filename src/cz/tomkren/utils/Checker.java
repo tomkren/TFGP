@@ -47,7 +47,7 @@ public class Checker {
         rand = new Random(this.seed);
 
         if (!silent) {
-            Log.it("seed : "+this.seed+"L ("+getSeedOrigin()+")");
+            log("seed : "+this.seed+"L ("+getSeedOrigin()+")");
         }
 
         startTime();
@@ -74,12 +74,12 @@ public class Checker {
         String hlaska = ko == 0 ? ":)" : ":( nééééé" ;
 
         if (ko > 0) {
-            Log.it("== ERRORS ================================================");
-            Log.it(errors.toString());
+            it("== ERRORS ================================================");
+            it(errors.toString());
         }
 
-        Log.it("\n"+ok+" OK, "+ko+" KO.   "+hlaska);
-        Log.it("Seed was: "+seed+"L ("+getSeedOrigin()+")");
+        it("\n"+ok+" OK, "+ko+" KO.   "+hlaska);
+        it("Seed was: "+seed+"L ("+getSeedOrigin()+")");
         showTime();
     }
 
@@ -91,7 +91,7 @@ public class Checker {
         startTime = System.nanoTime();
     }
     private void showTime() {
-        Log.it("It took "+getTime() +" seconds...");
+        it("It took "+getTime() +" seconds...");
     }
 
     public double getTime() {
@@ -114,6 +114,11 @@ public class Checker {
 
     public Checker it(Object o) {
         //Log.it(o);
+        logFun.accept(o);
+        return this;
+    }
+
+    public Checker log(Object o) {
         logFun.accept(o);
         return this;
     }

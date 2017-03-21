@@ -2,7 +2,6 @@ package cz.tomkren.fishtron.ugen.apps.cellplaza;
 
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.CellPlaza;
 import cz.tomkren.fishtron.ugen.multi.*;
-import cz.tomkren.fishtron.ugen.server.Api;
 import cz.tomkren.fishtron.ugen.server.EvaJob;
 import cz.tomkren.fishtron.ugen.server.EvaJobProcess;
 import cz.tomkren.fishtron.ugen.server.EvaServer;
@@ -14,7 +13,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.function.Consumer;
 
 /** Created by tom on 20.03.2017. */
 
@@ -23,7 +21,8 @@ public class CellEva implements EvaJob {
 
     private final CellEvaOpts ceOpts;
     private final Checker checker;
-    //private boolean runOnServer;
+    private CellEvalManager evalManager;
+
 
 
     public CellEva(Object ceOptsObj) {
@@ -32,19 +31,22 @@ public class CellEva implements EvaJob {
 
     private CellEva(CellEvaOpts ceOpts) {
         this.ceOpts = ceOpts;
-        this.checker = ceOpts.ch;
+        this.checker = Checker.mk(ceOpts.config);
     }
 
-    private void runEvolution() {
+    private void runEvolution(EvaJobProcess jobProcess) {
         JSONObject config = ceOpts.config;
         String logPath = ceOpts.logPath;
 
-        EvaSetup_CellEva setup = new EvaSetup_CellEva(config, checker);
+        EvaSetup_CellEva setup = new EvaSetup_CellEva(config, checker, jobProcess);
         MultiEvaOpts<AppTreeMI> opts = setup.getOpts();
+        evalManager = setup.getEvalManager();
         MultiLogger<AppTreeMI> logger = new EvaLogger<>(config, logPath, checker, opts, new CellShower());
 
         MultiEvolution<AppTreeMI> eva = new MultiEvolution<>(opts, logger);
         eva.startIterativeEvolution(1);
+
+        checker.results();
     }
 
     private void log(Object x) {checker.it(x);}
@@ -53,6 +55,7 @@ public class CellEva implements EvaJob {
 
     @Override
     public void runJob(JSONObject jobOpts, EvaJobProcess jobProcess) {
+
 
         checker.setLogFun(jobProcess::log);
         checker.setLogFun_noln(jobProcess::log_noln);
@@ -63,7 +66,7 @@ public class CellEva implements EvaJob {
 
         try {
 
-            runEvolution();
+            runEvolution(jobProcess);
 
         } catch (Error e) {
             resolveError(e);
@@ -75,15 +78,14 @@ public class CellEva implements EvaJob {
         log();
         log(String.join("\n",F.map(e.getStackTrace(), StackTraceElement::toString)));
         log();
-        log("e.getMessage = "+e.getMessage());
-        log("e.getLocalizedMessage = "+e.getLocalizedMessage());
+        log("MSG = "+e.getMessage());
         log();
         log("EXITING WITH ERROR !");
     }
 
     @Override
     public JSONObject processApiCall(JSONArray path, JSONObject query) {
-        return Api.ok("msg","todo");
+        return evalManager.processApiCall(path, query);
     }
 
     public static void main(String[] args) {
@@ -103,24 +105,25 @@ public class CellEva implements EvaJob {
             Log.it("logPath : "+logPath);
             Log.it();
 
-            Checker ch = Checker.mk(config);
+
 
             boolean runOnServer = config.optBoolean("runOnServer", true);
 
-            CellEvaOpts ceOpts = new CellEvaOpts(config, logPath, false, ch);
+            CellEvaOpts ceOpts = new CellEvaOpts(config, logPath);
 
             if (runOnServer) {
 
                 EvaServer evaServer = new EvaServer(config.getJSONObject("evaServer"));
                 evaServer.addJobClass("CellEva", CellEva.class, ceOpts);
+                evaServer.addJobClass(InteractiveEvaluatorJob.JOB_NAME, InteractiveEvaluatorJob.class);
                 evaServer.addJobClass("Test", Test.class);
                 evaServer.startServer();
 
             } else {
-                new CellEva((Object)ceOpts).runEvolution();
+                new CellEva((Object)ceOpts).runEvolution(null);
             }
 
-            ch.results();
+
 
 
         } catch (IOException e) {
@@ -136,24 +139,15 @@ public class CellEva implements EvaJob {
 
         private final JSONObject config;
         private final String logPath;
-        private final boolean runOnServer;
-        private final Checker ch;
 
-        CellEvaOpts(JSONObject config, String logPath, boolean runOnServer, Checker ch) {
+        CellEvaOpts(JSONObject config, String logPath) {
             this.config = config;
             this.logPath = logPath;
-            this.runOnServer = runOnServer;
-            this.ch = ch;
         }
 
         @Override
         public String toString() {
-            return "CellEvaOpts{" +
-                    "config=" + config +
-                    ", logPath='" + logPath + '\'' +
-                    ", runOnServer=" + runOnServer +
-                    ", ch=" + ch +
-                    '}';
+            return "CellEvaOpts{logPath='" + logPath + "', config=" + config + "}";
         }
     }
 

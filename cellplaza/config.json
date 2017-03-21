@@ -1,25 +1,21 @@
 {
 
   "runOnServer": true,
+  "evaServer": {"port": 2342},
 
-  "evaServer": {
-    "port": 2342
-  },
-
+  "numIndividualsToGenerate": 64,
   "generatingMaxTreeSize": 10,
 
-  "numEvaluations": 2147483647,
-  "numIndividualsToGenerate": 64,
-  "maxPopulationSize": 256,
-  "minPopulationSizeToOperate": 0,
+  "maxPopulationSize": 128,
+  "minPopulationSizeToOperate": 2,
 
+  "numEvaluations": 1000000,
   "timeLimit": 2147483647,
-  "sleepTime": 2000,
+  "sleepTime": 1000,
 
   "tournamentBetterWinsProbability": 1,
 
   "dummyFitness": false,
-  "poolSize": 16,
   "isMaxims": [true],
 
   "cellPlaza": {

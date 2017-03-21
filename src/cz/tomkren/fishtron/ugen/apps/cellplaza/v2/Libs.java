@@ -7,6 +7,7 @@ import cz.tomkren.fishtron.ugen.apps.cellplaza.shared.CellEvalCodes;
 import cz.tomkren.fishtron.ugen.eval.*;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.trees.Leaf;
+import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.F;
 //import cz.tomkren.utils.Log;
@@ -33,7 +34,7 @@ public class Libs {
         int numStates = 2;
         String plazaDir = "mini_100";
         JSONArray pixelSizes = F.arr(5);
-        EvalTester.testLib(ch, k_max, mkLib(numStates, plazaDir, pixelSizes), gamma, goal, true, x->x, mkAllParamsInfo(numStates,plazaDir, ch));
+        EvalTester.testLib(ch, k_max, mkLib(numStates, plazaDir, pixelSizes), gamma, goal_img, true, x->x, mkAllParamsInfo(numStates,plazaDir, ch));
     }
 
 
@@ -62,14 +63,17 @@ public class Libs {
     }
 
 
-    public static final Type goal = Types.parse("Img");
+    public static final Type goal_img = Types.parse("Img");
+    public static final Type goal_pair = Types.parse("P Img Rule");
+
     static final Type ruleType = Types.parse("Rule");
 
     public static final Gamma gamma = Gamma.mk(
             "bitRule", "Rule",
             "seedImg", "Img",
             "numSteps", "N",
-            "runRule", "Rule -> (Img -> (N -> Img))"
+            "runRule", "Rule -> (Img -> (N -> Img))",
+            "pair",    "a -> (b -> (P a b))"
     );
 
     public static EvalLib mkLib(int numStates, String plazaDir, JSONArray pixelSizes) {
@@ -77,7 +81,8 @@ public class Libs {
             "bitRule",  new BitRule(numStates),
             "seedImg",  new CellEvalCodes.SeedImg(),
             "numSteps", new CellEvalCodes.NumSteps(),
-            "runRule",  new RunRule(numStates, plazaDir, pixelSizes)
+            "runRule",  new RunRule(numStates, plazaDir, pixelSizes),
+            "pair", (Fun2) a -> b -> AB.mk(a,b)
         );
     }
 

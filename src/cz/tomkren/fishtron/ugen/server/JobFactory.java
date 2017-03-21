@@ -27,10 +27,13 @@ class JobFactory {
     EvaJob mkJob(String jobName) {
 
         AB<Class<? extends EvaJob>,Object> jobClassData = jobClasses.get(jobName);
+
+        if (jobClassData == null) {return null;}
+
         Class<? extends EvaJob> jobClass = jobClassData._1();
         Object initData = jobClassData._2();
 
-        if (jobClass == null) {return null;}
+
 
         try {
 

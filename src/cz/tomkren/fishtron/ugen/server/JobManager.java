@@ -11,7 +11,7 @@ import java.util.function.Function;
 
 /** Created by Tomáš Křen on 19.2.2017.*/
 
-class JobManager {
+public class JobManager {
 
     private final JobFactory jobFactory;
     private final Map<Integer, EvaJobProcess> jobs;
@@ -48,7 +48,7 @@ class JobManager {
     private JSONObject getJobInfo(int jobId) {
         EvaJobProcess jobProcess = jobs.get(jobId);
         if (jobProcess == null) {
-            return ApiManager.mkErrorResponse("There is no job with jobId "+jobId);
+            return Api.error("There is no job with jobId "+jobId);
         }
         return Api.addOk(jobProcess.toJson());
     }
@@ -56,7 +56,7 @@ class JobManager {
     private JSONObject getJobLog(int jobId) {
         EvaJobProcess jobProcess = jobs.get(jobId);
         if (jobProcess == null) {
-            return ApiManager.mkErrorResponse("There is no job with jobId "+jobId);
+            return Api.error("There is no job with jobId "+jobId);
         }
         String logStr = jobProcess.getLog();
         JSONArray logLines = F.jsonMap(logStr.split("\\n"));
@@ -66,7 +66,7 @@ class JobManager {
         );
     }
 
-    private Api getJobApi(int jobId) {
+    public Api getJobApi(int jobId) {
         EvaJobProcess jobProcess = jobs.get(jobId);
         if (jobProcess == null) {
             return null;
@@ -74,33 +74,33 @@ class JobManager {
         return jobProcess.getJobApi();
     }
 
-    private JSONObject runJob(JSONObject jobOpts) {
+    public JSONObject runJob(JSONObject jobOpts) {
 
         if (!jobOpts.has(Api.JOB_NAME)) {
-            return ApiManager.mkErrorResponse("Missing key: "+ Api.JOB_NAME);
+            return Api.error("Missing key: "+ Api.JOB_NAME);
         }
 
         Object jobNameObj = jobOpts.get(Api.JOB_NAME);
         if (!(jobNameObj instanceof String)) {
-            return ApiManager.mkErrorResponse(Api.JOB_NAME +" must be a String.");
+            return Api.error(Api.JOB_NAME +" must be a String.");
         }
 
         String jobName = (String) jobNameObj;
         EvaJob job = jobFactory.mkJob(jobName);
 
         if (job == null) {
-            return ApiManager.mkErrorResponse("Unknown job: "+jobOpts.getString("job"));
+            return Api.error("Unknown job: "+jobOpts.getString("job"));
         }
 
         int jobId = nextJobId;
         nextJobId ++;
 
-        EvaJobProcess newJob = new EvaJobProcess(jobId, job, jobOpts);
+        EvaJobProcess newJobProcess = new EvaJobProcess(jobId, job, jobOpts, this);
 
-        jobs.put(jobId, newJob);
-        newJob.start();
+        jobs.put(jobId, newJobProcess);
+        newJobProcess.start();
 
-        Log.it("New job ("+ Api.JOB_ID +"="+jobId+") successfully made and starting ...");
+        Log.it("New '"+jobName+"' job ["+ Api.JOB_ID +"="+jobId+"] successfully started ...");
 
         return Api.addOk(F.obj(Api.JOB_ID,jobId));
     }
@@ -130,7 +130,7 @@ class JobManager {
                 int idInt = Integer.parseInt(idStr);
                 query.put(Api.JOB_ID, idInt);
             } catch (NumberFormatException e) {
-                return ApiManager.mkErrorResponse(Api.JOB_ID +" in path must be an integer.");
+                return Api.error(Api.JOB_ID +" in path must be an integer.");
             }
         }
 
@@ -140,23 +140,23 @@ class JobManager {
         }
 
         if (!query.has(Api.JOB_ID)) {
-            return ApiManager.mkErrorResponse("Missing key: "+ Api.JOB_ID);
+            return Api.error("Missing key: "+ Api.JOB_ID);
         }
 
         Object jobIdObj = query.get(Api.JOB_ID);
         if (!(jobIdObj instanceof Integer)) {
-            return ApiManager.mkErrorResponse(Api.JOB_ID +" must be an integer.");
+            return Api.error(Api.JOB_ID +" must be an integer.");
         }
 
         int jobId = (int) jobIdObj;
 
-        if (query.has(Api.JOB_CMD) && query.has("cmd") && query.get("cmd").equals("job")) {
+        if (query.has(Api.JOB_CMD) && query.has(Api.CMD) && query.get(Api.CMD).equals(Api.CMD_JOB)) {
             // instead of showing some job info we process jobCmd
             // e.g. when /job/1/someJobCmd was called.
             //      or   /job/1?{"jobCmd":"someJobCmd"}
             //      or   ?{"cmd":"job", "jobId":1, "jobCmd":"someJobCmd"}
             Api jobApi = getJobApi(jobId);
-            if (jobApi == null) {return ApiManager.mkErrorResponse("There is no job with jobId "+jobId);}
+            if (jobApi == null) {return Api.error("There is no job with jobId "+jobId);}
             return jobApi.processApiCall(path, query);
         }
 

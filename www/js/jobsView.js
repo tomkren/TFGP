@@ -2,6 +2,13 @@ function mkJobsView($container, dispatch) {
 
     //var jobNames = ["test","test2","hax"];
 
+    var firstTime = true;
+    var previousJobNames = null;
+    var previousJobs = null;
+
+    var $jobStarterContainer;
+    var $jobsTableContainer;
+
     function render(jobsInfo) {
         if (jobsInfo === null) {
             $container.html('Error: Unable to load jobs!');
@@ -11,12 +18,32 @@ function mkJobsView($container, dispatch) {
         var jobs = jobsInfo['jobs'];
         var jobNames = jobsInfo['jobNames'];
 
-        //log(jobs);
-        $container.html('');
-        $container.append([
-            mkJobStarter(jobNames),
-            mkJobsTable(jobs)
-        ]);
+        if (firstTime) {
+            firstTime = false;
+            previousJobNames = jobNames;
+            previousJobs = jobs;
+
+            $jobStarterContainer = $('<div>').html(mkJobStarter(jobNames));
+            $jobsTableContainer  = $('<div>').html(mkJobsTable(jobs));
+
+            $container.html('');
+            $container.append([$jobStarterContainer, $jobsTableContainer]);
+
+        } else {
+
+            // todo prasárna ale to vyřeší přechod na react, tak ted na rychlo to nevadí
+
+            if (!_.isEqual(jobNames, previousJobNames)) {
+                $jobStarterContainer.html(mkJobStarter(jobs));
+                previousJobNames = jobNames;
+            }
+            if (!_.isEqual(jobs, previousJobs)) {
+                $jobsTableContainer.html(mkJobsTable(jobs));
+                previousJobs = jobs;
+            }
+        }
+
+
     }
 
     function mkJobStarter(jobNames) {

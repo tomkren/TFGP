@@ -11,6 +11,7 @@ import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import cz.tomkren.fishtron.ugen.multi.*;
 import cz.tomkren.fishtron.ugen.multi.operators.AppTreeMIGenerator;
 import cz.tomkren.fishtron.ugen.multi.operators.MultiGenOpFactory;
+import cz.tomkren.fishtron.ugen.server.EvaJobProcess;
 import cz.tomkren.utils.Checker;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -22,9 +23,9 @@ import java.util.List;
 class EvaSetup_CellEva {
 
     private MultiEvaOpts<AppTreeMI> opts;
-    //private  evalManager; // todo zřejmě bude potřeba zobecnit pro komparativní selekci
+    private CellEvalManager evalManager; // todo zřejmě bude potřeba zobecnit pro komparativní selekci
 
-    EvaSetup_CellEva(JSONObject config, Checker ch) {
+    EvaSetup_CellEva(JSONObject config, Checker ch, EvaJobProcess jobProcess) {
 
         int numEvaluations  = Configs.getInt(config,  Configs.numEvaluations, Integer.MAX_VALUE);
 
@@ -55,7 +56,7 @@ class EvaSetup_CellEva {
         JSONObject allParamsInfo = Libs.mkAllParamsInfo(numStates, plazaDir, ch);
 
         Gen gen = new Gen(gamma, ch);
-        Type goal = Libs.goal;
+        Type goal = Libs.goal_pair;
 
         IndivGenerator<AppTreeMI> generator = new AppTreeMIGenerator(goal, generatingMaxTreeSize, gen, allParamsInfo);
         MultiSelection<AppTreeMI> parentSelection = new MultiSelection.Tournament<>(tournamentBetterWinsProbability, ch.getRandom());
@@ -66,17 +67,15 @@ class EvaSetup_CellEva {
 
         List<Boolean> isMaxims = Configs.getIsMaxims(config);
 
-        int poolSize = Configs.getInt(config, Configs.poolSize, 16);
         boolean dummyFitnessMode = Configs.getBoolean(config, Configs.dummyFitness, false);
-        MultiEvalManager<AppTreeMI> evalManager = new CellEvalManager<>(lib, poolSize, dummyFitnessMode);
+        evalManager = new CellEvalManager(lib, dummyFitnessMode, ch, jobProcess);
 
         opts = new BasicMultiEvaOpts<>(numEvaluations, numToGen, minPopToOperate, maxPopSize, /*saveBest,*/ timeLimit, sleepTime,
                 generator, isMaxims, evalManager, parentSelection, operators, ch);
     }
 
-    public MultiEvaOpts<AppTreeMI> getOpts() {
-        return opts;
-    }
+    MultiEvaOpts<AppTreeMI> getOpts() {return opts;}
 
+    CellEvalManager getEvalManager() {return evalManager;}
 
 }

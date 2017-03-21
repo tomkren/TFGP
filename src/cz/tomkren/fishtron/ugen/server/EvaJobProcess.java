@@ -3,6 +3,8 @@ package cz.tomkren.fishtron.ugen.server;
 import cz.tomkren.utils.F;
 import org.json.JSONObject;
 
+import java.util.List;
+
 /** Created by tom on 05.03.2017. */
 
 public class EvaJobProcess {
@@ -14,15 +16,17 @@ public class EvaJobProcess {
     private final EvaJob job;
     private final JSONObject jobOpts;
     private final StringBuffer output;
+    private final JobManager jobMan;
 
-    EvaJobProcess(int jobId, EvaJob job, JSONObject jobOpts) {
+    EvaJobProcess(int jobId, EvaJob job, JSONObject jobOpts, JobManager jobMan) {
         setStatus(Status.beforeStart);
         this.jobId = jobId;
         this.job = job;
         this.jobOpts = jobOpts;
+        this.jobMan = jobMan;
 
-        if (jobOpts.has("cmd")) {
-            jobOpts.remove("cmd");
+        if (jobOpts.has(Api.CMD)) {
+            jobOpts.remove(Api.CMD);
         }
 
         output = new StringBuffer();
@@ -38,6 +42,12 @@ public class EvaJobProcess {
 
     public void log(Object x) {
         output.append(x).append('\n');
+    }
+
+    public void logList(List<?> xs) {
+        for (Object x : xs) {
+            log(x);
+        }
     }
 
     public void log_noln(Object x) {
@@ -60,11 +70,15 @@ public class EvaJobProcess {
         return job;
     }
 
+    public JobManager getJobManager() {
+        return jobMan;
+    }
+
     public JSONObject toJson() {
         return F.obj(
-                "jobId", jobId,
-                "jobOpts", jobOpts,
-                "jobStatus", getStatus().name()
+                Api.JOB_ID, jobId,
+                Api.JOB_OPTS, jobOpts,
+                Api.JOB_STATUS, getStatus().name()
         );
     }
 

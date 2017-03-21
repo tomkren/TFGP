@@ -1,41 +1,133 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza;
 
+import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.Rule;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
+import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
 import cz.tomkren.fishtron.ugen.multi.MultiEvalManager;
 import cz.tomkren.fishtron.ugen.multi.MultiEvalResult;
-import cz.tomkren.fishtron.ugen.multi.MultiIndiv;
-import cz.tomkren.utils.AB;
-import cz.tomkren.utils.TODO;
+import cz.tomkren.fishtron.ugen.server.Api;
+import cz.tomkren.fishtron.ugen.server.EvaJobProcess;
+import cz.tomkren.fishtron.ugen.server.JobManager;
+import cz.tomkren.utils.*;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /** Created by tom on 20.03.2017. */
 
-class CellEvalManager<Indiv extends MultiIndiv> implements MultiEvalManager<Indiv> {
+class CellEvalManager implements MultiEvalManager<AppTreeMI>, Api {
 
     private final EvalLib lib;
     private final boolean dummyMode;
-    private final int poolSize;
+    private final Checker ch;
+    private final Api interactiveEvalApi;
 
-    CellEvalManager(EvalLib lib, int poolSize, boolean dummyMode) {
+    private Map<Integer, AB<AppTreeMI,JSONObject>> id2indivData;
+    private int nextId;
+
+    CellEvalManager(EvalLib lib, boolean dummyMode, Checker ch, EvaJobProcess jobProcess) {
         this.lib = lib;
         this.dummyMode = dummyMode;
-        this.poolSize =poolSize;
+        this.ch = ch;
+
+        id2indivData = new HashMap<>();
+        nextId = 0;
+
+        JobManager jobMan = jobProcess.getJobManager();
+
+        JSONObject response = jobMan.runJob(F.obj(
+                Api.CMD, Api.CMD_RUN,
+                Api.JOB_NAME, InteractiveEvaluatorJob.JOB_NAME
+        ));
+
+        if (!response.getString(Api.STATUS).equals(Api.OK)) {
+            throw new Error("Unable to create "+InteractiveEvaluatorJob.JOB_NAME+" job, response: "+response);
+        }
+
+        int jobId = response.getInt(Api.JOB_ID);
+
+        ch.log("\n>>> Created "+ InteractiveEvaluatorJob.JOB_NAME+" job: "+ response+", jobId: "+jobId+"\n");
+
+        interactiveEvalApi = jobMan.getJobApi(jobId);
     }
 
     @Override
-    public MultiEvalResult<Indiv> evalIndividuals(List<AB<Indiv, JSONObject>> indivs) {
-        throw new TODO();
+    public MultiEvalResult<AppTreeMI> evalIndividuals(List<AB<AppTreeMI, JSONObject>> indivs) {
+
+        JSONArray jsonIndivs = new JSONArray();
+
+        for (AB<AppTreeMI,JSONObject> indivData : indivs) {
+            AppTreeMI  indiv     = indivData._1();
+            JSONObject indivJson = indivData._2();
+
+            indivJson.put("id",nextId);
+            id2indivData.put(nextId, indivData);
+
+            Object indivValue = indiv.computeValue(lib); // INDIVIDUAL EVALUATION
+
+            JSONObject indivDataToSubmit = F.obj(
+                    "id",    nextId,
+                    "value", indivValueToJson(indivValue),
+                    "tree", indiv.getTree()
+            );
+
+            nextId++;
+            jsonIndivs.put(indivDataToSubmit);
+        }
+
+        interactiveEvalApi.processApiCall(null, F.obj(
+                Api.JOB_CMD, InteractiveEvaluatorJob.CMD_ADD_TO_POOL,
+                InteractiveEvaluatorJob.INDIVS, jsonIndivs
+        ));
+
+        int tries = 1;
+        while (true) {
+            ch.log("("+tries+") Waiting for user evaluations... ");
+            F.sleep(2000);
+            tries++;
+        }
+
+    }
+
+    private Object indivValueToJson(Object indivValue) {
+        AB<String,Rule> p = (AB<String,Rule>)indivValue;
+        String coreFilename = p._1();
+        Rule rule = p._2();
+
+        // TODO zde pokračovat
+        /*int howMany = 10; // todo DO KONFIGU !
+
+        List<String> fenotype = new ArrayList<>(howMany);
+
+        for (int i = 0; i < howMany; i++) {
+
+        }*/
+
+
+        return F.arr(coreFilename,rule.toString());
     }
 
     @Override
-    public MultiEvalResult<Indiv> justAskForResults() {
+    public MultiEvalResult<AppTreeMI> justAskForResults() {
         throw new TODO();
     }
 
     @Override
     public int getEvalPoolSize(int suggestedPoolSize) {
-        return poolSize;
+        return suggestedPoolSize;
     }
+
+    @Override
+    public JSONObject processApiCall(JSONArray path, JSONObject query) {
+        return interactiveEvalApi.processApiCall(path, query);
+    }
+
+
+
+
+
 }

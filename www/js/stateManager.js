@@ -27,8 +27,8 @@ function mkStateManager(config) {
                 log(result);
 
                 loadJobsAndInformListeners(function () {
-                    if (state.currentJobId === undefined) {
-                        log("currentJob auto-set...");
+                    if (result.status === "ok") {
+                        log("currentJob auto-set to "+result.jobId+"...");
                         dispatch({
                             cmd: "setCurrentJob",
                             jobId: result.jobId
@@ -48,14 +48,24 @@ function mkStateManager(config) {
         }
     }
 
-    function periodicalCheck(loadAndInformListeners, ajax, checkingInterval) {
+    function periodicalCheck(loadAndInformListeners, ajax, checkingInterval, isCheckPerformedFun) {
+
+        if (_.isFunction(isCheckPerformedFun)) {
+            if (!isCheckPerformedFun()) {
+                setTimeout(function(){
+                    periodicalCheck(loadAndInformListeners, ajax, checkingInterval, isCheckPerformedFun);
+                }, checkingInterval);
+                return;
+            }
+        }
+
         ajax.fadeIn("fast");
         loadAndInformListeners(function (info) {
             if (info !== null && info.status === 'ok') {
 
                 ajax.fadeOut("fast");
                 setTimeout(function(){
-                    periodicalCheck(loadAndInformListeners, ajax, checkingInterval);
+                    periodicalCheck(loadAndInformListeners, ajax, checkingInterval,isCheckPerformedFun);
                 }, checkingInterval);
 
             } else {
@@ -87,14 +97,18 @@ function mkStateManager(config) {
         });
     }
 
+    function isLogCheckPerformed() {
+        return _.isNumber(state.currentJobId);
+    }
+
     function loadLogAndInformListeners(doAfterLoad) {
 
-        if (!_.isNumber(state.currentJobId)) {
+        /*if (!_.isNumber(state.currentJobId)) {
             if (_.isFunction(doAfterLoad)) {
                 doAfterLoad({status: "ok", msg: "no current job"});
             }
             return;
-        }
+        }*/
 
         var loadFunction = mkLoadStateFun('log/'+state.currentJobId, 'log');
 
@@ -135,9 +149,10 @@ function mkStateManager(config) {
     var loadJobs = mkLoadStateFun('jobs', 'jobs');
 
     return {
-        loadJobs: loadJobs,
+        //loadJobs: loadJobs,
         loadJobsAndInformListeners: loadJobsAndInformListeners,
         loadLogAndInformListeners: loadLogAndInformListeners,
+        isLogCheckPerformed: isLogCheckPerformed,
         addJobsListener: addJobsListener,
         addLogListener: addLogListener,
         dispatch: dispatch,

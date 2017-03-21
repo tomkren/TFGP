@@ -21,10 +21,10 @@ class ApiManager implements Api {
     ApiManager(JobManager jobMan) {
         apiCmds = new HashMap<>();
 
-        addApiCmd("run",  jobMan::runJob);
-        addApiCmd("job",  jobMan::getJobInfo);
-        addApiCmd("log",  jobMan::getJobLog);
-        addApiCmd("jobs", jobMan::getJobsInfo);
+        addApiCmd(Api.CMD_RUN, jobMan::runJob);
+        addApiCmd(Api.CMD_JOB, jobMan::getJobInfo);
+        addApiCmd(Api.CMD_LOG, jobMan::getJobLog);
+        addApiCmd(Api.CMD_JOBS, jobMan::getJobsInfo);
     }
 
     private void addApiCmd(String cmdName, Api apiCmd) {
@@ -57,7 +57,7 @@ class ApiManager implements Api {
                 JSONObject jsonRequest = parseStdQuery(query, "&");
                 return processApiCall(pathJson, jsonRequest);
             } catch (ParseException pe) {
-                return mkErrorResponse("Unsupported query detected, query must be a JSON or stdQuery.");
+                return Api.error("Unsupported query detected, query must be a JSON or stdQuery.");
             }
         } catch (Exception e) {
             return mkUnexpectedErrorResponse(e);
@@ -75,9 +75,9 @@ class ApiManager implements Api {
 
         if (path.length() > 0) {
             cmd = path.getString(0); // higher priority than cmd field in query
-            query.put("cmd", cmd);   // and it overrides it, so we know that actual cmd is in the query
-        } else if (query.has("cmd") && query.get("cmd") instanceof String) {
-            cmd = query.getString("cmd");
+            query.put(Api.CMD, cmd);   // and it overrides it, so we know that actual cmd is in the query
+        } else if (query.has(Api.CMD) && query.get(Api.CMD) instanceof String) {
+            cmd = query.getString(Api.CMD);
         }
 
         if (cmd != null) {
@@ -90,8 +90,8 @@ class ApiManager implements Api {
         }
 
         return F.obj(
-                "status", "error",
-                "msg", "Unsupported command.",
+                Api.STATUS, Api.ERROR,
+                Api.MSG, "Unsupported command.",
                 "path", path,
                 "query", query
         );
@@ -101,16 +101,9 @@ class ApiManager implements Api {
         return Api.addOk(F.obj("msg","Welcome to EvaServer API!"));
     }
 
-    static JSONObject mkErrorResponse(String msg) {
-        return F.obj(
-                "status","error",
-                "msg",msg
-        );
-    }
-
     private static JSONObject mkUnexpectedErrorResponse(Exception e) {
         String msg = (e.getMessage() == null ? "" : " ... " + e.getMessage());
-        return mkErrorResponse("Unexpected error occurred: " + e.toString() + msg);
+        return Api.error("Unexpected error occurred: " + e.toString() + msg);
     }
 
     private static JSONObject parseStdQuery(String query, String sepRegexp) throws ParseException {
