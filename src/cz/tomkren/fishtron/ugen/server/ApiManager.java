@@ -21,7 +21,7 @@ class ApiManager implements Api {
     ApiManager(JobManager jobMan) {
         apiCmds = new HashMap<>();
 
-        addApiCmd("run",  jobMan::makeJob);
+        addApiCmd("run",  jobMan::runJob);
         addApiCmd("job",  jobMan::getJobInfo);
         addApiCmd("log",  jobMan::getJobLog);
         addApiCmd("jobs", jobMan::getJobsInfo);

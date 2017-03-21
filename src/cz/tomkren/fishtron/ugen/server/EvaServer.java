@@ -1,5 +1,6 @@
 package cz.tomkren.fishtron.ugen.server;
 
+import cz.tomkren.fishtron.ugen.server.jobs.Test;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
 import org.eclipse.jetty.server.Request;
@@ -49,6 +50,11 @@ public class EvaServer extends AbstractHandler {
         }
     }
 
+    private void addJobClass(String jobName, Class<? extends EvaJob> jobClass) {
+        jobMan.addJobClass(jobName, jobClass);
+        Log.it("Added class for job '"+jobName+"'.");
+    }
+
     public void stopEva() {
         try {
             server.stop();
@@ -87,7 +93,9 @@ public class EvaServer extends AbstractHandler {
     }
 
     private static void runServer() {
-        new EvaServer(defaultConfig).startServer();
+        EvaServer evaServer = new EvaServer(defaultConfig);
+        evaServer.addJobClass("test", Test.class);
+        evaServer.startServer();
     }
 
     public static void main(String[] args) {

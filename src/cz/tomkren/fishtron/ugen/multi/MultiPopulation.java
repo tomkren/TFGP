@@ -66,7 +66,7 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
     }
 
 
-    // TODO ověřit že max fakt dává nejhoršího :) !!
+    // TODO ověřit že max fakt dává nejhoršího :) !!!
     private Indiv findWorstIndividual_singleFitness() {
         Comparator<Indiv> singleComparator = (i1, i2) -> MultiIndiv.singleCompare(i1,i2,isMaxis.get(0));
         return individuals.stream().max(singleComparator).orElse(null);

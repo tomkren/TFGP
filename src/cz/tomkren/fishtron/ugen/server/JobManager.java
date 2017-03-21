@@ -5,7 +5,6 @@ import cz.tomkren.utils.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -14,11 +13,13 @@ import java.util.function.Function;
 
 class JobManager {
 
+    private final JobFactory jobFactory;
     private final Map<Integer, EvaJobProcess> jobs;
     private int nextJobId;
 
 
     JobManager() {
+        jobFactory = new JobFactory();
         jobs = new HashMap<>();
         nextJobId = 1;
     }
@@ -30,6 +31,11 @@ class JobManager {
     void stop() {
         //todo
     }
+
+    void addJobClass(String jobName, Class<? extends EvaJob> jobClass) {
+        jobFactory.addJobClass(jobName, jobClass);
+    }
+
 
     JSONObject getJobsInfo() {
          JSONArray jobsArr = F.jsonMap(jobs.keySet(), this::getJobInfo);
@@ -62,7 +68,7 @@ class JobManager {
         return jobProcess.getJobApi();
     }
 
-    private JSONObject makeJob(JSONObject jobOpts) {
+    private JSONObject runJob(JSONObject jobOpts) {
 
         if (!jobOpts.has(Api.JOB_NAME)) {
             return ApiManager.mkErrorResponse("Missing key: "+ Api.JOB_NAME);
@@ -74,7 +80,7 @@ class JobManager {
         }
 
         String jobName = (String) jobNameObj;
-        EvaJob job = JobFactory.mkJob(jobName);
+        EvaJob job = jobFactory.mkJob(jobName);
 
         if (job == null) {
             return ApiManager.mkErrorResponse("Unknown job: "+jobOpts.getString("job"));
@@ -95,11 +101,11 @@ class JobManager {
     }
 
 
-    JSONObject makeJob(JSONArray path, JSONObject query) {
+    JSONObject runJob(JSONArray path, JSONObject query) {
         if (path.length() > 1) {
             query.put(Api.JOB_NAME, path.get(1));
         }
-        return makeJob(query);
+        return runJob(query);
     }
 
     JSONObject getJobInfo(JSONArray path, JSONObject query) {
