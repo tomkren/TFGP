@@ -1,8 +1,6 @@
 package cz.tomkren.fishtron.ugen.server;
 
-import cz.tomkren.fishtron.server.EvolutionJob;
 import cz.tomkren.utils.F;
-import cz.tomkren.utils.Log;
 import org.json.JSONObject;
 
 /** Created by tom on 05.03.2017. */
@@ -40,7 +38,7 @@ public class EvaJobProcess {
 
     public void log(Object x) {
         output.append(x).append('\n');
-        Log.it(x);
+        //Log.it(x);
     }
 
     public String getLog() {

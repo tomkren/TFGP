@@ -94,11 +94,10 @@ class JobManager {
 
         EvaJobProcess newJob = new EvaJobProcess(jobId, job, jobOpts);
 
-
-        Log.it("New job ("+ Api.JOB_ID +"="+jobId+") successfully made # and starting ...");
-
         jobs.put(jobId, newJob);
         newJob.start();
+
+        Log.it("New job ("+ Api.JOB_ID +"="+jobId+") successfully made and starting ...");
 
         return Api.addOk(F.obj(Api.JOB_ID,jobId));
     }

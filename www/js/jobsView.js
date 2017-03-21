@@ -47,18 +47,27 @@ function mkJobsView($container, dispatch) {
     }
 
     function mkJobsTable(jobs) {
+
+
         var $table = $('<table>');
-        $table.addClass("job-tab").html('<tr><th>id</th><th>status</th><th>opts</th></tr>');
-        _.each(jobs, function (job) {
-            $table.append(mkJobRow(job));
-        });
+        $table.addClass("blue-tab");
+
+        if (_.isEmpty(jobs)) {
+            $table.append($('<tr>').append($('<td>').text('There are no running or finished jobs.')));
+        } else {
+            $table.html('<tr><th>id</th><th>status</th><th>opts</th></tr>');
+            _.each(jobs, function (job) {
+                $table.append(mkJobRow(job));
+            });
+        }
+
         return $table;
     }
 
     function mkJobRow(job) {
 
         return $('<tr>').append([
-            mkTd(job, 'jobId'),
+            mkTd(job, 'jobId', {click: showJob(job['jobId'])}),
             mkTd(job, 'jobStatus'),
             mkTd(job, 'jobOpts')
             //mkUpdateButt(job)
@@ -66,26 +75,44 @@ function mkJobsView($container, dispatch) {
 
     }
 
-    function mkInputId(job, key) {
-        return 'input-'+key+'-'+job.jobId;
+    function showJob(jobId) {
+        return function () {
+            dispatch({
+                cmd: 'setCurrentJob',
+                jobId: jobId
+            });
+        }
     }
 
-    function mkTd(job, key, editable, checkBox) {
+    function mkInputId(job, key) {
+        return 'input-'+key+'-'+job['jobId'];
+    }
+
+    function mkTd(job, key, opts) {
+
+        opts  = opts || {editable: false, checkBox: false, click: undefined};
+
         var val = job[key];
         var $html;
-        if (editable) {
+        if (opts.editable) {
             $html = $('<input>').attr('id', mkInputId(job,key));
-            if (checkBox) {
+            if (opts.checkBox) {
                 $html.attr('type', 'checkbox').prop('checked', val);
             } else {
                 $html.val(val);
             }
         } else {
 
+            $html = opts.click ? $('<button>').addClass('hand') : $('<div>');
+
             if (_.isString(val) || _.isNumber(val)) {
-                $html = $('<div>').html(val);
+                $html.html(val);
             } else {
-                $html = $('<div>').html(JSON.stringify(val));
+                $html.html(JSON.stringify(val));
+            }
+
+            if (opts.click) {
+                $html.click(opts.click);
             }
 
         }

@@ -1,10 +1,13 @@
 function mkStateManager(config) {
 
     var state = {
-        jobs: undefined
+        jobs: undefined,
+        log: undefined,
+        currentJobId: undefined
     };
 
     var jobsListeners = [];
+    var logListeners = [];
 
     var apiUrl = config.apiUrl || 'http://localhost:2342';
     if (_.last(apiUrl) !== '/') {
@@ -30,18 +33,70 @@ function mkStateManager(config) {
                 log("ERROR !");
             });
 
+        } else if (action.cmd == 'setCurrentJob') {
+            state.currentJobId = action['jobId'];
+            //log("state.currentJobId = "+state.currentJobId);
+
+            loadLogAndInformListeners();
+
         }
+    }
+
+    function periodicalCheck(loadAndInformListeners, ajax, checkingInterval) {
+        ajax.fadeIn("fast");
+        loadAndInformListeners(function (info) {
+            if (info !== null && info.status === 'ok') {
+
+                ajax.fadeOut("fast");
+                setTimeout(function(){
+                    periodicalCheck(loadAndInformListeners, ajax, checkingInterval);
+                }, checkingInterval);
+
+            } else {
+
+                var errMsg = (info === null ? "info = null" : "info.status = "+info.status);
+                ajax.text("[error: "+errMsg+"]").addClass("red");
+                console.error(errMsg);
+
+            }
+        });
     }
 
     function addJobsListener(callback) {
         jobsListeners.push(callback);
     }
 
-    function loadJobsAndInformListeners() {
+    function addLogListener(callback) {
+        logListeners.push(callback);
+    }
+
+    function loadJobsAndInformListeners(doAfterLoad) {
         loadJobs(function (jobsInfo) {
             _.each(jobsListeners, function (callback) {
                 callback(jobsInfo);
             });
+            if (_.isFunction(doAfterLoad)) {
+                doAfterLoad(jobsInfo);
+            }
+        });
+    }
+
+    function loadLogAndInformListeners(doAfterLoad) {
+
+        if (!_.isNumber(state.currentJobId)) {
+            doAfterLoad({status:"ok", msg:"no current job"});
+            return;
+        }
+
+        var loadFunction = mkLoadStateFun('log/'+state.currentJobId, 'log');
+
+        loadFunction(function (logInfo) {
+            _.each(logListeners, function (callback) {
+                callback(logInfo);
+            });
+            if (_.isFunction(doAfterLoad)) {
+                doAfterLoad(logInfo);
+            }
         });
     }
 
@@ -69,13 +124,16 @@ function mkStateManager(config) {
         }
     }
 
-    var loadJobs = mkLoadStateFun('jobs', 'jobs' /*, function (r) {return r.jobs;}*/);
+    var loadJobs = mkLoadStateFun('jobs', 'jobs');
 
     return {
         loadJobs: loadJobs,
         loadJobsAndInformListeners: loadJobsAndInformListeners,
+        loadLogAndInformListeners: loadLogAndInformListeners,
         addJobsListener: addJobsListener,
+        addLogListener: addLogListener,
         dispatch: dispatch,
+        periodicalCheck: periodicalCheck,
         getState: function () {return state;}
     };
 }

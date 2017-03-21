@@ -11,12 +11,31 @@ pre {
     font-size: 9pt;
 }
 
-.job-tab {
-    border: 1px solid #C9E6F2;
-    background-color: #F2F9FC;
+.hidden {
+    display: none;
 }
 
-.job-tab td {
+.red {
+    color: red;
+}
+
+.hand {
+    cursor: pointer;
+}
+
+.link {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.blue-tab {
+    border: 1px solid #C9E6F2;
+    background-color: #F2F9FC;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.blue-tab td {
     padding: 4px;
 }
 
