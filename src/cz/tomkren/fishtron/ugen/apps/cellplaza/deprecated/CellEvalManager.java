@@ -1,5 +1,6 @@
-package cz.tomkren.fishtron.ugen.apps.cellplaza;
+package cz.tomkren.fishtron.ugen.apps.cellplaza.deprecated;
 
+import cz.tomkren.fishtron.ugen.apps.cellplaza.deprecated.InteractiveEvaluatorJob;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.CellOpts;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.Libs;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.Rule;

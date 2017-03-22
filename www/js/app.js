@@ -10,6 +10,8 @@ function mkApp(config) {
     stateMan.addLogListener(logView.render);
     logView.renderEmpty();
 
+    var cellComparatorView = mkCellComparatorView($('#cellComparatorView'), dispatch);
+    stateMan.addJobsListener(cellComparatorView.findCellEvaJob);
 
     stateMan.periodicalCheck(stateMan.loadJobsAndInformListeners, $('#jobsViewLoader'), config.jobsCheckingInterval);
     stateMan.periodicalCheck(stateMan.loadLogAndInformListeners,  $('#logViewLoader'),  config.logCheckingInterval, stateMan.isLogCheckPerformed);

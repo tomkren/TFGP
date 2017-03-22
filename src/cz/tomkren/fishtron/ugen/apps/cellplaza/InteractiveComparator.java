@@ -1,6 +1,5 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza;
 
-import com.sun.org.apache.regexp.internal.RE;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.CellOpts;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.Libs;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.Rule;
@@ -51,7 +50,7 @@ public class InteractiveComparator implements Api {
 
         this.sleepTime = sleepTime;
 
-        nextId = 0;
+        nextId = 1;
 
         indivPairsToCompare = new ConcurrentLinkedQueue<>();
         comparedInivPairs = new ConcurrentLinkedQueue<>();
@@ -124,35 +123,36 @@ public class InteractiveComparator implements Api {
 
         String jobCmd = query.optString(Api.JOB_CMD, "WRONG FORMAT OR MISSING, MUST BE STRING");
 
-        if (jobCmd.equals(CMD_GET_PAIR_TO_COMPARE)) {
+        switch (jobCmd) {
+            case CMD_GET_PAIR_TO_COMPARE:
 
-            JSONArray pairToCompare = indivPairsToCompare.peek();
+                JSONArray pairToCompare = indivPairsToCompare.peek();
 
-            return Api.ok(
-                PAIR, pairToCompare == null ? JSONObject.NULL : pairToCompare
-            );
+                return Api.ok(
+                        PAIR, pairToCompare == null ? JSONObject.NULL : pairToCompare
+                );
 
 
-        } else if (jobCmd.equals(CMD_OFFER_RESULT)) {
+            case CMD_OFFER_RESULT:
 
-            if (query.has(RESULT) && (query.get(RESULT) instanceof JSONObject)) {
+                if (query.has(RESULT) && (query.get(RESULT) instanceof JSONObject)) {
 
-                JSONObject result = query.getJSONObject(RESULT);
+                    JSONObject result = query.getJSONObject(RESULT);
 
-                if (checkResult(result)) {
-                    comparedInivPairs.offer(result);
-                    return Api.ok("msg", "Thanks!");
+                    if (checkResult(result)) {
+                        comparedInivPairs.offer(result);
+                        return Api.ok(MSG, "Thanks!");
+                    } else {
+                        return Api.error("Wrong (inner) result format.");
+                    }
+
                 } else {
-                    return Api.error("Wrong (inner) result format.");
+                    return Api.error("Wrong result format.");
                 }
 
-            } else {
-                return Api.error("Wrong result format.");
-            }
 
-
-        } else {
-            return Api.error("Unsupported "+Api.JOB_CMD+": "+jobCmd);
+            default:
+                return Api.error("Unsupported " + Api.JOB_CMD + ": " + jobCmd);
         }
     }
 

@@ -40,11 +40,22 @@ function mkStateManager(config) {
                 log("ERROR !");
             });
 
-        } else if (action.cmd == 'setCurrentJob') {
+        } else if (action.cmd === 'setCurrentJob') {
             state.currentJobId = action.jobId;
 
             loadLogAndInformListeners();
 
+        } else if (action.cmd === 'job') {
+
+            if (action.jobCmd === 'offerResult') {
+                log("TODO! : implement 'offerResult' dispatching.");
+            } else {
+                log("Unknown jobCmd '"+action.jobCmd+"' in action: "+JSON.stringify(action));
+            }
+
+
+        } else {
+            log("Unknown cmd '"+action.cmd+"' in action: "+JSON.stringify(action));
         }
     }
 
@@ -150,6 +161,7 @@ function mkStateManager(config) {
 
     return {
         //loadJobs: loadJobs,
+        getApiUrl: function () {return apiUrl;},
         loadJobsAndInformListeners: loadJobsAndInformListeners,
         loadLogAndInformListeners: loadLogAndInformListeners,
         isLogCheckPerformed: isLogCheckPerformed,

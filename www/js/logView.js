@@ -11,7 +11,7 @@ function mkLogView($container, dispatch) {
 
         var $pre = $('<pre>');
 
-        _.each(logLines, function (line) {
+        _.each(_.reverse(logLines), function (line) {
             $pre.append(line + '\n');
         });
 

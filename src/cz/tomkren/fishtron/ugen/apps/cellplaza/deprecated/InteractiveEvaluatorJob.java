@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen.apps.cellplaza;
+package cz.tomkren.fishtron.ugen.apps.cellplaza.deprecated;
 
 
 import cz.tomkren.fishtron.ugen.server.Api;

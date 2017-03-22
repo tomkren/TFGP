@@ -130,7 +130,7 @@ public class CompareEvolution<Indiv extends MultiIndiv> {
 
     private JSONObject mkParentInfo(Indiv parent) {
         return F.obj(
-                "fitness", F.jsonMap(parent.getFitness()),
+                "fitness", F.jsonMap(parent.getFitness()), // TODO tady se to roseklo protože nemaj fitness :)
                 "id", parent.getId()
         );
     }
