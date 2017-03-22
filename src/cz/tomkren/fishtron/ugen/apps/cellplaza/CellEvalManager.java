@@ -1,5 +1,7 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza;
 
+import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.CellOpts;
+import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.Libs;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.Rule;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
@@ -12,7 +14,6 @@ import cz.tomkren.utils.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,17 +23,23 @@ import java.util.Map;
 class CellEvalManager implements MultiEvalManager<AppTreeMI>, Api {
 
     private final EvalLib lib;
-    private final boolean dummyMode;
     private final Checker ch;
     private final Api interactiveEvalApi;
 
     private Map<Integer, AB<AppTreeMI,JSONObject>> id2indivData;
     private int nextId;
 
-    CellEvalManager(EvalLib lib, boolean dummyMode, Checker ch, EvaJobProcess jobProcess) {
+    private final CellOpts cellOpts;
+    private final int numFrames;
+    private final String runDirPath;
+
+    CellEvalManager(EvalLib lib, CellOpts cellOpts, int numFrames, String runDirPath, Checker ch, EvaJobProcess jobProcess) {
         this.lib = lib;
-        this.dummyMode = dummyMode;
         this.ch = ch;
+
+        this.cellOpts = cellOpts;
+        this.numFrames = numFrames;
+        this.runDirPath = runDirPath;
 
         id2indivData = new HashMap<>();
         nextId = 0;
@@ -71,7 +78,7 @@ class CellEvalManager implements MultiEvalManager<AppTreeMI>, Api {
 
             JSONObject indivDataToSubmit = F.obj(
                     "id",    nextId,
-                    "value", indivValueToJson(indivValue),
+                    "value", indivValueToJson(indivValue, nextId),
                     "tree", indiv.getTree()
             );
 
@@ -93,22 +100,17 @@ class CellEvalManager implements MultiEvalManager<AppTreeMI>, Api {
 
     }
 
-    private Object indivValueToJson(Object indivValue) {
+    private Object indivValueToJson(Object indivValue, int indivId) {
         AB<String,Rule> p = (AB<String,Rule>)indivValue;
-        String coreFilename = p._1();
+        String seedFilename = p._1();
         Rule rule = p._2();
 
-        // TODO zde pokračovat
-        /*int howMany = 10; // todo DO KONFIGU !
+        List<String> frames = Libs.genPhenotype(cellOpts, seedFilename, rule, numFrames, runDirPath, indivId, ch);
 
-        List<String> fenotype = new ArrayList<>(howMany);
-
-        for (int i = 0; i < howMany; i++) {
-
-        }*/
-
-
-        return F.arr(coreFilename,rule.toString());
+        return F.obj(
+                "pair", F.arr(seedFilename,rule.toString()),
+                "frames", F.jsonMap(frames)
+        );
     }
 
     @Override

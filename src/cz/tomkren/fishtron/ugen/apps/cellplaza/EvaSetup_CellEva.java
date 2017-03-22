@@ -6,6 +6,7 @@ import cz.tomkren.fishtron.eva.Operator;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
+import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.CellOpts;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.Libs;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import cz.tomkren.fishtron.ugen.multi.*;
@@ -13,6 +14,7 @@ import cz.tomkren.fishtron.ugen.multi.operators.AppTreeMIGenerator;
 import cz.tomkren.fishtron.ugen.multi.operators.MultiGenOpFactory;
 import cz.tomkren.fishtron.ugen.server.EvaJobProcess;
 import cz.tomkren.utils.Checker;
+import cz.tomkren.utils.F;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -24,8 +26,9 @@ class EvaSetup_CellEva {
 
     private MultiEvaOpts<AppTreeMI> opts;
     private CellEvalManager evalManager; // todo zřejmě bude potřeba zobecnit pro komparativní selekci
+    private EvaLogger<AppTreeMI> logger;
 
-    EvaSetup_CellEva(JSONObject config, Checker ch, EvaJobProcess jobProcess) {
+    EvaSetup_CellEva(JSONObject config, String logPath, Checker ch, EvaJobProcess jobProcess) {
 
         int numEvaluations  = Configs.getInt(config,  Configs.numEvaluations, Integer.MAX_VALUE);
 
@@ -51,9 +54,11 @@ class EvaSetup_CellEva {
         JSONArray pixelSizes = plazaConfig.getJSONArray("pixelSizes");
 
 
+        CellOpts cellOpts = new CellOpts(numStates, plazaDir, pixelSizes);
+
         Gamma gamma = Libs.gamma;
-        EvalLib lib = Libs.mkLib(numStates, plazaDir, pixelSizes);
-        JSONObject allParamsInfo = Libs.mkAllParamsInfo(numStates, plazaDir, ch);
+        EvalLib lib = Libs.mkLib(cellOpts);
+        JSONObject allParamsInfo = Libs.mkAllParamsInfo(cellOpts, ch);
 
         Gen gen = new Gen(gamma, ch);
         Type goal = Libs.goal_pair;
@@ -65,17 +70,21 @@ class EvaSetup_CellEva {
         Distribution<Operator<AppTreeMI>> operators;
         operators = MultiGenOpFactory.mkOperators(operatorsConfig, ch.getRandom(), gen, allParamsInfo);
 
-        List<Boolean> isMaxims = Configs.getIsMaxims(config);
 
-        boolean dummyFitnessMode = Configs.getBoolean(config, Configs.dummyFitness, false);
-        evalManager = new CellEvalManager(lib, dummyFitnessMode, ch, jobProcess);
+        logger = new EvaLogger<>(config, logPath, ch, opts, new CellShower(), F.arr("frames"));
+
+
+        //boolean dummyFitnessMode = Configs.getBoolean(config, Configs.dummyFitness, false);
+        int numFrames = config.optInt("numFrames", 16);
+        evalManager = new CellEvalManager(lib, cellOpts, numFrames, logger.getRunDirPath(), ch, jobProcess);
+
+        List<Boolean> isMaxims = Configs.getIsMaxims(config);
 
         opts = new BasicMultiEvaOpts<>(numEvaluations, numToGen, minPopToOperate, maxPopSize, /*saveBest,*/ timeLimit, sleepTime,
                 generator, isMaxims, evalManager, parentSelection, operators, ch);
     }
 
     MultiEvaOpts<AppTreeMI> getOpts() {return opts;}
-
     CellEvalManager getEvalManager() {return evalManager;}
-
+    MultiLogger<AppTreeMI> getLogger() {return logger;}
 }

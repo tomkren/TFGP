@@ -114,7 +114,8 @@ public class PlazaImg {
             int pixelSize = pixelSizes.get(i);
 
             String dirPath = dir+"/px"+pixelSize;
-            String fullDirPath = CellPlaza.BASE_DIR+"/"+dirPath;
+
+            String fullDirPath = alreadyContainsBaseDir(dirPath) ? dirPath : CellPlaza.BASE_DIR+"/"+dirPath;
 
             if (!(new File(fullDirPath).exists())) {
                 if (!(new File(fullDirPath).mkdirs())) {throw new Error("Unable to create "+dir+" directory!");}
@@ -149,13 +150,19 @@ public class PlazaImg {
                 }
             }
 
-            ImageIO.write(bi, "PNG", new File(CellPlaza.BASE_DIR +"/"+ (dir.equals("") ? "" : dir+"/")+ filename));
+            String prefix = alreadyContainsBaseDir(dir) ? "" : CellPlaza.BASE_DIR +"/";
+
+            ImageIO.write(bi, "PNG", new File(prefix + (dir.equals("") ? "" : dir+"/")+ filename));
 
             Log.it("done");
 
         } catch (IOException e) {
             throw new Error(e);
         }
+    }
+
+    private static boolean alreadyContainsBaseDir(String pathStr) {
+        return CellPlaza.BASE_DIR.equals(pathStr.substring(0,CellPlaza.BASE_DIR.length()));
     }
 
     private void putPixel(Graphics2D g, int x, int y, int pixelSize) {

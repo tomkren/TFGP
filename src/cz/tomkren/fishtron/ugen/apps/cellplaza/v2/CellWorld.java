@@ -1,7 +1,9 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza.v2;
 
+import com.google.common.base.Strings;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.shared.PlazaImg;
 import cz.tomkren.utils.AA;
+import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
 import org.json.JSONArray;
 
@@ -30,14 +32,14 @@ public class CellWorld {
 
 
 
-    CellWorld(int numStates, String plazaDir, String coreName, Rule rule, boolean writeTestImages, JSONArray pixelSizes) {
+    CellWorld(CellOpts opts, String coreName, Rule rule, boolean writeTestImages) {
 
-        this.numStates = numStates;
-        this.pixelSizes = pixelSizes;
+        this.numStates = opts.getNumStates();
+        this.pixelSizes = opts.getPixelSizes();
 
         this.rule = rule;
         this.step = 0;
-        this.plazaDir = plazaDir;
+        this.plazaDir = opts.getPlazaDir();
 
         state2color = new Color[numStates];
         initStateToColor();
@@ -315,6 +317,18 @@ public class CellWorld {
     }
 
 
+    String writeState_eva(String runDirName, int indivId, int frameIndex) {
+
+        String dir = runDirName+"/frames";
+        String filename = F.fillZeros(indivId, 5)+"_"+F.fillZeros(frameIndex,2)+".png";
+
+        PlazaImg stateImg = toStateImg();
+        stateImg.writeImage(dir, filename);
+
+        return dir+"/"+filename;
+    }
+
+
     void writeState() {
         PlazaImg stateImg = toStateImg();
         stateImg.writeImage(plazaDir+"/run", "state"+getStepXXX()+".png");
@@ -330,7 +344,7 @@ public class CellWorld {
 
 
     private String getStepXXX() {
-        return (step<100?"0":"") + (step<10?"0":"") + step;
+        return F.fillZeros(step, 3);
     }
 
 

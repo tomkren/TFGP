@@ -39,15 +39,17 @@ public class CellPlaza {
         int numStates = plazaConfig.getInt("numStates");
         JSONArray pixelSizes = plazaConfig.getJSONArray("pixelSizes");
 
-        EvalLib lib = Libs.mkLib(numStates, plazaDir, pixelSizes);
-        JSONObject allParamsInfo = Libs.mkAllParamsInfo(numStates, plazaDir, ch);
+        CellOpts opts = new CellOpts(numStates, plazaDir, pixelSizes);
+
+        EvalLib lib = Libs.mkLib(opts);
+        JSONObject allParamsInfo = Libs.mkAllParamsInfo(opts, ch);
 
         AB<AppTree,Rule> rule = genBitRule(lib, allParamsInfo, ch);
 
         JSONArray coreNames = allParamsInfo.getJSONObject("seedImg").getJSONArray("filename");
         String coreName = (String) F.randomElement(coreNames, rand);
 
-        CellWorld w = new CellWorld(numStates, plazaDir, coreName, rule._2(), false, pixelSizes);
+        CellWorld w = new CellWorld(opts, coreName, rule._2(), false);
 
         int numSteps = 100;
         w.writeState();

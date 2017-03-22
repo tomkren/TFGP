@@ -3,12 +3,12 @@ package cz.tomkren.fishtron.ugen.multi;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.F;
-//import cz.tomkren.utils.Log;
+import cz.tomkren.utils.Log;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.*;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 /**Created by tom on 20.03.2017.*/
 
@@ -22,7 +22,9 @@ public class EvaLogger<Indiv extends MultiIndiv> implements MultiLogger<Indiv> {
 
     private final IndivShower<Indiv> indivShower;
 
-    public EvaLogger(JSONObject config, String logPath, Checker checker, MultiEvaOpts<Indiv> opts, IndivShower<Indiv> indivShower) {
+    //private final String runDirName;
+
+    public EvaLogger(JSONObject config, String logPath, Checker checker, MultiEvaOpts<Indiv> opts, IndivShower<Indiv> indivShower, JSONArray runSubdirNames) {
 
         this.opts = opts;
         this.checker = checker;
@@ -38,12 +40,20 @@ public class EvaLogger<Indiv extends MultiIndiv> implements MultiLogger<Indiv> {
         int i = 1;
         while (new File(logPath,"run_"+i).exists()) {i++;}
 
+
+
         runLogDir = new File(logPath,"run_"+i);
         if (!runLogDir.mkdir()) {throw new Error("Unable to create log directory!");}
 
         stdout("log directory for this run: "+runLogDir);
         writeToFile("config.json", config.toString(2));
         evalsLogDir = mkDir("evals");
+
+        F.each(runSubdirNames, runSubdirName -> mkDir((String)runSubdirName));
+    }
+
+    public String getRunDirPath() {
+        return runLogDir.getPath().replace('\\','/');
     }
 
     private void stdout(Object x) {checker.it(x);}

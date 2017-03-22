@@ -3,6 +3,7 @@ package cz.tomkren.utils;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
+import com.google.common.base.Strings;
 import com.google.common.io.Files;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -138,8 +139,12 @@ public class F {
     }*/
 
 
-    public static <T> void each(List<T> xs, Consumer<? super T> f) {
-        xs.stream().forEach(f);
+    public static <T> void each(Collection<T> xs, Consumer<? super T> f) {
+        xs.forEach(f);
+    }
+
+    public static void each(JSONArray xs, Consumer<? super Object> f) {
+        F.map(xs,x->x).forEach(f);
     }
 
     public static <A,B> List<B> map(Function<A,B> f,  List<A> xs) {
@@ -384,6 +389,13 @@ public class F {
         }
         return sb.toString();
     }
+
+    public static String fillZeros(int i, int outputLength) {
+        int iNumDigits = i == 0 ? 1 : 1 + (int) Math.log10(Math.abs(i));
+        int numZeros = Math.max(outputLength - iNumDigits, 0);
+        return (i<0?"-":"") + Strings.repeat("0", numZeros) + Math.abs(i);
+    }
+
 
     public static String underline(String str) {
         return underline(str, "-");

@@ -38,12 +38,10 @@ public class CellEva implements EvaJob {
         JSONObject config = ceOpts.config;
         String logPath = ceOpts.logPath;
 
-        EvaSetup_CellEva setup = new EvaSetup_CellEva(config, checker, jobProcess);
-        MultiEvaOpts<AppTreeMI> opts = setup.getOpts();
+        EvaSetup_CellEva setup = new EvaSetup_CellEva(config, logPath, checker, jobProcess);
         evalManager = setup.getEvalManager();
-        MultiLogger<AppTreeMI> logger = new EvaLogger<>(config, logPath, checker, opts, new CellShower());
 
-        MultiEvolution<AppTreeMI> eva = new MultiEvolution<>(opts, logger);
+        MultiEvolution<AppTreeMI> eva = new MultiEvolution<>(setup.getOpts(), setup.getLogger());
         eva.startIterativeEvolution(1);
 
         checker.results();

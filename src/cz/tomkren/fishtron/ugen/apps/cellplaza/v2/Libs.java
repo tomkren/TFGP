@@ -11,12 +11,15 @@ import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.F;
 //import cz.tomkren.utils.Log;
+import cz.tomkren.utils.TODO;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.function.Function;
 
 /**Created by tom on 19.03.2017.*/
@@ -31,15 +34,18 @@ public class Libs {
 
     private static void test_1(Checker ch) {
         int k_max = 100;
-        int numStates = 2;
-        String plazaDir = "mini_100";
-        JSONArray pixelSizes = F.arr(5);
-        EvalTester.testLib(ch, k_max, mkLib(numStates, plazaDir, pixelSizes), gamma, goal_img, true, x->x, mkAllParamsInfo(numStates,plazaDir, ch));
+
+        CellOpts opts = new CellOpts(2, "mini_100", F.arr(5));
+
+        EvalTester.testLib(ch, k_max, mkLib(opts), gamma, goal_img, true, x->x, mkAllParamsInfo(opts, ch));
     }
 
 
 
-    public static JSONObject mkAllParamsInfo(int numStates, String plazaDir, Checker ch) {
+    public static JSONObject mkAllParamsInfo(CellOpts opts, Checker ch) {
+
+        int numStates = opts.getNumStates();
+        String plazaDir = opts.getPlazaDir();
 
         JSONArray states = new JSONArray();
         for (int s = 0; s < numStates; s++) {states.put(s);}
@@ -63,7 +69,7 @@ public class Libs {
     }
 
 
-    public static final Type goal_img = Types.parse("Img");
+    private static final Type goal_img = Types.parse("Img");
     public static final Type goal_pair = Types.parse("P Img Rule");
 
     static final Type ruleType = Types.parse("Rule");
@@ -76,12 +82,12 @@ public class Libs {
             "pair",    "a -> (b -> (P a b))"
     );
 
-    public static EvalLib mkLib(int numStates, String plazaDir, JSONArray pixelSizes) {
+    public static EvalLib mkLib(CellOpts opts) {
         return EvalLib.mk(
-            "bitRule",  new BitRule(numStates),
+            "bitRule",  new BitRule(opts.getNumStates()),
             "seedImg",  new CellEvalCodes.SeedImg(),
             "numSteps", new CellEvalCodes.NumSteps(),
-            "runRule",  new RunRule(numStates, plazaDir, pixelSizes),
+            "runRule",  new RunRule(opts),
             "pair", (Fun2) a -> b -> AB.mk(a,b)
         );
     }
@@ -101,14 +107,10 @@ public class Libs {
     private static class RunRule implements F3 {
         private static int nextIndivId = 1;
 
-        private final int numStates;
-        private final String plazaDir;
-        private final JSONArray pixelSizes;
+        private final CellOpts opts;
 
-        RunRule(int numStates, String plazaDir, JSONArray pixelSizes) {
-            this.numStates = numStates;
-            this.plazaDir = plazaDir;
-            this.pixelSizes = pixelSizes;
+        RunRule(CellOpts opts) {
+            this.opts = opts;
         }
 
         @Override
@@ -117,7 +119,7 @@ public class Libs {
             String imgName = (String) imgNameObj;
             int numSteps = (int) numStepsObj;
 
-            CellWorld w = new CellWorld(numStates, plazaDir, imgName, rule, false, pixelSizes);
+            CellWorld w = new CellWorld(opts, imgName, rule, false);
             w.step(numSteps);
             String indivFilename = w.writeState(nextIndivId);
             nextIndivId ++;
@@ -125,6 +127,25 @@ public class Libs {
         }
     }
 
+    public static List<String> genPhenotype(CellOpts opts, String seedFilename, Rule rule, int numFrames, String runDirName, int indivId, Checker ch) {
+
+        List<String> frameFilenames = new ArrayList<>(numFrames);
+
+        CellWorld w = new CellWorld(opts, seedFilename, rule, false);
+
+        String frameFilename = w.writeState_eva(runDirName, indivId, 0);
+        frameFilenames.add(frameFilename);
+        ch.log(" >>> "+frameFilename);
+
+        for (int s = 0; s < numFrames-1; s++) {
+            w.step();
+            frameFilename = w.writeState_eva(runDirName, indivId, s+1);
+            frameFilenames.add(frameFilename);
+            ch.log(" >>> "+ frameFilename);
+        }
+
+        return frameFilenames;
+    }
 
 
 }

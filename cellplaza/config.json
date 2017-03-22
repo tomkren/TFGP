@@ -3,8 +3,10 @@
   "runOnServer": true,
   "evaServer": {"port": 2342},
 
+  "numFrames": 10,
+
   "numIndividualsToGenerate": 64,
-  "generatingMaxTreeSize": 10,
+  "generatingMaxTreeSize": 3,
 
   "maxPopulationSize": 128,
   "minPopulationSizeToOperate": 2,
