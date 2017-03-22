@@ -1,6 +1,5 @@
 package cz.tomkren.fishtron.ugen.multi;
 
-import cz.tomkren.utils.TODO;
 
 import java.util.*;
 
@@ -17,7 +16,7 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
     private Indiv worstIndividual;
 
 
-    MultiPopulation(List<Boolean> isMaxis) {
+    public MultiPopulation(List<Boolean> isMaxis) {
         if (isMaxis.isEmpty()) {throw new Error("0-fitness error : isMaxis is empty.");}
 
         this.isMaxis = isMaxis;
@@ -66,7 +65,7 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
     }
 
 
-    // TODO ověřit že max fakt dává nejhoršího :) !!!
+    // TODO ověřit že max fakt dává nejhoršího :) !!!!
     private Indiv findWorstIndividual_singleFitness() {
         Comparator<Indiv> singleComparator = (i1, i2) -> MultiIndiv.singleCompare(i1,i2,isMaxis.get(0));
         return individuals.stream().max(singleComparator).orElse(null);

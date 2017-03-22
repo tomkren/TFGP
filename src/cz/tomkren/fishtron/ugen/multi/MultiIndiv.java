@@ -30,6 +30,11 @@ public interface MultiIndiv {
 
     default double getFitness(int i) {return getFitness().get(i);}
 
+    void addWin();
+    void addLoss();
+
+    int getNumWins();
+    int getNumLosses();
 
 
     // TODO | zefektivnit aby se nemuselo pokazdy kontrolovat kolikanasobna je to optimalizace atd...

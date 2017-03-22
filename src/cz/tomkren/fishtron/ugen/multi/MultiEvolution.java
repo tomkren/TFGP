@@ -162,7 +162,7 @@ public class MultiEvolution<Indiv extends MultiIndiv> {
 
 
 
-    private JSONObject mkIndivJson_forGenerated() {
+    private static JSONObject mkIndivJson_forGenerated() {
         return F.obj(
                 "operator", F.obj("name","generator", "generated",true),
                 "parents",  F.arr()

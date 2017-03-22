@@ -8,32 +8,32 @@ import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.CellOpts;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.Libs;
+import cz.tomkren.fishtron.ugen.compare.BasicCompareOpts;
+import cz.tomkren.fishtron.ugen.compare.CompareOpts;
+import cz.tomkren.fishtron.ugen.compare.CompareSelection;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import cz.tomkren.fishtron.ugen.multi.*;
 import cz.tomkren.fishtron.ugen.multi.operators.AppTreeMIGenerator;
 import cz.tomkren.fishtron.ugen.multi.operators.MultiGenOpFactory;
-import cz.tomkren.fishtron.ugen.server.EvaJobProcess;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.F;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.List;
 
 /** Created by tom on 20.03.2017.*/
 
 class EvaSetup_CellEva {
 
-    private MultiEvaOpts<AppTreeMI> opts;
-    private CellEvalManager evalManager; // todo zřejmě bude potřeba zobecnit pro komparativní selekci
+    private CompareOpts<AppTreeMI> opts;
+    private InteractiveComparator interactiveComparator;
     private EvaLogger<AppTreeMI> logger;
 
-    EvaSetup_CellEva(JSONObject config, String logPath, Checker ch, EvaJobProcess jobProcess) {
+    EvaSetup_CellEva(JSONObject config, String logPath, Checker ch) {
 
         int numEvaluations  = Configs.getInt(config,  Configs.numEvaluations, Integer.MAX_VALUE);
 
         int numToGen        = Configs.getInt(config,  Configs.numIndividualsToGenerate, 64);
-        int minPopToOperate = Configs.getInt(config, Configs.minPopulationSizeToOperate, 0); // todo zjistit jak se chova pro nula
         int maxPopSize      = Configs.getInt(config, Configs.maxPopulationSize, numToGen*4);
 
         int generatingMaxTreeSize = Configs.getInt(config, Configs.generatingMaxTreeSize, 10);
@@ -64,27 +64,27 @@ class EvaSetup_CellEva {
         Type goal = Libs.goal_pair;
 
         IndivGenerator<AppTreeMI> generator = new AppTreeMIGenerator(goal, generatingMaxTreeSize, gen, allParamsInfo);
-        MultiSelection<AppTreeMI> parentSelection = new MultiSelection.Tournament<>(tournamentBetterWinsProbability, ch.getRandom());
+        CompareSelection<AppTreeMI> parentSelection = new CompareSelection.Tournament<>(tournamentBetterWinsProbability, ch.getRandom());
 
         JSONArray operatorsConfig = config.has("operators") ? config.getJSONArray("operators") : new JSONArray();
         Distribution<Operator<AppTreeMI>> operators;
         operators = MultiGenOpFactory.mkOperators(operatorsConfig, ch.getRandom(), gen, allParamsInfo);
 
 
-        logger = new EvaLogger<>(config, logPath, ch, opts, new CellShower(), F.arr("frames"));
+        logger = new EvaLogger<>(config, logPath, ch, new CellShower(), F.arr("frames"));
 
 
         //boolean dummyFitnessMode = Configs.getBoolean(config, Configs.dummyFitness, false);
         int numFrames = config.optInt("numFrames", 16);
-        evalManager = new CellEvalManager(lib, cellOpts, numFrames, logger.getRunDirPath(), ch, jobProcess);
+        //evalManager = new CellEvalManager(lib, cellOpts, numFrames, logger.getRunDirPath(), ch, jobProcess);
 
-        List<Boolean> isMaxims = Configs.getIsMaxims(config);
+        interactiveComparator = new InteractiveComparator(lib, cellOpts, numFrames, logger.getRunDirPath(), sleepTime, ch);
 
-        opts = new BasicMultiEvaOpts<>(numEvaluations, numToGen, minPopToOperate, maxPopSize, /*saveBest,*/ timeLimit, sleepTime,
-                generator, isMaxims, evalManager, parentSelection, operators, ch);
+        opts = new BasicCompareOpts<>(interactiveComparator::compare, numEvaluations, numToGen, maxPopSize, timeLimit, sleepTime, generator, parentSelection, operators, ch);
     }
 
-    MultiEvaOpts<AppTreeMI> getOpts() {return opts;}
-    CellEvalManager getEvalManager() {return evalManager;}
+    CompareOpts<AppTreeMI> getOpts() {return opts;}
+    //CellEvalManager getEvalManager() {return evalManager;}
+    InteractiveComparator getInteractiveComparator() {return interactiveComparator;}
     MultiLogger<AppTreeMI> getLogger() {return logger;}
 }

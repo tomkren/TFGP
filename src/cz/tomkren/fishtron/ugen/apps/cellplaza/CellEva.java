@@ -1,6 +1,7 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza;
 
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.CellPlaza;
+import cz.tomkren.fishtron.ugen.compare.CompareEvolution;
 import cz.tomkren.fishtron.ugen.multi.*;
 import cz.tomkren.fishtron.ugen.server.EvaJob;
 import cz.tomkren.fishtron.ugen.server.EvaJobProcess;
@@ -21,7 +22,8 @@ public class CellEva implements EvaJob {
 
     private final CellEvaOpts ceOpts;
     private final Checker checker;
-    private CellEvalManager evalManager;
+    //private CellEvalManager evalManager;
+    private InteractiveComparator interactiveComparator;
 
 
 
@@ -34,15 +36,16 @@ public class CellEva implements EvaJob {
         this.checker = Checker.mk(ceOpts.config);
     }
 
-    private void runEvolution(EvaJobProcess jobProcess) {
+    private void runEvolution() {
         JSONObject config = ceOpts.config;
         String logPath = ceOpts.logPath;
 
-        EvaSetup_CellEva setup = new EvaSetup_CellEva(config, logPath, checker, jobProcess);
-        evalManager = setup.getEvalManager();
+        EvaSetup_CellEva setup = new EvaSetup_CellEva(config, logPath, checker);
+        //evalManager = setup.getEvalManager();
+        interactiveComparator = setup.getInteractiveComparator();
 
-        MultiEvolution<AppTreeMI> eva = new MultiEvolution<>(setup.getOpts(), setup.getLogger());
-        eva.startIterativeEvolution(1);
+        CompareEvolution<AppTreeMI> eva = new CompareEvolution<>(setup.getOpts(), setup.getLogger());
+        eva.start();
 
         checker.results();
     }
@@ -64,7 +67,7 @@ public class CellEva implements EvaJob {
 
         try {
 
-            runEvolution(jobProcess);
+            runEvolution();
 
         } catch (Error e) {
             resolveError(e);
@@ -83,7 +86,7 @@ public class CellEva implements EvaJob {
 
     @Override
     public JSONObject processApiCall(JSONArray path, JSONObject query) {
-        return evalManager.processApiCall(path, query);
+        return interactiveComparator.processApiCall(path, query);
     }
 
     public static void main(String[] args) {
@@ -113,12 +116,12 @@ public class CellEva implements EvaJob {
 
                 EvaServer evaServer = new EvaServer(config.getJSONObject("evaServer"));
                 evaServer.addJobClass("CellEva", CellEva.class, ceOpts);
-                evaServer.addJobClass(InteractiveEvaluatorJob.JOB_NAME, InteractiveEvaluatorJob.class);
+                //evaServer.addJobClass(InteractiveEvaluatorJob.JOB_NAME, InteractiveEvaluatorJob.class);
                 evaServer.addJobClass("Test", Test.class);
                 evaServer.startServer();
 
             } else {
-                new CellEva((Object)ceOpts).runEvolution(null);
+                new CellEva((Object)ceOpts).runEvolution();
             }
 
 

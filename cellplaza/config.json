@@ -9,16 +9,20 @@
   "generatingMaxTreeSize": 3,
 
   "maxPopulationSize": 128,
-  "minPopulationSizeToOperate": 2,
 
-  "numEvaluations": 1000000,
+  "numEvaluations": 100000,
   "timeLimit": 2147483647,
-  "sleepTime": 1000,
+  "sleepTime": 200,
 
   "tournamentBetterWinsProbability": 1,
 
-  "dummyFitness": false,
-  "isMaxims": [true],
+  "operators" : [
+    {"name": "basicTypedXover", "probability": 0.4 , "maxTreeSize": 128},
+    {"name": "sameSizeSubtreeMutation", "probability": 0.3, "maxSubtreeSize": 32},
+    {"name": "oneParamMutation", "probability" : 0.3, "shiftsWithProbabilities": [[-2, 0.1], [-1, 0.4], [1, 0.4], [2, 0.1]]}
+  ],
+
+
 
   "cellPlaza": {
     "evaPlaza": "mini_50",
@@ -30,7 +34,7 @@
       },
       "mini_50": {
         "numStates": 3,
-        "pixelSizes": [10, 1]
+        "pixelSizes": [3, 1]
       },
       "mini_100": {
         "numStates": 3,

@@ -18,11 +18,22 @@ public class AppTreeMI implements MultiIndiv {
     private int front;
     private double crowdingDistance;
 
+    private int numWins;
+    private int numLosses;
 
     public AppTreeMI(AppTree tree/*, EvalLib lib*/) {
         this.tree = tree;
         //this.lib = lib;
+        numWins = 0;
+        numLosses = 0;
     }
+
+
+    @Override public void addWin() {numWins++;}
+    @Override public void addLoss() {numLosses++;}
+    @Override public int getNumWins() {return numWins;}
+    @Override public int getNumLosses() {return numLosses;}
+
 
     public AppTree getTree() {return tree;}
     //public EvalLib getLib() {return lib;}

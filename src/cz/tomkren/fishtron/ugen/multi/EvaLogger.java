@@ -15,7 +15,7 @@ import java.util.Objects;
 public class EvaLogger<Indiv extends MultiIndiv> implements MultiLogger<Indiv> {
 
     private final Checker checker;
-    private MultiEvaOpts<Indiv> opts;
+    //private MultiEvaOpts<Indiv> opts;
 
     private final File runLogDir;
     private final File evalsLogDir;
@@ -24,9 +24,9 @@ public class EvaLogger<Indiv extends MultiIndiv> implements MultiLogger<Indiv> {
 
     //private final String runDirName;
 
-    public EvaLogger(JSONObject config, String logPath, Checker checker, MultiEvaOpts<Indiv> opts, IndivShower<Indiv> indivShower, JSONArray runSubdirNames) {
+    public EvaLogger(JSONObject config, String logPath, Checker checker, IndivShower<Indiv> indivShower, JSONArray runSubdirNames) {
 
-        this.opts = opts;
+
         this.checker = checker;
         this.indivShower = indivShower;
 
@@ -69,7 +69,7 @@ public class EvaLogger<Indiv extends MultiIndiv> implements MultiLogger<Indiv> {
 
         // stdout logging :
         stdout();
-        stdout("eval #"+ evalId +(opts==null ? "" : "/"+opts.getNumEvaluations()));
+        stdout("eval #"+ evalId); //+(opts==null ? "" : "/"+opts.getNumEvaluations()));
         //JSONObject bestInfo = logBest(evalId, evalResult); //todo
         stdout(" Evaluated individuals:");
         stdout(F.map(evalResult.getIndividuals(), this::showIndivRow));
