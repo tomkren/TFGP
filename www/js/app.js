@@ -4,8 +4,6 @@ function mkApp(config) {
     var dispatch = stateMan.dispatch;
 
 
-    stateMan.addJobsListener(stateMan.findCellEvaJobId);
-
     var jobsView = mkJobsView($('#jobsView'), dispatch);
     stateMan.addJobsListener(jobsView.render);
 
@@ -13,18 +11,21 @@ function mkApp(config) {
     stateMan.addLogListener(logView.render);
     logView.renderEmpty();
 
+
+    stateMan.addJobsListener(stateMan.findCellEvaJobId);
+
     var cellComparatorView = mkCellComparatorView($('#cellComparatorView'), dispatch);
-    //stateMan.addJobsListener(cellComparatorView.render);
     stateMan.addPairListener(cellComparatorView.render);
 
-    stateMan.periodicalCheck(stateMan.loadJobsAndInformListeners, $('#jobsViewLoader'), config.jobsCheckingInterval);
-    stateMan.periodicalCheck(stateMan.loadLogAndInformListeners,  $('#logViewLoader'),  config.logCheckingInterval, stateMan.isLogCheckPerformed);
+    var cellZoomView = mkCellZoomView(config, $('#cellZoomView'), dispatch);
+    stateMan.addHistoryListener(cellZoomView.render);
 
-    stateMan.periodicalCheck(stateMan.loadPairAndInformListeners,  $('#cellComparatorViewLoader'),  config.pairCheckingInterval, stateMan.isPairCheckPerformed);
-
+    stateMan.periodicalCheck(stateMan.loadJobsAndInformListeners,    $('#jobsViewLoader'),            config.jobsCheckingInterval);
+    stateMan.periodicalCheck(stateMan.loadLogAndInformListeners,     $('#logViewLoader'),             config.logCheckingInterval,     stateMan.isLogCheckPerformed);
+    stateMan.periodicalCheck(stateMan.loadPairAndInformListeners,    $('#cellComparatorViewLoader'),  config.pairCheckingInterval,    stateMan.isPairCheckPerformed);
+    stateMan.periodicalCheck(stateMan.loadHistoryAndInformListeners, $('#cellZoomViewLoader'),        config.historyCheckingInterval, stateMan.isHistoryCheckPerformed);
 
     return {
-        getStateMan: function () {return stateMan;},
-        getCellEvaJobId: function () {return stateMan.getCellEvaJobId();}
+        getStateMan: function () {return stateMan;}
     };
 }

@@ -3,6 +3,7 @@ package cz.tomkren.fishtron.ugen.apps.cellplaza;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.CellPlaza;
 import cz.tomkren.fishtron.ugen.compare.CompareEvolution;
 import cz.tomkren.fishtron.ugen.multi.*;
+import cz.tomkren.fishtron.ugen.server.Api;
 import cz.tomkren.fishtron.ugen.server.EvaJob;
 import cz.tomkren.fishtron.ugen.server.EvaJobProcess;
 import cz.tomkren.fishtron.ugen.server.EvaServer;
@@ -19,6 +20,8 @@ import java.io.IOException;
 
 public class CellEva implements EvaJob {
     private static final String version = "0.0.1";
+
+    private static final String CELL_EVA_JOB_NAME = "CellEva";
 
     private final CellEvaOpts ceOpts;
     private final Checker checker;
@@ -119,9 +122,16 @@ public class CellEva implements EvaJob {
             if (runOnServer) {
 
                 EvaServer evaServer = new EvaServer(config.getJSONObject("evaServer"));
-                evaServer.addJobClass("CellEva", CellEva.class, ceOpts);
+                evaServer.addJobClass(CELL_EVA_JOB_NAME, CellEva.class, ceOpts);
                 //evaServer.addJobClass(InteractiveEvaluatorJob.JOB_NAME, InteractiveEvaluatorJob.class);
                 evaServer.addJobClass("Test", Test.class);
+
+
+                evaServer.getJobManager().runJob((F.obj(
+                        Api.CMD, Api.CMD_RUN,
+                        Api.JOB_NAME, CELL_EVA_JOB_NAME
+                )));
+
                 evaServer.startServer();
 
             } else {

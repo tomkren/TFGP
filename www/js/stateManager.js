@@ -7,12 +7,15 @@ function mkStateManager(config) {
 
         cellEvaJobId: null,
         isPairNeeded: true,
-        lastPairIds: [undefined,undefined]
+        lastPairIds: [undefined,undefined],
+
+        lastHistoryVersion: undefined
     };
 
     var jobsListeners = [];
     var logListeners = [];
     var pairListeners = [];
+    var historyListeners = [];
 
     var apiUrl = config.apiUrl || 'http://localhost:2342';
     if (_.last(apiUrl) !== '/') {
@@ -92,9 +95,6 @@ function mkStateManager(config) {
         }
     }
 
-    function getCellEvaJobId() {
-        return state.cellEvaJobId;
-    }
 
     function periodicalCheck(loadAndInformListeners, ajax, checkingInterval, isCheckPerformedFun) {
 
@@ -149,6 +149,44 @@ function mkStateManager(config) {
         return _.isNumber(state.currentJobId);
     }
 
+
+
+    function addHistoryListener(callback) {
+        historyListeners.push(callback);
+    }
+
+    function isHistoryCheckPerformed() {
+        return state.cellEvaJobId !== null;
+    }
+
+    function loadHistoryAndInformListeners(doAfterLoad) {
+
+        var loadFunction = mkLoadStateFun('job/'+state.cellEvaJobId+'/historyVersion');
+        loadFunction(function (historyVersionInfo) {
+
+            if (historyVersionInfo !== null && historyVersionInfo.status === 'ok' && historyVersionInfo.version !== state.lastHistoryVersion) {
+
+                var loadFunction2 = mkLoadStateFun('job/'+state.cellEvaJobId+'/history');
+                loadFunction2(function (history) {
+
+                    if (history !== null && history.status === 'ok') {
+
+                        state.lastHistoryVersion = historyVersionInfo.version;
+
+                        _.each(historyListeners, function (callback) {
+                            callback(history);
+                        });
+
+                    }
+
+                });
+            }
+
+            if (_.isFunction(doAfterLoad)) {
+                doAfterLoad(historyVersionInfo);
+            }
+        });
+    }
 
 
 
@@ -237,16 +275,18 @@ function mkStateManager(config) {
         addPairListener: addPairListener,
         addJobsListener: addJobsListener,
         addLogListener: addLogListener,
+        addHistoryListener: addHistoryListener,
 
         loadJobsAndInformListeners: loadJobsAndInformListeners,
         loadLogAndInformListeners: loadLogAndInformListeners,
         loadPairAndInformListeners: loadPairAndInformListeners,
+        loadHistoryAndInformListeners: loadHistoryAndInformListeners,
 
         isLogCheckPerformed: isLogCheckPerformed,
         isPairCheckPerformed: isPairCheckPerformed,
+        isHistoryCheckPerformed: isHistoryCheckPerformed,
 
         findCellEvaJobId: findCellEvaJobId,
-        getCellEvaJobId: getCellEvaJobId,
 
         periodicalCheck: periodicalCheck,
         getState: function () {return state;},

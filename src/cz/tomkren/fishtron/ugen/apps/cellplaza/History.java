@@ -11,9 +11,11 @@ import java.util.List;
 class History {
 
     private final List<JSONObject> clickWinners;
+    private int version;
 
     History() {
         clickWinners = new ArrayList<>();
+        version = 1;
     }
 
     void addClickWinner(String clickWinner, String clickWinner1px, int winnerId, int loserId) {
@@ -23,13 +25,18 @@ class History {
                 "frame",clickWinner,
                 "frame1px",clickWinner1px
         ));
+        version++;
     }
 
 
     JSONObject toJson() {
         return F.obj(
-                "clickWinners", F.jsonMap(clickWinners)
+                "clickWinners", F.jsonMap(clickWinners),
+                "version", version
         );
     }
 
+    public int getVersion() {
+        return version;
+    }
 }

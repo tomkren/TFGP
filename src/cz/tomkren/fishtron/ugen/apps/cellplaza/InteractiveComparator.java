@@ -27,6 +27,8 @@ public class InteractiveComparator implements Api {
     private static final String CMD_GET_PAIR_TO_COMPARE = "getPairToCompare";
     private static final String CMD_OFFER_RESULT = "offerResult";
     private static final String CMD_HISTORY = "history";
+    private static final String CMD_HISTORY_VERSION = "historyVersion";
+
 
 
     private static final String I1_WINS = "i1wins";
@@ -157,7 +159,8 @@ public class InteractiveComparator implements Api {
 
             case CMD_GET_PAIR_TO_COMPARE: return api_getPairToCompare();
             case CMD_OFFER_RESULT:        return api_offerResult(query);
-            case CMD_HISTORY:             return history.toJson();
+            case CMD_HISTORY:             return Api.addOk(history.toJson());
+            case CMD_HISTORY_VERSION:     return Api.ok("version",history.getVersion());
 
             default: return Api.error("Unsupported " + Api.JOB_CMD + ": " + jobCmd);
         }

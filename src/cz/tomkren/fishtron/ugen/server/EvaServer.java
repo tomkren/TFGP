@@ -60,6 +60,10 @@ public class EvaServer extends AbstractHandler {
         Log.it("Added class for job '"+jobName+"'.");
     }
 
+    public JobManager getJobManager() {
+        return jobMan;
+    }
+
     public void stopEva() {
         try {
             server.stop();
