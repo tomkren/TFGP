@@ -71,7 +71,7 @@ class EvaSetup_CellEva {
         operators = MultiGenOpFactory.mkOperators(operatorsConfig, ch.getRandom(), gen, allParamsInfo);
 
 
-        logger = new EvaLogger<>(config, logPath, ch, new CellShower(), F.arr("frames"));
+        logger = new EvaLogger<>(config, logPath, ch, new CellShower(), F.arr("frames", "winners", "winners/px1"));
 
 
         //boolean dummyFitnessMode = Configs.getBoolean(config, Configs.dummyFitness, false);

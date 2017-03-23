@@ -9,9 +9,14 @@ import cz.tomkren.fishtron.ugen.server.Api;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.F;
+import cz.tomkren.utils.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -25,6 +30,7 @@ public class InteractiveComparator implements Api {
     private static final String I1_WINS = "i1wins";
     private static final String PAIR = "pair";
     private static final String RESULT = "result";
+    private static final String FRAME = "frame";
 
     private final Checker ch;
     private final EvalLib lib;
@@ -90,7 +96,13 @@ public class InteractiveComparator implements Api {
     private static boolean checkResult(JSONObject result) {
         if (!result.has(I1_WINS)) {return false;}
         Object i1wins = result.get(I1_WINS);
-        return i1wins instanceof Boolean;
+        if (!(i1wins instanceof Boolean)) {return false;}
+
+        if (!result.has(FRAME)) {return false;}
+        Object frame = result.get(FRAME);
+        if (!(frame instanceof String)) {return false;}
+
+        return true;
     }
 
 
@@ -109,7 +121,7 @@ public class InteractiveComparator implements Api {
         String seedFilename = (String) seedFilenameObj;
         Rule rule = (Rule) ruleObj;
 
-        List<String> frames = Libs.genPhenotype(cellOpts, seedFilename, rule, numFrames, runDirPath, indivId, ch);
+        List<String> frames = Libs.genPhenotype(cellOpts, seedFilename, rule, numFrames, runDirPath, indivId, ch); // GENERATING FRAMES
 
         return F.obj(
                 "id", indivId,
@@ -126,40 +138,53 @@ public class InteractiveComparator implements Api {
 
     @Override
     public JSONObject processApiCall(JSONArray path, JSONObject query) {
-
         String jobCmd = query.optString(Api.JOB_CMD, "WRONG FORMAT OR MISSING, MUST BE STRING");
-
         switch (jobCmd) {
-            case CMD_GET_PAIR_TO_COMPARE:
 
-                JSONArray pairToCompare = indivPairsToCompare.peek();
+            case CMD_GET_PAIR_TO_COMPARE: return api_getPairToCompare();
+            case CMD_OFFER_RESULT:        return api_offerResult(query);
 
-                return Api.ok(
-                        PAIR, pairToCompare == null ? JSONObject.NULL : pairToCompare
-                );
-
-
-            case CMD_OFFER_RESULT:
-
-                if (query.has(RESULT) && (query.get(RESULT) instanceof JSONObject)) {
-
-                    JSONObject result = query.getJSONObject(RESULT);
-
-                    if (checkResult(result)) {
-                        comparedInivPairs.offer(result);
-                        return Api.ok(MSG, "Thanks!");
-                    } else {
-                        return Api.error("Wrong (inner) result format.");
-                    }
-
-                } else {
-                    return Api.error("Wrong result format.");
-                }
-
-
-            default:
-                return Api.error("Unsupported " + Api.JOB_CMD + ": " + jobCmd);
+            default: return Api.error("Unsupported " + Api.JOB_CMD + ": " + jobCmd);
         }
+    }
+
+    private JSONObject api_getPairToCompare() {
+        JSONArray pairToCompare = indivPairsToCompare.peek();
+        return Api.ok(
+            PAIR, pairToCompare == null ? JSONObject.NULL : pairToCompare
+        );
+    }
+
+    private JSONObject api_offerResult(JSONObject query) {
+        if (!query.has(RESULT) || !(query.get(RESULT) instanceof JSONObject)) {return Api.error("Wrong result format.");}
+
+        JSONObject result = query.getJSONObject(RESULT);
+        if (!checkResult(result)) {return Api.error("Wrong (inner) result format.");}
+
+        comparedInivPairs.offer(result);
+
+
+        String framePath = result.getString(FRAME);
+
+        File source    = new File(framePath);
+        File source1px = new File(runDirPath+"/frames/px1/"+source.getName());
+
+        String destination    = runDirPath + "/winners/";
+        String destination1px = runDirPath + "/winners/px1/";
+
+        File target    = new File(destination    + source.getName());
+        File target1px = new File(destination1px + source.getName());
+
+        try {
+            Files.copy(source.toPath(),    target.toPath(),    StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(source1px.toPath(), target1px.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }catch (IOException e) {
+            System.err.println("Unable to save winner img: "+ e.getMessage());
+        }
+
+        Log.it(framePath +" -> "+ target.toString());
+
+        return Api.ok(MSG, "Thanks!");
     }
 
 
