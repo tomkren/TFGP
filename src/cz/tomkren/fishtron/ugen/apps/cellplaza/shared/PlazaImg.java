@@ -19,28 +19,38 @@ public class PlazaImg {
 
     private final Color[][] pixels;
     private List<Integer> pixelSizes;
+    private final boolean silent;
 
-    public static PlazaImg mk(String filename) {
+    private void log(Object x) {if (!silent) {Log.it(x);}}
+    private void log_noln(Object x) {if (!silent) {Log.it_noln(x);}}
+
+    private static void log(Object x, boolean silent) {if (!silent) {Log.it(x);}}
+    private static void log_noln(Object x, boolean silent) {if (!silent) {Log.it_noln(x);}}
+
+
+    public static PlazaImg mk(String filename, boolean silent) {
         if (filename == null) {return null;}
 
-        Log.it_noln("Trying to load "+filename+" ... ");
+        log_noln("Trying to load "+filename+" ... ",silent);
         File file = new File(CellPlaza.BASE_DIR +"/"+ filename);
         if (file.exists()) {
-            PlazaImg ret = new PlazaImg(file);
-            Log.it("done.");
+            PlazaImg ret = new PlazaImg(file, silent);
+            log("done.", silent);
             return ret;
         } else {
-            Log.it("does not exist.");
+            log("does not exist.", silent);
             return null;
         }
     }
 
-    public PlazaImg(Color[][] pixels, JSONArray pixelSizes) {
+    public PlazaImg(Color[][] pixels, JSONArray pixelSizes, boolean silent) {
         this.pixels = pixels;
         this.pixelSizes = F.map(pixelSizes,x->(int)x);
+        this.silent = silent;
     }
 
-    private PlazaImg(File file) {
+    private PlazaImg(File file, boolean silent) {
+        this.silent = silent;
 
         BufferedImage img;
 
@@ -130,7 +140,7 @@ public class PlazaImg {
     private void writeImage(String dir, String filename, int pixelSize) {
         try {
 
-            Log.it_noln("Writing "+filename+" ... ");
+            log_noln("Writing "+filename+" ... ");
 
             int w = getWidth();
             int h = getHeight();
@@ -154,7 +164,7 @@ public class PlazaImg {
 
             ImageIO.write(bi, "PNG", new File(prefix + (dir.equals("") ? "" : dir+"/")+ filename));
 
-            Log.it("done");
+            log("done");
 
         } catch (IOException e) {
             throw new Error(e);

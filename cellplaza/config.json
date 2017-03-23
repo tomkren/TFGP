@@ -12,7 +12,7 @@
 
   "numEvaluations": 100000,
   "timeLimit": 2147483647,
-  "sleepTime": 200,
+  "sleepTime": 100,
 
   "tournamentBetterWinsProbability": 1,
 

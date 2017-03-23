@@ -100,7 +100,7 @@ public class JobManager {
         jobs.put(jobId, newJobProcess);
         newJobProcess.start();
 
-        Log.it("New '"+jobName+"' job ["+ Api.JOB_ID +"="+jobId+"] successfully started ...");
+        Log.it("New '"+jobName+"' job ["+ Api.JOB_ID +"="+jobId+"] successfully started.");
 
         return Api.addOk(F.obj(Api.JOB_ID,jobId));
     }

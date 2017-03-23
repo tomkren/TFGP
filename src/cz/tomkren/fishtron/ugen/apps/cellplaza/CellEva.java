@@ -86,7 +86,11 @@ public class CellEva implements EvaJob {
 
     @Override
     public JSONObject processApiCall(JSONArray path, JSONObject query) {
-        return interactiveComparator.processApiCall(path, query);
+        if (interactiveComparator == null) {
+            return InteractiveComparator.mkInitializingResponse();
+        } else {
+            return interactiveComparator.processApiCall(path, query);
+        }
     }
 
     public static void main(String[] args) {

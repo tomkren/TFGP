@@ -17,17 +17,11 @@ function mkStateManager(config) {
 
     function dispatch(action) {
         if (action.cmd === 'run') {
-            var json = JSON.stringify(action);
-            var encodedJson = encodeURIComponent(json);
 
-            //log(json);
-            //log(encodedJson);
-
-            $.get(apiUrl+'?'+encodedJson).done(function (result) {
+            sendApiAction(action).done(function (result) {
                 log(result);
-
                 loadJobsAndInformListeners(function () {
-                    if (result.status === "ok") {
+                    if (config.autoSelectCurrentJob && result.status === "ok") {
                         log("currentJob auto-set to "+result.jobId+"...");
                         dispatch({
                             cmd: "setCurrentJob",
@@ -35,10 +29,8 @@ function mkStateManager(config) {
                         });
                     }
                 });
+            }).error(handleError);
 
-            }).error(function () {
-                log("ERROR !");
-            });
 
         } else if (action.cmd === 'setCurrentJob') {
             state.currentJobId = action.jobId;
@@ -46,18 +38,36 @@ function mkStateManager(config) {
             loadLogAndInformListeners();
 
         } else if (action.cmd === 'job') {
-
             if (action.jobCmd === 'offerResult') {
-                log("TODO! : implement 'offerResult' dispatching.");
+                sendApiAction(action).done(function (response) {
+                    log(response);
+                    App.getCellComparatorView().loadNewPair();
+                }).error(handleError);
+
             } else {
                 log("Unknown jobCmd '"+action.jobCmd+"' in action: "+JSON.stringify(action));
             }
-
 
         } else {
             log("Unknown cmd '"+action.cmd+"' in action: "+JSON.stringify(action));
         }
     }
+
+    function encodeAction(action) {
+        var json = JSON.stringify(action);
+        return encodeURIComponent(json);
+    }
+
+    function sendApiAction(action) {
+        var encodedAction = encodeAction(action);
+        return $.get(apiUrl+'?'+encodedAction);
+    }
+
+    function handleError(e) {
+        log('ERROR!!!! : '+e);
+    }
+
+
 
     function periodicalCheck(loadAndInformListeners, ajax, checkingInterval, isCheckPerformedFun) {
 
@@ -81,7 +91,7 @@ function mkStateManager(config) {
 
             } else {
 
-                var errMsg = (info === null ? "info = null" : "info.status = "+info.status);
+                var errMsg = (info === null ? "server is probably turned off" : "info.status = "+info.status);
                 ajax.text("[error: "+errMsg+"]").addClass("red");
                 console.error(errMsg);
 
@@ -169,6 +179,7 @@ function mkStateManager(config) {
         addLogListener: addLogListener,
         dispatch: dispatch,
         periodicalCheck: periodicalCheck,
-        getState: function () {return state;}
+        getState: function () {return state;},
+        handleError: handleError
     };
 }

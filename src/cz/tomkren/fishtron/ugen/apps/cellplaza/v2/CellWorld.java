@@ -1,6 +1,5 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza.v2;
 
-import com.google.common.base.Strings;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.shared.PlazaImg;
 import cz.tomkren.utils.AA;
 import cz.tomkren.utils.F;
@@ -30,12 +29,13 @@ public class CellWorld {
     private final double c2s_beta;
     private final double c2s_alpha;
 
-
+    private final boolean silent;
 
     CellWorld(CellOpts opts, String coreName, Rule rule, boolean writeTestImages) {
 
         this.numStates = opts.getNumStates();
         this.pixelSizes = opts.getPixelSizes();
+        this.silent = opts.isSilent();
 
         this.rule = rule;
         this.step = 0;
@@ -52,10 +52,10 @@ public class CellWorld {
         String filename_sens = plazaDir + "/sens.png";
         String filename_core = coreName == null ? null : plazaDir +"/cores/"+ coreName;
 
-        PlazaImg seed = PlazaImg.mk(filename_seed);
-        PlazaImg core = PlazaImg.mk(filename_core);
-        //PlazaImg grad = PlazaImg.mk(filename_grad);
-        PlazaImg sens = PlazaImg.mk(filename_sens);
+        PlazaImg seed = PlazaImg.mk(filename_seed, silent);
+        PlazaImg core = PlazaImg.mk(filename_core, silent);
+        //PlazaImg grad = PlazaImg.mk(filename_grad, silent);
+        PlazaImg sens = PlazaImg.mk(filename_sens, silent);
 
         checkSizes(seed, /*grad,*/ sens);
 
@@ -66,8 +66,12 @@ public class CellWorld {
             writeTests(seed, /*grad,*/ sens);
         }
 
-        Log.it("CellWorld created!\n");
+        log("CellWorld created!\n");
     }
+
+    private void log(Object x) {if (!silent) {Log.it(x);}}
+    private void log_noln(Object x) {if (!silent) {Log.it_noln(x);}}
+
 
     private void mkCells(PlazaImg seed, PlazaImg core, /*PlazaImg grad,*/ PlazaImg sens) {
 
@@ -125,7 +129,7 @@ public class CellWorld {
             int coreDy = coreMarker1._2();
             int coreWidth = coreMarker2._1() - coreDx + 1;
             int coreHeight = coreMarker2._2() - coreDy + 1;
-            Log.it("Core markers: " + coreMarker1 + " & " + coreMarker2 + " ... " + coreWidth + " × " + coreHeight);
+            log("Core markers: " + coreMarker1 + " & " + coreMarker2 + " ... " + coreWidth + " × " + coreHeight);
             if (coreWidth != core.getWidth() || coreHeight != core.getHeight()) {
                 throw new Error("Core size does not match core markers: " +
                         core.getWidth() + " × " + core.getHeight() + " -vs- " + coreWidth + " × " + coreHeight);
@@ -170,10 +174,10 @@ public class CellWorld {
     }
 
     void step() {
-        Log.it_noln("Computing next step ("+(step+1)+") ... ");
+        log_noln("Computing next step ("+(step+1)+") ... ");
         eachCell(this::computeNextState);
         eachCell(Cell::setStateToNextState);
-        Log.it("done");
+        log("done");
         step++;
     }
 
@@ -282,7 +286,7 @@ public class CellWorld {
 
     private PlazaImg toImg(Function<Cell,Color> showFun) {
 
-        Log.it_noln("Converting cells to image ... ");
+        log_noln("Converting cells to image ... ");
 
         int width  = getWidth();
         int height = getHeight();
@@ -297,8 +301,8 @@ public class CellWorld {
             pixels[y] = pixelRow;
         }
 
-        Log.it("done");
-        return new PlazaImg(pixels, pixelSizes);
+        log("done");
+        return new PlazaImg(pixels, pixelSizes, silent);
     }
 
     private PlazaImg toStateImg() {
@@ -355,10 +359,10 @@ public class CellWorld {
     }
 
     private void checkSizes(PlazaImg seed, /*PlazaImg grad,*/ PlazaImg sens) {
-        Log.it_noln("Checking sizes ... ");
+        log_noln("Checking sizes ... ");
         //if (grad != null) {grad.checkSize(seed);}
         if (sens != null) {sens.checkSize(seed);}
-        Log.it("OK");
+        log("OK");
     }
 
     private void writeTests(PlazaImg seed, /*PlazaImg grad,*/ PlazaImg sens) {

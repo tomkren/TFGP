@@ -54,7 +54,7 @@ class EvaSetup_CellEva {
         JSONArray pixelSizes = plazaConfig.getJSONArray("pixelSizes");
 
 
-        CellOpts cellOpts = new CellOpts(numStates, plazaDir, pixelSizes);
+        CellOpts cellOpts = new CellOpts(numStates, plazaDir, pixelSizes, true);
 
         Gamma gamma = Libs.gamma;
         EvalLib lib = Libs.mkLib(cellOpts);

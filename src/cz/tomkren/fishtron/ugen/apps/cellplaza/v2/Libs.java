@@ -35,7 +35,7 @@ public class Libs {
     private static void test_1(Checker ch) {
         int k_max = 100;
 
-        CellOpts opts = new CellOpts(2, "mini_100", F.arr(5));
+        CellOpts opts = new CellOpts(2, "mini_100", F.arr(5), false);
 
         EvalTester.testLib(ch, k_max, mkLib(opts), gamma, goal_img, true, x->x, mkAllParamsInfo(opts, ch));
     }

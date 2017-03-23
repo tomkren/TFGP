@@ -40,6 +40,8 @@ public class InteractiveComparator implements Api {
 
     private long sleepTime;
 
+
+
     InteractiveComparator(EvalLib lib, CellOpts cellOpts, int numFrames, String runDirPath, long sleepTime, Checker ch) {
         this.lib = lib;
         this.ch = ch;
@@ -68,7 +70,7 @@ public class InteractiveComparator implements Api {
         JSONObject result = comparedInivPairs.poll();
         int i = 0;
         while (result == null) {
-            if (i % 20 == 0) {ch.log("("+(i/20)+") Waiting for user to compare pair...");}
+            if (i % 50 == 0) {ch.log("("+(i/50)+") Waiting for user to compare pair...");}
             F.sleep(sleepTime);
             result = comparedInivPairs.poll();
             i++;
@@ -116,6 +118,10 @@ public class InteractiveComparator implements Api {
         );
     }
 
+
+    static JSONObject mkInitializingResponse() {
+        return F.obj(Api.STATUS, "initializing");
+    }
 
 
     @Override

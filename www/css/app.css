@@ -55,3 +55,9 @@ pre {
     position:relative;
     top:-10px;
 }
+
+.ajax2 {
+    position:relative;
+    top:5px;
+    margin-left: 10px;
+}

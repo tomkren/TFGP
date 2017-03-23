@@ -37,10 +37,10 @@ public class CellWorld {
         String filename_sens = plazaDir + "/sens.png";
         String filename_core = coreName == null ? null : plazaDir +"/"+ coreName + ".png";
 
-        PlazaImg seed = PlazaImg.mk(filename_seed);
-        PlazaImg core = PlazaImg.mk(filename_core);
-        PlazaImg grad = PlazaImg.mk(filename_grad);
-        PlazaImg sens = PlazaImg.mk(filename_sens);
+        PlazaImg seed = PlazaImg.mk(filename_seed, false);
+        PlazaImg core = PlazaImg.mk(filename_core, false);
+        PlazaImg grad = PlazaImg.mk(filename_grad, false);
+        PlazaImg sens = PlazaImg.mk(filename_sens, false);
 
         checkSizes(seed, grad, sens);
 
@@ -217,7 +217,7 @@ public class CellWorld {
         }
 
         Log.it("done");
-        return new PlazaImg(pixels, F.arr(1));
+        return new PlazaImg(pixels, F.arr(1), false);
     }
 
     private PlazaImg toStateImg() {

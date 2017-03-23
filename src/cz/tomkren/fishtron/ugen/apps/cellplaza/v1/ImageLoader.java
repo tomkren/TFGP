@@ -71,6 +71,6 @@ public class ImageLoader {
         System.out.println("amount red pixel: "+numRedPixels);
         System.out.println("amount pixel red percent: "+percentPixel+" %");
 
-        return new PlazaImg(pixels, F.arr(1));
+        return new PlazaImg(pixels, F.arr(1), false);
     }
 }

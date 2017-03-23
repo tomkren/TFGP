@@ -39,7 +39,7 @@ public class CellPlaza {
         int numStates = plazaConfig.getInt("numStates");
         JSONArray pixelSizes = plazaConfig.getJSONArray("pixelSizes");
 
-        CellOpts opts = new CellOpts(numStates, plazaDir, pixelSizes);
+        CellOpts opts = new CellOpts(numStates, plazaDir, pixelSizes, false);
 
         EvalLib lib = Libs.mkLib(opts);
         JSONObject allParamsInfo = Libs.mkAllParamsInfo(opts, ch);

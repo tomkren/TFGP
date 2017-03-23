@@ -11,13 +11,14 @@ function mkApp(config) {
     logView.renderEmpty();
 
     var cellComparatorView = mkCellComparatorView($('#cellComparatorView'), dispatch);
-    stateMan.addJobsListener(cellComparatorView.findCellEvaJob);
+    stateMan.addJobsListener(cellComparatorView.render);
 
     stateMan.periodicalCheck(stateMan.loadJobsAndInformListeners, $('#jobsViewLoader'), config.jobsCheckingInterval);
     stateMan.periodicalCheck(stateMan.loadLogAndInformListeners,  $('#logViewLoader'),  config.logCheckingInterval, stateMan.isLogCheckPerformed);
 
 
     return {
-        getStateMan: function () {return stateMan;}
+        getStateMan: function () {return stateMan;},
+        getCellComparatorView: function() {return cellComparatorView;}
     };
 }
