@@ -39,11 +39,11 @@ public class CellEva implements EvaJob {
         this.checker = Checker.mk(ceOpts.config);
     }
 
-    private void runEvolution() {
+    private void runEvolution(JSONObject jobOpts) {
         JSONObject config = ceOpts.config;
         String logPath = ceOpts.logPath;
 
-        EvaSetup_CellEva setup = new EvaSetup_CellEva(config, logPath, checker);
+        EvaSetup_CellEva setup = new EvaSetup_CellEva(jobOpts, config, logPath, checker);
         //evalManager = setup.getEvalManager();
         interactiveComparator = setup.getInteractiveComparator();
 
@@ -70,7 +70,7 @@ public class CellEva implements EvaJob {
 
         try {
 
-            runEvolution();
+            runEvolution(jobOpts);
 
         } catch (Error e) {
             resolveError(e);
@@ -126,16 +126,13 @@ public class CellEva implements EvaJob {
                 //evaServer.addJobClass(InteractiveEvaluatorJob.JOB_NAME, InteractiveEvaluatorJob.class);
                 evaServer.addJobClass("Test", Test.class);
 
-
-                evaServer.getJobManager().runJob((F.obj(
-                        Api.CMD, Api.CMD_RUN,
-                        Api.JOB_NAME, CELL_EVA_JOB_NAME
-                )));
+                evaServer.getJobManager().runJob(CELL_EVA_JOB_NAME, F.obj("plazaDir", "mini_50"));
+                //evaServer.getJobManager().runJob(CELL_EVA_JOB_NAME, F.obj("plazaDir", "mini_10"));
 
                 evaServer.startServer();
 
             } else {
-                new CellEva((Object)ceOpts).runEvolution();
+                new CellEva((Object)ceOpts).runEvolution(null);
             }
 
 

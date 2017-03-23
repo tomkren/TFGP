@@ -71,7 +71,7 @@ public class InteractiveComparator implements Api {
         indivPairsToCompare = new ConcurrentLinkedQueue<>();
         comparedInivPairs = new ConcurrentLinkedQueue<>();
 
-        history = new History();
+        history = new History(cellOpts.getNumStates());
     }
 
 

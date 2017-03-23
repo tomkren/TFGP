@@ -60,6 +60,16 @@ pre {
     margin: 3px;
 }
 
+.tiles-tab {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.tiles-tab td {
+    border: 1px solid black;
+    padding: 4px;
+}
+
 .ajax2 {
     position:relative;
     top:5px;

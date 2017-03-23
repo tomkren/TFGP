@@ -17,8 +17,8 @@ public class CellOpts {
         this.silent = silent;
     }
 
-    int getNumStates() {return numStates;}
-    String getPlazaDir() {return plazaDir;}
-    JSONArray getPixelSizes() {return pixelSizes;}
+    public int getNumStates() {return numStates;}
+    public String getPlazaDir() {return plazaDir;}
+    public JSONArray getPixelSizes() {return pixelSizes;}
     public boolean isSilent() {return silent;}
 }

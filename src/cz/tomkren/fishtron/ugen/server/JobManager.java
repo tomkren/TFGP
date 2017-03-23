@@ -74,6 +74,12 @@ public class JobManager {
         return jobProcess.getJobApi();
     }
 
+
+    public JSONObject runJob(String jobName, JSONObject jobOpts) {
+        jobOpts.put(Api.JOB_NAME, jobName);
+        return runJob(jobOpts);
+    }
+
     public JSONObject runJob(JSONObject jobOpts) {
 
         if (!jobOpts.has(Api.JOB_NAME)) {

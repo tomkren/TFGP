@@ -29,7 +29,7 @@ class EvaSetup_CellEva {
     private InteractiveComparator interactiveComparator;
     private EvaLogger<AppTreeMI> logger;
 
-    EvaSetup_CellEva(JSONObject config, String logPath, Checker ch) {
+    EvaSetup_CellEva(JSONObject jobOpts, JSONObject config, String logPath, Checker ch) {
 
         int numEvaluations  = Configs.getInt(config,  Configs.numEvaluations, Integer.MAX_VALUE);
 
@@ -45,7 +45,7 @@ class EvaSetup_CellEva {
         long sleepTime = Configs.getInt(config, Configs.sleepTime, 2000);
 
 
-        String plazaDir = config.getJSONObject("cellPlaza").getString("evaPlaza");
+        String plazaDir = jobOpts.optString("plazaDir", "mini_50"); //config.getJSONObject("cellPlaza").getString("evaPlaza");
         JSONObject plazaConfig = config.getJSONObject("cellPlaza").getJSONObject("plazas").getJSONObject(plazaDir);
 
         ch.it("plazaConfig: "+ plazaConfig);

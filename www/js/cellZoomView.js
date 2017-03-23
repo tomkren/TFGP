@@ -1,40 +1,98 @@
 function mkCellZoomView(config, $container, dispatch) {
 
     var $selectedContainer;
+    var tilesDir;
+
+    var $tileContainers;
+    var tileIndices;
 
     function render(history) {
 
 
         var clickWinners = history['clickWinners'];
+        tilesDir = "../"+ history['tiles']['dir'];
+        var tiles = history['tiles']['tiles'];
 
-        $selectedContainer = mkSelectedContainer();
+        $selectedContainer = mkContainer();
+        $tileContainers = _.map(tiles, function () {return mkContainer();});
+
+        if (tileIndices === undefined) {
+            tileIndices = _.map(tiles, function () {return 0;});
+        }
+
+        var $tiles = mkTiles(tiles);
         var $thumbnails = mkThumbnails(clickWinners);
 
-        select(_.last(clickWinners));
+        if (!_.isEmpty(clickWinners)){
+            select(_.last(clickWinners));
+        }
+
+        _.each(tiles, function (pack,iPack) {
+            if (!_.isEmpty(pack)) {
+                selectTile(pack[tileIndices[iPack]],iPack,tileIndices[iPack]);
+            }
+        });
 
         $container.html('');
         $container.append([
-            $selectedContainer,
-            $thumbnails,
-            $('<pre>').text(JSON.stringify(history, null, 2))
+            $('<table>').html($('<tr>').append([
+                $('<td>').html($('<button>').html('Zoom! (todo)').addClass('hand')),
+                $('<td>').html($selectedContainer),
+                $('<td>').html($tiles)
+            ])),
+            $thumbnails
+            //$('<pre>').text(JSON.stringify(history, null, 2))
         ]);
 
 
     }
 
-    function mkSelectedContainer() {
-        var $selected = $('<div>');
-        return $selected;
+    function mkTiles(tiles) {
+        var $tiles = $('<table>').addClass('tiles-tab');
+        _.each(tiles, function (pack,i) {
+            $tiles.append(mkTilesPack(pack,i));
+        });
+        return $tiles;
+    }
+
+    function mkTilesPack(pack,iPack) {
+        var $tilesPack = $('<td>');
+        for (var i = 0; i < pack.length; i++) {
+            var $img = mkTile(pack[i],iPack, i);
+            $tilesPack.append($img);
+            if (i % config.numTilesOneRow == config.numTilesOneRow-1) {
+                $tilesPack.append('<br>');
+            }
+        }
+        return $('<tr>').append([$('<td>').html($tileContainers[iPack]), $tilesPack]);
+    }
+
+    function mkTile(tile, iPack, i) {
+        return $('<img>').addClass('thumbnail').addClass('hand').attr('src', tilesDir +"/"+ tile['src']).click(function () {
+            selectTile(tile, iPack, i);
+        });
+    }
+
+    function selectTile(tile, iPack, i) {
+        tileIndices[iPack] = i;
+        var src = tilesDir +'/'+ tile['src'];
+        var $img = $('<img>').attr('src',src).css("width", 100);
+        $tileContainers[iPack].html($img);
+    }
+
+
+
+    function mkContainer() {
+        return $('<div>');
     }
 
     function mkThumbnails(clickWinners) {
         var $thumbnails = $('<div>');
-
         for (var i = 0; i < clickWinners.length; i++) {
             var $img = mkThumbnail(clickWinners[i]);
             $thumbnails.append($img);
 
-            if (i % config.numThumbnailsOnLine == config.numThumbnailsOnLine-1) {
+            if (i % config.numThumbnailsOneRow == config.numThumbnailsOneRow-1) {
                 $thumbnails.append('<br>');
             }
         }
@@ -53,7 +111,6 @@ function mkCellZoomView(config, $container, dispatch) {
             select(clickWinner);
         });
     }
-
 
 
 

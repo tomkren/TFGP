@@ -49,6 +49,10 @@ public class PlazaImg {
         this.silent = silent;
     }
 
+    public PlazaImg(File file) {
+        this(file, true);
+    }
+
     private PlazaImg(File file, boolean silent) {
         this.silent = silent;
 
@@ -102,6 +106,17 @@ public class PlazaImg {
         return pixels[y][x];
     }
 
+    public int sumColor() {
+        int sum = 0;
+        int w = getWidth();
+        int h = getHeight();
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                sum += getColor(x, y).getRed();
+            }
+        }
+        return sum;
+    }
 
     public void writeImage(String filename) {
 
