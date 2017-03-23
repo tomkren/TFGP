@@ -26,11 +26,15 @@ public class InteractiveComparator implements Api {
 
     private static final String CMD_GET_PAIR_TO_COMPARE = "getPairToCompare";
     private static final String CMD_OFFER_RESULT = "offerResult";
+    private static final String CMD_HISTORY = "history";
+
 
     private static final String I1_WINS = "i1wins";
     private static final String PAIR = "pair";
     private static final String RESULT = "result";
     private static final String FRAME = "frame";
+    private static final String IDS = "ids";
+    private static final String INDIV_ID = "indivId";
 
     private final Checker ch;
     private final EvalLib lib;
@@ -43,6 +47,8 @@ public class InteractiveComparator implements Api {
 
     private Queue<JSONArray> indivPairsToCompare;
     private Queue<JSONObject> comparedInivPairs;
+
+    private final History history;
 
     private long sleepTime;
 
@@ -62,6 +68,8 @@ public class InteractiveComparator implements Api {
 
         indivPairsToCompare = new ConcurrentLinkedQueue<>();
         comparedInivPairs = new ConcurrentLinkedQueue<>();
+
+        history = new History();
     }
 
 
@@ -101,6 +109,12 @@ public class InteractiveComparator implements Api {
         if (!result.has(FRAME)) {return false;}
         Object frame = result.get(FRAME);
         if (!(frame instanceof String)) {return false;}
+
+        if (!result.has(IDS)) {return false;}
+        Object ids_obj = result.get(IDS);
+        if (!(ids_obj instanceof JSONArray)) {return false;}
+        JSONArray ids = (JSONArray) ids_obj;
+        if (ids.length() != 2 || !(ids.get(0) instanceof Integer) || !(ids.get(1) instanceof Integer)) {return false;}
 
         return true;
     }
@@ -143,6 +157,7 @@ public class InteractiveComparator implements Api {
 
             case CMD_GET_PAIR_TO_COMPARE: return api_getPairToCompare();
             case CMD_OFFER_RESULT:        return api_offerResult(query);
+            case CMD_HISTORY:             return history.toJson();
 
             default: return Api.error("Unsupported " + Api.JOB_CMD + ": " + jobCmd);
         }
@@ -164,15 +179,17 @@ public class InteractiveComparator implements Api {
         comparedInivPairs.offer(result);
 
 
-        String framePath = result.getString(FRAME);
 
-        File source    = new File(framePath);
-        File source1px = new File(runDirPath+"/frames/px1/"+source.getName());
+        String winnerFramePath = result.getString(FRAME);
+        File source = new File(winnerFramePath);
 
-        String destination    = runDirPath + "/winners/";
+        String winnerFramePath1px = runDirPath+"/frames/px1/"+source.getName();
+        File source1px = new File(winnerFramePath1px);
+
+        String destination = runDirPath + "/winners/";
+        File target = new File(destination + source.getName());
+
         String destination1px = runDirPath + "/winners/px1/";
-
-        File target    = new File(destination    + source.getName());
         File target1px = new File(destination1px + source.getName());
 
         try {
@@ -182,7 +199,12 @@ public class InteractiveComparator implements Api {
             System.err.println("Unable to save winner img: "+ e.getMessage());
         }
 
-        Log.it(framePath +" -> "+ target.toString());
+        JSONArray ids = result.getJSONArray(IDS);
+        boolean i1wins = result.getBoolean(I1_WINS);
+        int winnerId = ids.getInt(i1wins ? 0 : 1);
+        int loserId  = ids.getInt(i1wins ? 1 : 0);
+
+        history.addClickWinner(winnerFramePath, winnerFramePath1px, winnerId, loserId);
 
         return Api.ok(MSG, "Thanks!");
     }

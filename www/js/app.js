@@ -3,6 +3,9 @@ function mkApp(config) {
     var stateMan = mkStateManager(config);
     var dispatch = stateMan.dispatch;
 
+
+    stateMan.addJobsListener(stateMan.findCellEvaJobId);
+
     var jobsView = mkJobsView($('#jobsView'), dispatch);
     stateMan.addJobsListener(jobsView.render);
 
@@ -11,14 +14,17 @@ function mkApp(config) {
     logView.renderEmpty();
 
     var cellComparatorView = mkCellComparatorView($('#cellComparatorView'), dispatch);
-    stateMan.addJobsListener(cellComparatorView.render);
+    //stateMan.addJobsListener(cellComparatorView.render);
+    stateMan.addPairListener(cellComparatorView.render);
 
     stateMan.periodicalCheck(stateMan.loadJobsAndInformListeners, $('#jobsViewLoader'), config.jobsCheckingInterval);
     stateMan.periodicalCheck(stateMan.loadLogAndInformListeners,  $('#logViewLoader'),  config.logCheckingInterval, stateMan.isLogCheckPerformed);
 
+    stateMan.periodicalCheck(stateMan.loadPairAndInformListeners,  $('#cellComparatorViewLoader'),  config.pairCheckingInterval, stateMan.isPairCheckPerformed);
+
 
     return {
         getStateMan: function () {return stateMan;},
-        getCellComparatorView: function() {return cellComparatorView;}
+        getCellEvaJobId: function () {return stateMan.getCellEvaJobId();}
     };
 }

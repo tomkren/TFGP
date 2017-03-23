@@ -3,11 +3,16 @@ function mkStateManager(config) {
     var state = {
         jobs: undefined,
         log: undefined,
-        currentJobId: undefined
+        currentJobId: undefined,
+
+        cellEvaJobId: null,
+        isPairNeeded: true,
+        lastPairIds: [undefined,undefined]
     };
 
     var jobsListeners = [];
     var logListeners = [];
+    var pairListeners = [];
 
     var apiUrl = config.apiUrl || 'http://localhost:2342';
     if (_.last(apiUrl) !== '/') {
@@ -39,9 +44,15 @@ function mkStateManager(config) {
 
         } else if (action.cmd === 'job') {
             if (action.jobCmd === 'offerResult') {
+
+                action.jobId = state.cellEvaJobId;
+                log(JSON.stringify(action));
+
                 sendApiAction(action).done(function (response) {
                     log(response);
-                    App.getCellComparatorView().loadNewPair();
+                    //App.getCellComparatorView().loadNewPair();
+                    state.isPairNeeded = true;
+
                 }).error(handleError);
 
             } else {
@@ -68,6 +79,22 @@ function mkStateManager(config) {
     }
 
 
+    function findCellEvaJobId(jobsInfo) {
+        if (jobsInfo === null) {return;}
+        if (state.cellEvaJobId === null) {
+            // takes the last job with 'CellEva' jobName
+            _.each(jobsInfo['jobs'], function (job) {
+                var jobName = job['jobOpts']['job'];
+                if (jobName === 'CellEva') {
+                    state.cellEvaJobId = job['jobId'];
+                }
+            });
+        }
+    }
+
+    function getCellEvaJobId() {
+        return state.cellEvaJobId;
+    }
 
     function periodicalCheck(loadAndInformListeners, ajax, checkingInterval, isCheckPerformedFun) {
 
@@ -82,7 +109,7 @@ function mkStateManager(config) {
 
         ajax.fadeIn("fast");
         loadAndInformListeners(function (info) {
-            if (info !== null && info.status === 'ok') {
+            if (info !== null && (info.status === 'ok' || info.status === 'initializing')) {
 
                 ajax.fadeOut("fast");
                 setTimeout(function(){
@@ -122,14 +149,20 @@ function mkStateManager(config) {
         return _.isNumber(state.currentJobId);
     }
 
-    function loadLogAndInformListeners(doAfterLoad) {
 
-        /*if (!_.isNumber(state.currentJobId)) {
-            if (_.isFunction(doAfterLoad)) {
-                doAfterLoad({status: "ok", msg: "no current job"});
-            }
-            return;
-        }*/
+
+
+
+
+    function addPairListener(callback) {
+        pairListeners.push(callback);
+    }
+
+    function isPairCheckPerformed() {
+        return state.cellEvaJobId !== null && state.isPairNeeded;
+    }
+
+    function loadLogAndInformListeners(doAfterLoad) {
 
         var loadFunction = mkLoadStateFun('log/'+state.currentJobId, 'log');
 
@@ -142,6 +175,35 @@ function mkStateManager(config) {
             }
         });
     }
+
+    function loadPairAndInformListeners(doAfterLoad) {
+
+        var loadFunction = mkLoadStateFun('job/'+state.cellEvaJobId+'/getPairToCompare');
+
+        loadFunction(function (pairToCompareInfo) {
+
+            if (pairToCompareInfo !== null && pairToCompareInfo.status === 'ok') {
+                var pair = pairToCompareInfo['pair'];
+                if (pair !== null && !(pair[0].id === state.lastPairIds[0] && pair[1].id === state.lastPairIds[1])) {
+
+                    state.lastPairIds = [pair[0].id, pair[1].id];
+                    state.isPairNeeded = false;
+
+                    _.each(pairListeners, function (callback) {
+                        callback(pairToCompareInfo);
+                    });
+                }
+            }
+
+            if (_.isFunction(doAfterLoad)) {
+                doAfterLoad(pairToCompareInfo);
+            }
+
+
+        });
+
+    }
+
 
     function mkLoadStateFun(apiCmdStr, stateKey, projection) {
         if (projection === undefined) {
@@ -170,14 +232,22 @@ function mkStateManager(config) {
     var loadJobs = mkLoadStateFun('jobs', 'jobs');
 
     return {
-        //loadJobs: loadJobs,
-        getApiUrl: function () {return apiUrl;},
-        loadJobsAndInformListeners: loadJobsAndInformListeners,
-        loadLogAndInformListeners: loadLogAndInformListeners,
-        isLogCheckPerformed: isLogCheckPerformed,
+        dispatch: dispatch,
+
+        addPairListener: addPairListener,
         addJobsListener: addJobsListener,
         addLogListener: addLogListener,
-        dispatch: dispatch,
+
+        loadJobsAndInformListeners: loadJobsAndInformListeners,
+        loadLogAndInformListeners: loadLogAndInformListeners,
+        loadPairAndInformListeners: loadPairAndInformListeners,
+
+        isLogCheckPerformed: isLogCheckPerformed,
+        isPairCheckPerformed: isPairCheckPerformed,
+
+        findCellEvaJobId: findCellEvaJobId,
+        getCellEvaJobId: getCellEvaJobId,
+
         periodicalCheck: periodicalCheck,
         getState: function () {return state;},
         handleError: handleError
