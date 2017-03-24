@@ -6,15 +6,24 @@ function mkCellZoomView(config, $container, dispatch) {
     var $tileContainers;
     var tileIndices;
 
+    var selectedWinner;
+    var selectedTiles;
+
+    var $zoomContainer;
+
+
     function render(history) {
 
 
         var clickWinners = history['clickWinners'];
-        tilesDir = "../"+ history['tiles']['dir'];
+        tilesDir =  history['tiles']['dir'];
         var tiles = history['tiles']['tiles'];
 
         $selectedContainer = mkContainer();
         $tileContainers = _.map(tiles, function () {return mkContainer();});
+
+        selectedWinner = null;
+        selectedTiles  = _.map(tiles, function () {return null;});
 
         if (tileIndices === undefined) {
             tileIndices = _.map(tiles, function () {return 0;});
@@ -33,19 +42,43 @@ function mkCellZoomView(config, $container, dispatch) {
             }
         });
 
+        $zoomContainer = $('<div>').text('zoom container');
+        var $zoomButton = $('<button>').html('Zoom!').addClass('hand').click(zoom);
+
         $container.html('');
         $container.append([
             $('<table>').html($('<tr>').append([
-                $('<td>').html($('<button>').html('Zoom! (todo)').addClass('hand')),
-                $('<td>').html($selectedContainer),
+                $('<td>').html($zoomContainer),
+                $('<td>').append([$selectedContainer,'<br>',$zoomButton]),
                 $('<td>').html($tiles)
             ])),
             $thumbnails
             //$('<pre>').text(JSON.stringify(history, null, 2))
         ]);
-
-
     }
+
+    function zoom() {
+
+        if (selectedWinner === null || !_.isEmpty(_.filter(selectedTiles, function (x) {return x === null;}))) {
+            return;
+        }
+
+        var action = {
+            cmd: 'job',
+            jobCmd: 'zoom',
+            plaza : selectedWinner,
+            tiles : selectedTiles
+        };
+
+        dispatch(action, updateZoom);
+    }
+
+    function updateZoom(zoomResultSrc) {
+        log(zoomResultSrc);
+        var $img = $('<img>').attr('src', '../'+zoomResultSrc);
+        $zoomContainer.html($img);
+    }
+
 
     function mkTiles(tiles) {
         var $tiles = $('<table>').addClass('tiles-tab');
@@ -68,16 +101,18 @@ function mkCellZoomView(config, $container, dispatch) {
     }
 
     function mkTile(tile, iPack, i) {
-        return $('<img>').addClass('thumbnail').addClass('hand').attr('src', tilesDir +"/"+ tile['src']).click(function () {
+        return $('<img>').addClass('thumbnail').addClass('hand').attr('src', "../"+tilesDir +"/"+ tile['src']).click(function () {
             selectTile(tile, iPack, i);
         });
     }
 
     function selectTile(tile, iPack, i) {
+        selectedTiles[iPack] = tilesDir +'/'+ tile['src'];
         tileIndices[iPack] = i;
-        var src = tilesDir +'/'+ tile['src'];
+        var src = "../"+ tilesDir +'/'+ tile['src'];
         var $img = $('<img>').attr('src',src).css("width", 100);
         $tileContainers[iPack].html($img);
+        zoom();
     }
 
 
@@ -101,9 +136,11 @@ function mkCellZoomView(config, $container, dispatch) {
 
 
     function select(clickWinner) {
+        selectedWinner = clickWinner['frame1px'];
         var src = '../' + clickWinner['frame'];
         var $img = $('<img>').attr('src',src);
         $selectedContainer.html($img);
+        zoom();
     }
 
     function mkThumbnail(clickWinner) {

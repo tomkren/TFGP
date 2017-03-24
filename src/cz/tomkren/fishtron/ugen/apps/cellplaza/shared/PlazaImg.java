@@ -1,6 +1,7 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza.shared;
 
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.CellPlaza;
+import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.CellWorld;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
 import org.json.JSONArray;
@@ -105,6 +106,44 @@ public class PlazaImg {
     public Color getColor(int x, int y) {
         return pixels[y][x];
     }
+
+    public PlazaImg zoom(JSONArray tilePaths) {
+
+        List<PlazaImg> tiles = F.map(tilePaths, tilePath -> new PlazaImg(new File((String)tilePath)));
+        if (tiles.isEmpty()) {throw new Error("There must be at lest one tile.");}
+        int numStates = tiles.size();
+
+        int wPlaza = getWidth();
+        int hPlaza = getHeight();
+
+        int wTile = tiles.get(0).getWidth();
+        int hTile = tiles.get(0).getHeight();
+
+        int wResult = wPlaza * wTile;
+        int hResult = hPlaza * hTile;
+
+
+        Color[][] resultPixels = new Color[hResult][wResult];
+
+        for (int y = 0; y < hPlaza; y++) {
+            for (int x = 0; x < wPlaza; x++) {
+                int state = CellWorld.colorToState(getColor(x, y), numStates);
+                PlazaImg tile = tiles.get(numStates - state - 1);
+                for (int yy = 0; yy < hTile; yy++) {
+                    for (int xx = 0; xx < wTile; xx++) {
+
+                        int xxx = x * wTile + xx;
+                        int yyy = y * hTile + yy;
+
+                        resultPixels[yyy][xxx] = tile.getColor(xx,yy);
+                    }
+                }
+            }
+        }
+
+        return new PlazaImg(resultPixels, F.arr(1), true);
+    }
+
 
     public int sumColor() {
         int sum = 0;

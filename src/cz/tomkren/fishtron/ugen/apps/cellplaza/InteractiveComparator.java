@@ -1,6 +1,8 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza;
 
+import cz.tomkren.fishtron.ugen.apps.cellplaza.shared.PlazaImg;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.CellOpts;
+import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.CellWorld;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.Libs;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.Rule;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
@@ -28,6 +30,7 @@ public class InteractiveComparator implements Api {
     private static final String CMD_OFFER_RESULT = "offerResult";
     private static final String CMD_HISTORY = "history";
     private static final String CMD_HISTORY_VERSION = "historyVersion";
+    private static final String CMD_ZOOM = "zoom";
 
 
 
@@ -161,9 +164,32 @@ public class InteractiveComparator implements Api {
             case CMD_OFFER_RESULT:        return api_offerResult(query);
             case CMD_HISTORY:             return Api.addOk(history.toJson());
             case CMD_HISTORY_VERSION:     return Api.ok("version",history.getVersion());
+            case CMD_ZOOM:                return api_zoom(query);
 
             default: return Api.error("Unsupported " + Api.JOB_CMD + ": " + jobCmd);
         }
+    }
+
+    private JSONObject api_zoom(JSONObject query) {
+
+        String plazaPath = query.optString("plaza");
+        JSONArray tilePaths  = query.optJSONArray("tiles");
+
+        String dir = runDirPath +"/zooms";
+
+        File plazaFile = new File(plazaPath);
+
+        PlazaImg plazaImg = new PlazaImg(plazaFile);
+
+        String newFilename = plazaFile.getName() +"_with_"+ String.join("_", F.map(tilePaths,x-> new File((String)x).getName() ))+".png";
+
+        PlazaImg zoomedImg = plazaImg.zoom(tilePaths);
+
+        zoomedImg.writeImage(dir, newFilename);
+
+
+
+        return Api.ok("result", dir +"/"+ newFilename);
     }
 
     private JSONObject api_getPairToCompare() {

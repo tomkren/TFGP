@@ -214,6 +214,14 @@ public class CellWorld {
         }
     }
 
+    public static int colorToState(Color color, int numStates) {
+        double a = (1.0 - numStates) / 255;
+        double b = numStates - 1.0;
+        return (int) Math.round(a * color.getRed() + b);
+    }
+
+
+
     private static boolean isGrayScale(Color color) {
         int r = color.getRed();
         int g = color.getGreen();

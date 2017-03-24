@@ -23,7 +23,7 @@ function mkStateManager(config) {
     }
     log(apiUrl);
 
-    function dispatch(action) {
+    function dispatch(action, haxCallback) {
         if (action.cmd === 'run') {
 
             sendApiAction(action).done(function (result) {
@@ -46,6 +46,7 @@ function mkStateManager(config) {
             loadLogAndInformListeners();
 
         } else if (action.cmd === 'job') {
+
             if (action.jobCmd === 'offerResult') {
 
                 action.jobId = state.cellEvaJobId;
@@ -55,6 +56,17 @@ function mkStateManager(config) {
                     log(response);
                     //App.getCellComparatorView().loadNewPair();
                     state.isPairNeeded = true;
+
+                }).error(handleError);
+
+            } else if (action.jobCmd === 'zoom') {
+
+                action.jobId = state.cellEvaJobId;
+                log(JSON.stringify(action));
+
+                sendApiAction(action).done(function (response) {
+                    log('todo: response to response: '+ JSON.stringify(response));
+                    haxCallback(response.result);
 
                 }).error(handleError);
 
