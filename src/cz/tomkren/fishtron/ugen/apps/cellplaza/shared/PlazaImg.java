@@ -141,7 +141,7 @@ public class PlazaImg {
             }
         }
 
-        return new PlazaImg(resultPixels, F.arr(1), true);
+        return new PlazaImg(resultPixels, F.arr(2), true);
     }
 
 

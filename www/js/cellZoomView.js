@@ -43,13 +43,13 @@ function mkCellZoomView(config, $container, dispatch) {
         });
 
         $zoomContainer = $('<div>').text('zoom container');
-        var $zoomButton = $('<button>').html('Zoom!').addClass('hand').click(zoom);
+        //var $zoomButton = $('<button>').html('Zoom!').addClass('hand').click(zoom);
 
         $container.html('');
         $container.append([
             $('<table>').html($('<tr>').append([
                 $('<td>').html($zoomContainer),
-                $('<td>').append([$selectedContainer,'<br>',$zoomButton]),
+                $('<td>').append([$selectedContainer,'<br>'/*,$zoomButton*/]),
                 $('<td>').html($tiles)
             ])),
             $thumbnails
