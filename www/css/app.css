@@ -79,3 +79,20 @@ pre {
 .comparatorAjaxHolder {
     height: 346px;
 }
+
+.fakePlaza {
+    border: 0;
+    padding:0;
+    margin:0;
+    border-collapse: collapse;
+}
+
+.fakePlaza td {
+    padding:0;
+    margin:0;
+}
+
+.fakePlaza img {
+    padding:0;
+    margin:0;
+}

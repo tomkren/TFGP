@@ -39,6 +39,10 @@
       "mini_100": {
         "numStates": 3,
         "pixelSizes": [5, 1]
+      },
+      "stred_50": {
+        "numStates": 3,
+        "pixelSizes": [2,1]
       }
     }
   }

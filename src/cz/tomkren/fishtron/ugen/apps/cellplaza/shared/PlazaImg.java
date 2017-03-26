@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 /**Created by tom on 12.03.2017.*/
 
@@ -106,6 +107,46 @@ public class PlazaImg {
     public Color getColor(int x, int y) {
         return pixels[y][x];
     }
+
+    public PlazaImg chessboardGradient(PlazaImg gradient, JSONArray pixelSizes, Random rand) {
+
+        int w = getWidth();
+        int h = getHeight();
+
+        if (w != gradient.getWidth() || h != gradient.getHeight()) {
+            throw new Error("Img sizes do not match.");
+        }
+
+        Color[][] newPixels = new Color[h][w];
+
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+
+                Color plazaColor = getColor(x,y);
+                Color gradientColor = gradient.getColor(x,y);
+
+                double p = Math.pow(colorToProbability(gradientColor, x, y),1);
+
+                if (rand.nextDouble() < p) {
+                    newPixels[y][x] = plazaColor;
+                } else {
+                    newPixels[y][x] = (x+y) % 2 == 0 ? Color.BLACK : Color.WHITE;
+                }
+
+            }
+        }
+
+        return new PlazaImg(newPixels, pixelSizes, true);
+    }
+
+    private static double colorToProbability(Color gradColor, int x, int y) {
+        /*if (!CellWorld.isGrayScale(gradColor)) {
+            throw new Error("GradImage not in gray scale: "+gradColor.toString()+" on pos [x="+x+", y="+y+"].");
+        }*/
+        double r = (gradColor.getRed() + gradColor.getGreen() + gradColor.getBlue()) / 3.0;
+        return (r < 6 ? 0: r) / 255.0;
+    }
+
 
     public PlazaImg zoom(JSONArray tilePaths) {
 

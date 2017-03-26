@@ -45,11 +45,18 @@ function mkCellZoomView(config, $container, dispatch) {
         $zoomContainer = $('<div>').text('zoom container');
         //var $zoomButton = $('<button>').html('Zoom!').addClass('hand').click(zoom);
 
+
+        var $fakePlaza = $('<div>').append([
+            //'<img src="img/fontany1px.png" style="display: block">',
+            $zoomContainer,
+            //'<img src="img/fontany1px.png" style="display: block">'
+        ]);
+
         $container.html('');
         $container.append([
             $('<table>').html($('<tr>').append([
-                $('<td>').html($zoomContainer),
-                $('<td>').append([$selectedContainer,'<br>'/*,$zoomButton*/]),
+                $('<td>').html($fakePlaza),
+                $('<td>').append($selectedContainer),
                 $('<td>').html($tiles)
             ])),
             $thumbnails
@@ -75,7 +82,7 @@ function mkCellZoomView(config, $container, dispatch) {
 
     function updateZoom(zoomResultSrc) {
         log(zoomResultSrc);
-        var $img = $('<img>').attr('src', '../'+zoomResultSrc);
+        var $img = $('<img>').attr('src', '../'+zoomResultSrc).css({display:"block"});
         $zoomContainer.html($img);
     }
 

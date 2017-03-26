@@ -222,7 +222,7 @@ public class CellWorld {
 
 
 
-    private static boolean isGrayScale(Color color) {
+    public static boolean isGrayScale(Color color) {
         int r = color.getRed();
         int g = color.getGreen();
         int b = color.getBlue();
