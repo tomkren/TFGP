@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>EvaServer</title>
+
+    <script src="vendor/lodash.js"></script>
+    <script src="vendor/jquery.min.js"></script>
+
+    <script src="js/utils.js"></script>
+    <script src="config.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/stateManager.js"></script>
+    <script src="js/jobsView.js"></script>
+    <script src="js/logView.js"></script>
+
+    <script src="js/cellComparatorView.js"></script>
+    <script src="js/cellZoomView.js"></script>
+
+    <link href='css/app.css' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,600,600italic,700,700italic,800,800italic&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+
+    <script>$(function () {App = mkApp(evaConfig);});</script>
+
+</head>
+<body>
+
+<img src="img/plachta.png" width="100%">
+
+<h1>Cellular Plaza</h1>
+
+<h2>Interaktivní evoluce návrhu dlažby</h2>
+
+<p>
+K návrhu rozvržení dlažby jsme použili interaktivní evoluční algoritmus.
+Obraz, představující rozložení barev jednotlivých dlažebních kostek,reprezentujeme jako celulární automat.
+Konkrétní celulární automat je definován svými pravidly, která určují, jak se vstupní obraz transformuje na obraz
+v následujícím kroku. Naše metoda operuje se dvěmi populacemi; makro návrhy (hlavní motiv náměstí) a mikro návrhy
+(dílčí opakující se podstruktury). Jedinci v obou těchto populacích jsou reprezentovány jako program kódující dvojici
+počátečního obrazu a konkrétního transformačního pravidla.
+</p>
+
+<p>
+Tato dvojice jednoznačně udává posloupnost obrazů. Uživateli jsou vždy prezentovány dvě takové posloupnosti.
+Uživatel kliknutím na jeden z obrazů v představené dvojici posloupností určí, který z jedinců bude vybrán jako rodič
+pro nově vznikající jedince. Jak evoluce pokračuje, vznikají čím dál rozmanitější návrhy.
+</p>
+
+<p>
+Finální návrh náměstí vzniká nahrazením pixelů makro návrhu za korespondující mikro návrhy. Jak evoluci, tak finální
+kombinaci makro a mikro návrhů může uživatel ovládat z jednoduchého webového rozhraní.
+</p>
+
+<p>
+V našem řešení představujeme námi navrženou dlažbu, je však případně možné náš systém nechat použít i občany
+a umožnit jim tak podílet se na výsledné podobě řešeného území.
+</p>
+
+
+
+<h2>Comparator <span id="cellComparatorViewLoader1" class="hidden"><img src="img/ajax.gif"></span></h2>
+<div id="cellComparatorView1"></div>
+
+<!--<h2>Comparator2 <span id="cellComparatorViewLoader2" class="hidden"><img src="img/ajax.gif"></span></h2>
+<div id="cellComparatorView2"></div>-->
+
+<h2>Plaza Zooming <span id="cellZoomViewLoader" class="hidden"><img src="img/ajax.gif"></span></h2>
+<div id="cellZoomView"></div>
+
+<hr>
+
+<h1>EvaServer</h1>
+
+<h2>Jobs <span id="jobsViewLoader"><img src="img/ajax.gif"></span></h2>
+<div id="jobsView"></div>
+
+<h2>JobLog <span id="logViewLoader" class="hidden"><img src="img/ajax.gif"></span></h2>
+<div id="logView"></div>
+
+
+
+</body>
+</html>

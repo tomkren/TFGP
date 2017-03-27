@@ -1,0 +1,98 @@
+html {
+    font-family: 'Open Sans', sans-serif;
+}
+
+input {
+    border: 1px solid #C9E6F2;
+}
+
+pre {
+    font-family: Consolas,monospace;
+    font-size: 9pt;
+}
+
+.hidden {
+    display: none;
+}
+
+.red {
+    color: red;
+}
+
+.hand {
+    cursor: pointer;
+}
+
+.link {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.blue-tab {
+    border: 1px solid #C9E6F2;
+    background-color: #F2F9FC;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.blue-tab td {
+    padding: 4px;
+}
+
+.job-starter {
+    padding-bottom: 4px;
+}
+
+.job-starter button {
+    margin: 4px;
+}
+
+.job-dropdown {
+    width: 160px;
+}
+
+.log-header {
+    position:relative;
+    top:-10px;
+}
+
+.thumbnail {
+    margin: 3px;
+}
+
+.tiles-tab {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.tiles-tab td {
+    border: 1px solid black;
+    padding: 4px;
+}
+
+.ajax2 {
+    position:relative;
+    top:5px;
+    margin-left: 10px;
+}
+
+.comparatorAjaxHolder {
+    height: 346px;
+}
+
+.fakePlaza {
+    border: 0;
+    padding:0;
+    margin:0;
+    border-collapse: collapse;
+}
+
+.fakePlaza td {
+    padding:0;
+    margin:0;
+}
+
+.fakePlaza img {
+    padding:0;
+    margin:0;
+}
