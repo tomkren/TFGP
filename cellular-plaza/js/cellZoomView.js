@@ -151,6 +151,9 @@ function mkCellZoomView(config, $container, dispatch) {
                 $thumbnails.append('<br>');
             }
         }
+
+        $thumbnails.prepend($('<h3>').text('Historie vybraných makro-semínek'));
+
         return $thumbnails;
     }
 
