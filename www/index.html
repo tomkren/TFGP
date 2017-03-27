@@ -25,7 +25,37 @@
 </head>
 <body>
 
-<h1>CellPlaza</h1>
+<img src="img/plachta.png" width="100%">
+
+<h1>Cellular Plaza</h1>
+
+<h2>Interaktivní evoluce návrhu dlažby</h2>
+
+<p>
+K návrhu rozvržení dlažby jsme použili interaktivní evoluční algoritmus.
+Obraz, představující rozložení barev jednotlivých dlažebních kostek,reprezentujeme jako celulární automat.
+Konkrétní celulární automat je definován svými pravidly, která určují, jak se vstupní obraz transformuje na obraz
+v následujícím kroku. Naše metoda operuje se dvěmi populacemi; makro návrhy (hlavní motiv náměstí) a mikro návrhy
+(dílčí opakující se podstruktury). Jedinci v obou těchto populacích jsou reprezentovány jako program kódující dvojici
+počátečního obrazu a konkrétního transformačního pravidla.
+</p>
+
+<p>
+Tato dvojice jednoznačně udává posloupnost obrazů. Uživateli jsou vždy prezentovány dvě takové posloupnosti.
+Uživatel kliknutím na jeden z obrazů v představené dvojici posloupností určí, který z jedinců bude vybrán jako rodič
+pro nově vznikající jedince. Jak evoluce pokračuje, vznikají čím dál rozmanitější návrhy.
+</p>
+
+<p>
+Finální návrh náměstí vzniká nahrazením pixelů makro návrhu za korespondující mikro návrhy. Jak evoluci, tak finální
+kombinaci makro a mikro návrhů může uživatel ovládat z jednoduchého webového rozhraní.
+</p>
+
+<p>
+V našem řešení představujeme námi navrženou dlažbu, je však případně možné náš systém nechat použít i občany
+a umožnit jim tak podílet se na výsledné podobě řešeného území.
+</p>
+
 
 
 <h2>Comparator <span id="cellComparatorViewLoader1" class="hidden"><img src="img/ajax.gif"></span></h2>
