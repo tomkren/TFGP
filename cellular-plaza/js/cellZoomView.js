@@ -96,7 +96,7 @@ function mkCellZoomView(config, $container, dispatch) {
     function updateZoom(zoomResultSrc) {
         log(zoomResultSrc);
         var $img = $('<img>').attr('src', '../'+zoomResultSrc).css({display:"block"});
-        $zoomContainer.html($img);
+        $zoomContainer.html('').append([$('<h3>').text('Finální kombinace vybraného makro-semínka a několika zvolených mikro-semínek:'), $img]);
     }
 
 
@@ -152,7 +152,7 @@ function mkCellZoomView(config, $container, dispatch) {
             }
         }
 
-        $thumbnails.prepend($('<h3>').text('Historie vybraných makro-semínek'));
+        $thumbnails.prepend($('<h3>').text('Historie vybraných makro-semínek:'));
 
         return $thumbnails;
     }
@@ -162,7 +162,7 @@ function mkCellZoomView(config, $container, dispatch) {
         selectedWinner = clickWinner['frame1px'];
         var src = '../' + clickWinner['frame'];
         var $img = $('<img>').attr('src',src).addClass('selectedMacro');
-        $selectedContainer.html('').append([$('<h3>').text('Poslední vybrané makro-semínko'), $img]);
+        $selectedContainer.html('').append([$('<h3>').text('Poslední vybrané makro-semínko:'), $img]);
         zoom();
     }
 
