@@ -65,7 +65,7 @@ function mkStateManager(config) {
                 log(JSON.stringify(action));
 
                 sendApiAction(action).done(function (response) {
-                    log('todo: response to response: '+ JSON.stringify(response));
+
                     haxCallback(response.result);
 
                 }).error(handleError);

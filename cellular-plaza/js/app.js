@@ -4,12 +4,12 @@ function mkApp(config) {
     var dispatch = stateMan.dispatch;
 
 
-    var jobsView = mkJobsView($('#jobsView'), dispatch);
-    stateMan.addJobsListener(jobsView.render);
+    //var jobsView = mkJobsView($('#jobsView'), dispatch);
+    //stateMan.addJobsListener(jobsView.render);
 
-    var logView = mkLogView($('#logView'), dispatch);
-    stateMan.addLogListener(logView.render);
-    logView.renderEmpty();
+    //var logView = mkLogView($('#logView'), dispatch);
+    //stateMan.addLogListener(logView.render);
+    //logView.renderEmpty();
 
 
     stateMan.addJobsListener(stateMan.findCellEvaJobId);
@@ -21,7 +21,7 @@ function mkApp(config) {
     stateMan.addHistoryListener(cellZoomView.render);
 
     stateMan.periodicalCheck(stateMan.loadJobsAndInformListeners,    $('#jobsViewLoader'),             config.jobsCheckingInterval);
-    stateMan.periodicalCheck(stateMan.loadLogAndInformListeners,     $('#logViewLoader'),              config.logCheckingInterval,     stateMan.isLogCheckPerformed);
+    //stateMan.periodicalCheck(stateMan.loadLogAndInformListeners,     $('#logViewLoader'),              config.logCheckingInterval,     stateMan.isLogCheckPerformed);
     stateMan.periodicalCheck(stateMan.loadPairAndInformListeners,    $('#cellComparatorViewLoader1'),  config.pairCheckingInterval,    stateMan.isPairCheckPerformed);
     stateMan.periodicalCheck(stateMan.loadHistoryAndInformListeners, $('#cellZoomViewLoader'),         config.historyCheckingInterval, stateMan.isHistoryCheckPerformed);
 
