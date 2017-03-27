@@ -46,13 +46,8 @@ function mkCellZoomView(config, $container, dispatch) {
                     //In the array!
                     defaultTiles[iPack] = null;
                     selectTile(pack[ind], iPack, ind);
-                    log('bondhere');
                 } else {
                     //Not in the array
-
-                    log('bond -- here');
-                    log(defaultTiles[iPack]);
-
                     ind = tileIndices[iPack];
                     selectTile(pack[ind], iPack, ind);
                 }
@@ -70,16 +65,16 @@ function mkCellZoomView(config, $container, dispatch) {
             //'<img src="img/fontany1px.png" style="display: block">'
         ]);
 
+        var $tilesTab = $('<table>').html($('<tr>').append([
+            $('<td>').append($selectedContainer),
+            $('<td>').html($tiles)
+        ]));
+
         $container.html('');
-        $container.append([
-            $('<table>').html($('<tr>').append([
-                $('<td>').html($fakePlaza),
-                $('<td>').append($selectedContainer),
-                $('<td>').html($tiles)
-            ])),
-            $thumbnails
-            //$('<pre>').text(JSON.stringify(history, null, 2))
-        ]);
+        $container.append(
+            $('<table>').append([$('<tr>').append([
+                $('<td>').append([$tilesTab, $fakePlaza]), $('<td>').css({'vertical-align': 'top', width:'600px'}).html($thumbnails)
+            ])]));
     }
 
     function zoom() {
@@ -110,7 +105,7 @@ function mkCellZoomView(config, $container, dispatch) {
         _.each(tiles, function (pack,i) {
             $tiles.append(mkTilesPack(pack,i));
         });
-        return $tiles;
+        return $('<div>').append([$('<h3>').text('Galerie mikro-semínek'), $tiles]);
     }
 
     function mkTilesPack(pack,iPack) {
@@ -150,7 +145,7 @@ function mkCellZoomView(config, $container, dispatch) {
         var $thumbnails = $('<div>');
         for (var i = 0; i < clickWinners.length; i++) {
             var $img = mkThumbnail(clickWinners[i]);
-            $thumbnails.append($img);
+            $thumbnails.prepend($img);
 
             if (i % config.numThumbnailsOneRow == config.numThumbnailsOneRow-1) {
                 $thumbnails.append('<br>');
@@ -163,8 +158,8 @@ function mkCellZoomView(config, $container, dispatch) {
     function select(clickWinner) {
         selectedWinner = clickWinner['frame1px'];
         var src = '../' + clickWinner['frame'];
-        var $img = $('<img>').attr('src',src);
-        $selectedContainer.html($img);
+        var $img = $('<img>').attr('src',src).addClass('selectedMacro');
+        $selectedContainer.html('').append([$('<h3>').text('Poslední vybrané makro-semínko'), $img]);
         zoom();
     }
 

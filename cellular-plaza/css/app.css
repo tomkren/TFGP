@@ -96,3 +96,7 @@ pre {
     padding:0;
     margin:0;
 }
+
+.selectedMacro {
+    width : 350px;
+}

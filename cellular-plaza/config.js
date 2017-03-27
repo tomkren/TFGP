@@ -6,7 +6,7 @@ var evaConfig = {
     pairCheckingInterval: 500,
     historyCheckingInterval: 500,
 
-    numThumbnailsOneRow: 28,
+    numThumbnailsOneRow: 10,
     numTilesOneRow: 32,
 
     autoSelectCurrentJob: false
