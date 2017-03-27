@@ -11,6 +11,8 @@ function mkCellZoomView(config, $container, dispatch) {
 
     var $zoomContainer;
 
+    var defaultTiles = ['state038.png', 'state004.png', 'state020.png'];
+
 
     function render(history) {
 
@@ -38,7 +40,23 @@ function mkCellZoomView(config, $container, dispatch) {
 
         _.each(tiles, function (pack,iPack) {
             if (!_.isEmpty(pack)) {
-                selectTile(pack[tileIndices[iPack]],iPack,tileIndices[iPack]);
+
+                var ind = _.map(pack, function (x) {return x.src;}).indexOf(defaultTiles[iPack]);
+                if (ind > -1) {
+                    //In the array!
+                    defaultTiles[iPack] = null;
+                    selectTile(pack[ind], iPack, ind);
+                    log('bondhere');
+                } else {
+                    //Not in the array
+
+                    log('bond -- here');
+                    log(defaultTiles[iPack]);
+
+                    ind = tileIndices[iPack];
+                    selectTile(pack[ind], iPack, ind);
+                }
+
             }
         });
 
