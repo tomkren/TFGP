@@ -113,7 +113,51 @@ public class MultiUtils {
             assignCrowdingDistances(front, isMaxis);
         }
 
-        return AB.mk(front == null ? null : findWorstIndiv(front), frontNumber);
+        return AB.mk(front == null ? null : findWorstIndiv(front), frontNumber-1);
+    }
+
+    public static <Indiv extends MultiIndiv> AB<Indiv,Integer> assignFrontsAndDistances_martin(Collection<Indiv> indivs, List<Boolean> isMaxis) {
+        checkFitnessSize(isMaxis);
+
+        ArrayList<Indiv> listIndivs = new ArrayList<>(indivs);
+
+        listIndivs.sort(new ObjectiveValueComparator2<>(isMaxis));
+
+        ArrayList<Indiv> notAssigned = listIndivs;
+
+        ArrayList<Indiv> front = new ArrayList<>();
+        ArrayList<Indiv> stillNotAssigned = new ArrayList<>();
+
+        int frontNumber = 1;
+        while (notAssigned.size() > 0) {
+
+            front.clear();
+
+            front.add(notAssigned.get(0));
+            Indiv lastNonDom = front.get(0);
+
+            for (int i = 1; i < notAssigned.size(); i++) {
+                Indiv check = notAssigned.get(i);
+                if (dominates(lastNonDom, check, isMaxis)) {
+                    stillNotAssigned.add(check);
+                } else {
+                    check.setFront(frontNumber);
+                    front.add(check);
+                    lastNonDom = check;
+
+                }
+            }
+
+            frontNumber++;
+            //assignCrowdingDistances(front, isMaxis);
+
+            notAssigned = stillNotAssigned;
+            stillNotAssigned = new ArrayList<>(); //.clear();
+        }
+
+        assignCrowdingDistances(front, isMaxis); // we need to assign crowding distance in the last front only
+
+        return AB.mk(findWorstIndiv(front), frontNumber-1);
     }
 
     private static <Indiv extends MultiIndiv> Indiv findWorstIndiv(List<Indiv> front) {
@@ -185,6 +229,33 @@ public class MultiUtils {
         }
     }
 
+
+    static class ObjectiveValueComparator2<Indiv extends MultiIndiv> implements Comparator<Indiv> {
+
+        private final List<Boolean> isMaxis;
+
+        ObjectiveValueComparator2(List<Boolean> isMaxis) {
+            this.isMaxis = isMaxis;
+        }
+
+        @Override
+        public int compare(Indiv o1, Indiv o2) {
+
+            for (int i = 0 ; i < isMaxis.size(); i++) {
+
+                double val1 = o1.getFitness(i);
+                double val2 = o2.getFitness(i);
+
+                int compareRes = Double.compare(val1, val2);
+
+                if (compareRes != 0) {
+                    return (isMaxis.get(i) ? -1 : 1) * compareRes;
+                }
+            }
+
+            return 0;
+        }
+    }
 
 
 

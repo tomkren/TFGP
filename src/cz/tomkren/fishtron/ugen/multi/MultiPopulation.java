@@ -41,12 +41,12 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
 
         // todo mělo by se kontrolovat ještě před evaluací!
 
-        Stopwatch sw = new Stopwatch();
+
 
         if (individuals.contains(indiv) || removedIndividuals.contains(indiv)) {
             numUniqueCheckFails ++;
 
-            Log.it("(check fail "+sw.restart() +")");
+            Log.it("(check fail)");
 
             return false;
         }
@@ -59,10 +59,22 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
 
 
         if (isMaxis.size() > 1) {
-            AB<Indiv,Integer> assignRes = MultiUtils.assignFrontsAndDistances(individuals, isMaxis);
+
+            Stopwatch sw = new Stopwatch();
+
+            /*AB<Indiv,Integer> assignRes_old = MultiUtils.assignFrontsAndDistances(individuals, isMaxis);
+            Log.it("(numFronts: "+ assignRes_old._2() +" & fronts-assigning took: "+ sw.restart()+")");*/
+
+            AB<Indiv,Integer> assignRes = MultiUtils.assignFrontsAndDistances_martin(individuals, isMaxis);
+            Log.it("(numFronts: "+ assignRes._2() +" & fronts-assigning took: "+ sw.restart()+")");
+
             worstIndividual = assignRes._1();
 
-            Log.it("(numFronts: "+ assignRes._2() +" & fronts-assigning took: "+ sw.restart()+")");
+            /*if (!Objects.equals(assignRes._2(), assignRes_old._2())) {
+                throw new Error("front numbers do not match");
+            }*/
+
+            //Log.it("(numFronts: "+ assignRes._2() +" & fronts-assigning took: "+ sw.restart()+")");
 
         } else {
             worstIndividual = findWorstIndividual_singleFitness();
