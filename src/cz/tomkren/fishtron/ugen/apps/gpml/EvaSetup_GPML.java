@@ -17,7 +17,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.List;
-import java.util.Random;
+
 
 /**Created by tom on 07.03.2017.*/
 
@@ -62,7 +62,7 @@ public class EvaSetup_GPML {
 
 
         if (dummyFitnessMode) {
-            evalManager = new DummyMultiEvalManager<>(lib);
+            evalManager = new DummyHistoryEvalManager<>(lib, "history_multiProblem.json");
         } else {
             evalManager = new DagMultiEvalManager<>(lib,"get_param_sets", "get_core_count", "submit", "get_evaluated", evalServerUrl, datasetFilename);
         }

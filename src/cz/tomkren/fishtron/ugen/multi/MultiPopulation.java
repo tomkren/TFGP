@@ -1,6 +1,10 @@
 package cz.tomkren.fishtron.ugen.multi;
 
 
+import cz.tomkren.utils.AB;
+import cz.tomkren.utils.Log;
+import cz.tomkren.utils.Stopwatch;
+
 import java.util.*;
 
 /** Created by tom on 07.03.2017. */
@@ -37,8 +41,13 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
 
         // todo mělo by se kontrolovat ještě před evaluací!
 
+        Stopwatch sw = new Stopwatch();
+
         if (individuals.contains(indiv) || removedIndividuals.contains(indiv)) {
             numUniqueCheckFails ++;
+
+            Log.it("(check fail "+sw.restart() +")");
+
             return false;
         }
 
@@ -50,7 +59,11 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
 
 
         if (isMaxis.size() > 1) {
-            worstIndividual = MultiUtils.assignFrontsAndDistances(individuals, isMaxis);
+            AB<Indiv,Integer> assignRes = MultiUtils.assignFrontsAndDistances(individuals, isMaxis);
+            worstIndividual = assignRes._1();
+
+            Log.it("(numFronts: "+ assignRes._2() +" & fronts-assigning took: "+ sw.restart()+")");
+
         } else {
             worstIndividual = findWorstIndividual_singleFitness();
         }

@@ -1,12 +1,14 @@
 {
 
+  "seed" : -952607556281434775,
+
   "serverUrl" : "http://127.0.0.1:8080",
   "dataset" : "winequality-white.csv",
   "killServer": true,
   "dummyFitness": true,
   "isMaxims": [true,false],
 
-  "timeLimit": 14400,
+  "timeLimit": 18000,
 
   "numEvaluations": 32768,
   "numIndividualsToGenerate": 256,

@@ -1,5 +1,7 @@
 package cz.tomkren.fishtron.ugen.multi;
 
+import cz.tomkren.utils.AB;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -93,7 +95,7 @@ public class MultiUtils {
 
 
 
-    public static <Indiv extends MultiIndiv> Indiv assignFrontsAndDistances(Collection<Indiv> indivs, List<Boolean> isMaxis) {
+    public static <Indiv extends MultiIndiv> AB<Indiv,Integer> assignFrontsAndDistances(Collection<Indiv> indivs, List<Boolean> isMaxis) {
         checkFitnessSize(isMaxis);
 
         List<Indiv> indivsToAssign = new ArrayList<>(indivs);
@@ -111,7 +113,7 @@ public class MultiUtils {
             assignCrowdingDistances(front, isMaxis);
         }
 
-        return front == null ? null : findWorstIndiv(front);
+        return AB.mk(front == null ? null : findWorstIndiv(front), frontNumber);
     }
 
     private static <Indiv extends MultiIndiv> Indiv findWorstIndiv(List<Indiv> front) {

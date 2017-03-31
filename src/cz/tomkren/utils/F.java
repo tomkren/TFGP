@@ -477,6 +477,19 @@ public class F {
         return new JSONObject(jsonStr);
     }
 
+    public static JSONArray loadJsonArray(String jsonPath) {
+        try {
+            return tryLoadJsonArray(jsonPath);
+        } catch (IOException e) {
+            throw new Error(e);
+        }
+    }
+
+    public static JSONArray tryLoadJsonArray(String jsonPath) throws IOException {
+        String jsonStr = Files.toString(new File(jsonPath), Charsets.UTF_8);
+        return new JSONArray(jsonStr);
+    }
+
 
     public static void writeJsonAsJsFile(String filename, String mkFunName, JSONObject json) {
         writeFile(filename,
