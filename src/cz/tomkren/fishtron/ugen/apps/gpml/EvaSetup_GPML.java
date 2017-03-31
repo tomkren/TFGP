@@ -62,7 +62,7 @@ public class EvaSetup_GPML {
 
 
         if (dummyFitnessMode) {
-            evalManager = new DummyHistoryEvalManager<>(lib, "history_multiProblem.json");
+            evalManager = new DummyHistoryEvalManager<>(lib, "configs/multi_gpml/history_multiProblem.json");
         } else {
             evalManager = new DagMultiEvalManager<>(lib,"get_param_sets", "get_core_count", "submit", "get_evaluated", evalServerUrl, datasetFilename);
         }
