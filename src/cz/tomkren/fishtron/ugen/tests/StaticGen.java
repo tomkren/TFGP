@@ -32,12 +32,6 @@ public class StaticGen {
         return F.map(ts1_results, r -> r.toTsRes(t));
     }
 
-    private static List<SubsRes> subs_1(Gamma gamma, Type t, int n) {
-        List<PreTs1Res> ts1_results_unmoved = Gen.ts1_static(gamma, t, n);
-        List<PreSubsRes> subs_results_unmoved_unpacked = F.map(ts1_results_unmoved, PreTs1Res::toPreSubsRes);
-        return Gen.pack(t, n, subs_results_unmoved_unpacked);
-    }
-
     private static List<TsRes> ts_ij(Gamma gamma, int i, int j, Type t, int n) {
         List<TsRes> ret = new ArrayList<>();
         AB<TypeVar,Integer> res_alpha = Gen.newVar(t, n);
@@ -47,12 +41,37 @@ public class StaticGen {
         for (TsRes res_F : ts(gamma, i, t_F, n1)) {
             Type t_X = res_F.getSigma().apply(alpha);
             for (TsRes res_X : ts(gamma, j, t_X, res_F.getNextVarId())) {
-                Sub sigma_FX = Sub.dot(res_X.getSigma(), res_F.getSigma()).restrict(t);
-                AppTree tree_FX = AppTree.mk(res_F.getTree(), res_X.getTree(), sigma_FX.apply(t));
+                Sub sigma_X = res_X.getSigma();
+                Sub sigma_FX = Sub.dot(sigma_X, res_F.getSigma()).restrict(t);
+
+                AppTree tree_F = res_F.getTree().applySub_new(sigma_X);
+
+                AppTree tree_FX = AppTree.mk(tree_F, res_X.getTree(), sigma_FX.apply(t));
                 ret.add(new TsRes(tree_FX, sigma_FX, res_X.getNextVarId()));
             }
         }
         return ret;
+    }
+
+    public static List<TsRes> ts(Gamma gamma, int k, Type t, int n) {
+        if (k < 1) {throw new Error("k must be > 0, it is "+k);}
+
+        if (k == 1) {
+            return ts_1(gamma, t, n);
+        } else {
+            List<TsRes> ret_unmoved = new ArrayList<>();
+            for (int i = 1; i < k; i++) {
+                ret_unmoved.addAll(ts_ij(gamma, i, k-i, t, n));
+            }
+            return Mover.moveTsResults(t,n,ret_unmoved);
+        }
+    }
+
+
+    private static List<SubsRes> subs_1(Gamma gamma, Type t, int n) {
+        List<PreTs1Res> ts1_results_unmoved = Gen.ts1_static(gamma, t, n);
+        List<PreSubsRes> subs_results_unmoved_unpacked = F.map(ts1_results_unmoved, PreTs1Res::toPreSubsRes);
+        return Gen.pack(t, n, subs_results_unmoved_unpacked);
     }
 
     private static List<PreSubsRes> subs_ij(Gamma gamma, int i, int j, Type t, int n) {
@@ -75,21 +94,6 @@ public class StaticGen {
         }
         //zde neni potřeba packovat, packovat stačí subs
         return ret; //pack(ret);
-    }
-
-
-    public static List<TsRes> ts(Gamma gamma, int k, Type t, int n) {
-        if (k < 1) {throw new Error("k must be > 0, it is "+k);}
-
-        if (k == 1) {
-            return ts_1(gamma, t, n);
-        } else {
-            List<TsRes> ret_unmoved = new ArrayList<>();
-            for (int i = 1; i < k; i++) {
-                ret_unmoved.addAll(ts_ij(gamma, i, k-i, t, n));
-            }
-            return Mover.moveTsResults(t,n,ret_unmoved);
-        }
     }
 
     static List<SubsRes> subs(Gamma gamma, int k, Type t, int n) {

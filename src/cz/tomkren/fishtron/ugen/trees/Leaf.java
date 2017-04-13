@@ -122,6 +122,11 @@ public class Leaf implements AppTree {
     }
 
     @Override
+    public AppTree applySub_new(Sub sub) {
+        return new Leaf(sym, sub.apply(type), originalType, debugInfo, params);
+    }
+
+    @Override
     public void applyTypeTransform(Function<Type, Type> tt) {
         type = tt.apply(type);
     }

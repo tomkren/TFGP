@@ -237,6 +237,14 @@ public class App implements AppTree {
     }
 
     @Override
+    public AppTree applySub_new(Sub sub) {
+        Type newType = sub.apply(type);
+        AppTree newFunTree = funTree.applySub_new(sub);
+        AppTree newArgTree = argTree.applySub_new(sub);
+        return new App(newFunTree, newArgTree, newType, originalType, debugInfo);
+    }
+
+    @Override
     public void applyTypeTransform(Function<Type, Type> tt) {
         type = tt.apply(type);
         funTree.applyTypeTransform(tt);

@@ -8,6 +8,7 @@ import cz.tomkren.fishtron.ugen.data.PreTs1Res;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
 import cz.tomkren.fishtron.ugen.data.Ts1Res;
 import cz.tomkren.fishtron.ugen.data.TsRes;
+import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
 
@@ -45,6 +46,29 @@ public class Mover {
         return AB.mk(movedSub, nextVarId);
     }
 
+
+    // TODO refactorovoat prekrejvajici se kod tech dovou do jedny
+    private AB<AB<Sub,Integer>,AppTree> moveSubAndTree(Sub sub, AppTree appTree) {
+        TreeSet<Integer> codomainVarIds = sub.getCodomainVarIds();
+
+        Sub deltaSub = new Sub();
+        int nextVarId = tnvi_n;
+
+        for (Integer varId : codomainVarIds) {
+            if (varId >= tnvi_0) {
+                deltaSub.add(varId, new TypeVar(nextVarId));
+                nextVarId ++;
+            }
+        }
+
+        AppTree movedTree = appTree.applySub_new(deltaSub);
+
+        Sub movedSub = Sub.dot(deltaSub, sub).restrict(t);
+        return AB.mk(AB.mk(movedSub, nextVarId), movedTree);
+    }
+
+
+
     private boolean isMoveNeeded() {
         if (tnvi_n < tnvi_0) {throw new Error("Assert failed: tnvi_n < tnvi_0.");}
         return tnvi_n > tnvi_0;
@@ -54,7 +78,10 @@ public class Mover {
     private Ts1Res moveTs1Res(Ts1Res res)             {return new Ts1Res(res.getSym(), moveSub(res.getSigma()));}
     private SubsRes movePreSubsRes(PreSubsRes preRes) {return new SubsRes(preRes.getNum(), moveSub(preRes.getSigma()));}
     private SubsRes moveSubsRes(SubsRes res)          {return new SubsRes(res.getNum(), moveSub(res.getSigma()));}
-    private TsRes moveTsRes(TsRes res)                {return new TsRes(res.getTree(), moveSub(res.getSigma()));}
+    private TsRes moveTsRes(TsRes res) {
+        AB<AB<Sub,Integer>,AppTree> mr = moveSubAndTree(res.getSigma(), res.getTree());
+        return new TsRes(mr._2(), mr._1());
+    }
 
 
     public static List<Ts1Res> movePreTs1Results(Type t, int n, List<PreTs1Res> ts1results_unmoved) {

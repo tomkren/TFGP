@@ -63,7 +63,9 @@ public class TypeParser {
             stack.add( varId==-1 ? new TypeSym(part) : new TypeVar(varId) );
         }
 
-        return merge(stack);
+        Type ret = merge(stack);
+        if (!stack.isEmpty()) {return null;}
+        return ret;
     }
 
     private static Type merge(Stack<Type> stack) {

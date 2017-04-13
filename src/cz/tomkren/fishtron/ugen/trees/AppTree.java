@@ -42,6 +42,10 @@ public interface AppTree {
     int size();
     void deskolemize(Set<Integer> ids);
     void applySub(Sub sub);
+
+    AppTree applySub_new(Sub sub);
+
+
     void applyTypeTransform(Function<Type,Type> tt);
     String toRawString();
     String toShortString();

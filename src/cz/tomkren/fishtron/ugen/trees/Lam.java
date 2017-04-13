@@ -96,6 +96,14 @@ public class Lam implements AppTree {
     }
 
     @Override
+    public AppTree applySub_new(Sub sub) {
+        Type newType = sub.apply(type);
+        AppTree newBodyTree = bodyTree.applySub_new(sub);
+        return new Lam(varName, newBodyTree, newType, originalType, debugInfo);
+        // TODO pořádně se zamyslet že fakt ok
+    }
+
+    @Override
     public void applyTypeTransform(Function<Type, Type> tt) {
         type = tt.apply(type);
         bodyTree.applyTypeTransform(tt);
