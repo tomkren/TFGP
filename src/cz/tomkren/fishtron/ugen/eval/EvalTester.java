@@ -46,6 +46,10 @@ public class EvalTester {
         ch.results();
     }
 
+    public static void testLib(Checker ch, int k_max, EvalLib lib, Gamma gamma, Type goal) {
+        testLib(ch, k_max, lib, gamma, goal, true, x->x, null);
+    }
+
     private static void testLib(Checker ch, int k_max, EvalLib lib, Gamma gamma, String goalStr, boolean testEvaluation) {
         testLib(ch, k_max, lib, gamma, Types.parse(goalStr), testEvaluation, x->x, null);
     }

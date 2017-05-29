@@ -29,7 +29,7 @@ public class Test implements EvaJob {
 
         for (int i = 1; i <= howMany; i++) {
             long n = rand.nextLong();
-            String log = "("+i+") "+n+" = " + String.join(" * ", F.map(packFactors(factorize(n)), p -> p._1()+(p._2()==1?"":"^"+p._2())));
+            String log = "("+i+") "+n+" = " + String.join(" * ", F.map(packFactors(F.factorize(n)), p -> p._1()+(p._2()==1?"":"^"+p._2())));
             jobProcess.log(log);
             setLastLog(log);
         }
@@ -52,20 +52,6 @@ public class Test implements EvaJob {
         }
     }
 
-    private static List<Long> factorize(long n) {
-        List<Long> ret = new ArrayList<>();
-        if (n <  0) {ret.add(-1L); n *= -1;}
-        if (n == 0) {ret.add(0L); return ret;}
-        if (n == 1) {ret.add(1L);}
-        long smallestDivisor = 1;
-        while (smallestDivisor != n) {
-            n /= smallestDivisor;
-            smallestDivisor = getSmallestDivisor(n);
-            ret.add(smallestDivisor);
-        }
-        return ret;
-    }
-
     private static List<AA<Long>> packFactors(List<Long> fs) {
         List<AA<Long>> ret = new ArrayList<>();
         long last = -2;
@@ -85,13 +71,7 @@ public class Test implements EvaJob {
         return ret;
     }
 
-    private static long getSmallestDivisor(long n) {
-        long dMax = (long) Math.sqrt(n); // should be ok for big n, but who cares this is just for fun ...
-        for (long d = 2; d <= dMax; d++) {
-            if (n % d == 0) {return d;}
-        }
-        return n;
-    }
+
 
 
     private synchronized String getLastLog() {return lastLog;}

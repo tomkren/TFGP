@@ -695,6 +695,50 @@ public class F {
         }
     }
 
+    public static List<Integer> factorizeInt(int n) {
+        List<Integer> ret = new ArrayList<>();
+        if (n <  0) {ret.add(-1); n *= -1;}
+        if (n == 0) {ret.add(0); return ret;}
+        if (n == 1) {ret.add(1);}
+        int smallestDivisor = 1;
+        while (smallestDivisor != n) {
+            n /= smallestDivisor;
+            smallestDivisor = getSmallestDivisorInt(n);
+            ret.add(smallestDivisor);
+        }
+        return ret;
+    }
+
+    private static int getSmallestDivisorInt(int n) {
+        long dMax = (int) Math.sqrt(n); // should be ok for big n, but who cares this is just for fun ...
+        for (int d = 2; d <= dMax; d++) {
+            if (n % d == 0) {return d;}
+        }
+        return n;
+    }
+
+    public static List<Long> factorize(long n) {
+        List<Long> ret = new ArrayList<>();
+        if (n <  0) {ret.add(-1L); n *= -1;}
+        if (n == 0) {ret.add(0L); return ret;}
+        if (n == 1) {ret.add(1L);}
+        long smallestDivisor = 1;
+        while (smallestDivisor != n) {
+            n /= smallestDivisor;
+            smallestDivisor = getSmallestDivisor(n);
+            ret.add(smallestDivisor);
+        }
+        return ret;
+    }
+
+    private static long getSmallestDivisor(long n) {
+        long dMax = (long) Math.sqrt(n); // should be ok for big n, but who cares this is just for fun ...
+        for (long d = 2; d <= dMax; d++) {
+            if (n % d == 0) {return d;}
+        }
+        return n;
+    }
+
 
     public static void main(String[] args) {
 
