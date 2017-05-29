@@ -203,7 +203,7 @@ class Renaming {
 
     private static void test_1() {
 
-        testTab(0,0,  4,1,  2,2,  0,3,  6,4);
+        testTab(4,1,  2,2,  0,3,  6,4);
         testTab(0,0,  5,1,  4,2,  1,3,  3,4);
 
     }
