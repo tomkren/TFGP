@@ -3,7 +3,6 @@ package cz.tomkren.fishtron.ugen.apps.cellplaza.v3;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.TypeSym;
 import cz.tomkren.fishtron.types.TypeTerm;
-import cz.tomkren.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.eval.*;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
@@ -11,10 +10,8 @@ import cz.tomkren.fishtron.ugen.trees.Leaf;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.F;
-import cz.tomkren.utils.Log;
 
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
