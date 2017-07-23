@@ -50,9 +50,17 @@ class TypeData {
     }
 
 
-    // TODO přidat i ts1Data
     JSONObject toJson() {
-        return F.jsonMap(sizeDataMap, SizeData::toJson);
+
+        Object ts1Data_json = JSONObject.NULL;
+        if (ts1Data != null) {
+            ts1Data_json = F.jsonMap(ts1Data, EncodedTs1Res::toJson);
+        }
+
+        return F.obj(
+                "sizeData", F.jsonMap(sizeDataMap, SizeData::toJson),
+                "ts1Data",  ts1Data_json
+        );
     }
 
 

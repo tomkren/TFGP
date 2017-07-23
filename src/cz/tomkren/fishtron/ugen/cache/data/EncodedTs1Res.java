@@ -1,6 +1,7 @@
 package cz.tomkren.fishtron.ugen.cache.data;
 
-import cz.tomkren.fishtron.types.Sub;
+import cz.tomkren.utils.F;
+import org.json.JSONArray;
 
 /**Created by tom on 5. 2. 2017.*/
 
@@ -18,4 +19,8 @@ public class EncodedTs1Res {
     public String getSym() {return s;}
     public int getSub_id() {return sub_id;}
     public int getNextVarId() {return nextVarId;}
+
+    public JSONArray toJson() {
+        return F.arr(s, sub_id, nextVarId);
+    }
 }

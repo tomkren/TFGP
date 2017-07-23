@@ -57,7 +57,7 @@ class SizeData {
         if (subsData == null) {
             return JSONObject.NULL;
         } else {
-            return F.jsonMap(subsData, p -> F.arr(p.getNum().toString(),p.getSub_id()));
+            return F.jsonMap(subsData, EncodedSubsRes::toJson);
         }
     }
 
