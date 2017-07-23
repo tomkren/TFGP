@@ -23,4 +23,9 @@ public class EncodedTs1Res {
     public JSONArray toJson() {
         return F.arr(s, sub_id, nextVarId);
     }
+
+    public static EncodedTs1Res fromJson(Object data) {
+        JSONArray d = (JSONArray) data;
+        return new EncodedTs1Res(d.getString(0), d.getInt(1), d.getInt(2));
+    }
 }

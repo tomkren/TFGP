@@ -7,6 +7,7 @@ import cz.tomkren.fishtron.ugen.cache.data.EncodedSubsRes;
 import cz.tomkren.fishtron.ugen.data.PreSubsRes;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
 import cz.tomkren.utils.F;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.math.BigInteger;
@@ -20,6 +21,10 @@ class SizeData {
 
     SizeData() {
         subsData = null;
+    }
+
+    private SizeData(List<EncodedSubsRes> subsData) {
+        this.subsData = subsData;
     }
 
     private void ensureSubsDataIsComputed(Gen gen, Cache cache, int k, Type t) {
@@ -52,12 +57,19 @@ class SizeData {
     }
 
 
-
     Object toJson() {
         if (subsData == null) {
             return JSONObject.NULL;
         } else {
             return F.jsonMap(subsData, EncodedSubsRes::toJson);
+        }
+    }
+
+    static SizeData fromJson(Object data) {
+        if (data == JSONObject.NULL) {
+            return new SizeData();
+        } else {
+            return new SizeData(F.map((JSONArray) data, EncodedSubsRes::fromJson));
         }
     }
 

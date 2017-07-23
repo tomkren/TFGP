@@ -160,9 +160,25 @@ public class F {
 
     public static <B> List<B> map(JSONArray jsonArr, Function<Object,B> f) {
         int n = jsonArr.length();
-        List<B> ret = new ArrayList<B>(n);
+        List<B> ret = new ArrayList<>(n);
         for (int i = 0; i < n; i++) {
             ret.add(f.apply(jsonArr.get(i)));
+        }
+        return ret;
+    }
+
+    public static <K,V> Map<K,V> map(JSONObject jsonObj, Function<String,K> keyMapper, Function<Object,V> valMapper) {
+        Map<K,V> ret = new HashMap<>(jsonObj.length());
+        for (String key: jsonObj.keySet()) {
+            ret.put(keyMapper.apply(key), valMapper.apply(jsonObj.get(key)));
+        }
+        return ret;
+    }
+
+    public static <B> Map<String,B> map(JSONObject jsonObj, Function<Object,B> f) {
+        Map<String,B> ret = new HashMap<>(jsonObj.length());
+        for (String key: jsonObj.keySet()) {
+            ret.put(key, f.apply(jsonObj.get(key)));
         }
         return ret;
     }

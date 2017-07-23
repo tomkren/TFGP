@@ -8,6 +8,7 @@ import cz.tomkren.fishtron.ugen.cache.data.EncodedTs1Res;
 import cz.tomkren.fishtron.ugen.data.PreTs1Res;
 import cz.tomkren.fishtron.ugen.data.Ts1Res;
 import cz.tomkren.utils.F;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -22,8 +23,12 @@ class TypeData {
     private List<EncodedTs1Res> ts1Data;
 
     TypeData() {
-        sizeDataMap = new HashMap<>();
-        ts1Data = null;
+        this(new HashMap<>(), null);
+    }
+
+    private TypeData(Map<Integer,SizeData> sizeDataMap, List<EncodedTs1Res> ts1Data) {
+        this.sizeDataMap = sizeDataMap;
+        this.ts1Data = ts1Data;
     }
 
     List<Ts1Res> ts1(Type t, Gen gen, Cache cache) {
@@ -50,6 +55,10 @@ class TypeData {
     }
 
 
+    private static final String SIZE_DATA_KEY = "sizeData";
+    private static final String TS1_DATA_KEY  = "ts1Data";
+
+
     JSONObject toJson() {
 
         Object ts1Data_json = JSONObject.NULL;
@@ -58,9 +67,24 @@ class TypeData {
         }
 
         return F.obj(
-                "sizeData", F.jsonMap(sizeDataMap, SizeData::toJson),
-                "ts1Data",  ts1Data_json
+                SIZE_DATA_KEY, F.jsonMap(sizeDataMap, SizeData::toJson),
+                TS1_DATA_KEY,  ts1Data_json
         );
+    }
+
+    public static TypeData fromJson(Object data) {
+        JSONObject d = (JSONObject) data;
+
+        Object ts1data_json = d.get(TS1_DATA_KEY);
+        List<EncodedTs1Res> newTs1Data = null;
+        if (ts1data_json != JSONObject.NULL) {
+            newTs1Data = F.map((JSONArray) ts1data_json, EncodedTs1Res::fromJson);
+        }
+
+        JSONObject sizeData_json = d.getJSONObject(SIZE_DATA_KEY);
+        Map<Integer,SizeData> newSizeData = F.map(sizeData_json, Integer::parseInt, SizeData::fromJson);
+
+        return new TypeData(newSizeData, newTs1Data);
     }
 
 

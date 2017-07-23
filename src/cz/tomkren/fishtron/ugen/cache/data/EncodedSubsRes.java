@@ -25,4 +25,9 @@ public class EncodedSubsRes {
     public JSONArray toJson() {
         return F.arr(num.toString(), sub_id, nextVarId);
     }
+
+    public static EncodedSubsRes fromJson(Object data) {
+        JSONArray d = (JSONArray) data;
+        return new EncodedSubsRes(new BigInteger(d.getString(0)), d.getInt(1), d.getInt(2));
+    }
 }

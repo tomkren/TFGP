@@ -46,6 +46,7 @@ public class Sub implements Function<Type,Type> {
         failMsg = subToCopy.failMsg;
     }
 
+
     public boolean isFail() {return failMsg != null;}
     public String getFailMsg() {return failMsg;}
     private void setFail(String error) {failMsg = error;}
@@ -355,6 +356,7 @@ public class Sub implements Function<Type,Type> {
         throw new Error("occurCheck : should be unreachable");
     }
 
+    private static final Character VAR_PREFIX = 'x';
 
     public JSONObject toJson() {
         if (isFail()) {return null;}
@@ -364,11 +366,29 @@ public class Sub implements Function<Type,Type> {
             int id = entry.getKey();
             Type type = entry.getValue();
 
-            ret.put("x"+id, type.toString());
+            ret.put(VAR_PREFIX.toString() + id, type.toString());
         }
 
         return ret;
     }
+
+    public Sub(JSONObject json) {
+        table = new TreeMap<>();
+        failMsg = null;
+
+        for (String key : json.keySet()) {
+
+            if (key.charAt(0) != VAR_PREFIX) {
+                throw new Error("Unsupported type var encoding, only variables starting with .");
+            }
+
+            int varId = Integer.parseInt(key.substring(1));
+            Type type = Types.parse(json.getString(key));
+
+            table.put(varId, type);
+        }
+    }
+
 
     @Override
     public String toString() {

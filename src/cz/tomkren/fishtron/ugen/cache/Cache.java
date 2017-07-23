@@ -9,6 +9,7 @@ import cz.tomkren.fishtron.ugen.Mover;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
 import cz.tomkren.fishtron.ugen.data.Ts1Res;
 import cz.tomkren.utils.F;
+import cz.tomkren.utils.TODO;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -26,10 +27,14 @@ public class Cache {
     private Map<String, Integer> sub2id;
 
     public Cache(Gen gen) {
+        this(gen, new HashMap<>(), new ArrayList<>(), new HashMap<>());
+    }
+
+    private Cache(Gen gen, Map<String, TypeData> typeDataMap, List<SubData> subsList, Map<String, Integer> sub2id) {
         this.gen = gen;
-        typeDataMap = new HashMap<>();
-        subsList = new ArrayList<>();
-        sub2id = new HashMap<>();
+        this.typeDataMap = typeDataMap;
+        this.subsList = subsList;
+        this.sub2id = sub2id;
     }
 
     // -- main public interface ----------------------------------------------------------------------
@@ -105,28 +110,44 @@ public class Cache {
 
     // -- toJson method and its utils ---------------------------------------------------------------
 
+    private static final String TYPES_KEY = "types";
+    private static final String SUBS_KEY = "subs";
+
+
     public JSONObject toJson() {
         return F.obj(
-                "types", typesToJson(typeDataMap),
-                "subs",  subsToJson(subsList)
+                TYPES_KEY, F.jsonMap(typeDataMap, TypeData::toJson),
+                SUBS_KEY,  F.jsonMap(subsList, SubData::toJson)
         );
     }
 
-    private static JSONObject typesToJson(Map<String,TypeData> typeDataMap) {
-        return F.jsonMap(typeDataMap, TypeData::toJson);
+    public static Cache fromJson(Gen gen, JSONObject data) {
+        JSONObject types_json = data.getJSONObject(TYPES_KEY);
+        JSONArray subs_json = data.getJSONArray(SUBS_KEY);
+
+        Map<String, TypeData> newTypeDataMap = F.map(types_json, TypeData::fromJson);
+        List<SubData> newSubsList = F.map(subs_json, SubData::fromJson);
+
+        Map<String, Integer> newSub2id = new HashMap<>();
+
+        int sub_id = 0;
+        for (SubData subInfo : newSubsList) {
+            Sub sub = subInfo.getSub();
+            String sub_str = sub.toString();
+            newSub2id.put(sub_str, sub_id);
+            sub_id ++;
+        }
+
+        return new Cache(gen, newTypeDataMap, newSubsList, newSub2id);
     }
 
-    private static JSONArray subsToJson(List<SubData> subsList) {
-        return F.jsonMap(subsList, SubData::toJson);
-    }
-
-    private static JSONObject subsToJson_debugVersion(List<Sub> subsList) {
+    /*private static JSONObject subsToJson_debugVersion(List<Sub> subsList) {
         JSONObject ret = new JSONObject();
         for (int i = 0; i < subsList.size(); i++) {
             ret.put(Integer.toString(i), subsList.get(i).toJson());
         }
         return ret;
-    }
+    }*/
 
 
 }
