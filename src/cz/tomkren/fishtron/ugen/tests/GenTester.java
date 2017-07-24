@@ -1,10 +1,21 @@
 package cz.tomkren.fishtron.ugen.tests;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Longs;
+
+import cz.tomkren.fishtron.eva.IndivGenerator;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.types.TypeTerm;
 import cz.tomkren.fishtron.types.Types;
+import cz.tomkren.fishtron.ugen.apps.gpml.DummyHistoryEvalManager;
+import cz.tomkren.fishtron.ugen.apps.gpml.XmlRpcServer_MultiEvalManager;
+import cz.tomkren.fishtron.ugen.apps.workflows.Workflows;
+import cz.tomkren.fishtron.ugen.eval.EvalLib;
+import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
+import cz.tomkren.fishtron.ugen.multi.Configs;
+import cz.tomkren.fishtron.ugen.multi.operators.AppTreeMIGenerator;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
@@ -13,17 +24,19 @@ import cz.tomkren.fishtron.ugen.data.TsRes;
 import cz.tomkren.fishtron.ugen.nf.NF;
 import cz.tomkren.utils.*;
 
+import java.io.File;
 import java.math.BigInteger;
 import java.util.*;
 
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
+import org.json.JSONObject;
 
 /** Created by Tomáš Křen on 5.2.2017. */
 
 public class GenTester {
 
     public static void main(String[] args) {
-        test_ts(6);
+        //test_ts(6);
 
         /*Type correct = Types.parse("(Dag a b) -> ((Dag c d) -> (Dag (P a c) (P b d)))");
         Type bugged  = Types.parse("(Dag a b) -> ((Dag c d) -> (Dag (P a c) (P b d))");
@@ -31,9 +44,17 @@ public class GenTester {
         Log.it(correct);
         Log.it(bugged);*/
 
-        //test_1(); // <-- normally this test
         //bugIsolator_ProblemWithSystematicBalls();
         //bugIsolator_skolemizationNumTest();
+
+
+        for (int i = 0; i<100; i++) {
+            Log.it("start run i="+i);
+            test_GPML_generating();
+            Log.it("end run i="+i+"\n\n\n====================================================\n\n\n");
+        }
+
+        //test_1(6, 10000); // <-- normally this test
     }
 
     private static final Gamma g_testGamma = Gamma.mk(
@@ -110,7 +131,56 @@ public class GenTester {
         ch.results();
     }
 
-    private static void test_1() {
+    private static void test_GPML_generating() {
+        try {
+            Checker checker = new Checker();
+
+            String jsonConfigFilename = "configs/multi_gpml/config.json";
+            String configStr = Files.toString(new File(jsonConfigFilename), Charsets.UTF_8);
+            Log.itln(jsonConfigFilename + " = " + configStr);
+            JSONObject config = new JSONObject(configStr);
+
+
+            JSONObject methods = config.getJSONObject("methods");
+            AB<EvalLib,Gamma> libAndGamma = Workflows.mkLibAndGamma(methods);
+            EvalLib lib = libAndGamma._1();
+            Gamma gamma = libAndGamma._2();
+            Log.it("Gamma = \n"+gamma);
+
+            Gen gen;
+            if (true) {
+                JSONObject genDump = F.loadJson("test_outputs/gen_cache_GPML_incremental.json");
+                gen = Gen.fromJson(genDump, checker);
+            } else {
+                gen = new Gen(gamma, checker);
+            }
+
+            Type goal = Workflows.goal;
+            int generatingMaxTreeSize = Configs.getInt(config, Configs.generatingMaxTreeSize, 37);
+
+            XmlRpcServer_MultiEvalManager<AppTreeMI> evalManager = new DummyHistoryEvalManager<>(lib, "configs/multi_gpml/history_multiProblem.json");
+            JSONObject allParamsInfo = evalManager.getAllParamsInfo(null);
+            Log.itln("allParamsInfo = "+ allParamsInfo);
+
+
+            IndivGenerator<AppTreeMI> generator = new AppTreeMIGenerator(goal, generatingMaxTreeSize, gen, allParamsInfo);
+
+
+            int numToGenerate = Configs.getInt(config, Configs.numIndividualsToGenerate, 256);
+            List<AppTreeMI> indivs = generator.generate(numToGenerate);
+
+            //Log.list(indivs);
+
+            writeGeneratorDump(gen, "GPML_incremental");
+
+            checker.results();
+
+        } catch (Exception e) {
+            throw new Error(e);
+        }
+    }
+
+    private static void test_1(int k_max, int numSamples) {
         Checker ch = new Checker(/*7404398919224944163L*/);
 
         testNormalizations(ch);
@@ -119,21 +189,66 @@ public class GenTester {
 
         tests_subs_1(ch, opts);
         tests_subs_k(ch, opts);
-        tests_treeGenerating(ch, 6/*6*/, 10000, opts, true, !true);
+        tests_treeGenerating(ch, k_max, numSamples, opts, true, false, false, "test_outputs/gen_cache_k6_6.json");
 
         ch.results();
     }
 
-    private static void tests_treeGenerating(Checker ch,int k_max, int numSamples, Gen.Opts opts,
-                                             boolean testSampling, boolean testSystematicBalls) {
-        Log.it("\n== TREE GENERATING TESTS =======================================================\n");
-        for (int k = 1; k <= k_max; k++) {
-            testTreeGenerating(ch, k, g_testGoal, g_testGamma, numSamples,opts, testSampling, testSystematicBalls);
-        }
+    private static void writeGeneratorDump(Gen gen, String sufix) {
+        String name = "gen_cache_"+sufix+".json";
+        Log.it_noln("Writing "+name+" started...");
+        F.writeFile("test_outputs/"+ name, gen.toJson().toString());
     }
 
-    private static void testTreeGenerating(Checker ch, int k, Type t, Gamma gamma, int numSamples, Gen.Opts opts,
-                                           boolean testSampling, boolean testSystematicBalls) {
+    private static void tests_treeGenerating(Checker ch,int k_max, int numSamples, Gen.Opts opts,
+                                             boolean testSampling, boolean testSystematicBalls,
+                                             boolean createSeparateGenerators, String loadCacheFrom) {
+
+        Gamma gamma = g_testGamma;
+
+        Gen gen = null;
+        if (!createSeparateGenerators) {
+
+            if (loadCacheFrom == null) {
+                gen = new Gen(opts, gamma, ch);
+            } else {
+                Stopwatch stopwatch = new Stopwatch(3);
+                Log.it_noln("Start loading generator json ...");
+                JSONObject gen_dump = F.loadJson(loadCacheFrom);
+                Log.it(stopwatch.restart());
+
+                Log.it_noln("Loaded, start creating generator ...");
+                gen = Gen.fromJson(gen_dump, ch);
+                Log.it(stopwatch.restart());
+
+                Log.it("Generator ready.\n");
+
+                Log.it_noln("Now similarity check...");
+                ch.is(gen_dump.similar(gen.toJson()), "gen_dump.similar(gen.toJson())");
+                Log.it(stopwatch.restart());
+
+            }
+
+        }
+
+        Log.it("\n== TREE GENERATING TESTS =======================================================\n");
+        for (int k = 1; k <= k_max; k++) {
+            testTreeGenerating(gen, ch, k, g_testGoal, gamma, numSamples,opts, testSampling, testSystematicBalls, createSeparateGenerators);
+        }
+
+        if (gen != null) {
+            writeGeneratorDump(gen, "end");
+        }
+
+    }
+
+    private static void testTreeGenerating(Gen gen, Checker ch, int k, Type t, Gamma gamma, int numSamples, Gen.Opts opts,
+                                           boolean testSampling, boolean testSystematicBalls,
+                                           boolean createSeparateGenerators) {
+
+        if (createSeparateGenerators) {
+            gen = new Gen(opts, gamma, ch);
+        }
 
         Log.it("--  k = "+k+"  ---------------------------------------------------------");
 
@@ -141,7 +256,6 @@ public class GenTester {
 
         String argStr = "("+k+", "+t+")";
 
-        Gen gen = new Gen(opts, gamma, ch);
 
         Stopwatch stopwatch = new Stopwatch(3);
 
@@ -189,6 +303,8 @@ public class GenTester {
 
             if (intNum < 40000) {
 
+                //writeGeneratorDump(gen, "k="+k+"_middle");
+
                 if (testSystematicBalls) {
                     testGenOne_systematicBalls(ch, gen, k, t, gamma, allTrees);
                 }
@@ -198,6 +314,8 @@ public class GenTester {
                 }
             }
         }
+
+        //writeGeneratorDump(gen, "k="+k+"_end");
 
         Log.it();
     }

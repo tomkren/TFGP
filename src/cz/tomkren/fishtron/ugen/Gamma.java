@@ -130,6 +130,11 @@ public class Gamma {
         return F.jsonMap(gamma, GammaSym::toJson);
     }
 
+    static Gamma fromJson(JSONArray json) {
+        List<GammaSym> newSymList = F.map(json, GammaSym::fromJson);
+        return new Gamma(newSymList);
+    }
+
     /*public static Gamma mk(String... strs) {
         if (strs.length % 2 != 0) {throw new Error("There must be an even number of gamma strings.");}
         List<GammaSym> ret = new ArrayList<>(strs.length/2);

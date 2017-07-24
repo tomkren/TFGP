@@ -30,7 +30,16 @@ public class GammaSym {
     }
 
     public JSONArray toJson() {
-        return F.arr(sym, type.toString());
+        return F.arr(sym, type.toString(), isVar);
+    }
+
+    public static GammaSym fromJson(Object json) {
+        JSONArray arr = (JSONArray) json;
+        return new GammaSym(
+                arr.getString(0),
+                Types.parse(arr.getString(1)),
+                arr.getBoolean(2)
+        );
     }
 
     @Override

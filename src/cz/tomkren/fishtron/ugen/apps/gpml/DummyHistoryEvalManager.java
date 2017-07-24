@@ -25,7 +25,7 @@ public class DummyHistoryEvalManager<Indiv extends MultiIndiv> implements XmlRpc
 
     private Queue<JSONArray> history;
 
-    DummyHistoryEvalManager(EvalLib lib, String historyJsonPath) {
+    public DummyHistoryEvalManager(EvalLib lib, String historyJsonPath) {
         this.lib = lib;
         //fakeEvalQueue = new ArrayQueue<>();
         id2indivData = new HashMap<>();

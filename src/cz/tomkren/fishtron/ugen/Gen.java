@@ -543,27 +543,49 @@ public class Gen {
         return ch.getRandom();
     }
 
-    // -- STATS ----------------------------------------------------------------------------------
+    // -- Cache stuff ----------------------------------------------------------------------------------
 
     public Cache getCache() {
         return cache;
     }
 
+    private void setCache(Cache cache) {
+        this.cache = cache;
+    }
+
     // -- toString and Serialization to json -----------------------------------------------------
 
-    private JSONObject toJson() {
+    private static final String KEY_opts = "opts";
+    private static final String KEY_gamma = "gamma";
+    private static final String KEY_cache = "cache";
+
+    public JSONObject toJson() {
         return F.obj(
-                "gamma", gamma.toJson(),
-                "cache", cache.toJson()
+            KEY_opts , opts.toJson(),
+            KEY_gamma, gamma.toJson(),
+            KEY_cache, cache.toJson()
         );
+    }
+
+    public static Gen fromJson(JSONObject json, Checker checker) {
+
+        Opts newOpts = Opts.fromJson(json.getJSONObject(KEY_opts));
+        Gamma newGamma = Gamma.fromJson(json.getJSONArray(KEY_gamma));
+
+        Gen newGen = new Gen(newOpts, newGamma, checker);
+
+        Cache newCache = Cache.fromJson(newGen, json.getJSONObject(KEY_cache));
+        newGen.setCache(newCache);
+
+        return newGen;
     }
 
     @Override
     public String toString() {
         return F.prettyJson(toJson(),F.obj(
-                "types", 2,
-                "gamma", 1,
-                "subs",  1
+                KEY_gamma, 1,
+                Cache.KEY_types, 2,
+                Cache.KEY_subs,  1
         ));
     }
 
@@ -585,6 +607,29 @@ public class Gen {
             this.isNormalizationPerformed = isNormalizationPerformed;
             this.ballMode = ballMode;
             this.isLogging = isLogging;
+        }
+
+        private static final String KEY_isCachingUsed = "isCachingUsed";
+        private static final String KEY_isNormalizationPerformed = "isNormalizationPerformed";
+        private static final String KEY_ballMode = "ballMode";
+        private static final String KEY_isLogging = "isLogging";
+
+        JSONObject toJson() {
+            return F.obj(
+                    KEY_isCachingUsed, isCachingUsed,
+                    KEY_isNormalizationPerformed, isNormalizationPerformed,
+                    KEY_ballMode, ballMode.toString(),
+                    KEY_isLogging, isLogging
+            );
+        }
+
+        static Opts fromJson(JSONObject json) {
+            return new Opts(
+                    json.getBoolean(KEY_isCachingUsed),
+                    json.getBoolean(KEY_isNormalizationPerformed),
+                    BallMode.valueOf(json.getString(KEY_ballMode)),
+                    json.getBoolean(KEY_isLogging)
+            );
         }
 
         boolean isCachingUsed() {return isCachingUsed;}

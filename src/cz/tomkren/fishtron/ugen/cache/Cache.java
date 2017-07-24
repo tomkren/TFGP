@@ -4,13 +4,10 @@ import cz.tomkren.fishtron.types.Sub;
 import cz.tomkren.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.cache.data.SubData;
-import cz.tomkren.fishtron.ugen.data.PreSubsRes;
 import cz.tomkren.fishtron.ugen.Mover;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
 import cz.tomkren.fishtron.ugen.data.Ts1Res;
 import cz.tomkren.utils.F;
-import cz.tomkren.utils.TODO;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.math.BigInteger;
@@ -110,30 +107,27 @@ public class Cache {
 
     // -- toJson method and its utils ---------------------------------------------------------------
 
-    private static final String TYPES_KEY = "types";
-    private static final String SUBS_KEY = "subs";
+    public static final String KEY_types = "types";
+    public static final String KEY_subs = "subs";
 
 
     public JSONObject toJson() {
         return F.obj(
-                TYPES_KEY, F.jsonMap(typeDataMap, TypeData::toJson),
-                SUBS_KEY,  F.jsonMap(subsList, SubData::toJson)
+                KEY_types, F.jsonMap(typeDataMap, TypeData::toJson),
+                KEY_subs,  F.jsonMap(subsList, SubData::toJson)
         );
     }
 
-    public static Cache fromJson(Gen gen, JSONObject data) {
-        JSONObject types_json = data.getJSONObject(TYPES_KEY);
-        JSONArray subs_json = data.getJSONArray(SUBS_KEY);
+    public static Cache fromJson(Gen gen, JSONObject json) {
 
-        Map<String, TypeData> newTypeDataMap = F.map(types_json, TypeData::fromJson);
-        List<SubData> newSubsList = F.map(subs_json, SubData::fromJson);
+        Map<String, TypeData> newTypeDataMap = F.map(json.getJSONObject(KEY_types), TypeData::fromJson);
 
+        List<SubData> newSubsList = F.map(json.getJSONArray(KEY_subs), SubData::fromJson);
         Map<String, Integer> newSub2id = new HashMap<>();
 
         int sub_id = 0;
         for (SubData subInfo : newSubsList) {
-            Sub sub = subInfo.getSub();
-            String sub_str = sub.toString();
+            String sub_str = subInfo.getSub().toString();
             newSub2id.put(sub_str, sub_id);
             sub_id ++;
         }
