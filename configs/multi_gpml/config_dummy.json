@@ -3,7 +3,7 @@
   "serverUrl" : "http://127.0.0.1:8080",
   "dataset" : "winequality-white.csv",
   "killServer": true,
-  "dummyFitness": false,
+  "dummyFitness": true,
   "isMaxims": [true,false],
 
   "timeLimit": 14400,
@@ -11,10 +11,10 @@
   "numEvaluations": 32768,
   "numIndividualsToGenerate": 256,
   "minPopulationSizeToOperate": 64,
-  "maxPopulationSize": 512,
+  "maxPopulationSize": 300,
 
   "generatingMaxTreeSize":  64,
-  "generatorDump": false,
+  "generatorDump": "test_outputs/gen_cache_GPML_incremental.json",
 
   "tournamentBetterWinsProbability" : 0.8,
   "saveBest" : true,

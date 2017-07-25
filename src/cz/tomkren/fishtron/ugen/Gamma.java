@@ -194,4 +194,17 @@ public class Gamma {
         }
         return sb.toString();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Gamma gamma1 = (Gamma) o;
+        return gamma.equals(gamma1.gamma);
+    }
+
+    @Override
+    public int hashCode() {
+        return gamma.hashCode();
+    }
 }

@@ -53,6 +53,19 @@ public class EvaSetup_GPML {
 
         boolean dummyFitnessMode = Configs.getBoolean(config, Configs.dummyFitness, false);
 
+        String generatorDumpPath = null;
+        if (config.has("generatorDump")) {
+            Object gd = config.get("generatorDump");
+            if (gd instanceof String) {
+                generatorDumpPath = (String) gd;
+            }
+        }
+
+        if (generatorDumpPath == null) {
+            Log.it("No generator dump.");
+        } else {
+            Log.it("USING GENERATOR DUMP: "+generatorDumpPath);
+        }
 
         JSONObject methods = config.getJSONObject("methods"); // todo .. dát defaultní
 
@@ -74,7 +87,7 @@ public class EvaSetup_GPML {
 
         Log.it("Gamma = \n"+gamma);
 
-        Gen gen = new Gen(gamma, checker);
+        Gen gen = Gen.fromJson(generatorDumpPath, gamma, checker);
         Type goal = Workflows.goal;
 
         IndivGenerator<AppTreeMI> generator = new AppTreeMIGenerator(goal, generatingMaxTreeSize, gen, allParamsInfo);

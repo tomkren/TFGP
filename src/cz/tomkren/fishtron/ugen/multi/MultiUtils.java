@@ -1,6 +1,7 @@
 package cz.tomkren.fishtron.ugen.multi;
 
 import cz.tomkren.utils.AB;
+import cz.tomkren.utils.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -161,10 +162,14 @@ public class MultiUtils {
     }
 
     private static <Indiv extends MultiIndiv> Indiv findWorstIndiv(List<Indiv> front) {
-        Indiv worst = null;
+
+        assert !front.isEmpty();
+
+        Indiv worst = front.get(0);
         double worstDistance = Double.MAX_VALUE;
         for (Indiv indiv : front) {
             double distance = indiv.getCrowdingDistance();
+            Log.it("distance:"+distance); //TODO prasárna, pak dát pryč
             if (distance < worstDistance) {
                 worst = indiv;
                 worstDistance = distance;

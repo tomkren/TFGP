@@ -43,6 +43,26 @@ public class GammaSym {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        GammaSym gammaSym = (GammaSym) o;
+
+        if (isVar != gammaSym.isVar) return false;
+        if (!sym.equals(gammaSym.sym)) return false;
+        return type.equals(gammaSym.type);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = sym.hashCode();
+        result = 31 * result + type.hashCode();
+        result = 31 * result + (isVar ? 1 : 0);
+        return result;
+    }
+
+    @Override
     public String toString() {
         return sym +" : "+ Types.prettyPrint2(type);
     }

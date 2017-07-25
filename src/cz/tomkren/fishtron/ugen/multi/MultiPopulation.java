@@ -66,9 +66,11 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
             Log.it("(numFronts: "+ assignRes_old._2() +" & fronts-assigning took: "+ sw.restart()+")");*/
 
             AB<Indiv,Integer> assignRes = MultiUtils.assignFrontsAndDistances_martin(individuals, isMaxis);
-            Log.it("(numFronts: "+ assignRes._2() +" & fronts-assigning took: "+ sw.restart()+")");
+            Log.it("(numFronts: "+ assignRes._2() +" & populationSize: "+ individuals.size() +" & fronts-assigning took: "+ sw.restart()+")");
 
             worstIndividual = assignRes._1();
+
+            assert worstIndividual != null;
 
             /*if (!Objects.equals(assignRes._2(), assignRes_old._2())) {
                 throw new Error("front numbers do not match");
@@ -85,7 +87,11 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
 
 
     void removeWorstIndividual() {
-        individuals.remove(worstIndividual);
+        boolean success = individuals.remove(worstIndividual);
+        if (!success) {
+            Log.it("MISSING WORST INDIVIDUAL: "+worstIndividual);
+            throw new Error("Population dos not contain the worst individual.");
+        }
         removedIndividuals.add(worstIndividual);
     }
 

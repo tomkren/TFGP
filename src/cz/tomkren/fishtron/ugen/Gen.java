@@ -15,12 +15,12 @@ import cz.tomkren.fishtron.ugen.tests.StaticGen;
 import cz.tomkren.fishtron.ugen.trees.App;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.trees.Leaf;
-import cz.tomkren.utils.AB;
-import cz.tomkren.utils.Checker;
-import cz.tomkren.utils.F;
+import cz.tomkren.utils.*;
 import org.json.JSONObject;
 
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -578,6 +578,50 @@ public class Gen {
         newGen.setCache(newCache);
 
         return newGen;
+    }
+
+    public static Gen fromJson(String jsonPath, Gamma gamma, Checker checker) {
+
+        if (jsonPath == null) {
+            return new Gen(gamma, checker);
+        }
+
+        File f = new File(jsonPath);
+        if(!f.exists() || f.isDirectory()) {
+            String msg = "!!! WARNING: The generator dump file "+jsonPath+" does not exist or is a directory, so DUMP IS NOT USED!";
+            Log.err(msg);
+            Log.it(msg);
+            return new Gen(gamma, checker);
+        }
+
+        try {
+            JSONObject genDump = F.tryLoadJson(jsonPath);
+
+            Gen gen = Gen.fromJson(genDump, checker);
+
+            boolean eq_gammas = gen.gamma.equals(gamma);
+            boolean eq_gamma_jsons = gen.gamma.toJson().toString().equals(gamma.toJson().toString());
+
+
+            if (!eq_gammas || !eq_gamma_jsons) {
+                Log.it("Different gammas! Have a look:");
+                Log.it("eq_gammas = "+eq_gammas);
+                Log.it("eq_gamma_jsons = "+ eq_gamma_jsons);
+                Log.it(gen.gamma.toJson());
+                Log.it(gamma.toJson());
+                throw new Error("Different gammas!");
+            }
+
+            return gen;
+
+        } catch (IOException e) {
+            String msg = "!!! WARNING: some error occurred while loading the generator dump"+jsonPath+", so DUMP IS NOT USED!";
+            Log.err(msg);
+            Log.it(msg);
+            return new Gen(gamma, checker);
+        }
+
+
     }
 
     @Override
