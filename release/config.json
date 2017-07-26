@@ -7,6 +7,7 @@
   "isMaxims": [true,false],
 
   "timeLimit": 14400,
+  "sleepTime": 200,
 
   "numEvaluations": 32768,
   "numIndividualsToGenerate": 256,
@@ -14,6 +15,7 @@
   "maxPopulationSize": 512,
 
   "generatingMaxTreeSize":  64,
+  "generatorDump": "gpml_generator_dump.json",
 
   "tournamentBetterWinsProbability" : 0.8,
   "saveBest" : true,

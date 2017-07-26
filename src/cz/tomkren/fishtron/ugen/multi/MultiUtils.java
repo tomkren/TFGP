@@ -169,7 +169,6 @@ public class MultiUtils {
         double worstDistance = Double.MAX_VALUE;
         for (Indiv indiv : front) {
             double distance = indiv.getCrowdingDistance();
-            Log.it("distance:"+distance); //TODO prasárna, pak dát pryč
             if (distance < worstDistance) {
                 worst = indiv;
                 worstDistance = distance;

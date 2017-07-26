@@ -16,6 +16,8 @@ import java.util.*;
 
 /**Created by tom on 17.03.2017.*/
 
+// TODO už nefunguje s Multi evolucí, páč porušuje assert o unikátnosti pač to ignoruje jedince co to dostalo a vrací to ty historický
+
 public class DummyHistoryEvalManager<Indiv extends MultiIndiv> implements XmlRpcServer_MultiEvalManager<Indiv> {
 
     private EvalLib lib;

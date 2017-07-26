@@ -1,9 +1,8 @@
 package cz.tomkren.fishtron.ugen.multi;
 
 
-import cz.tomkren.utils.AB;
-import cz.tomkren.utils.Log;
-import cz.tomkren.utils.Stopwatch;
+import cz.tomkren.utils.*;
+import org.json.JSONObject;
 
 import java.util.*;
 
@@ -13,8 +12,10 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
 
     private final List<Boolean> isMaxis;
 
+    private Set<Indiv> yetToBeEvaluated;
     private Set<Indiv> individuals;
     private Set<Indiv> removedIndividuals;
+
     private int numUniqueCheckFails;
     private List<Indiv> terminators;
     private Indiv worstIndividual;
@@ -24,11 +25,51 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
         if (isMaxis.isEmpty()) {throw new Error("0-fitness error : isMaxis is empty.");}
 
         this.isMaxis = isMaxis;
+
         individuals = new HashSet<>();
         removedIndividuals = new HashSet<>();
+        yetToBeEvaluated = new HashSet<>();
+
         numUniqueCheckFails = 0;
         terminators = new ArrayList<>();
         worstIndividual = null;
+    }
+
+    public String getPopulationInfo() {
+        return "population size: "+individuals.size() +
+                ", num removed: "+removedIndividuals.size() +
+                ", num waiting for evaluation: "+ yetToBeEvaluated.size() +
+                ", numUniqueCheckFails: "+ numUniqueCheckFails;
+    }
+
+    private boolean testIsNew(Indiv indiv) {
+        //Indiv indiv = indivData._1();
+        if (individuals.contains(indiv) || removedIndividuals.contains(indiv) || yetToBeEvaluated.contains(indiv)) {
+            numUniqueCheckFails ++;
+            Log.it("UniqueCheck failed, numUniqueCheckFails = "+numUniqueCheckFails);
+            return false;
+        }
+
+        markYetToBeEvaluated(indiv);
+        return true;
+    }
+
+    private void markYetToBeEvaluated(Indiv indivSelectedForEvaluation) {
+        yetToBeEvaluated.add(indivSelectedForEvaluation);
+    }
+
+    /*boolean testIsNew(Indiv indiv) {
+        if (individuals.contains(indiv) || removedIndividuals.contains(indiv) || yetToBeEvaluated.contains(indiv)) {
+            numUniqueCheckFails ++;
+            Log.it("(check fail), numUniqueCheckFails = "+numUniqueCheckFails);
+            return false;
+        }
+
+        return true;
+    }*/
+
+    List<Indiv> keepOnlyNew_and_checkout(List<Indiv> indivsToFilter) {
+        return F.filter(indivsToFilter, this::testIsNew);
     }
 
     Indiv select(MultiSelection<Indiv> selection) {
@@ -37,18 +78,22 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
 
     // !!! TODO určitě předělat na addIndividuals, pač neefektivní vzledem k tomu že se furt přepočítávaj ty fronty !!! !!!
 
-    boolean addIndividual(Indiv indiv) {
+    void addIndividual(Indiv indiv) {
 
-        // todo mělo by se kontrolovat ještě před evaluací!
+        boolean wasThere = yetToBeEvaluated.remove(indiv);
 
+        // todo radi misto tech dvou cheku dat warningv rači.
 
-
+        if (!wasThere) {
+            throw new Error("INDIV 'WAS NOT THERE'!");
+        }
         if (individuals.contains(indiv) || removedIndividuals.contains(indiv)) {
-            numUniqueCheckFails ++;
 
+            throw new Error("UniqueCheckFail in addIndividual should be unreachable!");
+
+            /*numUniqueCheckFails ++;
             Log.it("(check fail)");
-
-            return false;
+            return false;*/
         }
 
         if (indiv.isTerminator()) {
@@ -66,7 +111,7 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
             Log.it("(numFronts: "+ assignRes_old._2() +" & fronts-assigning took: "+ sw.restart()+")");*/
 
             AB<Indiv,Integer> assignRes = MultiUtils.assignFrontsAndDistances_martin(individuals, isMaxis);
-            Log.it("(numFronts: "+ assignRes._2() +" & populationSize: "+ individuals.size() +" & fronts-assigning took: "+ sw.restart()+")");
+            Log.it("(numFronts: "+ assignRes._2() +" & fronts-assigning took: "+ sw.restart()+")");
 
             worstIndividual = assignRes._1();
 
@@ -82,7 +127,7 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
             worstIndividual = findWorstIndividual_singleFitness();
         }
 
-        return true;
+        //return true;
     }
 
 

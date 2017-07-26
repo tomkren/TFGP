@@ -3,7 +3,8 @@ package cz.tomkren.fishtron.ugen.multi;
 import cz.tomkren.fishtron.eva.Operator;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
-//import cz.tomkren.utils.Log;
+
+import cz.tomkren.utils.Log;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -34,14 +35,21 @@ public class MultiEvolution<Indiv extends MultiIndiv> {
         makeEmptyPopulation();
         MultiEvalResult<Indiv> evalResult = null;
 
+        int i = 1;
         while (isEvaluationUnfinished()) {
 
+            Log.it("\n\n -- Evolution Loop #"+i+" -----------------\n");
+
             if (isGeneratingNeeded()) {
+                log("Generating initial population...");
                 evalResult = sendToEval(generateIndividuals(evalResult));
             } else if(isPopulationLargeEnoughForOperating() && isSendingNeeded()) {
+                Log.it("Making children..");
                 List<AB<Indiv,JSONObject>> children = makeChildren(evalResult,population,opts.getNumEvaluations());
                 evalResult = children.size() > 0 ? sendToEval(children) : justAskForResults();
+                Log.it(children.size() +" children made.");
             } else {
+                Log.it("Just asking for results..");
                 evalResult = justAskForResults();
             }
 
@@ -51,6 +59,8 @@ public class MultiEvolution<Indiv extends MultiIndiv> {
             if (evalResult.isEmpty()) {
                 F.sleep(opts.getSleepTime());
             }
+
+            i++;
         }
     }
 
@@ -82,7 +92,7 @@ public class MultiEvolution<Indiv extends MultiIndiv> {
     }
 
     private List<AB<Indiv,JSONObject>> generateIndividuals(MultiEvalResult<Indiv> evalResult) {
-        log("Generating initial population...");
+
 
         int yetToGenerate = opts.getNumIndividualsToGenerate() - numSentIndividuals;
         int evaluatorCapabilities = evalResult == null ? opts.getEvalManager().getEvalPoolSize(yetToGenerate)
@@ -92,8 +102,16 @@ public class MultiEvolution<Indiv extends MultiIndiv> {
                           ? Math.max(evaluatorCapabilities, yetToGenerate)
                           : Math.min(evaluatorCapabilities, yetToGenerate);
 
-        List<Indiv> genIndivs = opts.getGenerator().generate(numToGenerate);
-        return F.map(genIndivs, indiv -> new AB<>(indiv, mkIndivJson_forGenerated()));
+        List<Indiv> allGenIndivs = new ArrayList<>(numToGenerate);
+
+        while (allGenIndivs.size() < numToGenerate) {
+            List<Indiv> genIndivs = opts.getGenerator().generate(numToGenerate);
+
+            List<Indiv> filtered_genIndivs = population.keepOnlyNew_and_checkout(genIndivs);
+            allGenIndivs.addAll(filtered_genIndivs);
+        }
+
+        return F.map(allGenIndivs, indiv -> new AB<>(indiv, mkIndivJson_forGenerated()));
     }
 
     private MultiEvalResult<Indiv> sendToEval(List<AB<Indiv,JSONObject>> indivs) {
@@ -118,15 +136,25 @@ public class MultiEvolution<Indiv extends MultiIndiv> {
         int numChildren = Math.min(requestedByEvaluator, yetToBeSent);
 
         while (children.size() < numChildren) {
+
             Operator<Indiv> operator = opts.getOperators().get(opts.getRandom());
             List<Indiv> parents = selectParents(operator.getNumInputs(), parentPop);
 
             List<Indiv> chs = operator.operate(parents);
-            List<AB<Indiv,JSONObject>> chsWithInfo = F.map(chs, ch -> new AB<>(ch, mkIndivJson(operator, parents)));
-            children.addAll(chsWithInfo);
+
+            Log.it("SelectedGenOp: "+operator.getOperatorInfo());
+
+            int neededToMakeYet = numChildren - children.size();
+            chs = F.take(neededToMakeYet, chs);
+
+            List<Indiv> filtered_chs = population.keepOnlyNew_and_checkout(chs);
+
+            List<AB<Indiv,JSONObject>> filtered_chsWithInfo = F.map(filtered_chs, ch -> new AB<>(ch, mkIndivJson(operator, parents)));
+            children.addAll(filtered_chsWithInfo);
         }
 
-        return F.take(numChildren, children);
+        assert children.size() == numChildren;
+        return children;
     }
 
     private List<Indiv> selectParents(int numParents, MultiPopulation<Indiv> parentPop) {
@@ -152,6 +180,7 @@ public class MultiEvolution<Indiv extends MultiIndiv> {
                 population.removeWorstIndividual();
             }
         }
+        Log.it("Population Info: "+ population.getPopulationInfo());
     }
 
 

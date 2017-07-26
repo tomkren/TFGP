@@ -6,6 +6,7 @@ import cz.tomkren.fishtron.ugen.multi.MultiEvalResult;
 import cz.tomkren.fishtron.ugen.multi.MultiIndiv;
 import cz.tomkren.fishtron.workflows.TypedDag;
 import cz.tomkren.utils.AB;
+import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.F;
 import org.apache.xmlrpc.XmlRpcException;
 import org.eclipse.jetty.util.ArrayQueue;
@@ -22,12 +23,16 @@ public class DummyMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcSe
     private Queue<JSONObject> fakeEvalQueue;
     private Map<Integer, AB<Indiv,JSONObject>> id2indivData;
     private int nextId;
+    private boolean pollRandomNumber;
+    private Checker checker;
 
-    DummyMultiEvalManager(EvalLib lib) {
+    DummyMultiEvalManager(EvalLib lib, boolean pollRandomNumber, Checker ch) {
         this.lib = lib;
         fakeEvalQueue = new ArrayQueue<>();
         id2indivData = new HashMap<>();
         nextId = 0;
+        this.pollRandomNumber = pollRandomNumber;
+        this.checker = ch;
     }
 
     @Override
@@ -75,17 +80,28 @@ public class DummyMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcSe
 
     private JSONArray fakeGetEvaluated() {
 
-        JSONObject submittedIndivData = fakeEvalQueue.poll();
+        int howManyPoll = pollRandomNumber ? checker.getRandom().nextInt(fakeEvalQueue.size()+1) : 1;
 
-        int id = submittedIndivData.getInt("id");
-        JSONObject indivDagJson = submittedIndivData.getJSONObject("code");
+        JSONArray evaluatedResults = new JSONArray();
 
-        double fakeScore1 = indivDagJson.keySet().size();
-        double fakeStdDevScore = Math.random();
-        double fakeScore2 = Math.random();
+        for (int i = 0; i<howManyPoll; i++) {
 
-        JSONArray oneIndivResult = F.arr(id, F.arr(fakeScore1,fakeStdDevScore,fakeScore2));
-        return F.arr(oneIndivResult);
+            JSONObject submittedIndivData = fakeEvalQueue.poll();
+
+            int id = submittedIndivData.getInt("id");
+            JSONObject indivDagJson = submittedIndivData.getJSONObject("code");
+
+            double fakeScore1 = indivDagJson.keySet().size();
+            double fakeStdDevScore = Math.random();
+            double fakeScore2 = Math.random();
+
+            JSONArray oneIndivResult = F.arr(id, F.arr(fakeScore1,fakeStdDevScore,fakeScore2));
+
+            evaluatedResults.put(oneIndivResult);
+        }
+
+
+        return evaluatedResults; //F.arr(oneIndivResult);
     }
 
     @Override
