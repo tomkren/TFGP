@@ -53,6 +53,11 @@ public class Leaf implements AppTree {
     }
 
     @Override
+    public Sexpr toSexpr() {
+        return new Sexpr(sym, Collections.emptyList());
+    }
+
+    @Override
     public boolean hasParams() {
         return params != null;
     }

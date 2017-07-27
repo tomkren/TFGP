@@ -15,7 +15,7 @@
   "maxPopulationSize": 512,
 
   "generatingMaxTreeSize":  64,
-  "generatorDump": "configs/multi_gpml/GPML_generator_dump.json",
+  "generatorDump": "release/gpml_generator_dump.json",
 
   "tournamentBetterWinsProbability" : 0.8,
   "saveBest" : true,

@@ -56,6 +56,11 @@ public class Lam implements AppTree {
     }
 
     @Override
+    public Sexpr toSexpr() {
+        throw new TODO("Lambda Sexprs are not yet supported.");
+    }
+
+    @Override
     public AppTree randomizeParams(JSONObject allParamsInfo, Random rand) {
         AppTree newBodyTree = bodyTree.randomizeParams(allParamsInfo, rand);
         return new Lam(varName, newBodyTree, type, originalType, debugInfo);

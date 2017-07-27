@@ -54,6 +54,14 @@ public class App implements AppTree {
     }
 
     @Override
+    public Sexpr toSexpr() {
+        AB<Leaf, List<AppTree>> funWithArgs = getFunLeafWithArgs();
+        Leaf funLeaf = funWithArgs._1();
+        List<AppTree> args = funWithArgs._2();
+        return new Sexpr(funLeaf.getSym(), F.map(args, AppTree::toSexpr));
+    }
+
+    @Override
     public boolean hasParams() {
         return false;
     }
@@ -205,8 +213,8 @@ public class App implements AppTree {
         List<AppTree> argTrees = new ArrayList<>();
 
         AppTree acc = this;
-        while (acc instanceof cz.tomkren.fishtron.ugen.trees.App) {
-            cz.tomkren.fishtron.ugen.trees.App app = (cz.tomkren.fishtron.ugen.trees.App) acc;
+        while (acc instanceof App) {
+            App app = (App) acc;
             argTrees.add(app.argTree);
             acc = app.funTree;
         }

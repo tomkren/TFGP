@@ -34,6 +34,8 @@ public interface AppTree {
         F.writeJsonAsJsFile("www/data/lastErrTree.js", "mkLastErrTree", typeTrace);
     }
 
+    Sexpr toSexpr();
+
     AppTree randomizeParams(JSONObject allParamsInfo, Random rand);
     boolean hasParams();
 
