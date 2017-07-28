@@ -1,14 +1,19 @@
-.idea/workspace.xml
-logs/
-out/
-results/
-tex/readme.aux
-tex/readme.dvi
-tex/readme.log
-tex/readme.out
-tex/readme.pdf
-tex/readme.synctex.gz
-tex/readme.toc
+/test_outputs/
+/cellplaza/
+
+/.idea/workspace.xml
+/.idea/inspectionProfiles/
+
+/logs/
+/out/
+/results/
+/tex/readme.aux
+/tex/readme.dvi
+/tex/readme.log
+/tex/readme.out
+/tex/readme.pdf
+/tex/readme.synctex.gz
+/tex/readme.toc
 
 
 
