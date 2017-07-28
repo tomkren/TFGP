@@ -96,7 +96,7 @@ public class DagMultiLogger implements MultiLogger<AppTreeMI> {
     private List<Double> bestFitnessSoFar;
 
     private void initBestSoFar() {
-        List<Boolean> isMaxims = opts.getIsMaximizationList();
+        List<Boolean> isMaxims = opts.getFitnessSignature().getIsMaximizationList();
 
         bestIndivSoFar = null;
         bestEvalIdSoFar = -1;
@@ -138,7 +138,7 @@ public class DagMultiLogger implements MultiLogger<AppTreeMI> {
     }
 
     private boolean isNewBest(List<Double> newFitness) {
-        List<Boolean> isMaxims = opts.getIsMaximizationList();
+        List<Boolean> isMaxims = opts.getFitnessSignature().getIsMaximizationList();
         for (int iFitness = 0; iFitness < isMaxims.size(); iFitness++) {
             double oldVal = bestFitnessSoFar.get(iFitness);
             double newVal = newFitness.get(iFitness);
@@ -154,9 +154,12 @@ public class DagMultiLogger implements MultiLogger<AppTreeMI> {
 
 
 
-    private static String showIndivRow(int ods, String label, AppTreeMI ind) {
+    private String showIndivRow(int ods, String label, AppTreeMI ind) {
         String indivCode = new JSONObject(((TypedDag) ind.getValue()).toJson()).toString();
-        return Strings.repeat(" ",ods)+ label +(label.length()>0?": ":"")+ "performance: "+ind.getFitness(0)+ ", time: "+ind.getFitness(1) + "\t" + indivCode;
+        List<String> fitnessLabels = opts.getFitnessSignature().getFitnessLabels();
+        return Strings.repeat(" ",ods)+ label +(label.length()>0?": ":"")+
+                fitnessLabels.get(0)+": "+ind.getFitness(0)+ ", "+
+                fitnessLabels.get(1)+": "+ind.getFitness(1) + "\t" + indivCode;
     }
 
     private JSONArray evalResultToJson(MultiEvalResult<AppTreeMI> evalResult) {

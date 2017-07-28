@@ -62,7 +62,6 @@ public class EvaLogger<Indiv extends MultiIndiv> implements MultiLogger<Indiv> {
     public void log(int run, int evalId, MultiEvalResult<Indiv> evalResult) {
 
         if (evalResult.isEmpty()) {
-            stdout("=");
             return;
         }
 

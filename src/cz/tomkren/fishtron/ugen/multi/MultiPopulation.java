@@ -10,7 +10,7 @@ import java.util.*;
 
 public class MultiPopulation<Indiv extends MultiIndiv> {
 
-    private final List<Boolean> isMaxis;
+    private final List<Boolean> isMaxis; // TODO předělat aby pracovalo s FitnessSignature víc.
 
     private Set<Indiv> yetToBeEvaluated;
     private Set<Indiv> individuals;
@@ -21,10 +21,10 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
     private Indiv worstIndividual;
 
 
-    public MultiPopulation(List<Boolean> isMaxis) {
-        if (isMaxis.isEmpty()) {throw new Error("0-fitness error : isMaxis is empty.");}
+    MultiPopulation(FitnessSignature fitnessSignature) {
+        if (fitnessSignature.getNumFitnesses() == 0) {throw new Error("0-fitness error : isMaxis is empty.");}
 
-        this.isMaxis = isMaxis;
+        this.isMaxis = fitnessSignature.getIsMaximizationList();
 
         individuals = new HashSet<>();
         removedIndividuals = new HashSet<>();
@@ -35,21 +35,26 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
         worstIndividual = null;
     }
 
-    public String getPopulationInfo() {
-        return "population size: "+individuals.size() +
-                ", num removed: "+removedIndividuals.size() +
-                ", num waiting for evaluation: "+ yetToBeEvaluated.size() +
-                ", numUniqueCheckFails: "+ numUniqueCheckFails;
+    private String getPopulationInfo() {
+        return "population-size= "+individuals.size() +
+                ", num-removed= "+removedIndividuals.size() +
+                ", num-waiting-for-evaluation= "+ yetToBeEvaluated.size() +
+                ", num-unique-check-fails= "+ numUniqueCheckFails;
+    }
+
+    List<Indiv> keepOnlyNew_and_checkout(List<Indiv> indivsToFilter) {
+        return F.filter(indivsToFilter, this::testIsNew);
     }
 
     private boolean testIsNew(Indiv indiv) {
         //Indiv indiv = indivData._1();
         if (individuals.contains(indiv) || removedIndividuals.contains(indiv) || yetToBeEvaluated.contains(indiv)) {
             numUniqueCheckFails ++;
-            Log.it("UniqueCheck failed, numUniqueCheckFails = "+numUniqueCheckFails);
+            Log.it("  -> UniqueCheck failed, numUniqueCheckFails = "+numUniqueCheckFails);
             return false;
         }
 
+        Log.it("  -> New individual found!");
         markYetToBeEvaluated(indiv);
         return true;
     }
@@ -58,27 +63,13 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
         yetToBeEvaluated.add(indivSelectedForEvaluation);
     }
 
-    /*boolean testIsNew(Indiv indiv) {
-        if (individuals.contains(indiv) || removedIndividuals.contains(indiv) || yetToBeEvaluated.contains(indiv)) {
-            numUniqueCheckFails ++;
-            Log.it("(check fail), numUniqueCheckFails = "+numUniqueCheckFails);
-            return false;
-        }
-
-        return true;
-    }*/
-
-    List<Indiv> keepOnlyNew_and_checkout(List<Indiv> indivsToFilter) {
-        return F.filter(indivsToFilter, this::testIsNew);
-    }
 
     Indiv select(MultiSelection<Indiv> selection) {
         return selection.select(individuals, isMaxis);
     }
 
     // !!! TODO určitě předělat na addIndividuals, pač neefektivní vzledem k tomu že se furt přepočítávaj ty fronty !!! !!!
-
-    void addIndividual(Indiv indiv) {
+    void addIndividual(Indiv indiv, StringBuilder info) {
 
         boolean wasThere = yetToBeEvaluated.remove(indiv);
 
@@ -111,9 +102,15 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
             Log.it("(numFronts: "+ assignRes_old._2() +" & fronts-assigning took: "+ sw.restart()+")");*/
 
             AB<Indiv,Integer> assignRes = MultiUtils.assignFrontsAndDistances_martin(individuals, isMaxis);
-            Log.it("(numFronts: "+ assignRes._2() +" & fronts-assigning took: "+ sw.restart()+")");
+
+
 
             worstIndividual = assignRes._1();
+
+            String msg = "After AddIndividual: numFronts="+ assignRes._2() +" fronts-assigning-took="+ sw.restart()+"\n";
+            msg += "  Worst-individual-fitness = "+ worstIndividual.getFitness() +"\n";
+            msg += "  Population-Info: "+getPopulationInfo()+"\n";
+            info.append(msg);
 
             assert worstIndividual != null;
 

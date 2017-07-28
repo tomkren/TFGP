@@ -28,7 +28,9 @@ public interface MultiEvaOpts<Indiv extends MultiIndiv> {
     default boolean generateMaxOfCapabilitiesAndNeeds() {return true;}
 
     // Evaluation
-    List<Boolean> getIsMaximizationList();
+    //List<Boolean> getIsMaximizationList();
+    //List<String> getFitnessLabels();
+    FitnessSignature getFitnessSignature();
     MultiEvalManager<Indiv> getEvalManager();
 
     // Selection, operators etc.

@@ -35,32 +35,39 @@ public class MultiEvolution<Indiv extends MultiIndiv> {
         makeEmptyPopulation();
         MultiEvalResult<Indiv> evalResult = null;
 
-        int i = 1;
+        int loop_i = 1;
         while (isEvaluationUnfinished()) {
 
-            Log.it("\n\n -- Evolution Loop #"+i+" -----------------\n");
-
             if (isGeneratingNeeded()) {
-                log("Generating initial population...");
+
                 evalResult = sendToEval(generateIndividuals(evalResult));
+
             } else if(isPopulationLargeEnoughForOperating() && isSendingNeeded()) {
-                Log.it("Making children..");
-                List<AB<Indiv,JSONObject>> children = makeChildren(evalResult,population,opts.getNumEvaluations());
+
+                List<AB<Indiv,JSONObject>> children = makeChildren(evalResult, population, loop_i); // TODO organizovanější logování uvnitř makeChildren
                 evalResult = children.size() > 0 ? sendToEval(children) : justAskForResults();
-                Log.it(children.size() +" children made.");
+
             } else {
-                Log.it("Just asking for results..");
+
                 evalResult = justAskForResults();
             }
 
-            updatePopulation(evalResult);
-            logger.log(run, numEvaluatedIndividuals, evalResult);
-
             if (evalResult.isEmpty()) {
+
+                Log.it_noln("=");
                 F.sleep(opts.getSleepTime());
+
+            } else {
+
+                StringBuilder info = new StringBuilder();
+                updatePopulation(evalResult, info);
+
+                Log.it("\n\n--- Evolution Loop #"+loop_i+" ----------------------------------------------");
+                logger.log(run, numEvaluatedIndividuals, evalResult);
+                Log.it("\n"+info.toString());
             }
 
-            i++;
+            loop_i++;
         }
     }
 
@@ -71,7 +78,7 @@ public class MultiEvolution<Indiv extends MultiIndiv> {
     }
 
     private void makeEmptyPopulation() {
-        population = new MultiPopulation<>(opts.getIsMaximizationList());
+        population = new MultiPopulation<>(opts.getFitnessSignature());
         numSentIndividuals = 0;
         numEvaluatedIndividuals = 0;
     }
@@ -127,13 +134,17 @@ public class MultiEvolution<Indiv extends MultiIndiv> {
         return numSentIndividuals < opts.getNumEvaluations();
     }
 
-    private List<AB<Indiv,JSONObject>> makeChildren(MultiEvalResult<Indiv> evalResult, MultiPopulation<Indiv> parentPop, int maxNumToMake) {
+    private List<AB<Indiv,JSONObject>> makeChildren(MultiEvalResult<Indiv> evalResult, MultiPopulation<Indiv> parentPop, int loop_i) {
 
         List<AB<Indiv,JSONObject>> children = new ArrayList<>();
 
         int requestedByEvaluator = evalResult.getNumEvaluatedIndividuals();
-        int yetToBeSent = maxNumToMake - numSentIndividuals;
+        int yetToBeSent = opts.getNumEvaluations() - numSentIndividuals;
         int numChildren = Math.min(requestedByEvaluator, yetToBeSent);
+
+        if (numChildren > 0) {
+            Log.it("MAKING LOVE in loop: " + loop_i+ "(numChildren="+numChildren+")");
+        }
 
         while (children.size() < numChildren) {
 
@@ -142,7 +153,7 @@ public class MultiEvolution<Indiv extends MultiIndiv> {
 
             List<Indiv> chs = operator.operate(parents);
 
-            Log.it("SelectedGenOp: "+operator.getOperatorInfo());
+            Log.it(" SelectedGenOp: "+operator.getOperatorInfo());
 
             int neededToMakeYet = numChildren - children.size();
             chs = F.take(neededToMakeYet, chs);
@@ -171,16 +182,15 @@ public class MultiEvolution<Indiv extends MultiIndiv> {
         return opts.getEvalManager().justAskForResults();
     }
 
-    private void updatePopulation(MultiEvalResult<Indiv> evalResult) {
+    private void updatePopulation(MultiEvalResult<Indiv> evalResult, StringBuilder info) {
         List<Indiv> evaluatedIndividuals = evalResult.getIndividuals();
         numEvaluatedIndividuals += evaluatedIndividuals.size();
         for (Indiv indiv : evaluatedIndividuals) {
-            population.addIndividual(indiv);
+            population.addIndividual(indiv, info);
             if (population.size() > opts.getMaxPopulationSize()) {
                 population.removeWorstIndividual();
             }
         }
-        Log.it("Population Info: "+ population.getPopulationInfo());
     }
 
 

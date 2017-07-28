@@ -2,8 +2,11 @@ package cz.tomkren.fishtron.ugen.apps.gpml;
 
 import cz.tomkren.fishtron.sandbox2.Dag_JsonEvalInterface;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
+import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
+import cz.tomkren.fishtron.ugen.multi.FitnessSignature;
 import cz.tomkren.fishtron.ugen.multi.MultiEvalResult;
 import cz.tomkren.fishtron.ugen.multi.MultiIndiv;
+import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.workflows.TypedDag;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;
@@ -17,6 +20,11 @@ import java.util.*;
 
 public class DagMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcServer_MultiEvalManager<Indiv> {
 
+    public enum FitnessMode {
+        time,
+        foldedSize
+    }
+
     private Dag_JsonEvalInterface dagEvaluator;
 
     private EvalLib lib;
@@ -25,13 +33,13 @@ public class DagMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcServ
     private String getCoreCountMethodName;
     private String submitMethodName;
     private String getEvaluatedMethodName;
-
     private String datasetFilename;
+    private FitnessMode fitnessMode;
 
     private Map<Integer, AB<Indiv,JSONObject>> id2indivData;
     private int nextId;
 
-    DagMultiEvalManager(EvalLib lib, String getParamSetsMethodName, String getCoreCountMethodName, String submitMethodName,
+    DagMultiEvalManager(FitnessSignature fitnessSignature, EvalLib lib, String getParamSetsMethodName, String getCoreCountMethodName, String submitMethodName,
                         String getEvaluatedMethodName, String evaluatorURL, String datasetFilename) {
 
         this.lib = lib;
@@ -41,6 +49,8 @@ public class DagMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcServ
         this.submitMethodName = submitMethodName;
         this.getEvaluatedMethodName = getEvaluatedMethodName;
         this.datasetFilename = datasetFilename;
+
+        this.fitnessMode = FitnessMode.valueOf(fitnessSignature.getFitnessLabels().get(1));
 
         dagEvaluator = new Dag_JsonEvalInterface(evaluatorURL);
 
@@ -68,11 +78,17 @@ public class DagMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcServ
             Indiv      indiv     = indivData._1();
             JSONObject indivJson = indivData._2();
 
-            indivJson.put("id",nextId);
-            id2indivData.put(nextId, indivData);
 
             Object indivValue = indiv.computeValue(lib); // INDIVIDUAL EVALUATION
             JSONObject jsonCode = dagToJson(indivValue);
+
+            AppTree indivTree = ((AppTreeMI)indiv).getTree();
+            int workflowSize = SizeUtils.workflowSize(indivTree);
+
+            indivJson.put("id",nextId);
+            indivJson.put("workflowSize", workflowSize);
+
+            id2indivData.put(nextId, indivData);
 
             JSONObject indivDataToSubmit = F.obj(
                     "id",   nextId,
@@ -115,15 +131,23 @@ public class DagMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcServ
         double performanceScore = (scores.length() > 0) ? scores.getDouble(0) : mkErrorPerformanceScore();
         double timeScore        = (scores.length() > 2) ? scores.getDouble(2) : mkErrorTimeScore();
 
-
         AB<Indiv,JSONObject> indivData = id2indivData.remove(id);
         if (indivData == null) {throw new Error("EvalResult for individual with non-existing id "+id+"!");}
 
         Indiv indiv = indivData._1();
         JSONObject indivJson = indivData._2();
 
+        int workflowSize = indivJson.getInt("workflowSize");
+        scores.put(workflowSize);
 
-        List<Double> fitness = Arrays.asList(performanceScore, timeScore);
+        double minimizeScore;
+        switch (fitnessMode) {
+            case time: minimizeScore = timeScore; break;
+            case foldedSize: minimizeScore = workflowSize;break;
+            default: throw new Error("Unsupported fitness mode.");
+        }
+
+        List<Double> fitness = Arrays.asList(performanceScore, minimizeScore);
         indiv.setFitness(fitness);
 
         indivJson.put("fitness", F.jsonMap(fitness));

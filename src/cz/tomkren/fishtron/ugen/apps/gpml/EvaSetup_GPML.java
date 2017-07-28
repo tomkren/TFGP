@@ -16,7 +16,6 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.List;
 
 
 /**Created by tom on 07.03.2017.*/
@@ -34,15 +33,10 @@ public class EvaSetup_GPML {
         int minPopToOperate = Configs.getInt(config, Configs.minPopulationSizeToOperate, numToGen/2);
         int maxPopSize      = Configs.getInt(config, Configs.maxPopulationSize,          numToGen*4);
 
-        //boolean saveBest = getBoolean(config,"saveBest", true);
 
         int generatingMaxTreeSize = Configs.getInt(config, Configs.generatingMaxTreeSize, 37);
         double tournamentBetterWinsProbability = Configs.getDouble(config, Configs.tournamentBetterWinsProbability, 0.8);
 
-        /*Long seed = config.has(Configs.seed) ? config.getLong(Configs.seed) : null;
-        if (checker == null) {checker = new Checker(seed);}
-        if (seed    == null) {config.put(Configs.seed, checker.getSeed());}
-        Random rand = checker.getRandom();*/
         Configs.handleRandomSeed(config, checker);
 
         String evalServerUrl   = Configs.getString(config, "serverUrl", "http://localhost:8080/");
@@ -51,7 +45,7 @@ public class EvaSetup_GPML {
         int timeLimit  = Configs.getInt(config, Configs.timeLimit, Integer.MAX_VALUE);
         long sleepTime = Configs.getInt(config, Configs.sleepTime, 2000);
 
-        boolean dummyFitnessMode = Configs.getBoolean(config, Configs.dummyFitness, false);
+        boolean isFitnessDummy = Configs.getBoolean(config, Configs.dummyFitness, false);
 
         String generatorDumpPath = null;
         if (config.has("generatorDump")) {
@@ -73,12 +67,18 @@ public class EvaSetup_GPML {
         EvalLib lib = libAndGamma._1();
         Gamma gamma = libAndGamma._2();
 
+        JSONArray fitnessSignatureJson = config.getJSONArray("fitness");
+        FitnessSignature fitnessSignature = new FitnessSignature(fitnessSignatureJson);
 
-        if (dummyFitnessMode) {
+        Log.it("FITNESS SIGNATURE: "+ fitnessSignature);
+        Log.it(" labels   = "+ fitnessSignature.getFitnessLabels());
+        Log.it(" isMaxims = "+ fitnessSignature.getIsMaximizationList());
+
+        if (isFitnessDummy) {
             //evalManager = new DummyHistoryEvalManager<>(lib, "configs/multi_gpml/history_multiProblem.json");
             evalManager = new DummyMultiEvalManager(lib, false, checker);
         } else {
-            evalManager = new DagMultiEvalManager<>(lib,"get_param_sets", "get_core_count", "submit", "get_evaluated", evalServerUrl, datasetFilename);
+            evalManager = new DagMultiEvalManager<>(fitnessSignature, lib, "get_param_sets", "get_core_count", "submit", "get_evaluated", evalServerUrl, datasetFilename);
         }
 
         JSONObject allParamsInfo = evalManager.getAllParamsInfo(datasetFilename);
@@ -98,11 +98,15 @@ public class EvaSetup_GPML {
         Distribution<Operator<AppTreeMI>> operators;
         operators = MultiGenOpFactory.mkOperators(operatorsConfig, checker.getRandom(), gen, allParamsInfo);
 
-        List<Boolean> isMaxims = Configs.getIsMaxims(config);
 
 
-        opts = new BasicMultiEvaOpts<>(numEvaluations, numToGen, minPopToOperate, maxPopSize, /*saveBest,*/ timeLimit, sleepTime,
-                generator, isMaxims, evalManager, parentSelection, operators, checker);
+        //List<Boolean> isMaxims = Configs.getIsMaxims(config);
+        //List<String> fitnessLabels = Arrays.asList("performance", "time/size");
+
+
+
+        opts = new BasicMultiEvaOpts<>(numEvaluations, numToGen, minPopToOperate, maxPopSize, timeLimit, sleepTime,
+                generator, fitnessSignature, evalManager, parentSelection, operators, checker);
     }
 
     public MultiEvaOpts<AppTreeMI> getOpts() {

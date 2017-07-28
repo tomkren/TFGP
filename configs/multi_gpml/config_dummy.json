@@ -3,8 +3,9 @@
   "serverUrl" : "http://127.0.0.1:8080",
   "dataset" : "winequality-white.csv",
   "killServer": true,
+
+  "fitness": [["max","performance"], ["min","foldedSize"]],
   "dummyFitness": true,
-  "isMaxims": [true,false],
 
   "timeLimit": 14400,
   "sleepTime": 200,
@@ -18,7 +19,6 @@
   "generatorDump": "release/gpml_generator_dump.json",
 
   "tournamentBetterWinsProbability" : 0.8,
-  "saveBest" : true,
 
   "operators" : [
     {"name": "basicTypedXover", "probability": 0.4 , "maxTreeSize": 128},
