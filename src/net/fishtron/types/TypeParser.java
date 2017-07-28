@@ -1,13 +1,11 @@
 package net.fishtron.types;
 
-/** Created by tom on 7.11.2015.*/
-
 import cz.tomkren.utils.Checker;
-
 import java.util.*;
 
-// todo | zobecnit aby šlo použít i pro parsování termovejch stromů
+/** Created by tom on 7.11.2015. */
 
+// todo | zobecnit aby šlo použít i pro parsování termovejch stromů
 public class TypeParser {
 
     private Map<String,Integer> varNameToId;
@@ -18,7 +16,7 @@ public class TypeParser {
         reset();
     }
 
-    public void reset() {
+    private void reset() {
         varNameToId = new HashMap<>();
         varIdToName = new HashMap<>();
         nextIdCandidate = 0;
