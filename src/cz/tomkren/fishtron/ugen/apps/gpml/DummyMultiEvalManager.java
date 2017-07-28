@@ -2,8 +2,9 @@ package cz.tomkren.fishtron.ugen.apps.gpml;
 
 import cz.tomkren.fishtron.mains.DagEvaTester;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
+import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
 import cz.tomkren.fishtron.ugen.multi.MultiEvalResult;
-import cz.tomkren.fishtron.ugen.multi.MultiIndiv;
+import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.workflows.TypedDag;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Checker;
@@ -17,11 +18,11 @@ import java.util.*;
 
 /**Created by tom on 17.03.2017.*/
 
-public class DummyMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcServer_MultiEvalManager<Indiv> {
+public class DummyMultiEvalManager implements XmlRpcServer_MultiEvalManager<AppTreeMI> {
 
     private EvalLib lib;
     private Queue<JSONObject> fakeEvalQueue;
-    private Map<Integer, AB<Indiv,JSONObject>> id2indivData;
+    private Map<Integer, AB<AppTreeMI,JSONObject>> id2indivData;
     private int nextId;
     private boolean pollRandomNumber;
     private Checker checker;
@@ -46,23 +47,29 @@ public class DummyMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcSe
     }
 
     @Override
-    public Object submit(List<AB<Indiv, JSONObject>> indivs) {
+    public Object submit(List<AB<AppTreeMI, JSONObject>> indivs) {
         JSONArray jsonIndivs = new JSONArray();
 
-        for (AB<Indiv,JSONObject> indivData : indivs) {
+        for (AB<AppTreeMI,JSONObject> indivData : indivs) {
 
             id2indivData.put(nextId, indivData);
 
             JSONObject indivJson = indivData._2();
             indivJson.put("id", nextId);
 
-            Indiv indiv = indivData._1();
+            AppTreeMI indiv = indivData._1();
             Object indivValue = indiv.computeValue(lib);
             JSONObject jsonCode = new JSONObject(((TypedDag) indivValue).toJson());
 
+            AppTree tree = indiv.getTree();
+            int workflowSize = SizeUtils.workflowSize(tree);
+            int treeSize = tree.size();
+
             JSONObject indivDataToSubmit = F.obj(
                     "id",   nextId,
-                    "code", jsonCode
+                    "code", jsonCode,
+                    "workflowSize", workflowSize,
+                    "treeSize", treeSize
             );
 
             nextId++;
@@ -91,9 +98,11 @@ public class DummyMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcSe
             int id = submittedIndivData.getInt("id");
             JSONObject indivDagJson = submittedIndivData.getJSONObject("code");
 
-            double fakeScore1 = indivDagJson.keySet().size();
+
+
+            double fakeScore1 = submittedIndivData.getInt("workflowSize");
             double fakeStdDevScore = Math.random();
-            double fakeScore2 = Math.random();
+            double fakeScore2 = submittedIndivData.getInt("treeSize");
 
             JSONArray oneIndivResult = F.arr(id, F.arr(fakeScore1,fakeStdDevScore,fakeScore2));
 
@@ -105,10 +114,10 @@ public class DummyMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcSe
     }
 
     @Override
-    public MultiEvalResult<Indiv> getEvaluated() {
+    public MultiEvalResult<AppTreeMI> getEvaluated() {
         JSONArray json = fakeGetEvaluated();
 
-        List<AB<Indiv,JSONObject>> evaluatedIndividuals = new ArrayList<>(json.length());
+        List<AB<AppTreeMI,JSONObject>> evaluatedIndividuals = new ArrayList<>(json.length());
 
         for (int i = 0; i < json.length(); i++) {
             JSONArray evalRes = json.getJSONArray(i);
@@ -118,7 +127,7 @@ public class DummyMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcSe
         return () -> evaluatedIndividuals;
     }
 
-    private AB<Indiv,JSONObject> getIndivBack(JSONArray evalResJsonArr) {
+    private AB<AppTreeMI,JSONObject> getIndivBack(JSONArray evalResJsonArr) {
 
         int       id     = evalResJsonArr.getInt(0);
         JSONArray scores = evalResJsonArr.getJSONArray(1);
@@ -127,10 +136,10 @@ public class DummyMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcSe
         double timeScore        = (scores.length() > 2) ? scores.getDouble(2) : mkErrorTimeScore();
 
 
-        AB<Indiv,JSONObject> indivData = id2indivData.remove(id);
+        AB<AppTreeMI,JSONObject> indivData = id2indivData.remove(id);
         if (indivData == null) {throw new Error("EvalResult for individual with non-existing id "+id+"!");}
 
-        Indiv indiv = indivData._1();
+        AppTreeMI indiv = indivData._1();
         JSONObject indivJson = indivData._2();
 
 

@@ -1,5 +1,8 @@
 package cz.tomkren.fishtron.ugen.trees;
 
+import com.google.common.base.Joiner;
+import cz.tomkren.utils.F;
+
 import java.util.List;
 
 /**
@@ -20,5 +23,11 @@ public class Sexpr {
 
     public boolean isLeaf() {
         return args.isEmpty();
+    }
+
+    @Override
+    public String toString() {
+        if (args.isEmpty()) {return sym;}
+        return sym + "("+ Joiner.on(",").join(F.map(args, Sexpr::toString)) +")";
     }
 }
