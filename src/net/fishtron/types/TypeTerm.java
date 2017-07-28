@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.types;
+package net.fishtron.types;
 
 import com.google.common.base.Joiner;
 import cz.tomkren.utils.AB;

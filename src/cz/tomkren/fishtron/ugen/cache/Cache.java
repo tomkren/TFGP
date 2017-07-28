@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.ugen.cache;
 
-import cz.tomkren.fishtron.types.Sub;
-import cz.tomkren.fishtron.types.Type;
+import net.fishtron.types.Sub;
+import net.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.cache.data.SubData;
 import cz.tomkren.fishtron.ugen.Mover;

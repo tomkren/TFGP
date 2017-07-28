@@ -1,9 +1,9 @@
 package cz.tomkren.fishtron.latticegen;
 
-import cz.tomkren.fishtron.types.Sub;
-import cz.tomkren.fishtron.types.Type;
-import cz.tomkren.fishtron.types.TypeTerm;
-import cz.tomkren.fishtron.types.Types;
+import net.fishtron.types.Sub;
+import net.fishtron.types.Type;
+import net.fishtron.types.TypeTerm;
+import net.fishtron.types.Types;
 import cz.tomkren.utils.*;
 import org.json.JSONObject;
 

@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.ugen.apps.gpml;
 import cz.tomkren.fishtron.eva.Distribution;
 import cz.tomkren.fishtron.eva.IndivGenerator;
 import cz.tomkren.fishtron.eva.Operator;
-import cz.tomkren.fishtron.types.Type;
+import net.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.apps.workflows.Workflows;

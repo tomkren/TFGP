@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.terms;
 
 import cz.tomkren.fishtron.sandbox.SonRestriction;
-import cz.tomkren.fishtron.types.*;
+import net.fishtron.types.*;
 import cz.tomkren.fishtron.workflows.TypedDag; // TODO !!!!!!!!!!!!!!  Potřeba odstranit reference na TypedDag -důležité !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! !!!   !!!!!!!!!!!!!!!!!!
 import cz.tomkren.utils.*;
 import org.json.JSONObject;

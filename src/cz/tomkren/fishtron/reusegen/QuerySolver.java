@@ -4,9 +4,9 @@ package cz.tomkren.fishtron.reusegen;
 import cz.tomkren.fishtron.skeletons.SkeletonTree;
 import cz.tomkren.fishtron.terms.PolyTree;
 import cz.tomkren.fishtron.terms.SmartLibrary;
-import cz.tomkren.fishtron.types.TMap;
-import cz.tomkren.fishtron.types.Type;
-import cz.tomkren.fishtron.types.Types;
+import net.fishtron.types.TMap;
+import net.fishtron.types.Type;
+import net.fishtron.types.Types;
 import cz.tomkren.utils.Log;
 
 import java.util.*;

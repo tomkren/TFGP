@@ -3,9 +3,9 @@ package cz.tomkren.fishtron.terms;
 import cz.tomkren.fishtron.eva.FitIndiv;
 import cz.tomkren.fishtron.eva.FitVal;
 import cz.tomkren.fishtron.reusegen.QuerySolver;
-import cz.tomkren.fishtron.types.Sub;
-import cz.tomkren.fishtron.types.TMap;
-import cz.tomkren.fishtron.types.Type;
+import net.fishtron.types.Sub;
+import net.fishtron.types.TMap;
+import net.fishtron.types.Type;
 import cz.tomkren.fishtron.workflows.DataScientistLibs;
 import cz.tomkren.utils.*;
 

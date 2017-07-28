@@ -3,8 +3,8 @@ package cz.tomkren.fishtron.operators;
 import cz.tomkren.fishtron.eva.IndivGenerator;
 import cz.tomkren.fishtron.reusegen.QuerySolver;
 import cz.tomkren.fishtron.terms.PolyTree;
-import cz.tomkren.fishtron.types.Type;
-import cz.tomkren.fishtron.types.Types;
+import net.fishtron.types.Type;
+import net.fishtron.types.Types;
 
 import java.util.List;
 

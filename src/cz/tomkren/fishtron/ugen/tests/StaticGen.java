@@ -1,9 +1,9 @@
 package cz.tomkren.fishtron.ugen.tests;
 
-import cz.tomkren.fishtron.types.Sub;
-import cz.tomkren.fishtron.types.Type;
-import cz.tomkren.fishtron.types.TypeVar;
-import cz.tomkren.fishtron.types.Types;
+import net.fishtron.types.Sub;
+import net.fishtron.types.Type;
+import net.fishtron.types.TypeVar;
+import net.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;

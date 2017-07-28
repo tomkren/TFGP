@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.ugen.multi.operators;
 
 import cz.tomkren.fishtron.eva.IndivGenerator;
-import cz.tomkren.fishtron.types.Type;
+import net.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.eva.AppTreeIndivGenerator;

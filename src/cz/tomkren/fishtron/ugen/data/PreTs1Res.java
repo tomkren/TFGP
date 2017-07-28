@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.ugen.data;
 
-import cz.tomkren.fishtron.types.Sub;
+import net.fishtron.types.Sub;
 
 import java.math.BigInteger;
 

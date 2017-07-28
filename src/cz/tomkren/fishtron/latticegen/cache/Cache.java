@@ -1,9 +1,9 @@
 package cz.tomkren.fishtron.latticegen.cache;
 
 import cz.tomkren.fishtron.latticegen.LSolver;
-import cz.tomkren.fishtron.types.Sub;
-import cz.tomkren.fishtron.types.Type;
-import cz.tomkren.fishtron.types.TypeVar;
+import net.fishtron.types.Sub;
+import net.fishtron.types.Type;
+import net.fishtron.types.TypeVar;
 import cz.tomkren.utils.ABC;
 import cz.tomkren.utils.F;
 import org.json.JSONArray;

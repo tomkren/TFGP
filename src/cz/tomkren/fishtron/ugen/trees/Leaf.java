@@ -1,8 +1,8 @@
 package cz.tomkren.fishtron.ugen.trees;
 
 import cz.tomkren.fishtron.terms.SubtreePos;
-import cz.tomkren.fishtron.types.Sub;
-import cz.tomkren.fishtron.types.Type;
+import net.fishtron.types.Sub;
+import net.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.Fresh;
 import cz.tomkren.fishtron.ugen.params.Params;
 import cz.tomkren.utils.AB;

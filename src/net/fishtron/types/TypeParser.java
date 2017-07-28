@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.types;
+package net.fishtron.types;
 
 /** Created by tom on 7.11.2015.*/
 

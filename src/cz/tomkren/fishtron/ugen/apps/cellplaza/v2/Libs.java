@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza.v2;
 
-import cz.tomkren.fishtron.types.Type;
-import cz.tomkren.fishtron.types.Types;
+import net.fishtron.types.Type;
+import net.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.shared.CellEvalCodes;
 import cz.tomkren.fishtron.ugen.eval.*;
@@ -11,7 +11,6 @@ import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Checker;
 import cz.tomkren.utils.F;
 //import cz.tomkren.utils.Log;
-import cz.tomkren.utils.TODO;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

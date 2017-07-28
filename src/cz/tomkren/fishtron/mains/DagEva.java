@@ -9,8 +9,8 @@ import cz.tomkren.fishtron.reusegen.QuerySolver;
 import cz.tomkren.fishtron.operators.RandomParamsPolyTreeGenerator;
 import cz.tomkren.fishtron.terms.PolyTree;
 import cz.tomkren.fishtron.terms.SmartLibrary;
-import cz.tomkren.fishtron.types.Type;
-import cz.tomkren.fishtron.types.Types;
+import net.fishtron.types.Type;
+import net.fishtron.types.Types;
 
 import cz.tomkren.fishtron.workflows.DagEvolutionLogger;
 import cz.tomkren.fishtron.workflows.DataScientistFitness;

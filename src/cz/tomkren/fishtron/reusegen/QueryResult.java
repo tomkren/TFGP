@@ -5,13 +5,12 @@ import com.google.common.base.Joiner;
 import cz.tomkren.fishtron.skeletons.SkeletonTree;
 import cz.tomkren.fishtron.terms.PolyTree;
 import cz.tomkren.fishtron.terms.SmartSymbol;
-import cz.tomkren.fishtron.types.Sub;
-import cz.tomkren.fishtron.types.TMap;
-import cz.tomkren.fishtron.types.Type;
+import net.fishtron.types.Sub;
+import net.fishtron.types.TMap;
+import net.fishtron.types.Type;
 import cz.tomkren.utils.ABC;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Listek;
-import cz.tomkren.utils.Log;
 
 import java.math.BigInteger;
 import java.util.*;

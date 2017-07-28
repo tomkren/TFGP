@@ -1,9 +1,8 @@
 package cz.tomkren.fishtron.sandbox;
 
 import cz.tomkren.fishtron.terms.SmartSymbol;
-import cz.tomkren.fishtron.types.Type;
-import cz.tomkren.fishtron.types.TypeParser;
-import cz.tomkren.fishtron.types.Types;
+import net.fishtron.types.Type;
+import net.fishtron.types.TypeParser;
 import cz.tomkren.utils.Comb0;
 
 

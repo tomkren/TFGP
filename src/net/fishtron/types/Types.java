@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.types;
+package net.fishtron.types;
 
 import com.google.common.base.Joiner;
 import cz.tomkren.fishtron.ugen.nf.MkNF;
@@ -9,7 +9,6 @@ import cz.tomkren.utils.F;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /** Created by tom on 7.11.2015.*/

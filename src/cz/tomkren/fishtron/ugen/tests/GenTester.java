@@ -6,9 +6,9 @@ import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Longs;
 
 import cz.tomkren.fishtron.eva.IndivGenerator;
-import cz.tomkren.fishtron.types.Type;
-import cz.tomkren.fishtron.types.TypeTerm;
-import cz.tomkren.fishtron.types.Types;
+import net.fishtron.types.Type;
+import net.fishtron.types.TypeTerm;
+import net.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.apps.gpml.DummyHistoryEvalManager;
 import cz.tomkren.fishtron.ugen.apps.gpml.XmlRpcServer_MultiEvalManager;
 import cz.tomkren.fishtron.ugen.apps.workflows.Workflows;

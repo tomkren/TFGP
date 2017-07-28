@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.types;
+package net.fishtron.types;
 
 import cz.tomkren.utils.AA;
 

@@ -1,8 +1,8 @@
 package cz.tomkren.fishtron.ugen.apps.workflows;
 
-import cz.tomkren.fishtron.types.Type;
-import cz.tomkren.fishtron.types.TypeTerm;
-import cz.tomkren.fishtron.types.Types;
+import net.fishtron.types.Type;
+import net.fishtron.types.TypeTerm;
+import net.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;

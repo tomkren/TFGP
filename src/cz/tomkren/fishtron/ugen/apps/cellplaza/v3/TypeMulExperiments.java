@@ -1,8 +1,8 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza.v3;
 
-import cz.tomkren.fishtron.types.Type;
-import cz.tomkren.fishtron.types.TypeSym;
-import cz.tomkren.fishtron.types.TypeTerm;
+import net.fishtron.types.Type;
+import net.fishtron.types.TypeSym;
+import net.fishtron.types.TypeTerm;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.eval.*;
 import cz.tomkren.fishtron.ugen.trees.AppTree;

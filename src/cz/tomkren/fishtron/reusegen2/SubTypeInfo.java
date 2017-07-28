@@ -1,8 +1,8 @@
 package cz.tomkren.fishtron.reusegen2;
 
 import cz.tomkren.fishtron.terms.SmartSymbol;
-import cz.tomkren.fishtron.types.Type;
-import cz.tomkren.fishtron.types.Types;
+import net.fishtron.types.Type;
+import net.fishtron.types.Types;
 import cz.tomkren.utils.AA;
 import cz.tomkren.utils.F;
 

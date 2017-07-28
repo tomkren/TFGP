@@ -1,9 +1,9 @@
 package cz.tomkren.fishtron.ugen.nf;
 
-import cz.tomkren.fishtron.types.Type;
-import cz.tomkren.fishtron.types.TypeSym;
-import cz.tomkren.fishtron.types.TypeTerm;
-import cz.tomkren.fishtron.types.TypeVar;
+import net.fishtron.types.Type;
+import net.fishtron.types.TypeSym;
+import net.fishtron.types.TypeTerm;
+import net.fishtron.types.TypeVar;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
 

@@ -4,7 +4,7 @@ import cz.tomkren.fishtron.reusegen.QuerySolver;
 import cz.tomkren.fishtron.terms.PolyTree;
 import cz.tomkren.fishtron.terms.SmartLibrary;
 import cz.tomkren.fishtron.terms.SubtreePos;
-import cz.tomkren.fishtron.types.Type;
+import net.fishtron.types.Type;
 import cz.tomkren.fishtron.workflows.DataScientistLibs;
 
 import cz.tomkren.utils.Checker;

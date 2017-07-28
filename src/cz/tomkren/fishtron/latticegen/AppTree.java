@@ -2,9 +2,9 @@
 package cz.tomkren.fishtron.latticegen;
 
 
-import cz.tomkren.fishtron.types.Sub;
-import cz.tomkren.fishtron.types.Type;
-import cz.tomkren.fishtron.types.Types;
+import net.fishtron.types.Sub;
+import net.fishtron.types.Type;
+import net.fishtron.types.Types;
 import cz.tomkren.utils.AA;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.F;

@@ -1,9 +1,8 @@
 package cz.tomkren.fishtron.ugen.cache.data;
 
-import cz.tomkren.fishtron.types.Sub;
+import net.fishtron.types.Sub;
 import cz.tomkren.utils.F;
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 /**  Created by user on 8. 2. 2017. */
 

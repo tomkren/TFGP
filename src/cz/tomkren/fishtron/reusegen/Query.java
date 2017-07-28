@@ -1,9 +1,9 @@
 package cz.tomkren.fishtron.reusegen;
 
 import cz.tomkren.fishtron.terms.SmartSymbol;
-import cz.tomkren.fishtron.types.Sub;
-import cz.tomkren.fishtron.types.Type;
-import cz.tomkren.fishtron.types.Types;
+import net.fishtron.types.Sub;
+import net.fishtron.types.Type;
+import net.fishtron.types.Types;
 
 import java.util.List;
 import java.util.Random;

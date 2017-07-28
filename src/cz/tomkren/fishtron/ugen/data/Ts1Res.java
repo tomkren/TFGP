@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.ugen.data;
 
-import cz.tomkren.fishtron.types.Sub;
-import cz.tomkren.fishtron.types.Type;
+import net.fishtron.types.Sub;
+import net.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.utils.AB;
 

@@ -9,7 +9,7 @@ import cz.tomkren.fishtron.sandbox2.Dag_EvalManager;
 
 import cz.tomkren.fishtron.sandbox2.Dag_IEvalManager;
 import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
-import cz.tomkren.fishtron.types.Type;
+import net.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.eva.AppTreeIndiv;

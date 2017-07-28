@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.terms;
 
 
-import cz.tomkren.fishtron.types.Type;
+import net.fishtron.types.Type;
 import cz.tomkren.utils.Listek;
 import cz.tomkren.utils.Log;
 

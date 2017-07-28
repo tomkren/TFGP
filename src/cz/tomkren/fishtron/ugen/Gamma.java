@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.ugen;
 
-import cz.tomkren.fishtron.types.Type;
-import cz.tomkren.fishtron.types.Types;
+import net.fishtron.types.Type;
+import net.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.data.GammaSym;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.trees.Lam;
@@ -10,7 +10,6 @@ import cz.tomkren.utils.ABC;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.TODO;
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;

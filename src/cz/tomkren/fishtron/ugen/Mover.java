@@ -1,8 +1,8 @@
 package cz.tomkren.fishtron.ugen;
 
-import cz.tomkren.fishtron.types.Sub;
-import cz.tomkren.fishtron.types.Type;
-import cz.tomkren.fishtron.types.TypeVar;
+import net.fishtron.types.Sub;
+import net.fishtron.types.Type;
+import net.fishtron.types.TypeVar;
 import cz.tomkren.fishtron.ugen.data.PreSubsRes;
 import cz.tomkren.fishtron.ugen.data.PreTs1Res;
 import cz.tomkren.fishtron.ugen.data.SubsRes;

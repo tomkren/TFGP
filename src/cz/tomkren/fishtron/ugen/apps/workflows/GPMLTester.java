@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.ugen.apps.workflows;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import cz.tomkren.fishtron.eva.IndivGenerator;
-import cz.tomkren.fishtron.types.Type;
+import net.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.eva.AppTreeIndiv;
@@ -20,7 +20,6 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Function;
 
 /** Created by tom on 17. 2. 2017. */
