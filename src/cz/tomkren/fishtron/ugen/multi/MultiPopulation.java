@@ -14,7 +14,7 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
 
     private Set<Indiv> yetToBeEvaluated;
     private Set<Indiv> individuals;
-    private Set<Indiv> removedIndividuals;
+    private Set<Indiv> removedIndividuals; //TODO ukladat usporněji !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     private int numUniqueCheckFails;
     private List<Indiv> terminators;
@@ -111,6 +111,9 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
             msg += "  Worst-individual-fitness = "+ worstIndividual.getFitness() +"\n";
             msg += "  Population-Info: "+getPopulationInfo()+"\n";
             info.append(msg);
+
+            // Uncomment for testing the assignment by ineffective but more straightforward algorithm
+            //MultiUtils.assignFrontsAndDistances_test(individuals, isMaxis);
 
             assert worstIndividual != null;
 

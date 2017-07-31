@@ -55,7 +55,7 @@ public class DagMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcServ
         dagEvaluator = new Dag_JsonEvalInterface(evaluatorURL);
 
         id2indivData = new HashMap<>();
-        nextId = 0;
+        nextId = 1;
     }
 
     @Override
@@ -84,6 +84,12 @@ public class DagMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcServ
 
             AppTree indivTree = ((AppTreeMI)indiv).getTree();
             int workflowSize = SizeUtils.workflowSize(indivTree);
+
+            // TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            // TODO : to je strašný nastavovat to tady, musí se refaktorovat jako sůl!, stačí všecky id related veci přesunout
+            // TODO | do multi evoluce, a manažer to používat jako službu, todle je běs, vůbec ten indiv json by měl bejt v individualovi,
+            // TODO | něco jako metadata typ na to udelanej a v nem json s user specifik datama, ale takovýhle pevný veci napevno
+            indiv.setId(nextId);
 
             indivJson.put("id",nextId);
             indivJson.put("workflowSize", workflowSize);

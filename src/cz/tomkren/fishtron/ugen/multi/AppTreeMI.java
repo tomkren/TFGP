@@ -75,7 +75,12 @@ public class AppTreeMI implements MultiIndiv {
     @Override public List<Double> getFitness() {return fitness;}
     @Override public void setFitness(List<Double> fitness) {this.fitness = fitness;}
 
-    @Override public int getId() {return id;}
+    @Override public int getId() {
+        if (id == 0) {
+            throw new Error("getId on not assigned id, probably something horribly wrong!");
+        }
+        return id;
+    }
     @Override public void setId(int id) {this.id =id;}
 
     @Override public int getFront() {return front;}

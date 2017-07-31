@@ -2,6 +2,7 @@ package cz.tomkren.fishtron.ugen.multi;
 
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Log;
+import cz.tomkren.utils.Stopwatch;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,7 +35,8 @@ public class MultiUtils {
                 return false;
             }
         }
-        return isStrong;
+        return isStrong || i1.getId() > i2.getId();
+        //return isStrong;
     }
 
 
@@ -88,31 +90,86 @@ public class MultiUtils {
             MultiIndiv next  = front.get(i+1);
 
             double d0 = next.getFitness(0) - prev.getFitness(0);
-            double d1 = prev.getFitness(1) - next.getFitness(1);
+            double d1 = next.getFitness(1) - prev.getFitness(1);
 
             indiv.setCrowdingDistance(Math.abs(d0) + Math.abs(d1));
         }
     }
 
 
+    private static <Indiv extends MultiIndiv> int assignCrowdingDistances_test(List<Indiv> front, List<Boolean> isMaxis) {
+        checkFitnessSize(isMaxis);
 
-    public static <Indiv extends MultiIndiv> AB<Indiv,Integer> assignFrontsAndDistances(Collection<Indiv> indivs, List<Boolean> isMaxis) {
+        int numOk = 0;
+
+        front.sort(new ObjectiveValueComparator<>(0, isMaxis));
+
+        int iLast = front.size() - 1;
+
+        if (front.get(0).getCrowdingDistance() == Double.MAX_VALUE) {
+            numOk ++;
+        } else {
+            throw new Error("Not true: front.get(0).getCrowdingDistance() == Double.MAX_VALUE");
+        }
+
+        if (front.get(iLast).getCrowdingDistance() == Double.MAX_VALUE) {
+            numOk ++;
+        } else {
+            throw new Error("Not true: front.get(iLast).getCrowdingDistance() == Double.MAX_VALUE");
+        }
+
+        for (int i = 1; i < iLast; i++) {
+
+            MultiIndiv prev  = front.get(i-1);
+            MultiIndiv indiv = front.get(i);
+            MultiIndiv next  = front.get(i+1);
+
+            double d0 = next.getFitness(0) - prev.getFitness(0);
+            double d1 = next.getFitness(1) - prev.getFitness(1);
+
+            if (indiv.getCrowdingDistance() == (Math.abs(d0) + Math.abs(d1))) {
+                numOk ++;
+            } else {
+                throw new Error("Not true: indiv.getCrowdingDistance() == (Math.abs(d0) + Math.abs(d1))");
+            }
+        }
+
+        return numOk;
+    }
+
+
+    public static <Indiv extends MultiIndiv> AB<Indiv,Integer> assignFrontsAndDistances_test(Collection<Indiv> indivs, List<Boolean> isMaxis) {
+
+        Stopwatch sw = new Stopwatch();
+        Log.it_noln("Starting front assignment test ... ");
+        int numOk = 0;
+        int numOkDist = 0;
+
         checkFitnessSize(isMaxis);
 
         List<Indiv> indivsToAssign = new ArrayList<>(indivs);
         int frontNumber = 1;
 
         List<Indiv> front = null;
-
         while (!indivsToAssign.isEmpty()) {
             front = getNonDominatedFront(indivsToAssign, isMaxis);
             indivsToAssign.removeAll(front);
 
-            for (Indiv indiv : front) {indiv.setFront(frontNumber);}
+            for (Indiv indiv : front) {
+                //indiv.setFront(frontNumber);
+                if (indiv.getFront() == frontNumber) {
+                    //Log.it("OK front!");
+                    numOk++;
+                } else {
+                    throw new Error("BAD FRONT!");
+                }
+            }
             frontNumber ++;
 
-            assignCrowdingDistances(front, isMaxis);
+            numOkDist += assignCrowdingDistances_test(front, isMaxis);
         }
+
+        Log.it(numOk+" front tests performed successfully. (numOkDist = "+numOkDist+") It took "+sw.restart());
 
         return AB.mk(front == null ? null : findWorstIndiv(front), frontNumber-1);
     }
@@ -151,13 +208,13 @@ public class MultiUtils {
             }
 
             frontNumber++;
-            //assignCrowdingDistances(front, isMaxis);
+            assignCrowdingDistances(front, isMaxis); // dříve bylo zakomentováno, kvůli domnělé optimalizaci
 
             notAssigned = stillNotAssigned;
-            stillNotAssigned = new ArrayList<>(); //.clear();
+            stillNotAssigned = new ArrayList<>();
         }
 
-        assignCrowdingDistances(front, isMaxis); // we need to assign crowding distance in the last front only
+        //assignCrowdingDistances(front, isMaxis); // we need to assign crowding distance in the last front only? well, not really
 
         return AB.mk(findWorstIndiv(front), frontNumber-1);
     }
@@ -258,7 +315,9 @@ public class MultiUtils {
                 }
             }
 
-            return 0;
+            return - Double.compare(o1.getId(), o2.getId());
+
+            //return 0;
         }
     }
 

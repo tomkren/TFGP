@@ -44,9 +44,13 @@ public interface MultiIndiv {
         return (isMaxis.size() > 1) ? multiCompare(i1,i2) : singleCompare(i1,i2, isMaxis.get(0));
     }
 
+    // TODO dát do multi utils, tady je to zapomenutý dost nešikovně !!!!!!!!!!!!!!!!!!
     static <Indiv extends MultiIndiv> int multiCompare(Indiv i1, Indiv i2) {
         int front1 = i1.getFront();
         int front2 = i2.getFront();
+
+        if (front1 == 0) {throw new Error("Unassigned front for i1: "+i1+", something went terribly wrong.");}
+        if (front2 == 0) {throw new Error("Unassigned front for i2: "+i2+", something went terribly wrong.");}
 
         if (front1 < front2) {return -1;} // i1 wins
         if (front1 > front2) {return  1;} // i2 wins
@@ -57,7 +61,9 @@ public interface MultiIndiv {
         if (dist1 > dist2) {return -1;} // i1 wins
         if (dist1 < dist2) {return  1;} // i2 wins
 
-        return 0; // tie
+        if (i1.getId() > i2.getId()) {return -1;} // i1 wins (i.e. prefer younger solution)
+        return 1; // i2 wins, since id1 == id2 implies i1 == i2, so no need for tie.
+        //return 0; // tie
     }
 
     static <Indiv extends MultiIndiv> int singleCompare(Indiv i1, Indiv i2, boolean isMaximization) {

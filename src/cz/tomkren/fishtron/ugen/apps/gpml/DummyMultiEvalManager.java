@@ -31,7 +31,7 @@ public class DummyMultiEvalManager implements XmlRpcServer_MultiEvalManager<AppT
         this.lib = lib;
         fakeEvalQueue = new ArrayQueue<>();
         id2indivData = new HashMap<>();
-        nextId = 0;
+        nextId = 1;
         this.pollRandomNumber = pollRandomNumber;
         this.checker = ch;
     }
@@ -54,10 +54,12 @@ public class DummyMultiEvalManager implements XmlRpcServer_MultiEvalManager<AppT
 
             id2indivData.put(nextId, indivData);
 
+            AppTreeMI indiv = indivData._1();
             JSONObject indivJson = indivData._2();
+
+            indiv.setId(nextId);
             indivJson.put("id", nextId);
 
-            AppTreeMI indiv = indivData._1();
             Object indivValue = indiv.computeValue(lib);
             JSONObject jsonCode = new JSONObject(((TypedDag) indivValue).toJson());
 
@@ -96,9 +98,7 @@ public class DummyMultiEvalManager implements XmlRpcServer_MultiEvalManager<AppT
             JSONObject submittedIndivData = fakeEvalQueue.poll();
 
             int id = submittedIndivData.getInt("id");
-            JSONObject indivDagJson = submittedIndivData.getJSONObject("code");
-
-
+            //JSONObject indivDagJson = submittedIndivData.getJSONObject("code");
 
             double fakeScore1 = submittedIndivData.getInt("workflowSize");
             double fakeStdDevScore = Math.random();
@@ -132,8 +132,8 @@ public class DummyMultiEvalManager implements XmlRpcServer_MultiEvalManager<AppT
         int       id     = evalResJsonArr.getInt(0);
         JSONArray scores = evalResJsonArr.getJSONArray(1);
 
-        double performanceScore = (scores.length() > 0) ? scores.getDouble(0) : mkErrorPerformanceScore();
-        double timeScore        = (scores.length() > 2) ? scores.getDouble(2) : mkErrorTimeScore();
+        double score_1 = (scores.length() > 0) ? scores.getDouble(0) : mkErrorPerformanceScore();
+        double score_2 = (scores.length() > 2) ? scores.getDouble(2) : mkErrorTimeScore();
 
 
         AB<AppTreeMI,JSONObject> indivData = id2indivData.remove(id);
@@ -143,7 +143,7 @@ public class DummyMultiEvalManager implements XmlRpcServer_MultiEvalManager<AppT
         JSONObject indivJson = indivData._2();
 
 
-        List<Double> fitness = Arrays.asList(performanceScore, timeScore);
+        List<Double> fitness = Arrays.asList(score_1, score_2);
         indiv.setFitness(fitness);
 
         indivJson.put("rawScores", scores);

@@ -4,7 +4,7 @@
   "dataset" : "winequality-white.csv",
   "killServer": true,
 
-  "fitness": [["max","performance"], ["min","foldedSize"]],
+  "fitness": [["max","foldedSize"], ["min","rawSize"]],
   "dummyFitness": true,
 
   "timeLimit": 14400,

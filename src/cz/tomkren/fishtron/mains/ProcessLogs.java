@@ -29,8 +29,9 @@ public class ProcessLogs {
         Checker checker = new Checker();
 
         //String runDirPath = "results/_raw/dageva-outputs-multi-time-nocache/wilt-1/tom/run_1";
-        String runDirPath = "results/_raw/dageva-outputs-multi-size-cache/wilt-1/tom/run_1";
-        String experimentId = "wilt-1-multi-size-cache"; //"wine-5";
+        //String runDirPath = "results/_raw/dageva-outputs-multi-size-cache/wilt-1/tom/run_1";
+        String runDirPath = "logs/run_103";
+        String experimentId = "zruda_2"; //"wine-5";
 
 
         processLogs(runDirPath, experimentId);
@@ -288,7 +289,7 @@ public class ProcessLogs {
         Log.it("numFronts="+numFronts);
 
         StringBuilder front1 = new StringBuilder();
-        front1.append("fitness1\tfitness2..\n");
+        front1.append("id \t fitness1 \t fitness2..\n");
 
         for (MultiIndiv mi : indivs) {
             int front = mi.getFront();
@@ -296,7 +297,7 @@ public class ProcessLogs {
                 throw new Error("WTF front 0!");
             }
             if (front == 1) {
-                front1.append(Joiner.on("\t").join(mi.getFitness())).append("\n");
+                front1.append(mi.getId()).append("\t").append(Joiner.on("\t").join(mi.getFitness())).append("\n");
             }
         }
 
