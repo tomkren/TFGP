@@ -136,6 +136,7 @@ public class MultiUtils {
 
             front.add(notAssigned.get(0));
             Indiv lastNonDom = front.get(0);
+            lastNonDom.setFront(frontNumber);
 
             for (int i = 1; i < notAssigned.size(); i++) {
                 Indiv check = notAssigned.get(i);

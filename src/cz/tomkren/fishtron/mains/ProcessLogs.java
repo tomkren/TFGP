@@ -1,6 +1,9 @@
 package cz.tomkren.fishtron.mains;
 
 import com.google.common.base.Joiner;
+import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
+import cz.tomkren.fishtron.ugen.multi.MultiIndiv;
+import cz.tomkren.fishtron.ugen.multi.MultiUtils;
 import cz.tomkren.utils.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -12,10 +15,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /** Created by tom on 28. 6. 2016.*/
 
@@ -164,6 +164,8 @@ public class ProcessLogs {
         StringBuilder fitnesses2 = new StringBuilder();
         fitnesses2.append("#evalId\tindivId\tfitness1\tfitness2..\n");
 
+        List<MultiIndiv> indivs = new ArrayList<>();
+
         for (int evalId = 1; evalId <= numEvaluations; evalId++) {
 
             String evalFilePath = evalsDirPath + "/eval_" + evalId + ".json";
@@ -181,6 +183,12 @@ public class ProcessLogs {
 
                 fitnesses.append(evalId).append("\t").append(id).append("\t").append(fitness).append("\n");
                 fitnesses2.append(evalId).append("\t").append(id).append("\t").append(Joiner.on("\t").join(fitnessList)).append("\n");
+
+                // construct fake indiv for front computation
+                AppTreeMI fakeIndiv = new AppTreeMI(null);
+                fakeIndiv.setFitness(fitnessList);
+                fakeIndiv.setId(id);
+                indivs.add(fakeIndiv);
 
 
                 JSONObject operatorData = indivData.getJSONObject("operator");
@@ -272,6 +280,27 @@ public class ProcessLogs {
             F.writeFile(experimentDir+"/"+operatorName+"_1.txt", tableStr_1);
             F.writeFile(experimentDir+"/"+operatorName+"_2.txt", tableStr_2);
         }
+
+
+        Log.it("Starts computing fronts...");
+        AB<MultiIndiv,Integer> assignRes = MultiUtils.assignFrontsAndDistances_martin(indivs, Arrays.asList(true, false)); // TODO načíst isMaxis pořádně !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!§
+        int numFronts = assignRes._2();
+        Log.it("numFronts="+numFronts);
+
+        StringBuilder front1 = new StringBuilder();
+        front1.append("fitness1\tfitness2..\n");
+
+        for (MultiIndiv mi : indivs) {
+            int front = mi.getFront();
+            if (front == 0) {
+                throw new Error("WTF front 0!");
+            }
+            if (front == 1) {
+                front1.append(Joiner.on("\t").join(mi.getFitness())).append("\n");
+            }
+        }
+
+        F.writeFile(experimentDir+"/front1.txt", front1.toString());
 
     }
 
