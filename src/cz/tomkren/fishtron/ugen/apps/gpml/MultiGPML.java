@@ -21,7 +21,7 @@ import java.io.IOException;
 
 public class MultiGPML {
 
-    private static final String version = "4.1.2";
+    private static final String version = "4.2.0";
 
     private static void run(String jsonConfigFilename, String logPath) throws JSONException, IOException, XmlRpcException {
         Log.it("Program arguments:");
