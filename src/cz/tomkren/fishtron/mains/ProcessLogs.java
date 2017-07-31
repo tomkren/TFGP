@@ -1,9 +1,7 @@
 package cz.tomkren.fishtron.mains;
 
-import cz.tomkren.utils.AB;
-import cz.tomkren.utils.Checker;
-import cz.tomkren.utils.F;
-import cz.tomkren.utils.Log;
+import com.google.common.base.Joiner;
+import cz.tomkren.utils.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -30,8 +28,9 @@ public class ProcessLogs {
     public static void main(String[] args) {
         Checker checker = new Checker();
 
-        String runDirPath = "C:/Users/pejsek/Desktop/wine-5/media/logs/tom/run_1";
-        String experimentId = "wine-5";
+        //String runDirPath = "results/_raw/dageva-outputs-multi-time-nocache/wilt-1/tom/run_1";
+        String runDirPath = "results/_raw/dageva-outputs-multi-size-cache/wilt-1/tom/run_1";
+        String experimentId = "wilt-1-multi-size-cache"; //"wine-5";
 
 
         processLogs(runDirPath, experimentId);
@@ -43,10 +42,15 @@ public class ProcessLogs {
 
     private static void mkDerivedFiles(String experimentId) {
         mkDerivedFiles(experimentId, "fitness", 2);
-        mkDerivedFiles(experimentId, "generator", 1);
-        mkDerivedFiles(experimentId, "basicTypedXover", 1);
-        mkDerivedFiles(experimentId, "sameSizeSubtreeMutation", 1);
-        mkDerivedFiles(experimentId, "oneParamMutation", 1);
+
+        mkDerivedFiles(experimentId, "generator_1", 1);
+        mkDerivedFiles(experimentId, "generator_2", 1);
+        mkDerivedFiles(experimentId, "basicTypedXover_1", 1);
+        mkDerivedFiles(experimentId, "basicTypedXover_2", 1);
+        mkDerivedFiles(experimentId, "sameSizeSubtreeMutation_1", 1);
+        mkDerivedFiles(experimentId, "sameSizeSubtreeMutation_2", 1);
+        mkDerivedFiles(experimentId, "oneParamMutation_1", 1);
+        mkDerivedFiles(experimentId, "oneParamMutation_2", 1);
     }
 
     private static void mkDerivedFiles(String experimentId, String tableName, int dataColIndex) {
@@ -66,6 +70,8 @@ public class ProcessLogs {
         writeNumList(dir+"/"+tableName+"-w10.txt", movingAvg(fitness,10));
         writeNumList(dir+"/"+tableName+"-w100.txt", movingAvg(fitness,100));
         writeNumList(dir+"/"+tableName+"-w1000.txt", movingAvg(fitness,1000));
+        writeNumList(dir+"/"+tableName+"-w2000.txt", movingAvg(fitness,2000));
+        writeNumList(dir+"/"+tableName+"-w3000.txt", movingAvg(fitness,3000));
         writeNumList(dir+"/"+tableName+"-w10000.txt", movingAvg(fitness,10000));
 
 
@@ -148,12 +154,15 @@ public class ProcessLogs {
 
         JSONObject config = new JSONObject(readFile(configFilePath));
 
-        Map<String,StringBuilder> operators = new HashMap<>();
+        Map<String,AA<StringBuilder>> operators = new HashMap<>();
 
         int numEvaluations = config.getInt("numEvaluations");
 
         StringBuilder fitnesses = new StringBuilder();
         fitnesses.append("#evalId\tindivId\tfitness\n");
+
+        StringBuilder fitnesses2 = new StringBuilder();
+        fitnesses2.append("#evalId\tindivId\tfitness1\tfitness2..\n");
 
         for (int evalId = 1; evalId <= numEvaluations; evalId++) {
 
@@ -167,8 +176,11 @@ public class ProcessLogs {
 
                 JSONObject indivData = evalResult.getJSONObject(i).getJSONObject("indivData");
                 int    id      = indivData.getInt("id");
-                double fitness = indivData.getDouble("fitness");
+                double fitness = getSingeFitness(indivData);
+                List<Double> fitnessList = getFitnessList(indivData);
+
                 fitnesses.append(evalId).append("\t").append(id).append("\t").append(fitness).append("\n");
+                fitnesses2.append(evalId).append("\t").append(id).append("\t").append(Joiner.on("\t").join(fitnessList)).append("\n");
 
 
                 JSONObject operatorData = indivData.getJSONObject("operator");
@@ -176,35 +188,57 @@ public class ProcessLogs {
 
                 JSONArray parentsData = indivData.getJSONArray("parents");
 
-                StringBuilder operatorSb = operators.get(operatorName);
-                if (operatorSb == null) {
-                    operatorSb = new StringBuilder();
-                    operators.put(operatorName, operatorSb);
+                AA<StringBuilder> operatorSbPair = operators.get(operatorName);
+                if (operatorSbPair == null) {
+
+                    StringBuilder sb_1 = new StringBuilder();
+                    StringBuilder sb_2 = new StringBuilder();
+
+                    operatorSbPair = AA.mk(sb_1, sb_2);
+                    operators.put(operatorName, operatorSbPair);
 
                     if (parentsData.length() == 0) {
-                        operatorSb.append("#evalId\tfitness\n");
+                        sb_1.append("#evalId\tfitness\n");
                     } else {
-                        operatorSb.append("#evalId\timprovement\n");
+                        sb_1.append("#evalId\timprovement\n");
+                        sb_2.append("#evalId\tP_improvement\n");
                     }
                 }
 
 
                 if (parentsData.length() == 0) {
-
-                    operatorSb.append(evalId).append("\t").append(fitness).append("\n");
+                    operatorSbPair._1().append(evalId).append("\t").append(fitness).append("\n");
 
                 } else {
 
+                    double p_improvement = 0.0;
                     double avgParentFitness = 0.0;
-                    for (int p = 0; p<parentsData.length(); p++) {
+
+                    int numParents = parentsData.length();
+                    double p_delta = 1.0 / numParents;
+
+                    for (int p = 0; p<numParents; p++) {
                         JSONObject parent = parentsData.getJSONObject(p);
-                        avgParentFitness += parent.getDouble("fitness");
+                        double parentFitness = getSingeFitness(parent);
+
+                        avgParentFitness += parentFitness;
+
+                        if (fitness > parentFitness) {
+                            p_improvement += p_delta;
+                        } else if (fitness == parentFitness) {
+                            p_improvement += 0.5 * p_delta;
+                        }
                     }
-                    avgParentFitness /= parentsData.length();
+
+                    avgParentFitness /= numParents;
 
                     double improvement = fitness - avgParentFitness;
 
-                    operatorSb.append(evalId).append("\t").append(improvement).append("\n");
+                    StringBuilder sb_1 = operatorSbPair._1();
+                    StringBuilder sb_2 = operatorSbPair._2();
+
+                    sb_1.append(evalId).append("\t").append(improvement).append("\n");
+                    sb_2.append(evalId).append("\t").append(p_improvement).append("\n");
                 }
 
             }
@@ -224,16 +258,42 @@ public class ProcessLogs {
         mkDir(experimentDir);
 
         F.writeFile(experimentDir+"/fitness.txt", fitnesses.toString());
+        F.writeFile(experimentDir+"/fitness2.txt", fitnesses2.toString());
 
-        for (Map.Entry<String,StringBuilder> e : operators.entrySet()) {
+
+        for (Map.Entry<String,AA<StringBuilder>> e : operators.entrySet()) {
             String operatorName = e.getKey();
-            String tableStr = e.getValue().toString();
 
-            F.writeFile(experimentDir+"/"+operatorName+".txt", tableStr);
+            AA<StringBuilder> sbPair = e.getValue();
+
+            String tableStr_1 = sbPair._1().toString();
+            String tableStr_2 = sbPair._2().toString();
+
+            F.writeFile(experimentDir+"/"+operatorName+"_1.txt", tableStr_1);
+            F.writeFile(experimentDir+"/"+operatorName+"_2.txt", tableStr_2);
         }
 
     }
 
+    private static double sanitizeFitness(double rawFitVal) {
+        return Math.max(rawFitVal, -0.1);
+    }
+
+    private static double getSingeFitness(JSONObject indivData) {
+        Object fitVal = indivData.get("fitness");
+        if (fitVal instanceof Double) {
+            return sanitizeFitness((double) fitVal);
+        } else if (fitVal instanceof JSONArray) {
+            JSONArray fitArr = (JSONArray) fitVal;
+            return sanitizeFitness(fitArr.getDouble(0));
+        } else {
+            throw new Error("Unsupported fitness format.");
+        }
+    }
+
+    private static List<Double> getFitnessList(JSONObject indivData) {
+        return F.map(indivData.getJSONArray("fitness"), x->Double.valueOf(x.toString()));
+    }
 
 
     private static String readFile(String path) {
