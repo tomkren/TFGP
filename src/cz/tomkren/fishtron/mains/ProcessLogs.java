@@ -30,10 +30,10 @@ public class ProcessLogs {
     public static void main(String[] args) {
         Checker checker = new Checker();
 
-        //String runDirPath = "results/_raw/dageva-outputs-multi-time-nocache/wilt-1/tom/run_1";
-        String runDirPath = "results/raw/dageva-outputs-multi-size-cache_2/wilt-1/tom/run_1";
+        String experimentName = "wilt-5";
 
-        String experimentId = "wilt-1-multi-size-cache_2";
+        String runDirPath = "results/raw/dageva-outputs-multi-size-cache_2/"+experimentName+"/tom/run_1";
+        String experimentId = experimentName+"-multi-size-cache_2";
 
 
         processLogs(runDirPath, experimentId);
@@ -45,21 +45,23 @@ public class ProcessLogs {
 
     private static void mkDerivedFiles(String experimentId) {
 
+        //Set<String> ops =  Sets.newHashSet("basicTypedXover", "sameSizeSubtreeMutation", "oneParamMutation");
+        List<String> prefixes = Arrays.asList("allOperators", "generator", "basicTypedXover", "sameSizeSubtreeMutation", "oneParamMutation");
+        List<String> middles = Arrays.asList("1","2");
+        List<Integer> windows = Arrays.asList(1, 10, 100, 1000, 2000, 2500);
+
+
         String experimentDir = resultsDir+"/"+experimentId+"/";
         String derivedDir = experimentDir +"derived";
         mkDir(derivedDir);
 
-        //todo taky odebrat
-        mkDerivedFiles(experimentId, "fitness", 2);
 
 
-        //Set<String> ops =  Sets.newHashSet("basicTypedXover", "sameSizeSubtreeMutation", "oneParamMutation");
-        List<String> prefixes = Arrays.asList("allOperators", "generator", "basicTypedXover", "sameSizeSubtreeMutation", "oneParamMutation");
-
-        List<String> middles = Arrays.asList("1","2");
-        List<Integer> windows = Arrays.asList(1, 10, 100, 1000, 2000, 3000, 10000);
-
-
+        List<AB<Integer,Double>> fitness = readDataFile(experimentDir + "fitness.txt", 2);
+        writeNumList(derivedDir+"/fitness-best.txt", bestSoFar(fitness));
+        for (Integer window : windows) {
+            writeNumList(derivedDir+"/fitness-w"+window+".txt", movingAvg(fitness,1));
+        }
 
         for (String prefix : prefixes) {
             for (String middle : middles) {

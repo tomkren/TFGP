@@ -1,4 +1,3 @@
-dir = 'stats/wilt-1-multi-size-cache_2'
 window = '2000'
 
 allop='allOperators'

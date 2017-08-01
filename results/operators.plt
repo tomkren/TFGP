@@ -1,5 +1,3 @@
-load 'settings.plt'
-
 set key right top
 
 allop_file=dir.'/derived/'.allop.'_2-w'.window.'.txt'
