@@ -1,6 +1,7 @@
 package cz.tomkren.fishtron.mains;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Sets;
 import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
 import cz.tomkren.fishtron.ugen.multi.MultiIndiv;
 import cz.tomkren.fishtron.ugen.multi.MultiUtils;
@@ -12,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -22,16 +24,16 @@ import java.util.*;
 public class ProcessLogs {
 
 
-    private static final String resultsDir = "results";
+    private static final String resultsDir = "results/stats";
 
 
     public static void main(String[] args) {
         Checker checker = new Checker();
 
         //String runDirPath = "results/_raw/dageva-outputs-multi-time-nocache/wilt-1/tom/run_1";
-        //String runDirPath = "results/_raw/dageva-outputs-multi-size-cache/wilt-1/tom/run_1";
-        String runDirPath = "logs/run_103";
-        String experimentId = "zruda_2"; //"wine-5";
+        String runDirPath = "results/raw/dageva-outputs-multi-size-cache_2/wilt-1/tom/run_1";
+
+        String experimentId = "wilt-1-multi-size-cache_2";
 
 
         processLogs(runDirPath, experimentId);
@@ -42,16 +44,47 @@ public class ProcessLogs {
     }
 
     private static void mkDerivedFiles(String experimentId) {
+
+        String experimentDir = resultsDir+"/"+experimentId+"/";
+        String derivedDir = experimentDir +"derived";
+        mkDir(derivedDir);
+
+        //todo taky odebrat
         mkDerivedFiles(experimentId, "fitness", 2);
 
-        mkDerivedFiles(experimentId, "generator_1", 1);
-        mkDerivedFiles(experimentId, "generator_2", 1);
-        mkDerivedFiles(experimentId, "basicTypedXover_1", 1);
-        mkDerivedFiles(experimentId, "basicTypedXover_2", 1);
-        mkDerivedFiles(experimentId, "sameSizeSubtreeMutation_1", 1);
-        mkDerivedFiles(experimentId, "sameSizeSubtreeMutation_2", 1);
-        mkDerivedFiles(experimentId, "oneParamMutation_1", 1);
-        mkDerivedFiles(experimentId, "oneParamMutation_2", 1);
+
+        //Set<String> ops =  Sets.newHashSet("basicTypedXover", "sameSizeSubtreeMutation", "oneParamMutation");
+        List<String> prefixes = Arrays.asList("allOperators", "generator", "basicTypedXover", "sameSizeSubtreeMutation", "oneParamMutation");
+
+        List<String> middles = Arrays.asList("1","2");
+        List<Integer> windows = Arrays.asList(1, 10, 100, 1000, 2000, 3000, 10000);
+
+
+
+        for (String prefix : prefixes) {
+            for (String middle : middles) {
+
+                String tableName = prefix+"_"+middle;
+                List<AB<Integer,Double>> data = readDataFile(experimentDir + tableName+".txt", 1);
+                writeNumList(derivedDir+"/"+tableName+"-best.txt", bestSoFar(data));
+
+                for (Integer window : windows) {
+                    List<AB<Integer,Double>> movingData = movingAvg(data,window);
+                    writeNumList(derivedDir+"/"+tableName+"-w"+window+".txt", movingData);
+
+                    // todo zbytecne se pocita znova
+                    List<AB<Integer,Double>> baseData = readDataFile(experimentDir+"allOperators"+"_"+middle+".txt", 1);
+                    List<AB<Integer,Double>> movingBase = movingAvg(baseData,window);
+                    List<AB<Integer,Double>> normalizedData = div(movingData, movingBase);
+                    writeNumList(derivedDir+"/"+tableName+"-w"+window+"_normalized.txt", normalizedData);
+
+
+                }
+
+            }
+        }
+
+
     }
 
     private static void mkDerivedFiles(String experimentId, String tableName, int dataColIndex) {
@@ -109,20 +142,51 @@ public class ProcessLogs {
         return ret;
     }
 
+
+    private static List<AB<Integer,Double>> div(List<AB<Integer,Double>> xs, List<AB<Integer,Double>> ys) {
+        if (xs == null || ys == null) { return null; }
+
+        List<AB<Integer,Double>> ret = new ArrayList<>(xs.size());
+
+        AB<Integer,Double> y_a,y_b;
+        int y_i = 0;
+        y_a = ys.get(0);
+        y_b = ys.get(0);
+
+        for (AB<Integer,Double> x : xs) {
+
+            int x1 = x._1();
+
+            while (y_b._1() < x1 && y_i + 1 < ys.size()) {
+                y_a = ys.get(y_i);
+                y_b = ys.get(y_i + 1);
+                y_i ++;
+            }
+
+            double y_avg = (y_a._2() + y_b._2()) * 0.5;
+
+            ret.add(AB.mk(x1, x._2() / y_avg));
+
+        }
+
+        return ret;
+    }
+
     private static List<AB<Integer,Double>> movingAvg(List<AB<Integer,Double>> xs, int window) {
 
-        if (window >= xs.size()) {
-            return null;
-        }
+        if (window >= xs.size()) { return null; }
 
         List<AB<Integer,Double>> ret = new ArrayList<>(xs.size()-window+1);
         for (int i = 0; i <= xs.size()-window; i++) {
-            double sum = 0.0;
+            double sum_1 = 0.0;
+            double sum_2 = 0.0;
             for (int j=0; j<window; j++) {
-                sum += xs.get(i+j)._2();
+                AB<Integer,Double> point = xs.get(i+j);
+                sum_1 += point._1();
+                sum_2 += point._2();
             }
-            int firstEvalIdInWindow = xs.get(i)._1();
-            ret.add(new AB<>(firstEvalIdInWindow,sum/window));
+            //int firstEvalIdInWindow = xs.get(i)._1();
+            ret.add(new AB<>(/*firstEvalIdInWindow*/(int)Math.round(sum_1/window), sum_2/window));
         }
         return ret;
     }
@@ -154,10 +218,14 @@ public class ProcessLogs {
         String configFilePath = runDirPath + "/config.json";
 
         JSONObject config = new JSONObject(readFile(configFilePath));
+        int numEvaluations = config.getInt("numEvaluations");
 
         Map<String,AA<StringBuilder>> operators = new HashMap<>();
 
-        int numEvaluations = config.getInt("numEvaluations");
+
+        AA<StringBuilder> allOperators = AA.mk(new StringBuilder(), new StringBuilder());
+        allOperators._1().append("#evalId\timprovement\n");
+        allOperators._2().append("#evalId\tP_improvement\n");
 
         StringBuilder fitnesses = new StringBuilder();
         fitnesses.append("#evalId\tindivId\tfitness\n");
@@ -171,7 +239,14 @@ public class ProcessLogs {
 
             String evalFilePath = evalsDirPath + "/eval_" + evalId + ".json";
 
-            JSONObject logJson = new JSONObject(readFile(evalFilePath));
+            String evalFileStr = readFile(evalFilePath);
+
+            if (evalFileStr == null) {
+                Log.it("\n\nNO eval-id "+evalId+" !!!\n\n");
+                break;
+            }
+
+            JSONObject logJson = new JSONObject(evalFileStr);
             JSONArray evalResult = logJson.getJSONArray("evalResult");
 
 
@@ -196,6 +271,8 @@ public class ProcessLogs {
                 String operatorName = operatorData.getString("name");
 
                 JSONArray parentsData = indivData.getJSONArray("parents");
+
+
 
                 AA<StringBuilder> operatorSbPair = operators.get(operatorName);
                 if (operatorSbPair == null) {
@@ -248,6 +325,9 @@ public class ProcessLogs {
 
                     sb_1.append(evalId).append("\t").append(improvement).append("\n");
                     sb_2.append(evalId).append("\t").append(p_improvement).append("\n");
+
+                    allOperators._1().append(evalId).append("\t").append(improvement).append("\n");
+                    allOperators._2().append(evalId).append("\t").append(p_improvement).append("\n");
                 }
 
             }
@@ -281,6 +361,10 @@ public class ProcessLogs {
             F.writeFile(experimentDir+"/"+operatorName+"_1.txt", tableStr_1);
             F.writeFile(experimentDir+"/"+operatorName+"_2.txt", tableStr_2);
         }
+
+        F.writeFile(experimentDir+"/allOperators_1.txt", allOperators._1().toString());
+        F.writeFile(experimentDir+"/allOperators_2.txt", allOperators._2().toString());
+
 
 
         Log.it("Starts computing fronts...");
@@ -331,7 +415,7 @@ public class ProcessLogs {
             byte[] encoded = Files.readAllBytes(Paths.get(path));
             return new String(encoded, StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new Error(e);
+            return null;
         }
     }
 

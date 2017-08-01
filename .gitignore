@@ -6,7 +6,10 @@
 
 /logs/
 /out/
-/results/
+/results/raw/
+/results/stats/
+/results/imgs/
+
 /tex/readme.aux
 /tex/readme.dvi
 /tex/readme.log

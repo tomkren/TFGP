@@ -12,7 +12,9 @@
       <excludeFolder url="file://$MODULE_DIR$/cellplaza/mini_50" />
       <excludeFolder url="file://$MODULE_DIR$/cellplaza/stred_50" />
       <excludeFolder url="file://$MODULE_DIR$/logs" />
-      <excludeFolder url="file://$MODULE_DIR$/results" />
+      <excludeFolder url="file://$MODULE_DIR$/results/imgs" />
+      <excludeFolder url="file://$MODULE_DIR$/results/raw" />
+      <excludeFolder url="file://$MODULE_DIR$/results/stats" />
       <excludeFolder url="file://$MODULE_DIR$/test_outputs" />
     </content>
     <orderEntry type="inheritedJdk" />
