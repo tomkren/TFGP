@@ -1,7 +1,6 @@
 package cz.tomkren.fishtron.mains;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.Sets;
 import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
 import cz.tomkren.fishtron.ugen.multi.MultiIndiv;
 import cz.tomkren.fishtron.ugen.multi.MultiUtils;
@@ -13,7 +12,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -23,35 +21,148 @@ import java.util.*;
 
 public class ProcessLogs {
 
+    private static final String resultsDir = "results";
+    private static final String resultsStatsDir = resultsDir+"/stats";
 
-    private static final String resultsDir = "results/stats";
+
+    private static final List<String> prefixes = Arrays.asList("allOperators", "generator", "basicTypedXover", "sameSizeSubtreeMutation", "oneParamMutation");
+    private static final List<String> middles = Arrays.asList(/*"1",*/"2");
+
+    private static final List<String> avg_prefixes = Arrays.asList("allOperators", /*"generator", todo */ "basicTypedXover", "sameSizeSubtreeMutation", "oneParamMutation");
 
 
     public static void main(String[] args) {
         Checker checker = new Checker();
 
-        String experimentName = "wilt-5";
+        List<String> wilt = Arrays.asList("wilt-1","wilt-2","wilt-3","wilt-4","wilt-5");
 
-        String runDirPath = "results/raw/dageva-outputs-multi-size-cache_2/"+experimentName+"/tom/run_1";
-        String experimentId = experimentName+"-multi-size-cache_2";
+        Map<String,List<String>> experimentNamesMap = new HashMap<>();
+        experimentNamesMap.put("wilt", wilt);
 
 
-        processLogs(runDirPath, experimentId);
-        mkDerivedFiles(experimentId);
+        String experimentBatch = "wilt";
 
+        String experimentKind = "multi-time-nocache"; //"multi-size-cache";
+        int window = 2000;
+
+
+
+        List<String> experimentNames = experimentNamesMap.get(experimentBatch);
+        for (String experimentName : experimentNames) {
+            mkExperimentStats(experimentName, experimentKind, window);
+        }
+
+        Log.it("\n\n==============================================================================\n\n");
+
+        mkAveragedStats(experimentNames, experimentBatch, experimentKind, window);
+
+        String gnuplotScript =
+                "experiments = '"+experimentBatch+"'\n"+
+                "kind = '"+experimentKind+"'\n"+
+                "load 'settings.plt'\n"+
+                "window = '"+window+"'\n"+
+                "load 'main_averaged.plt'";
+        F.writeFile(resultsDir+"/"+experimentBatch+"-"+experimentKind+".plt", gnuplotScript);
 
         checker.results();
     }
 
-    private static void mkDerivedFiles(String experimentId) {
+    private static void mkExperimentStats(String experimentName, String experimentKind, int window) {
+
+        String runDirPath = "results/raw/dageva-outputs-"+experimentKind+"/"+experimentName+"/tom/run_1";
+        String experimentId = experimentName+"-"+experimentKind;
+
+
+        processLogs(runDirPath, experimentId);
+        mkDerivedFiles(experimentId, window);
+
+        String gnuplotScript =
+                        "experiment = '"+experimentName+"'\n"+
+                        "kind = '"+experimentKind+"'\n"+
+                        "load 'settings.plt'\n"+
+                        "window = '"+window+"'\n"+
+                        "load 'main.plt'";
+        F.writeFile(resultsDir+"/"+experimentName+"-"+experimentKind+".plt", gnuplotScript);
+
+    }
+
+    private static void mkAveragedStats(List<String> experimentNames, String experimentBatch, String experimentKind, int window) {
+
+        String batchId = experimentBatch +"-"+ experimentKind;
+
+        for (String prefix : avg_prefixes) {
+            for (String middle : middles) {
+                String tableName = prefix+"_"+middle;
+
+                List<List<AB<Integer, Double>>> datas = new ArrayList<>(experimentNames.size());
+
+                for (String experimentName : experimentNames) {
+                    String experimentId = experimentName+"-"+experimentKind;
+                    String experimentDir = resultsStatsDir +"/"+experimentId+"/";
+                    String derivedDir = experimentDir +"derived";
+
+                    List<AB<Integer, Double>> data_full = readDataFile(derivedDir + "/" + tableName + "-w" + window + "_full.txt", 1);
+                    datas.add(addFrontNulls(data_full));
+                }
+
+                List<AB<Integer, Double>> datas_averaged = new ArrayList<>();
+
+                boolean someNonEmpty = true;
+                int i = 1;
+                while (someNonEmpty) {
+
+                    int num = 0;
+                    double sum = 0;
+                    someNonEmpty = false;
+                    for (List<AB<Integer, Double>> data : datas) {
+                        if (data.size() > i) {
+                            someNonEmpty = true;
+                            AB<Integer, Double> point = data.get(i);
+                            if (point._2() != null) {
+                                sum += point._2();
+                                num++;
+                            }
+                        }
+                    }
+
+                    if (num > 0) {
+                        datas_averaged.add(AB.mk(i, sum / num));
+                    }
+
+                    i++;
+                }
+                String averagedDir = resultsStatsDir + "/averaged";
+                String batchDir = averagedDir + "/" + batchId;
+                mkDir(averagedDir);
+                mkDir(batchDir);
+
+                writeNumList(batchDir +"/"+tableName+"-w"+window+"_averaged.txt", datas_averaged);
+
+            }
+        }
+
+    }
+
+
+    private static List<AB<Integer,Double>> addFrontNulls(List<AB<Integer,Double>> xs_full) {
+        int firstX = xs_full.get(0)._1();
+        List<AB<Integer,Double>> ret = new ArrayList<>();
+        for (int i = 1; i < firstX; i++) {
+            ret.add(AB.mk(i, null));
+        }
+        ret.addAll(xs_full);
+        return ret;
+    }
+
+
+    private static void mkDerivedFiles(String experimentId, int window) {
 
         //Set<String> ops =  Sets.newHashSet("basicTypedXover", "sameSizeSubtreeMutation", "oneParamMutation");
-        List<String> prefixes = Arrays.asList("allOperators", "generator", "basicTypedXover", "sameSizeSubtreeMutation", "oneParamMutation");
-        List<String> middles = Arrays.asList("1","2");
-        List<Integer> windows = Arrays.asList(1, 10, 100, 1000, 2000, 2500);
+
+        //List<Integer> windows = Arrays.asList(1, 10, 100, 1000, 2000, 2500);
 
 
-        String experimentDir = resultsDir+"/"+experimentId+"/";
+        String experimentDir = resultsStatsDir +"/"+experimentId+"/";
         String derivedDir = experimentDir +"derived";
         mkDir(derivedDir);
 
@@ -59,29 +170,32 @@ public class ProcessLogs {
 
         List<AB<Integer,Double>> fitness = readDataFile(experimentDir + "fitness.txt", 2);
         writeNumList(derivedDir+"/fitness-best.txt", bestSoFar(fitness));
-        for (Integer window : windows) {
-            writeNumList(derivedDir+"/fitness-w"+window+".txt", movingAvg(fitness,1));
-        }
+        //for (Integer window : windows) {
+        writeNumList(derivedDir+"/fitness-w"+window+".txt", movingAvg(fitness,1));
+        //}
 
         for (String prefix : prefixes) {
             for (String middle : middles) {
-
                 String tableName = prefix+"_"+middle;
+
                 List<AB<Integer,Double>> data = readDataFile(experimentDir + tableName+".txt", 1);
                 writeNumList(derivedDir+"/"+tableName+"-best.txt", bestSoFar(data));
 
-                for (Integer window : windows) {
-                    List<AB<Integer,Double>> movingData = movingAvg(data,window);
-                    writeNumList(derivedDir+"/"+tableName+"-w"+window+".txt", movingData);
+                //for (Integer window : windows) {
+                List<AB<Integer,Double>> movingData = movingAvg(data,window);
+                writeNumList(derivedDir+"/"+tableName+"-w"+window+".txt", movingData);
 
-                    // todo zbytecne se pocita znova
-                    List<AB<Integer,Double>> baseData = readDataFile(experimentDir+"allOperators"+"_"+middle+".txt", 1);
-                    List<AB<Integer,Double>> movingBase = movingAvg(baseData,window);
-                    List<AB<Integer,Double>> normalizedData = div(movingData, movingBase);
-                    writeNumList(derivedDir+"/"+tableName+"-w"+window+"_normalized.txt", normalizedData);
+                List<AB<Integer,Double>> movingData_full = fullResample(movingData);
+                writeNumList(derivedDir+"/"+tableName+"-w"+window+"_full.txt", movingData_full);
 
 
-                }
+                // todo zbytecne se pocita znova
+                List<AB<Integer,Double>> baseData = readDataFile(experimentDir+"allOperators"+"_"+middle+".txt", 1);
+                List<AB<Integer,Double>> movingBase = movingAvg(baseData,window);
+                List<AB<Integer,Double>> normalizedData = div(movingData, movingBase);
+                writeNumList(derivedDir+"/"+tableName+"-w"+window+"_normalized.txt", normalizedData);
+
+                //}
 
             }
         }
@@ -89,29 +203,7 @@ public class ProcessLogs {
 
     }
 
-    private static void mkDerivedFiles(String experimentId, String tableName, int dataColIndex) {
 
-        String experimentPrefix = resultsDir+"/"+experimentId+"/";
-        String dir = experimentPrefix +"derived";
-        mkDir(dir);
-
-
-
-        List<AB<Integer,Double>> fitness = readDataFile(experimentPrefix + tableName+".txt", dataColIndex);
-
-        //Log.list(fitness);
-
-        writeNumList(dir+"/"+tableName+"-best.txt", bestSoFar(fitness));
-        writeNumList(dir+"/"+tableName+"-w1.txt", movingAvg(fitness,1));
-        writeNumList(dir+"/"+tableName+"-w10.txt", movingAvg(fitness,10));
-        writeNumList(dir+"/"+tableName+"-w100.txt", movingAvg(fitness,100));
-        writeNumList(dir+"/"+tableName+"-w1000.txt", movingAvg(fitness,1000));
-        writeNumList(dir+"/"+tableName+"-w2000.txt", movingAvg(fitness,2000));
-        writeNumList(dir+"/"+tableName+"-w3000.txt", movingAvg(fitness,3000));
-        writeNumList(dir+"/"+tableName+"-w10000.txt", movingAvg(fitness,10000));
-
-
-    }
 
     private static void writeNumList(String path, List<AB<Integer,Double>> xs) {
 
@@ -144,6 +236,52 @@ public class ProcessLogs {
         return ret;
     }
 
+
+    private static List<AB<Integer,Double>> fullResample(List<AB<Integer,Double>> xs) {
+        if (xs == null) { return null; }
+        if (xs.isEmpty()) {return new ArrayList<>(0);}
+
+        List<AB<Integer,Double>> ret = new ArrayList<>();
+
+        int lastIndex = xs.size() - 1;
+
+        int start  = xs.get(0)._1();
+        int finish = xs.get(lastIndex)._1();
+
+        AB<Integer,Double> prevPoint = xs.get(0);
+        int prevPointIndex = 0;
+        ret.add(prevPoint);
+
+
+        for (int currentX = start+1; currentX < finish; currentX++) {
+
+            AB<Integer,Double> nextPoint = xs.get(prevPointIndex+1);
+
+            if (nextPoint._1() == currentX) {
+                prevPoint = nextPoint;
+                prevPointIndex++;
+                ret.add(nextPoint);
+            } else {
+
+                int    prevX = prevPoint._1();
+                double prevY = prevPoint._2();
+
+                int    dx = nextPoint._1() - prevX;
+                double dy = nextPoint._2() - prevY;
+
+                double fac = ((double)(currentX - prevX)) / dx;
+                double newValue = prevY + (fac * dy);
+
+                ret.add(AB.mk(currentX, newValue));
+            }
+        }
+
+        if (lastIndex != 0) {
+            ret.add(xs.get(lastIndex));
+        }
+
+        return ret;
+    }
 
     private static List<AB<Integer,Double>> div(List<AB<Integer,Double>> xs, List<AB<Integer,Double>> ys) {
         if (xs == null || ys == null) { return null; }
@@ -216,6 +354,15 @@ public class ProcessLogs {
 
 
     private static void processLogs(String runDirPath, String experimentId) {
+
+        String experimentDir = resultsStatsDir +"/"+experimentId;
+
+        if (new File(experimentDir).exists()) {
+            Log.it("Skipping processLog, folder is already there...\n\n");
+            return;
+        }
+
+
         String evalsDirPath = runDirPath + "/evals";
         String configFilePath = runDirPath + "/config.json";
 
@@ -343,9 +490,8 @@ public class ProcessLogs {
 
         //Log.it(fitnesses.toString());
 
-        mkDir(resultsDir);
+        mkDir(resultsStatsDir);
 
-        String experimentDir = resultsDir+"/"+experimentId;
         mkDir(experimentDir);
 
         F.writeFile(experimentDir+"/fitness.txt", fitnesses.toString());

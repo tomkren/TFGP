@@ -1,0 +1,5 @@
+experiments = 'wilt'
+kind = 'multi-size-cache'
+load 'settings.plt'
+window = '2000'
+load 'main_averaged.plt'

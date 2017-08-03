@@ -1,4 +1,5 @@
-experiment = 'wilt-3'
+experiment = 'wilt-1'
+kind = 'multi-size-cache'
 load 'settings.plt'
 window = '2000'
 load 'main.plt'

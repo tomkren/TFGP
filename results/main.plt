@@ -1,4 +1,4 @@
-dir = 'stats/'.experiment.'-multi-size-cache_2'
+dir = 'stats/'.experiment.'-'.kind
 
 set terminal wxt
 load 'operators_normalized.plt'
@@ -8,4 +8,3 @@ load 'operators.plt'
 
 set terminal wxt 2
 load 'front1.plt'
-

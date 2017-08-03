@@ -1,4 +1,5 @@
-experiment = 'wilt-1'
+experiment = 'wilt-3'
+kind = 'multi-time-nocache'
 load 'settings.plt'
 window = '2000'
 load 'main.plt'
