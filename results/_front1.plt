@@ -1,6 +1,8 @@
-load 'settings.plt'
+load '_settings.plt'
 
 set key right bottom
+
+if (kind eq 'multi-time-nocache') set logscale x
 
 set pointsize 1
 

@@ -1,10 +1,10 @@
 dir = 'stats/'.experiment.'-'.kind
 
 set terminal wxt
-load 'operators_normalized.plt'
+load '_operators_normalized.plt'
 
 set terminal wxt 1
-load 'operators.plt'
+load '_operators.plt'
 
 set terminal wxt 2
-load 'front1.plt'
+load '_front1.plt'

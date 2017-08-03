@@ -34,56 +34,120 @@ public class ProcessLogs {
     public static void main(String[] args) {
         Checker checker = new Checker();
 
-        List<String> wilt = Arrays.asList("wilt-1","wilt-2","wilt-3","wilt-4","wilt-5");
+        List<String> experimentKinds = Arrays.asList("multi-size-cache", "multi-time-nocache");
+        List<String> experimentBatches = Arrays.asList("wilt" ,"wine" ,"magic" ,"ml-prove");
+
+        //String experimentBatch = "ml-prove";
+        //String experimentKind = "multi-time-nocache";
+        //String experimentKind = "multi-size-cache";
+
+        for (String experimentKind : experimentKinds) {
+            for (String experimentBatch: experimentBatches) {
+                processBatch(experimentBatch, experimentKind);
+            }
+        }
+
+        checker.results();
+    }
+
+    private static void processBatch(String experimentBatch, String experimentKind) {
 
         Map<String,List<String>> experimentNamesMap = new HashMap<>();
-        experimentNamesMap.put("wilt", wilt);
+        experimentNamesMap.put("wilt", mkExperimentNames("wilt"));
+        experimentNamesMap.put("wine", mkExperimentNames("wine"));
+        experimentNamesMap.put("magic", mkExperimentNames("magic"));
+        experimentNamesMap.put("ml-prove", mkExperimentNames("ml-prove"));
 
 
-        String experimentBatch = "wilt";
-
-        String experimentKind = "multi-time-nocache"; //"multi-size-cache";
         int window = 2000;
 
+        if (experimentBatch.equals("magic")) { window = 500; }
 
+        if (experimentKind.equals("multi-size-cache")) {
+            if (experimentBatch.equals("ml-prove")) { window = 1000; }
+        }
 
         List<String> experimentNames = experimentNamesMap.get(experimentBatch);
+
+        List<Double> bestFitVals = new ArrayList<>(experimentNames.size());
+
         for (String experimentName : experimentNames) {
-            mkExperimentStats(experimentName, experimentKind, window);
+            double bestFitVal = mkExperimentStats(experimentName, experimentKind, window);
+            bestFitVals.add(bestFitVal);
         }
 
         Log.it("\n\n==============================================================================\n\n");
 
         mkAveragedStats(experimentNames, experimentBatch, experimentKind, window);
 
-        String gnuplotScript =
+        String batchId = experimentBatch +"-"+ experimentKind;
+
+        String gnuplotScript_all =
                 "experiments = '"+experimentBatch+"'\n"+
                 "kind = '"+experimentKind+"'\n"+
-                "load 'settings.plt'\n"+
+                "load '_settings.plt'\n"+
                 "window = '"+window+"'\n"+
-                "load 'main_averaged.plt'";
-        F.writeFile(resultsDir+"/"+experimentBatch+"-"+experimentKind+".plt", gnuplotScript);
+                "load '_main_averaged.plt'";
+        F.writeFile(resultsDir+"/A_all_"+batchId+".plt", gnuplotScript_all);
 
-        checker.results();
+        String gnuplotScript_operators =
+                "experiments = '"+experimentBatch+"'\n"+
+                        "kind = '"+experimentKind+"'\n"+
+                        "load '_settings.plt'\n"+
+                        "window = '"+window+"'\n"+
+                        "dir = 'stats/averaged/'.experiments.'-'.kind\n"+
+                        "load '_operators_averaged.plt'";
+        F.writeFile(resultsDir+"/A_ops_"+batchId+".plt", gnuplotScript_operators);
+
+        String gnuplotScript_front1s =
+                        "experiments = '"+experimentBatch+"'\n" +
+                        "kind = '"+experimentKind+"'\n" +
+                        "load '_front1_averaged.plt'";
+        F.writeFile(resultsDir+"/A_frs_"+batchId+".plt", gnuplotScript_front1s);
+
+        double sum = 0;
+        Log.it("\n"+batchId+":");
+        for (Double bestFitVal : bestFitVals) {
+            Log.it("  "+bestFitVal);
+            sum += bestFitVal;
+        }
+        double meanBestFitVal = sum / bestFitVals.size();
+        Log.it("  mean: "+meanBestFitVal);
+
+        F.writeFile(resultsDir+"/R_"+batchId+".txt", batchId+":\n"+Joiner.on("\n").join(bestFitVals)+"\nmean: "+meanBestFitVal);
+
     }
 
-    private static void mkExperimentStats(String experimentName, String experimentKind, int window) {
+    private static List<String> mkExperimentNames(String experimentBatch) {
+        return mkExperimentNames(experimentBatch, 5);
+    }
+
+    private static List<String> mkExperimentNames(String experimentBatch, int numExperiments) {
+        List<String> ret = new ArrayList<>(numExperiments);
+        for (int i = 1; i <= numExperiments; i++) {
+            ret.add(experimentBatch+"-"+i);
+        }
+        return ret;
+    }
+
+    private static double mkExperimentStats(String experimentName, String experimentKind, int window) {
 
         String runDirPath = "results/raw/dageva-outputs-"+experimentKind+"/"+experimentName+"/tom/run_1";
         String experimentId = experimentName+"-"+experimentKind;
 
 
         processLogs(runDirPath, experimentId);
-        mkDerivedFiles(experimentId, window);
+        double bestFitVal = mkDerivedFiles(experimentId, window);
 
         String gnuplotScript =
                         "experiment = '"+experimentName+"'\n"+
                         "kind = '"+experimentKind+"'\n"+
-                        "load 'settings.plt'\n"+
+                        "load '_settings.plt'\n"+
                         "window = '"+window+"'\n"+
-                        "load 'main.plt'";
-        F.writeFile(resultsDir+"/"+experimentName+"-"+experimentKind+".plt", gnuplotScript);
+                        "load '_main.plt'";
+        F.writeFile(resultsDir+"/S_"+experimentName+"-"+experimentKind+".plt", gnuplotScript);
 
+        return bestFitVal;
     }
 
     private static void mkAveragedStats(List<String> experimentNames, String experimentBatch, String experimentKind, int window) {
@@ -155,24 +219,19 @@ public class ProcessLogs {
     }
 
 
-    private static void mkDerivedFiles(String experimentId, int window) {
-
-        //Set<String> ops =  Sets.newHashSet("basicTypedXover", "sameSizeSubtreeMutation", "oneParamMutation");
-
-        //List<Integer> windows = Arrays.asList(1, 10, 100, 1000, 2000, 2500);
-
+    private static double mkDerivedFiles(String experimentId, int window) {
 
         String experimentDir = resultsStatsDir +"/"+experimentId+"/";
         String derivedDir = experimentDir +"derived";
         mkDir(derivedDir);
 
-
-
         List<AB<Integer,Double>> fitness = readDataFile(experimentDir + "fitness.txt", 2);
-        writeNumList(derivedDir+"/fitness-best.txt", bestSoFar(fitness));
-        //for (Integer window : windows) {
+        List<AB<Integer,Double>> fitness_bestSoFar = bestSoFar(fitness);
+        writeNumList(derivedDir+"/fitness-best.txt", fitness_bestSoFar);
         writeNumList(derivedDir+"/fitness-w"+window+".txt", movingAvg(fitness,1));
-        //}
+
+        double bestFitVal = fitness_bestSoFar.get(fitness_bestSoFar.size()-1)._2();
+
 
         for (String prefix : prefixes) {
             for (String middle : middles) {
@@ -181,26 +240,21 @@ public class ProcessLogs {
                 List<AB<Integer,Double>> data = readDataFile(experimentDir + tableName+".txt", 1);
                 writeNumList(derivedDir+"/"+tableName+"-best.txt", bestSoFar(data));
 
-                //for (Integer window : windows) {
                 List<AB<Integer,Double>> movingData = movingAvg(data,window);
                 writeNumList(derivedDir+"/"+tableName+"-w"+window+".txt", movingData);
 
                 List<AB<Integer,Double>> movingData_full = fullResample(movingData);
                 writeNumList(derivedDir+"/"+tableName+"-w"+window+"_full.txt", movingData_full);
 
-
                 // todo zbytecne se pocita znova
                 List<AB<Integer,Double>> baseData = readDataFile(experimentDir+"allOperators"+"_"+middle+".txt", 1);
                 List<AB<Integer,Double>> movingBase = movingAvg(baseData,window);
                 List<AB<Integer,Double>> normalizedData = div(movingData, movingBase);
                 writeNumList(derivedDir+"/"+tableName+"-w"+window+"_normalized.txt", normalizedData);
-
-                //}
-
             }
         }
 
-
+        return bestFitVal;
     }
 
 
