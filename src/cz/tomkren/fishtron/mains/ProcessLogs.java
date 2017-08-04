@@ -16,10 +16,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Predicate;
 
 /** Created by tom on 28. 6. 2016.*/
 
 public class ProcessLogs {
+
+    private static final boolean checkBasicDataFolderExists = true;
 
     private static final String resultsDir = "results";
     private static final String resultsStatsDir = resultsDir+"/stats";
@@ -111,6 +114,14 @@ public class ProcessLogs {
                         "load '_front1_averaged.plt'";
         F.writeFile(resultsDir+"/A_frs_"+batchId+".plt", gnuplotScript_front1s);
 
+        if (experimentKind.equals("multi-size-cache")) {
+            String gnuplotScript_front1s_2 =
+                    "experiments = '" + experimentBatch + "'\n" +
+                            "kind = '" + experimentKind + "'\n" +
+                            "load '_front1_averaged2.plt'";
+            F.writeFile(resultsDir + "/A_frs_" + batchId + "_2.plt", gnuplotScript_front1s_2);
+        }
+
         double sum_fitness = 0;
         int sum_numEvals = 0;
         double sum_runTime = 0;
@@ -136,6 +147,8 @@ public class ProcessLogs {
 
         return resultFileStr;
     }
+
+
 
     private static List<String> mkExperimentNames(String experimentBatch) {
         return mkExperimentNames(experimentBatch, 5);
@@ -175,6 +188,8 @@ public class ProcessLogs {
 
         return ABC.mk(runInfo._1(),runInfo._2(), runTime);
     }
+
+
 
     private static void mkAveragedStats(List<String> experimentNames, String experimentBatch, String experimentKind, int window) {
 
@@ -282,7 +297,25 @@ public class ProcessLogs {
             }
         }
 
+        generate_front1_raw_scores_file(experimentId);
+
         return AB.mk(bestFitVal,numEvaluatedIndividuals);
+    }
+
+    /*for mkPerfSizeDataForPerfTimeFront*/
+    private static void generate_front1_raw_scores_file(String experimentId) {
+        //String experimentId = experimentName+"-"+experimentKind;
+        String experimentDir = resultsStatsDir +"/"+experimentId;
+        String derivedDir = experimentDir +"/derived";
+
+        //List<AB<Integer,Double>> front1_ids = readDataFile(experimentDir+"/front1.txt", 0);
+
+        Set<Integer> front1_ids = readSetIntCol(experimentDir+"/front1.txt", 0);
+        List<String> filteredLines_rawScores = readLinesWhereHoldsForIntCol(experimentDir+"/raw_scores.txt", 1, front1_ids::contains);
+
+        String front1_raw_scores = Joiner.on("\n").join(filteredLines_rawScores);
+
+        F.writeFile(derivedDir+"/front1_raw_scores.txt", front1_raw_scores);
     }
 
 
@@ -419,12 +452,52 @@ public class ProcessLogs {
             String line;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
-                if (!line.equals("") && line.charAt(0) != '#') {
+                if (!line.equals("") && line.charAt(0) != '#' && line.charAt(0) != 'i') {
                     String[] parts = line.split("\\s+");
 
                     int evalId = Integer.parseInt(parts[0]);
                     double val = Double.parseDouble(parts[col]);
                     ret.add(new AB<>(evalId,val));
+                }
+            }
+            return ret;
+        } catch (Exception e) {
+            throw new Error(e);
+        }
+    }
+
+    private static Set<Integer> readSetIntCol(String path, int col) {
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+            Set<Integer> ret = new HashSet<>();
+            String line;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (!line.equals("") && line.charAt(0) != '#' && line.charAt(0) != 'i') {
+                    String[] parts = line.split("\\s+");
+                    int intVal = Integer.parseInt(parts[col]);
+                    ret.add(intVal);
+                }
+            }
+            return ret;
+        } catch (Exception e) {
+            throw new Error(e);
+        }
+    }
+
+    private static List<String> readLinesWhereHoldsForIntCol(String path, int col, Predicate<Integer> p) {
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+            List<String> ret = new ArrayList<>();
+            String line;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (!line.equals("") && line.charAt(0) != '#' && line.charAt(0) != 'i') {
+                    String[] parts = line.split("\\s+");
+
+                    int intVal = Integer.parseInt(parts[col]);
+
+                    if (p.test(intVal)) {
+                        ret.add(line);
+                    }
                 }
             }
             return ret;
@@ -439,7 +512,7 @@ public class ProcessLogs {
 
         String experimentDir = resultsStatsDir +"/"+experimentId;
 
-        if (new File(experimentDir).exists()) {
+        if (checkBasicDataFolderExists && new File(experimentDir).exists()) {
             Log.it("Skipping processLog, folder is already there...\n\n");
             return;
         }
@@ -457,6 +530,9 @@ public class ProcessLogs {
         AA<StringBuilder> allOperators = AA.mk(new StringBuilder(), new StringBuilder());
         allOperators._1().append("#evalId\timprovement\n");
         allOperators._2().append("#evalId\tP_improvement\n");
+
+        StringBuilder rawScores = new StringBuilder();
+        rawScores.append("#evalId\tindivId\tperformance\tstd_dev\ttime\tfoldedSize\n");
 
         StringBuilder fitnesses = new StringBuilder();
         fitnesses.append("#evalId\tindivId\tfitness\n");
@@ -487,6 +563,9 @@ public class ProcessLogs {
                 int    id      = indivData.getInt("id");
                 double fitness = getSingeFitness(indivData);
                 List<Double> fitnessList = getFitnessList(indivData);
+
+                List<Double> raws = getFitnessList(indivData, "rawScores");
+                rawScores.append(evalId).append("\t").append(id).append("\t").append(Joiner.on("\t").join(raws)).append("\n");
 
                 fitnesses.append(evalId).append("\t").append(id).append("\t").append(fitness).append("\n");
                 fitnesses2.append(evalId).append("\t").append(id).append("\t").append(Joiner.on("\t").join(fitnessList)).append("\n");
@@ -576,6 +655,7 @@ public class ProcessLogs {
 
         mkDir(experimentDir);
 
+        F.writeFile(experimentDir+"/raw_scores.txt", rawScores.toString());
         F.writeFile(experimentDir+"/fitness.txt", fitnesses.toString());
         F.writeFile(experimentDir+"/fitness2.txt", fitnesses2.toString());
 
@@ -603,7 +683,7 @@ public class ProcessLogs {
         Log.it("numFronts="+numFronts);
 
         StringBuilder front1 = new StringBuilder();
-        front1.append("id \t fitness1 \t fitness2..\n");
+        front1.append("# id \t fitness1 \t fitness2..\n");
 
         for (MultiIndiv mi : indivs) {
             int front = mi.getFront();
@@ -636,9 +716,12 @@ public class ProcessLogs {
     }
 
     private static List<Double> getFitnessList(JSONObject indivData) {
-        return F.map(indivData.getJSONArray("fitness"), x->Double.valueOf(x.toString()));
+        return getFitnessList(indivData, "fitness");
     }
 
+    private static List<Double> getFitnessList(JSONObject indivData, String key) {
+        return F.map(indivData.getJSONArray(key), x->Double.valueOf(x.toString()));
+    }
 
     private static String readFile(String path) {
         try {
