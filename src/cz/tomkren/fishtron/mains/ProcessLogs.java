@@ -41,16 +41,22 @@ public class ProcessLogs {
         //String experimentKind = "multi-time-nocache";
         //String experimentKind = "multi-size-cache";
 
+        StringBuilder results_all = new StringBuilder();
+        results_all.append("# performance\t\tevals\trun_time\t\ttime_per_eval\n\n");
+
         for (String experimentKind : experimentKinds) {
             for (String experimentBatch: experimentBatches) {
-                processBatch(experimentBatch, experimentKind);
+                String resultFileStr = processBatch(experimentBatch, experimentKind);
+                results_all.append(resultFileStr).append("\n\n");
             }
         }
+
+        F.writeFile(resultsDir+"/R_all.txt", results_all.toString());
 
         checker.results();
     }
 
-    private static void processBatch(String experimentBatch, String experimentKind) {
+    private static String processBatch(String experimentBatch, String experimentKind) {
 
         Map<String,List<String>> experimentNamesMap = new HashMap<>();
         experimentNamesMap.put("wilt", mkExperimentNames("wilt"));
@@ -69,11 +75,11 @@ public class ProcessLogs {
 
         List<String> experimentNames = experimentNamesMap.get(experimentBatch);
 
-        List<Double> bestFitVals = new ArrayList<>(experimentNames.size());
+        List<ABC<Double,Integer,Double>> runInfos = new ArrayList<>(experimentNames.size());
 
         for (String experimentName : experimentNames) {
-            double bestFitVal = mkExperimentStats(experimentName, experimentKind, window);
-            bestFitVals.add(bestFitVal);
+            ABC<Double,Integer,Double> runInfo = mkExperimentStats(experimentName, experimentKind, window);
+            runInfos.add(runInfo);
         }
 
         Log.it("\n\n==============================================================================\n\n");
@@ -105,17 +111,30 @@ public class ProcessLogs {
                         "load '_front1_averaged.plt'";
         F.writeFile(resultsDir+"/A_frs_"+batchId+".plt", gnuplotScript_front1s);
 
-        double sum = 0;
+        double sum_fitness = 0;
+        int sum_numEvals = 0;
+        double sum_runTime = 0;
         Log.it("\n"+batchId+":");
-        for (Double bestFitVal : bestFitVals) {
-            Log.it("  "+bestFitVal);
-            sum += bestFitVal;
+        for (ABC<Double,Integer,Double> runInfo : runInfos) {
+            Log.it("     "+runInfo._1()+"\t"+runInfo._2()+"\t"+runInfo._3());
+            sum_fitness  += runInfo._1();
+            sum_numEvals += runInfo._2();
+            sum_runTime  += runInfo._3();
         }
-        double meanBestFitVal = sum / bestFitVals.size();
-        Log.it("  mean: "+meanBestFitVal);
+        double meanBestFitVal = sum_fitness / runInfos.size();
+        double meanNumEvals = sum_numEvals / runInfos.size();
+        double meanRunTime  = sum_runTime / runInfos.size();
 
-        F.writeFile(resultsDir+"/R_"+batchId+".txt", batchId+":\n"+Joiner.on("\n").join(bestFitVals)+"\nmean: "+meanBestFitVal);
+        Log.it("mean:"+meanBestFitVal+"\t"+meanNumEvals+"\t"+meanRunTime);
 
+        String resultFileStr = batchId+":\n"+
+                Joiner.on("\n").join(F.map(runInfos, ri -> ri._1()+"\t"+ri._2()+"\t"+ri._3()+"\t"+( ri._3() / ri._2() ) ))+"\n"+
+                "mean:\n"+
+                meanBestFitVal+"\t"+meanNumEvals+"\t"+meanRunTime+"\t"+(meanRunTime/meanNumEvals);
+
+        F.writeFile(resultsDir+"/R_"+batchId+".txt", resultFileStr);
+
+        return resultFileStr;
     }
 
     private static List<String> mkExperimentNames(String experimentBatch) {
@@ -130,14 +149,14 @@ public class ProcessLogs {
         return ret;
     }
 
-    private static double mkExperimentStats(String experimentName, String experimentKind, int window) {
+    private static ABC<Double,Integer,Double> mkExperimentStats(String experimentName, String experimentKind, int window) {
 
-        String runDirPath = "results/raw/dageva-outputs-"+experimentKind+"/"+experimentName+"/tom/run_1";
+        String runDirPath = resultsDir+"/raw/dageva-outputs-"+experimentKind+"/"+experimentName+"/tom/run_1";
         String experimentId = experimentName+"-"+experimentKind;
 
 
         processLogs(runDirPath, experimentId);
-        double bestFitVal = mkDerivedFiles(experimentId, window);
+        AB<Double,Integer> runInfo = mkDerivedFiles(experimentId, window);
 
         String gnuplotScript =
                         "experiment = '"+experimentName+"'\n"+
@@ -147,7 +166,14 @@ public class ProcessLogs {
                         "load '_main.plt'";
         F.writeFile(resultsDir+"/S_"+experimentName+"-"+experimentKind+".plt", gnuplotScript);
 
-        return bestFitVal;
+        // TODO hax
+        String evalFilePath = runDirPath + "/evals/eval_" + runInfo._2() + ".json";
+        String evalFileStr = readFile(evalFilePath);
+        if (evalFileStr == null) { throw new Error("No eval id "+runInfo._2()+" !!!"); }
+        JSONObject logJson = new JSONObject(evalFileStr);
+        double runTime = logJson.getDouble("time");
+
+        return ABC.mk(runInfo._1(),runInfo._2(), runTime);
     }
 
     private static void mkAveragedStats(List<String> experimentNames, String experimentBatch, String experimentKind, int window) {
@@ -219,7 +245,7 @@ public class ProcessLogs {
     }
 
 
-    private static double mkDerivedFiles(String experimentId, int window) {
+    private static AB<Double,Integer> mkDerivedFiles(String experimentId, int window) {
 
         String experimentDir = resultsStatsDir +"/"+experimentId+"/";
         String derivedDir = experimentDir +"derived";
@@ -230,6 +256,8 @@ public class ProcessLogs {
         writeNumList(derivedDir+"/fitness-best.txt", fitness_bestSoFar);
         writeNumList(derivedDir+"/fitness-w"+window+".txt", movingAvg(fitness,1));
 
+
+        int numEvaluatedIndividuals = fitness.size();
         double bestFitVal = fitness_bestSoFar.get(fitness_bestSoFar.size()-1)._2();
 
 
@@ -254,7 +282,7 @@ public class ProcessLogs {
             }
         }
 
-        return bestFitVal;
+        return AB.mk(bestFitVal,numEvaluatedIndividuals);
     }
 
 
