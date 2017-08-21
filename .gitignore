@@ -18,7 +18,9 @@
 /tex/readme.synctex.gz
 /tex/readme.toc
 
-
+/results/A_*.plt
+/results/S_*.plt
+/results/R_*.txt
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
