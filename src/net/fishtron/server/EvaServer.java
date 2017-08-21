@@ -86,7 +86,7 @@ public class EvaServer extends AbstractHandler {
         String encodedQueryString = request.getQueryString();
         String query = encodedQueryString == null ? null : URLDecoder.decode(encodedQueryString, "UTF-8");
 
-        JSONObject jsonResponse = apiMan.processApiCall(path, query);
+        JSONObject jsonResponse = apiMan.processRawApiCall(path, query);
 
         addHeaders(response);
         response.setStatus(HttpServletResponse.SC_OK);

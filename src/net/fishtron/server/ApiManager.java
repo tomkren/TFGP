@@ -36,7 +36,7 @@ class ApiManager implements Api {
     }
 
 
-    JSONObject processApiCall(String path, String query) {
+    JSONObject processRawApiCall(String path, String query) {
 
         String[] pathParts = path.split("/");
         JSONArray pathJson = F.jsonMap(F.filter(Arrays.asList(pathParts), x->!x.equals("")), x->x);
@@ -98,7 +98,7 @@ class ApiManager implements Api {
     }
 
     private static JSONObject mkIndexResponse() {
-        return Api.addOk(F.obj("msg","Welcome to EvaServer API!"));
+        return Api.ok(Api.MSG, "Welcome to EvaServer API!");
     }
 
     private static JSONObject mkUnexpectedErrorResponse(Exception e) {
