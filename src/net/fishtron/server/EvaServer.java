@@ -1,6 +1,6 @@
-package cz.tomkren.fishtron.ugen.server;
+package net.fishtron.server;
 
-import cz.tomkren.fishtron.ugen.server.jobs.Test;
+import net.fishtron.server.jobs.Test;
 import cz.tomkren.utils.F;
 import cz.tomkren.utils.Log;
 import org.eclipse.jetty.server.Request;

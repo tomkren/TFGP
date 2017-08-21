@@ -1,9 +1,9 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza.deprecated;
 
 
-import cz.tomkren.fishtron.ugen.server.Api;
-import cz.tomkren.fishtron.ugen.server.EvaJob;
-import cz.tomkren.fishtron.ugen.server.EvaJobProcess;
+import net.fishtron.server.Api;
+import net.fishtron.server.EvaJob;
+import net.fishtron.server.EvaJobProcess;
 import cz.tomkren.utils.F;
 import org.json.JSONArray;
 import org.json.JSONObject;

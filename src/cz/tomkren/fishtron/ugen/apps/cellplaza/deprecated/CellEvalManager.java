@@ -1,6 +1,5 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza.deprecated;
 
-import cz.tomkren.fishtron.ugen.apps.cellplaza.deprecated.InteractiveEvaluatorJob;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.CellOpts;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.Libs;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.Rule;
@@ -8,9 +7,9 @@ import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
 import cz.tomkren.fishtron.ugen.multi.MultiEvalManager;
 import cz.tomkren.fishtron.ugen.multi.MultiEvalResult;
-import cz.tomkren.fishtron.ugen.server.Api;
-import cz.tomkren.fishtron.ugen.server.EvaJobProcess;
-import cz.tomkren.fishtron.ugen.server.JobManager;
+import net.fishtron.server.Api;
+import net.fishtron.server.EvaJobProcess;
+import net.fishtron.server.JobManager;
 import cz.tomkren.utils.*;
 import org.json.JSONArray;
 import org.json.JSONObject;

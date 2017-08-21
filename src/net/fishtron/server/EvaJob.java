@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen.server;
+package net.fishtron.server;
 
 import org.json.JSONObject;
 

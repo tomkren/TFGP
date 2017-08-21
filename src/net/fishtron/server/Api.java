@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen.server;
+package net.fishtron.server;
 
 import cz.tomkren.utils.F;
 import org.json.JSONArray;
