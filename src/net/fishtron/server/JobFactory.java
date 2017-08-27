@@ -13,7 +13,6 @@ import java.util.Map;
 
 class JobFactory {
 
-
     private final Map<String,AB<Class<? extends EvaJob>,Object>> jobClasses;
 
     JobFactory() {
@@ -33,10 +32,7 @@ class JobFactory {
         Class<? extends EvaJob> jobClass = jobClassData._1();
         Object initData = jobClassData._2();
 
-
-
         try {
-
 
             if (initData == null) {
                 Constructor<? extends EvaJob> jobConstructor = jobClass.getConstructor();

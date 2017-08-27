@@ -547,6 +547,15 @@ public class F {
         return ret;
     }
 
+    public static JSONArray jsonMap(JSONArray json, Function<Object,Object> f) {
+        JSONArray ret = new JSONArray();
+        int n = json.length();
+        for (int i = 0; i < n; i++) {
+            ret.put(f.apply(json.get(i)));
+        }
+        return ret;
+    }
+
     public static <A> JSONArray jsonMap(A[] xs, Function<A,Object> f) {
         JSONArray ret = new JSONArray();
         Arrays.stream(xs).map(f).forEach(ret::put);
