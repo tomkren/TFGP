@@ -131,7 +131,7 @@ public class CompareEvolution<Indiv extends MultiIndiv> {
     private JSONObject mkParentInfo(Indiv parent) {
         return F.obj(
                 //"fitness", F.jsonMap(parent.getFitness()), // TODO tady se to roseklo protože nemaj fitness :)
-                "id", parent.getId()
+                //"id", parent.getId() // TODO dočasně zakomentováno, aby se zjistilo jestli se to vyřeší, je to podobná věc jako u GP-ML... id se přidává zevlacky nebo vůbec (vgpml se to dela explicitne behem evaluace fitness) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         );
     }
 
