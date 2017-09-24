@@ -1,8 +1,8 @@
-package cz.tomkren.fishtron.ugen.nf;
+package net.fishtron.gen.nf;
 
 import net.fishtron.types.Sub;
 import net.fishtron.types.Type;
-import cz.tomkren.fishtron.ugen.data.SubsRes;
+import net.fishtron.gen.data.SubsRes;
 import net.fishtron.utils.F;
 
 import java.math.BigInteger;

@@ -1,4 +1,8 @@
-package cz.tomkren.fishtron.ugen.tests;
+package net.fishtron.gen;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.fishtron.types.Sub;
 import net.fishtron.types.Type;
@@ -6,19 +10,15 @@ import net.fishtron.types.TypeVar;
 import net.fishtron.types.Types;
 import net.fishtron.trees.AppTree;
 import net.fishtron.trees.Gamma;
-import cz.tomkren.fishtron.ugen.Gen;
-import cz.tomkren.fishtron.ugen.Mover;
-import cz.tomkren.fishtron.ugen.data.SubsRes;
-import cz.tomkren.fishtron.ugen.data.PreSubsRes;
-import cz.tomkren.fishtron.ugen.data.PreTs1Res;
-import cz.tomkren.fishtron.ugen.data.Ts1Res;
-import cz.tomkren.fishtron.ugen.data.TsRes;
+import net.fishtron.gen.data.Mover;
+import net.fishtron.gen.data.SubsRes;
+import net.fishtron.gen.data.PreSubsRes;
+import net.fishtron.gen.data.PreTs1Res;
+import net.fishtron.gen.data.Ts1Res;
+import net.fishtron.gen.data.TsRes;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 
 /** Created by user on 1. 2. 2017.*/
 
@@ -96,7 +96,7 @@ public class StaticGen {
         return ret; //pack(ret);
     }
 
-    static List<SubsRes> subs(Gamma gamma, int k, Type t, int n) {
+    public static List<SubsRes> subs(Gamma gamma, int k, Type t, int n) {
         if (k < 1) {throw new Error("k must be > 0, it is "+k);}
 
         if (k == 1) {
@@ -110,7 +110,7 @@ public class StaticGen {
         }
     }
 
-    static BigInteger getNum(Gamma gamma, int k, Type t) {
+    public static BigInteger getNum(Gamma gamma, int k, Type t) {
         BigInteger sum = BigInteger.ZERO;
         for (SubsRes subsRes : subs(gamma, k, t, 0)) {
             sum = sum.add(subsRes.getNum());

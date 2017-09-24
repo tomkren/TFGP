@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen.cache.data;
+package net.fishtron.gen.cache.data;
 
 import net.fishtron.utils.F;
 import org.json.JSONArray;

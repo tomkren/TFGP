@@ -11,7 +11,7 @@ import cz.tomkren.fishtron.sandbox2.Dag_IEvalManager;
 import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
 import net.fishtron.types.Type;
 import net.fishtron.trees.Gamma;
-import cz.tomkren.fishtron.ugen.Gen;
+import net.fishtron.gen.Gen;
 import cz.tomkren.fishtron.ugen.eva.AppTreeIndiv;
 import cz.tomkren.fishtron.ugen.eva.AppTreeIndivGenerator;
 import cz.tomkren.fishtron.ugen.eva.GenOpFactory;

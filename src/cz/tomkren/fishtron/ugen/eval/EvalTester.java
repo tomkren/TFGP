@@ -4,7 +4,7 @@ import net.fishtron.types.Type;
 import net.fishtron.types.Types;
 import net.fishtron.trees.AppTree;
 import net.fishtron.trees.Gamma;
-import cz.tomkren.fishtron.ugen.Gen;
+import net.fishtron.gen.Gen;
 import net.fishtron.utils.Checker;
 import net.fishtron.utils.Log;
 import org.json.JSONObject;

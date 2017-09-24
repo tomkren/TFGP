@@ -1,13 +1,8 @@
-package cz.tomkren.fishtron.ugen;
+package net.fishtron.gen.data;
 
 import net.fishtron.types.Sub;
 import net.fishtron.types.Type;
 import net.fishtron.types.TypeVar;
-import cz.tomkren.fishtron.ugen.data.PreSubsRes;
-import cz.tomkren.fishtron.ugen.data.PreTs1Res;
-import cz.tomkren.fishtron.ugen.data.SubsRes;
-import cz.tomkren.fishtron.ugen.data.Ts1Res;
-import cz.tomkren.fishtron.ugen.data.TsRes;
 import net.fishtron.trees.AppTree;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
@@ -89,7 +84,7 @@ public class Mover {
         return F.map(ts1results_unmoved, mover::movePreTs1Res);
     }
 
-    static List<SubsRes> movePreSubsResults(Type t, int n, List<PreSubsRes> results_unmoved) {
+    public static List<SubsRes> movePreSubsResults(Type t, int n, List<PreSubsRes> results_unmoved) {
         Mover mover = new Mover(t, n);
         return F.map(results_unmoved, mover::movePreSubsRes);
     }

@@ -12,8 +12,7 @@ import net.fishtron.types.Type;
 import net.fishtron.utils.AA;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
-
-import cz.tomkren.fishtron.ugen.Gen;
+import net.fishtron.gen.Gen;
 
 
 /** Created by user on 27. 7. 2016.*/

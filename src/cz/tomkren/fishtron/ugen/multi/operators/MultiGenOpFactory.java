@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.ugen.multi.operators;
 import net.fishtron.utils.Distribution;
 import cz.tomkren.fishtron.eva.Operator;
 import cz.tomkren.fishtron.operators.CopyOp;
-import cz.tomkren.fishtron.ugen.Gen;
+import net.fishtron.gen.Gen;
 import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
 import net.fishtron.utils.F;
 import org.json.JSONArray;

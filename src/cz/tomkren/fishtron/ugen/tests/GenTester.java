@@ -6,6 +6,7 @@ import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Longs;
 
 import cz.tomkren.fishtron.eva.IndivGenerator;
+import net.fishtron.gen.StaticGen;
 import net.fishtron.types.Type;
 import net.fishtron.types.TypeTerm;
 import net.fishtron.types.Types;
@@ -18,10 +19,10 @@ import cz.tomkren.fishtron.ugen.multi.Configs;
 import cz.tomkren.fishtron.ugen.multi.operators.AppTreeMIGenerator;
 import net.fishtron.trees.AppTree;
 import net.fishtron.trees.Gamma;
-import cz.tomkren.fishtron.ugen.Gen;
-import cz.tomkren.fishtron.ugen.data.SubsRes;
-import cz.tomkren.fishtron.ugen.data.TsRes;
-import cz.tomkren.fishtron.ugen.nf.NF;
+import net.fishtron.gen.Gen;
+import net.fishtron.gen.data.SubsRes;
+import net.fishtron.gen.data.TsRes;
+import net.fishtron.gen.nf.NF;
 import cz.tomkren.utils.*;
 
 import java.io.File;

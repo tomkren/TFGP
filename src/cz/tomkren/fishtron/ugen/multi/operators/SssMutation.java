@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.ugen.multi.operators;
 
 import net.fishtron.trees.AppTree;
-import cz.tomkren.fishtron.ugen.Gen;
+import net.fishtron.gen.Gen;
 import org.json.JSONObject;
 
 import java.util.Random;

@@ -1,15 +1,22 @@
-package cz.tomkren.fishtron.ugen;
+package net.fishtron.gen;
 
-import net.fishtron.trees.Gamma;
+import java.io.File;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.*;
+
+import org.json.JSONObject;
+
+import net.fishtron.gen.data.Mover;
 import net.fishtron.types.*;
-import cz.tomkren.fishtron.ugen.cache.Cache;
-import cz.tomkren.fishtron.ugen.data.SubsRes;
-import cz.tomkren.fishtron.ugen.data.PreSubsRes;
-import cz.tomkren.fishtron.ugen.data.Ts1Res;
-import cz.tomkren.fishtron.ugen.data.TsRes;
-import cz.tomkren.fishtron.ugen.data.PreTs1Res;
-import cz.tomkren.fishtron.ugen.nf.NF;
-import cz.tomkren.fishtron.ugen.tests.StaticGen;
+import net.fishtron.gen.cache.Cache;
+import net.fishtron.gen.data.SubsRes;
+import net.fishtron.gen.data.PreSubsRes;
+import net.fishtron.gen.data.Ts1Res;
+import net.fishtron.gen.data.TsRes;
+import net.fishtron.gen.data.PreTs1Res;
+import net.fishtron.gen.nf.NF;
+import net.fishtron.trees.Gamma;
 import net.fishtron.trees.App;
 import net.fishtron.trees.AppTree;
 import net.fishtron.trees.Leaf;
@@ -17,13 +24,7 @@ import net.fishtron.utils.AB;
 import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;
 import net.fishtron.utils.Log;
-import org.json.JSONObject;
 
-
-import java.io.File;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.*;
 
 /** Created by Tomáš Křen on 31. 1. 2017. */
 

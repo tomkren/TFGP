@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen.nf;
+package net.fishtron.gen.nf;
 
 import net.fishtron.types.Type;
 import net.fishtron.types.TypeSym;

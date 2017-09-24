@@ -5,7 +5,7 @@ import net.fishtron.types.TypeTerm;
 import net.fishtron.types.Types;
 import net.fishtron.trees.AppTree;
 import net.fishtron.trees.Gamma;
-import cz.tomkren.fishtron.ugen.Gen;
+import net.fishtron.gen.Gen;
 import net.fishtron.params.Params;
 import net.fishtron.trees.GammaSym;
 import cz.tomkren.fishtron.ugen.eval.*;

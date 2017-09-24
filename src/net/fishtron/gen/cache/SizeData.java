@@ -1,10 +1,10 @@
-package cz.tomkren.fishtron.ugen.cache;
+package net.fishtron.gen.cache;
 
 import net.fishtron.types.Sub;
 import net.fishtron.types.Type;
-import cz.tomkren.fishtron.ugen.Gen;
-import cz.tomkren.fishtron.ugen.cache.data.EncodedSubsRes;
-import cz.tomkren.fishtron.ugen.data.SubsRes;
+import net.fishtron.gen.Gen;
+import net.fishtron.gen.cache.data.EncodedSubsRes;
+import net.fishtron.gen.data.SubsRes;
 import net.fishtron.utils.F;
 import org.json.JSONArray;
 import org.json.JSONObject;

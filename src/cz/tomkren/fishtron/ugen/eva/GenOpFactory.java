@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.ugen.eva;
 import net.fishtron.utils.Distribution;
 import cz.tomkren.fishtron.eva.Operator;
 import cz.tomkren.fishtron.operators.CopyOp;
-import cz.tomkren.fishtron.ugen.Gen;
+import net.fishtron.gen.Gen;
 import net.fishtron.utils.F;
 import org.json.JSONArray;
 import org.json.JSONObject;
