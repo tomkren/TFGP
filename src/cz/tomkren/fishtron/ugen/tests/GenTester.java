@@ -23,16 +23,12 @@ import net.fishtron.gen.Gen;
 import net.fishtron.gen.data.SubsRes;
 import net.fishtron.gen.data.TsRes;
 import net.fishtron.gen.nf.NF;
-import cz.tomkren.utils.*;
 
 import java.io.File;
 import java.math.BigInteger;
 import java.util.*;
 
-import net.fishtron.utils.AB;
-import net.fishtron.utils.Checker;
-import net.fishtron.utils.F;
-import net.fishtron.utils.Log;
+import net.fishtron.utils.*;
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
 import org.json.JSONObject;
 

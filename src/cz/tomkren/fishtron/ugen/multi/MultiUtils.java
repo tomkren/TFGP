@@ -2,7 +2,7 @@ package cz.tomkren.fishtron.ugen.multi;
 
 import net.fishtron.utils.AB;
 import net.fishtron.utils.Log;
-import cz.tomkren.utils.Stopwatch;
+import net.fishtron.utils.Stopwatch;
 
 import java.util.ArrayList;
 import java.util.Collection;

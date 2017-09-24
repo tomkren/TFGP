@@ -1,6 +1,4 @@
-package cz.tomkren.utils;
-
-import net.fishtron.utils.F;
+package net.fishtron.utils;
 
 /** Created by user on 8. 2. 2017. */
 
