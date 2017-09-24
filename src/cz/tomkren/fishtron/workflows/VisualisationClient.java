@@ -8,7 +8,7 @@ import java.net.URLEncoder;
 import java.util.List;
 
 import net.fishtron.utils.F;
-import cz.tomkren.utils.Log;
+import net.fishtron.utils.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.eva;
 
 import net.fishtron.utils.F;
-import cz.tomkren.utils.Log;
+import net.fishtron.utils.Log;
 
 import cz.tomkren.fishtron.workflows.TypedDag; // TODO !!!!!!!!!!!!!!  Potřeba odstranit reference na TypedDag -důležité !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! !!!   !!!!!!!!!!!!!!!!!!
 

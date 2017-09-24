@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.ugen.params;
 import cz.tomkren.fishtron.eva.Distribution;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
-import cz.tomkren.utils.Log;
+import net.fishtron.utils.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

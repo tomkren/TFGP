@@ -2,7 +2,7 @@ package cz.tomkren.fishtron.ugen.eval;
 
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.trees.Leaf;
-import cz.tomkren.utils.Log;
+import net.fishtron.utils.Log;
 
 import java.util.function.Function;
 

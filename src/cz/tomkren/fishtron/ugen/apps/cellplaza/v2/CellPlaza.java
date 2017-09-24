@@ -6,7 +6,7 @@ import cz.tomkren.fishtron.ugen.trees.AppTree;
 import net.fishtron.utils.AB;
 import cz.tomkren.utils.Checker;
 import net.fishtron.utils.F;
-import cz.tomkren.utils.Log;
+import net.fishtron.utils.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

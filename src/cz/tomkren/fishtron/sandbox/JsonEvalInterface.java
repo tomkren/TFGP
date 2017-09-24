@@ -2,7 +2,7 @@ package cz.tomkren.fishtron.sandbox;
 
 import cz.tomkren.utils.Checker;
 import net.fishtron.utils.F;
-import cz.tomkren.utils.Log;
+import net.fishtron.utils.Log;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 

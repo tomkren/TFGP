@@ -5,7 +5,7 @@ import net.fishtron.types.TypeSym;
 import net.fishtron.types.TypeTerm;
 import net.fishtron.types.TypeVar;
 import net.fishtron.utils.F;
-import cz.tomkren.utils.Log;
+import net.fishtron.utils.Log;
 
 import java.util.*;
 

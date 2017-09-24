@@ -10,7 +10,7 @@ import net.fishtron.types.Type;
 import net.fishtron.types.Types;
 import cz.tomkren.utils.Checker;
 import net.fishtron.utils.F;
-import cz.tomkren.utils.Log;
+import net.fishtron.utils.Log;
 import org.apache.xmlrpc.XmlRpcException;
 import org.json.JSONArray;
 import org.json.JSONObject;

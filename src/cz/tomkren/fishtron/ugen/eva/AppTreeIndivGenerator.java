@@ -7,7 +7,6 @@ import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import cz.tomkren.utils.Checker;
 import net.fishtron.utils.F;
-//import cz.tomkren.utils.Log;
 import cz.tomkren.utils.Stopwatch;
 import org.json.JSONObject;
 import java.math.BigInteger;

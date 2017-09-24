@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.sandbox2;
 import cz.tomkren.fishtron.eva.*;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
-import cz.tomkren.utils.Log;
+import net.fishtron.utils.Log;
 import org.json.JSONObject;
 
 import java.util.*;

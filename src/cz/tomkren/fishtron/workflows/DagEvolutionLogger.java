@@ -9,7 +9,7 @@ import cz.tomkren.fishtron.terms.PolyTree;
 
 import cz.tomkren.utils.Checker;
 import net.fishtron.utils.F;
-import cz.tomkren.utils.Log;
+import net.fishtron.utils.Log;
 
 import com.google.common.base.Joiner;
 import org.json.JSONArray;

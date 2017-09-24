@@ -1,4 +1,4 @@
-package cz.tomkren.utils;
+package net.fishtron.utils;
 
 import java.text.SimpleDateFormat;
 import java.util.Collection;

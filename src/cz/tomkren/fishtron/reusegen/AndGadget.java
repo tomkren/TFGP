@@ -9,7 +9,7 @@ import net.fishtron.types.TMap;
 import net.fishtron.types.Type;
 import net.fishtron.utils.F;
 import cz.tomkren.utils.Listek;
-import cz.tomkren.utils.Log;
+import net.fishtron.utils.Log;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

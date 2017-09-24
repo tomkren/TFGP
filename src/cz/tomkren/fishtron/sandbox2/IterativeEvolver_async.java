@@ -2,8 +2,6 @@ package cz.tomkren.fishtron.sandbox2;
 
 
 import cz.tomkren.fishtron.eva.FitIndiv;
-import cz.tomkren.utils.Log;
-import cz.tomkren.utils.TODO;
 
 
 /** Created by user on 2. 6. 2016. */

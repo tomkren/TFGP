@@ -1,7 +1,7 @@
 package net.fishtron.types;
 
 import cz.tomkren.utils.AA;
-import cz.tomkren.utils.Log;
+import net.fishtron.utils.Log;
 import org.json.JSONObject;
 
 import java.util.*;

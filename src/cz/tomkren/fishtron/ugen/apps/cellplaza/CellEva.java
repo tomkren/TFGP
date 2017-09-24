@@ -9,7 +9,7 @@ import net.fishtron.server.EvaServer;
 import net.fishtron.server.jobs.Test;
 import cz.tomkren.utils.Checker;
 import net.fishtron.utils.F;
-import cz.tomkren.utils.Log;
+import net.fishtron.utils.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

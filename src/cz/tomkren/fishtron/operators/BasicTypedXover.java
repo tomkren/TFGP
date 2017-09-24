@@ -11,7 +11,7 @@ import cz.tomkren.fishtron.workflows.DataScientistLibs;
 import cz.tomkren.utils.AA;
 import cz.tomkren.utils.Checker;
 import net.fishtron.utils.F;
-import cz.tomkren.utils.Log;
+import net.fishtron.utils.Log;
 
 import org.json.JSONObject;
 import java.util.*;

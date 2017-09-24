@@ -8,7 +8,7 @@ import cz.tomkren.fishtron.ugen.multi.MultiEvolution;
 import cz.tomkren.fishtron.ugen.multi.MultiLogger;
 import cz.tomkren.utils.Checker;
 import net.fishtron.utils.F;
-import cz.tomkren.utils.Log;
+import net.fishtron.utils.Log;
 import org.apache.xmlrpc.XmlRpcException;
 import org.json.JSONException;
 import org.json.JSONObject;

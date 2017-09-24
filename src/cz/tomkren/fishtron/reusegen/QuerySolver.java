@@ -7,7 +7,7 @@ import cz.tomkren.fishtron.terms.SmartLibrary;
 import net.fishtron.types.TMap;
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
-import cz.tomkren.utils.Log;
+import net.fishtron.utils.Log;
 
 import java.util.*;
 import java.util.function.BiFunction;

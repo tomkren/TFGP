@@ -14,7 +14,7 @@ import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
 import cz.tomkren.fishtron.ugen.eva.AppTreeIndiv;
 import cz.tomkren.utils.Checker;
 import net.fishtron.utils.F;
-import cz.tomkren.utils.Log;
+import net.fishtron.utils.Log;
 
 /** Aka DagEva3
  * Created by tom on 17. 2. 2017. */

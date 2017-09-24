@@ -19,7 +19,7 @@ import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import net.fishtron.utils.AB;
 import cz.tomkren.utils.Checker;
 
-import cz.tomkren.utils.Log;
+import net.fishtron.utils.Log;
 import org.apache.xmlrpc.XmlRpcException;
 import org.json.JSONArray;
 import org.json.JSONObject;

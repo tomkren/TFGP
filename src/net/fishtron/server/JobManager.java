@@ -1,7 +1,7 @@
 package net.fishtron.server;
 
 import net.fishtron.utils.F;
-import cz.tomkren.utils.Log;
+import net.fishtron.utils.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

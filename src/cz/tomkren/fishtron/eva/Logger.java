@@ -2,8 +2,7 @@ package cz.tomkren.fishtron.eva;
 
 import cz.tomkren.fishtron.sandbox2.EvalResult;
 import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
-import cz.tomkren.utils.Log;
-import cz.tomkren.utils.Weighted;
+import net.fishtron.utils.Log;
 import org.json.JSONObject;
 
 import java.util.List;

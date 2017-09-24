@@ -7,7 +7,7 @@ import cz.tomkren.fishtron.operators.UntypedRampedHalfAndHalf;
 import cz.tomkren.fishtron.terms.PolyTree;
 import cz.tomkren.fishtron.terms.SmartLibrary;
 import cz.tomkren.utils.Checker;
-import cz.tomkren.utils.Log;
+import net.fishtron.utils.Log;
 import ec.util.MersenneTwisterFast;
 
 import java.util.Arrays;
