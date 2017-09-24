@@ -1,7 +1,5 @@
 package net.fishtron.eva.simple;
 
-import cz.tomkren.fishtron.eva.FitIndiv;
-import cz.tomkren.fishtron.eva.FitVal;
 import net.fishtron.trees.AppTree;
 import net.fishtron.eval.EvalLib;
 

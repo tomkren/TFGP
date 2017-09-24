@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.terms;
 
-import cz.tomkren.fishtron.eva.FitIndiv;
-import cz.tomkren.fishtron.eva.FitVal;
+import net.fishtron.eva.simple.FitIndiv;
+import net.fishtron.eva.simple.FitVal;
 import cz.tomkren.fishtron.reusegen.QuerySolver;
 import net.fishtron.trees.SubtreePos;
 import net.fishtron.types.Sub;

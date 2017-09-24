@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.sandbox2;
 
 
-import cz.tomkren.fishtron.eva.FitIndiv;
+import net.fishtron.eva.simple.FitIndiv;
 
 
 /** Created by user on 2. 6. 2016. */

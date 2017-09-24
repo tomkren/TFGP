@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.apps;
 
-import cz.tomkren.fishtron.eva.FitVal;
+import net.fishtron.eva.simple.FitVal;
 import cz.tomkren.fishtron.eva.TogetherFitFun;
 import cz.tomkren.fishtron.sandbox.JsonEvalInterface;
 import net.fishtron.utils.F;

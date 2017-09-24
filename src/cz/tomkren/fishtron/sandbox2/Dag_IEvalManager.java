@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.sandbox2;
 
-import cz.tomkren.fishtron.eva.FitIndiv;
+import net.fishtron.eva.simple.FitIndiv;
 import net.fishtron.utils.AB;
 import org.apache.xmlrpc.XmlRpcException;
 import org.json.JSONObject;

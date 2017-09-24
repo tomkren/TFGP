@@ -1,10 +1,4 @@
-package cz.tomkren.fishtron.eva;
-
-
-import org.json.JSONObject;
-
-import java.util.List;
-import java.util.function.Function;
+package net.fishtron.eva.simple;
 
 public interface FitVal {
     double getVal();
@@ -43,20 +37,5 @@ public interface FitVal {
             return indivId;
         }
     }
-
-    /*class HaxFamilyInfo implements FitVal {
-
-        private JSONObject familyInfo;
-
-        public JSONObject getFamilyInfo() {return familyInfo;}
-
-
-        public HaxFamilyInfo(JSONObject familyInfo) {
-            this.familyInfo = familyInfo;
-        }
-
-        @Override public double getVal()   {throw new Error("HaxFamilyInfo.getVal is not supported.");}
-        @Override public boolean isOK()    {throw new Error("HaxFamilyInfo.getVal is not supported.");}
-    }*/
 
 }

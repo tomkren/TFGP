@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.sandbox2;
 
-import cz.tomkren.fishtron.eva.FitIndiv;
-import cz.tomkren.fishtron.eva.FitVal;
+import net.fishtron.eva.simple.FitIndiv;
+import net.fishtron.eva.simple.FitVal;
 import cz.tomkren.fishtron.sandbox.JsonEvalInterface;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.Checker;

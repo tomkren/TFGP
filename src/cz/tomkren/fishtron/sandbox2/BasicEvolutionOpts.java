@@ -1,6 +1,7 @@
 package cz.tomkren.fishtron.sandbox2;
 
 import cz.tomkren.fishtron.eva.*;
+import net.fishtron.eva.simple.FitIndiv;
 import net.fishtron.eva.IndivGenerator;
 import net.fishtron.eva.Operator;
 import net.fishtron.utils.Distribution;

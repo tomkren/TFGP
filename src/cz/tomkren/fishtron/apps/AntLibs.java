@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.apps;
 
-import cz.tomkren.fishtron.eva.FitIndiv;
+import net.fishtron.eva.simple.FitIndiv;
 import net.fishtron.eva.IndivGenerator;
 import cz.tomkren.fishtron.operators.UntypedRampedHalfAndHalf;
 import cz.tomkren.fishtron.sandbox.*;

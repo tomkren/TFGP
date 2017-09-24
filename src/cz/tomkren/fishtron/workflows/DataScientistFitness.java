@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.workflows;
 
-import cz.tomkren.fishtron.eva.FitVal;
+import net.fishtron.eva.simple.FitVal;
 import cz.tomkren.fishtron.eva.TogetherFitFun;
 import net.fishtron.utils.F;
 import net.fishtron.utils.Log;

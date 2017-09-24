@@ -1,7 +1,7 @@
 package net.fishtron.apps.workflows;
 
-import cz.tomkren.fishtron.eva.FitIndiv;
-import cz.tomkren.fishtron.eva.FitVal;
+import net.fishtron.eva.simple.FitIndiv;
+import net.fishtron.eva.simple.FitVal;
 import cz.tomkren.fishtron.mains.DagEvaTester;
 import cz.tomkren.fishtron.sandbox2.Dag_IEvalManager;
 import cz.tomkren.fishtron.sandbox2.EvalResult;

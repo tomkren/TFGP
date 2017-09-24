@@ -1,5 +1,7 @@
 package cz.tomkren.fishtron.eva;
 
+import net.fishtron.eva.simple.FitIndiv;
+import net.fishtron.eva.simple.FitVal;
 import net.fishtron.utils.Distribution;
 
 import java.util.ArrayList;

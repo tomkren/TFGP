@@ -1,5 +1,7 @@
 package cz.tomkren.fishtron.eva;
 
+import net.fishtron.eva.simple.FitVal;
+
 import java.util.List;
 
 /** Created by user on 1. 7. 2015. */
