@@ -1,6 +1,6 @@
 package net.fishtron.types;
 
-import cz.tomkren.utils.AB;
+import net.fishtron.utils.AB;
 
 import java.util.Set;
 import java.util.TreeSet;

@@ -5,7 +5,7 @@ import net.fishtron.types.Sub;
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
 import cz.tomkren.utils.AA;
-import cz.tomkren.utils.AB;
+import net.fishtron.utils.AB;
 import cz.tomkren.utils.TODO;
 import org.json.JSONObject;
 

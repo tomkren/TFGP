@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.ugen.multi;
 
 import cz.tomkren.fishtron.eva.Operator;
-import cz.tomkren.utils.AB;
+import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
 
 import cz.tomkren.utils.Log;

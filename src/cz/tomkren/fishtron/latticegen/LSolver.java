@@ -3,6 +3,7 @@ package cz.tomkren.fishtron.latticegen;
 import cz.tomkren.fishtron.latticegen.cache.Cache;
 import net.fishtron.types.*;
 import cz.tomkren.utils.*;
+import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
 import org.json.JSONObject;
 

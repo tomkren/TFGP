@@ -1,7 +1,7 @@
 package net.fishtron.types;
 
 import com.google.common.base.Joiner;
-import cz.tomkren.utils.AB;
+import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
 
 import java.util.*;

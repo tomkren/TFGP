@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.ugen.data;
 import net.fishtron.types.Sub;
 import net.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
-import cz.tomkren.utils.AB;
+import net.fishtron.utils.AB;
 
 import java.math.BigInteger;
 

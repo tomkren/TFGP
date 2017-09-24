@@ -4,7 +4,7 @@ import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import cz.tomkren.fishtron.ugen.multi.MultiEvalResult;
 import cz.tomkren.fishtron.ugen.multi.MultiIndiv;
 import cz.tomkren.fishtron.workflows.TypedDag;
-import cz.tomkren.utils.AB;
+import net.fishtron.utils.AB;
 import cz.tomkren.utils.ABC;
 import net.fishtron.utils.F;
 import org.apache.xmlrpc.XmlRpcException;

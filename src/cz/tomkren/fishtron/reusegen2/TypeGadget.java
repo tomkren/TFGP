@@ -4,7 +4,7 @@ package cz.tomkren.fishtron.reusegen2;
 import com.google.common.collect.Lists;
 import cz.tomkren.fishtron.terms.SmartSymbol;
 import net.fishtron.types.*;
-import cz.tomkren.utils.AB;
+import net.fishtron.utils.AB;
 import cz.tomkren.utils.ABC;
 import net.fishtron.utils.F;
 

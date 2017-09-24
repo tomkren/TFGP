@@ -5,7 +5,7 @@ import net.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.data.GammaSym;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.trees.Lam;
-import cz.tomkren.utils.AB;
+import net.fishtron.utils.AB;
 import cz.tomkren.utils.ABC;
 import net.fishtron.utils.F;
 import cz.tomkren.utils.TODO;

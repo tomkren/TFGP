@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.sandbox2;
 
 import cz.tomkren.fishtron.eva.FitIndiv;
-import cz.tomkren.utils.AB;
+import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
 import org.json.JSONObject;
 

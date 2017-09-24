@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.ugen.params;
 
-import cz.tomkren.utils.AB;
+import net.fishtron.utils.AB;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

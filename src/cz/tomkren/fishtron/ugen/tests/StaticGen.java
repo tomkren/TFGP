@@ -13,7 +13,7 @@ import cz.tomkren.fishtron.ugen.data.PreSubsRes;
 import cz.tomkren.fishtron.ugen.data.PreTs1Res;
 import cz.tomkren.fishtron.ugen.data.Ts1Res;
 import cz.tomkren.fishtron.ugen.data.TsRes;
-import cz.tomkren.utils.AB;
+import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
 
 import java.math.BigInteger;

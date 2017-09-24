@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.sandbox2;
 import cz.tomkren.fishtron.eva.FitIndiv;
 import cz.tomkren.fishtron.eva.FitVal;
 import cz.tomkren.fishtron.sandbox.JsonEvalInterface;
-import cz.tomkren.utils.AB;
+import net.fishtron.utils.AB;
 import cz.tomkren.utils.Checker;
 import net.fishtron.utils.F;
 import cz.tomkren.utils.Log;

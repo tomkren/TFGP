@@ -2,7 +2,7 @@ package cz.tomkren.fishtron.workflows;
 
 /** Created by tom on 7.11.2015.*/
 
-import cz.tomkren.utils.AB;
+import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
 import org.json.JSONObject;
 

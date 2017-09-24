@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.ugen.compare;
 import cz.tomkren.fishtron.eva.Operator;
 import cz.tomkren.fishtron.ugen.multi.MultiIndiv;
 import cz.tomkren.fishtron.ugen.multi.MultiLogger;
-import cz.tomkren.utils.AB;
+import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
 import org.json.JSONObject;
 

@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.reusegen2;
 import com.google.common.base.Joiner;
 import cz.tomkren.fishtron.terms.SmartSymbol;
 import net.fishtron.types.Type;
-import cz.tomkren.utils.AB;
+import net.fishtron.utils.AB;
 
 import java.util.ArrayList;
 import java.util.Collections;

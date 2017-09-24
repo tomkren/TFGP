@@ -6,7 +6,7 @@ import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
 import cz.tomkren.fishtron.ugen.multi.MultiEvalResult;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.workflows.TypedDag;
-import cz.tomkren.utils.AB;
+import net.fishtron.utils.AB;
 import cz.tomkren.utils.Checker;
 import net.fishtron.utils.F;
 import org.apache.xmlrpc.XmlRpcException;

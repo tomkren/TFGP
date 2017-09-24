@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.terms;
 
 import cz.tomkren.fishtron.eva.Distribution;
-import cz.tomkren.utils.AB;
+import net.fishtron.utils.AB;
 import cz.tomkren.utils.Comb0;
 import net.fishtron.utils.F;
 import org.json.JSONArray;

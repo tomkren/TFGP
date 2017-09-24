@@ -5,7 +5,7 @@ import cz.tomkren.fishtron.terms.*;
 import cz.tomkren.fishtron.workflows.DataScientistLibs;
 import cz.tomkren.fishtron.workflows.TypedDag;
 
-import cz.tomkren.utils.AB;
+import net.fishtron.utils.AB;
 import cz.tomkren.utils.Checker;
 import net.fishtron.utils.F;
 import cz.tomkren.utils.Log;

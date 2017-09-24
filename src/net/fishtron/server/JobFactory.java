@@ -1,6 +1,6 @@
 package net.fishtron.server;
 
-import cz.tomkren.utils.AB;
+import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
 import org.json.JSONArray;
 

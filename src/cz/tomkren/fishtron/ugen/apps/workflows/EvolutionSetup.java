@@ -16,7 +16,7 @@ import cz.tomkren.fishtron.ugen.eva.AppTreeIndiv;
 import cz.tomkren.fishtron.ugen.eva.AppTreeIndivGenerator;
 import cz.tomkren.fishtron.ugen.eva.GenOpFactory;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
-import cz.tomkren.utils.AB;
+import net.fishtron.utils.AB;
 import cz.tomkren.utils.Checker;
 
 import cz.tomkren.utils.Log;
