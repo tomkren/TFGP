@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.ugen.apps.cellplaza.v3;
 import net.fishtron.types.Type;
 import net.fishtron.types.TypeSym;
 import net.fishtron.types.TypeTerm;
-import cz.tomkren.fishtron.ugen.Gamma;
+import net.fishtron.trees.Gamma;
 import cz.tomkren.fishtron.ugen.eval.*;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.trees.Leaf;

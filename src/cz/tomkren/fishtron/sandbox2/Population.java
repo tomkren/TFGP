@@ -1,7 +1,6 @@
 package cz.tomkren.fishtron.sandbox2;
 
 import cz.tomkren.fishtron.eva.*;
-import cz.tomkren.utils.TODO;
 
 import java.util.ArrayList;
 import java.util.HashSet;

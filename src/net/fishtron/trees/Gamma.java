@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen;
+package net.fishtron.trees;
 
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
@@ -8,7 +8,7 @@ import cz.tomkren.fishtron.ugen.trees.Lam;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.ABC;
 import net.fishtron.utils.F;
-import cz.tomkren.utils.TODO;
+import net.fishtron.utils.TODO;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
@@ -125,11 +125,11 @@ public class Gamma {
         return F.map(gamma, GammaSym::toNameTypePair);
     }
 
-    JSONArray toJson() {
+    public JSONArray toJson() {
         return F.jsonMap(gamma, GammaSym::toJson);
     }
 
-    static Gamma fromJson(JSONArray json) {
+    public static Gamma fromJson(JSONArray json) {
         List<GammaSym> newSymList = F.map(json, GammaSym::fromJson);
         return new Gamma(newSymList);
     }

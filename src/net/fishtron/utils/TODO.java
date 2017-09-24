@@ -1,4 +1,4 @@
-package cz.tomkren.utils;
+package net.fishtron.utils;
 
 public class TODO extends Error {
 

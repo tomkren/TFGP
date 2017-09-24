@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.ugen.eval;
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
-import cz.tomkren.fishtron.ugen.Gamma;
+import net.fishtron.trees.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
 import net.fishtron.utils.Checker;
 import net.fishtron.utils.Log;

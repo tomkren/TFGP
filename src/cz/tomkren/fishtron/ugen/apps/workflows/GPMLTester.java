@@ -4,7 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import cz.tomkren.fishtron.eva.IndivGenerator;
 import net.fishtron.types.Type;
-import cz.tomkren.fishtron.ugen.Gamma;
+import net.fishtron.trees.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.eva.AppTreeIndiv;
 import cz.tomkren.fishtron.ugen.eva.AppTreeIndivGenerator;

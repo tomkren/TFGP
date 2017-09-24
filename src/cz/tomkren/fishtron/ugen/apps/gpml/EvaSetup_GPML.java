@@ -4,7 +4,7 @@ import cz.tomkren.fishtron.eva.Distribution;
 import cz.tomkren.fishtron.eva.IndivGenerator;
 import cz.tomkren.fishtron.eva.Operator;
 import net.fishtron.types.Type;
-import cz.tomkren.fishtron.ugen.Gamma;
+import net.fishtron.trees.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.apps.workflows.Workflows;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;

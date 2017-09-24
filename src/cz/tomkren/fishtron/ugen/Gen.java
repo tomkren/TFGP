@@ -1,5 +1,6 @@
 package cz.tomkren.fishtron.ugen;
 
+import net.fishtron.trees.Gamma;
 import net.fishtron.types.Sub;
 import net.fishtron.types.Type;
 import net.fishtron.types.TypeVar;
