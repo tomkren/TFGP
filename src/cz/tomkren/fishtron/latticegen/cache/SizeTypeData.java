@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.latticegen.cache;
 
-import cz.tomkren.utils.ABC;
+import net.fishtron.utils.ABC;
 
 import java.math.BigInteger;
 import java.util.List;

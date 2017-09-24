@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import cz.tomkren.fishtron.terms.SmartSymbol;
 import net.fishtron.types.*;
 import net.fishtron.utils.AB;
-import cz.tomkren.utils.ABC;
+import net.fishtron.utils.ABC;
 import net.fishtron.utils.F;
 
 import java.math.BigInteger;

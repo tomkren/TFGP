@@ -4,7 +4,7 @@ import cz.tomkren.fishtron.latticegen.LSolver;
 import net.fishtron.types.Sub;
 import net.fishtron.types.Type;
 import net.fishtron.types.TypeVar;
-import cz.tomkren.utils.ABC;
+import net.fishtron.utils.ABC;
 import net.fishtron.utils.F;
 import org.json.JSONArray;
 import org.json.JSONObject;

@@ -8,7 +8,7 @@ import cz.tomkren.fishtron.terms.SmartSymbol;
 import net.fishtron.types.Sub;
 import net.fishtron.types.TMap;
 import net.fishtron.types.Type;
-import cz.tomkren.utils.ABC;
+import net.fishtron.utils.ABC;
 import net.fishtron.utils.F;
 import cz.tomkren.utils.Listek;
 

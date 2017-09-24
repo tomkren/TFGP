@@ -1,4 +1,4 @@
-package cz.tomkren.utils;
+package net.fishtron.utils;
 
 // modifikovatelná trojice
 public class ABC<A,B,C> {
