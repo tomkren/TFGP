@@ -1,8 +1,8 @@
 package cz.tomkren.fishtron.sandbox2;
 
 import cz.tomkren.fishtron.eva.*;
+import net.fishtron.utils.Distribution;
 
-import java.util.List;
 import java.util.Random;
 
 /** Created by tom on 1. 6. 2016.*/

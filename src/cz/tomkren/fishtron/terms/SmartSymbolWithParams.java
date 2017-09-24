@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.terms;
 
-import cz.tomkren.fishtron.eva.Distribution;
+import net.fishtron.utils.Distribution;
 import net.fishtron.utils.AB;
 import cz.tomkren.utils.Comb0;
 import net.fishtron.utils.F;

@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.ugen.eva;
 
-import cz.tomkren.fishtron.eva.Distribution;
+import net.fishtron.utils.Distribution;
 import cz.tomkren.fishtron.eva.Operator;
 import cz.tomkren.fishtron.operators.CopyOp;
 import cz.tomkren.fishtron.ugen.Gen;

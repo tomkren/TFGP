@@ -1,5 +1,7 @@
 package cz.tomkren.fishtron.eva;
 
+import net.fishtron.utils.Distribution;
+
 import java.util.ArrayList;
 import java.util.List;
 

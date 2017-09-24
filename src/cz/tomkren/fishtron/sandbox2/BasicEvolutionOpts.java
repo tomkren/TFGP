@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.sandbox2;
 
 import cz.tomkren.fishtron.eva.*;
-import org.json.JSONObject;
+import net.fishtron.utils.Distribution;
 
 import java.util.Random;
 

@@ -1,9 +1,4 @@
-package cz.tomkren.fishtron.eva;
-
-import net.fishtron.utils.AB;
-import net.fishtron.utils.F;
-import net.fishtron.utils.Log;
-import net.fishtron.utils.Weighted;
+package net.fishtron.utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;

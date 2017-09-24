@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.ugen.compare;
 
-import cz.tomkren.fishtron.eva.Distribution;
+import net.fishtron.utils.Distribution;
 import cz.tomkren.fishtron.eva.IndivGenerator;
 import cz.tomkren.fishtron.eva.Operator;
 import cz.tomkren.fishtron.ugen.multi.MultiIndiv;

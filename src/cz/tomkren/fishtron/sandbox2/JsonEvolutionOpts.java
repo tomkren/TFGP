@@ -9,6 +9,7 @@ import cz.tomkren.fishtron.terms.SmartLibrary;
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
 import net.fishtron.utils.Checker;
+import net.fishtron.utils.Distribution;
 import net.fishtron.utils.F;
 import net.fishtron.utils.Log;
 import org.apache.xmlrpc.XmlRpcException;

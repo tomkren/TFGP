@@ -8,6 +8,7 @@ import cz.tomkren.fishtron.sandbox2.*;
 import cz.tomkren.fishtron.terms.PolyTree;
 import cz.tomkren.fishtron.terms.SmartLibrary;
 import net.fishtron.utils.Checker;
+import net.fishtron.utils.Distribution;
 
 import java.util.Arrays;
 import java.util.Random;

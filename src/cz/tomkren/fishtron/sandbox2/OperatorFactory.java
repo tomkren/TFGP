@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.sandbox2;
 
-import cz.tomkren.fishtron.eva.Distribution;
+import net.fishtron.utils.Distribution;
 import cz.tomkren.fishtron.eva.Operator;
 import cz.tomkren.fishtron.operators.BasicTypedXover;
 import cz.tomkren.fishtron.operators.CopyOp;

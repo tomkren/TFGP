@@ -1,5 +1,6 @@
 package cz.tomkren.fishtron.eva;
 
+import net.fishtron.utils.Distribution;
 import net.fishtron.utils.Weighted;
 
 import java.util.List;

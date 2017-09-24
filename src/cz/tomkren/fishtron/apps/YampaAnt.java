@@ -7,6 +7,7 @@ import cz.tomkren.fishtron.operators.UntypedRampedHalfAndHalf;
 import cz.tomkren.fishtron.terms.PolyTree;
 import cz.tomkren.fishtron.terms.SmartLibrary;
 import net.fishtron.utils.Checker;
+import net.fishtron.utils.Distribution;
 import net.fishtron.utils.Log;
 import ec.util.MersenneTwisterFast;
 

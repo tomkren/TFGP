@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.ugen.params;
 
-import cz.tomkren.fishtron.eva.Distribution;
+import net.fishtron.utils.Distribution;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
 import org.json.JSONArray;
