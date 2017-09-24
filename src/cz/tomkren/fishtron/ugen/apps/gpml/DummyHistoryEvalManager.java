@@ -1,8 +1,8 @@
 package cz.tomkren.fishtron.ugen.apps.gpml;
 
 import net.fishtron.eval.EvalLib;
-import cz.tomkren.fishtron.ugen.multi.MultiEvalResult;
-import cz.tomkren.fishtron.ugen.multi.MultiIndiv;
+import net.fishtron.eva.multi.MultiEvalResult;
+import net.fishtron.eva.multi.MultiIndiv;
 import cz.tomkren.fishtron.workflows.TypedDag;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.ABC;

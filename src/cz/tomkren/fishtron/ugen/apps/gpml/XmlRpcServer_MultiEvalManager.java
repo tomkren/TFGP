@@ -1,9 +1,9 @@
 package cz.tomkren.fishtron.ugen.apps.gpml;
 
 
-import cz.tomkren.fishtron.ugen.multi.MultiEvalManager;
-import cz.tomkren.fishtron.ugen.multi.MultiEvalResult;
-import cz.tomkren.fishtron.ugen.multi.MultiIndiv;
+import net.fishtron.eva.multi.MultiEvalManager;
+import net.fishtron.eva.multi.MultiEvalResult;
+import net.fishtron.eva.multi.MultiIndiv;
 import net.fishtron.utils.AB;
 import org.apache.xmlrpc.XmlRpcException;
 import org.json.JSONObject;

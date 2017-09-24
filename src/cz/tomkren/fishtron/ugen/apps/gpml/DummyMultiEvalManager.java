@@ -2,8 +2,8 @@ package cz.tomkren.fishtron.ugen.apps.gpml;
 
 import cz.tomkren.fishtron.mains.DagEvaTester;
 import net.fishtron.eval.EvalLib;
-import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
-import cz.tomkren.fishtron.ugen.multi.MultiEvalResult;
+import net.fishtron.eva.multi.AppTreeMI;
+import net.fishtron.eva.multi.MultiEvalResult;
 import net.fishtron.trees.AppTree;
 import cz.tomkren.fishtron.workflows.TypedDag;
 import net.fishtron.utils.AB;

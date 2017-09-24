@@ -2,7 +2,7 @@ package cz.tomkren.fishtron.mains;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
-import cz.tomkren.fishtron.eva.IndivGenerator;
+import net.fishtron.eva.IndivGenerator;
 import cz.tomkren.fishtron.terms.PolyTree;
 import cz.tomkren.fishtron.terms.SmartLibrary;
 import net.fishtron.types.TMap;

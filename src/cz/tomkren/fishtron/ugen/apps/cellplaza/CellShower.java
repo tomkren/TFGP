@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza;
 
-import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
-import cz.tomkren.fishtron.ugen.multi.IndivShower;
+import net.fishtron.eva.multi.AppTreeMI;
+import net.fishtron.eva.multi.IndivShower;
 
 /**Created by tom on 20.03.2017.*/
 

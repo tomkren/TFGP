@@ -1,9 +1,9 @@
 package cz.tomkren.fishtron.mains;
 
 import com.google.common.base.Joiner;
-import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
-import cz.tomkren.fishtron.ugen.multi.MultiIndiv;
-import cz.tomkren.fishtron.ugen.multi.MultiUtils;
+import net.fishtron.eva.multi.AppTreeMI;
+import net.fishtron.eva.multi.MultiIndiv;
+import net.fishtron.eva.multi.MultiUtils;
 import net.fishtron.utils.*;
 import org.json.JSONArray;
 import org.json.JSONObject;

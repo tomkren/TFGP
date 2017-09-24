@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.ugen.apps.gpml;
 
 import com.google.common.base.Strings;
-import cz.tomkren.fishtron.ugen.multi.*;
+import net.fishtron.eva.multi.*;
 import cz.tomkren.fishtron.workflows.TypedDag;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.Checker;

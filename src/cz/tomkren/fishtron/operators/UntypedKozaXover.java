@@ -2,7 +2,7 @@ package cz.tomkren.fishtron.operators;
 
 /** Created by tom on 24.1.2016.*/
 
-import cz.tomkren.fishtron.eva.Operator;
+import net.fishtron.eva.Operator;
 import cz.tomkren.fishtron.terms.PolyTree;
 import net.fishtron.utils.AA;
 import net.fishtron.utils.F;

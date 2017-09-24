@@ -2,12 +2,12 @@ package cz.tomkren.fishtron.ugen.apps.workflows;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
-import cz.tomkren.fishtron.eva.IndivGenerator;
+import net.fishtron.eva.IndivGenerator;
 import net.fishtron.types.Type;
 import net.fishtron.trees.Gamma;
 import net.fishtron.gen.Gen;
-import cz.tomkren.fishtron.ugen.eva.AppTreeIndiv;
-import cz.tomkren.fishtron.ugen.eva.AppTreeIndivGenerator;
+import net.fishtron.eva.simple.AppTreeIndiv;
+import net.fishtron.eva.simple.AppTreeIndivGenerator;
 import net.fishtron.eval.EvalLib;
 import cz.tomkren.fishtron.workflows.TypedDag;
 import net.fishtron.utils.Checker;

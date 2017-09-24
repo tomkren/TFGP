@@ -1,9 +1,9 @@
 package cz.tomkren.fishtron.sandbox2;
 
 import net.fishtron.utils.Distribution;
-import cz.tomkren.fishtron.eva.Operator;
+import net.fishtron.eva.Operator;
 import cz.tomkren.fishtron.operators.BasicTypedXover;
-import cz.tomkren.fishtron.operators.CopyOp;
+import net.fishtron.eva.CopyOp;
 import cz.tomkren.fishtron.operators.OneParamMutation;
 import cz.tomkren.fishtron.operators.SameSizeSubtreeMutation;
 import cz.tomkren.fishtron.reusegen.QuerySolver;

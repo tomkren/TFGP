@@ -11,7 +11,7 @@ import java.io.IOException;
 import cz.tomkren.fishtron.eva.Logger;
 import cz.tomkren.fishtron.sandbox2.Evolution;
 import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
-import cz.tomkren.fishtron.ugen.eva.AppTreeIndiv;
+import net.fishtron.eva.simple.AppTreeIndiv;
 import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;
 import net.fishtron.utils.Log;

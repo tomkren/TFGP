@@ -1,8 +1,8 @@
 package cz.tomkren.fishtron.ugen.apps.workflows;
 
 import net.fishtron.utils.Distribution;
-import cz.tomkren.fishtron.eva.IndivGenerator;
-import cz.tomkren.fishtron.eva.Operator;
+import net.fishtron.eva.IndivGenerator;
+import net.fishtron.eva.Operator;
 import cz.tomkren.fishtron.eva.Selection;
 import cz.tomkren.fishtron.sandbox2.BasicEvolutionOpts;
 import cz.tomkren.fishtron.sandbox2.Dag_EvalManager;
@@ -12,9 +12,9 @@ import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
 import net.fishtron.types.Type;
 import net.fishtron.trees.Gamma;
 import net.fishtron.gen.Gen;
-import cz.tomkren.fishtron.ugen.eva.AppTreeIndiv;
-import cz.tomkren.fishtron.ugen.eva.AppTreeIndivGenerator;
-import cz.tomkren.fishtron.ugen.eva.GenOpFactory;
+import net.fishtron.eva.simple.AppTreeIndiv;
+import net.fishtron.eva.simple.AppTreeIndivGenerator;
+import net.fishtron.eva.simple.GenOpFactory;
 import net.fishtron.eval.EvalLib;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.Checker;

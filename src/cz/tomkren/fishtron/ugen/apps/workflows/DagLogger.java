@@ -6,7 +6,7 @@ import cz.tomkren.fishtron.eva.EvaledPop;
 import cz.tomkren.fishtron.eva.Logger;
 import cz.tomkren.fishtron.sandbox2.EvalResult;
 import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
-import cz.tomkren.fishtron.ugen.eva.AppTreeIndiv;
+import net.fishtron.eva.simple.AppTreeIndiv;
 import cz.tomkren.fishtron.workflows.TypedDag;
 import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;

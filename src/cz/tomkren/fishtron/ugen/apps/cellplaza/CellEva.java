@@ -1,8 +1,8 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza;
 
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.CellPlaza;
-import cz.tomkren.fishtron.ugen.compare.CompareEvolution;
-import cz.tomkren.fishtron.ugen.multi.*;
+import net.fishtron.eva.compare.CompareEvolution;
+import net.fishtron.eva.multi.*;
 import net.fishtron.server.EvaJob;
 import net.fishtron.server.EvaJobProcess;
 import net.fishtron.server.EvaServer;

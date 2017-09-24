@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.apps;
 
 import cz.tomkren.fishtron.eva.FitIndiv;
-import cz.tomkren.fishtron.eva.IndivGenerator;
+import net.fishtron.eva.IndivGenerator;
 import cz.tomkren.fishtron.operators.UntypedRampedHalfAndHalf;
 import cz.tomkren.fishtron.sandbox.*;
 import cz.tomkren.fishtron.terms.PolyTree;

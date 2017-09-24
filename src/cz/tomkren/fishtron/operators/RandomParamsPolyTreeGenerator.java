@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.operators;
 
-import cz.tomkren.fishtron.eva.IndivGenerator;
+import net.fishtron.eva.IndivGenerator;
 import cz.tomkren.fishtron.reusegen.QuerySolver;
 import cz.tomkren.fishtron.terms.PolyTree;
 import net.fishtron.types.Type;
