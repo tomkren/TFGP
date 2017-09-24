@@ -1,10 +1,7 @@
 package cz.tomkren.fishtron.ugen;
 
 import net.fishtron.trees.Gamma;
-import net.fishtron.types.Sub;
-import net.fishtron.types.Type;
-import net.fishtron.types.TypeVar;
-import net.fishtron.types.Types;
+import net.fishtron.types.*;
 import cz.tomkren.fishtron.ugen.cache.Cache;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
 import cz.tomkren.fishtron.ugen.data.PreSubsRes;

@@ -1,6 +1,5 @@
-package cz.tomkren.fishtron.ugen;
+package net.fishtron.types;
 
-import net.fishtron.types.Type;
 import net.fishtron.utils.AB;
 
 /** Created by user on 2. 2. 2017. */

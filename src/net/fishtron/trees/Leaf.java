@@ -10,8 +10,8 @@ import net.fishtron.types.Sub;
 import net.fishtron.types.Type;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
+import net.fishtron.types.Fresh;
 
-import cz.tomkren.fishtron.ugen.Fresh;
 import cz.tomkren.fishtron.ugen.params.Params;
 
 
