@@ -12,7 +12,7 @@ import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
 import net.fishtron.types.Fresh;
 
-import cz.tomkren.fishtron.ugen.params.Params;
+import net.fishtron.params.Params;
 
 
 /** Created by tom on 18.03.2017. */

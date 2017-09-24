@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen.params;
+package net.fishtron.params;
 
 import net.fishtron.utils.Distribution;
 import net.fishtron.utils.AB;
