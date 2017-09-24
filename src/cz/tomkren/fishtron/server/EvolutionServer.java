@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.server;
 
 import cz.tomkren.fishtron.mains.DagEvaTester;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 import cz.tomkren.utils.Log;
 import cz.tomkren.utils.ResourceLoader;
 import org.eclipse.jetty.server.Request;

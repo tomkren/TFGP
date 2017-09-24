@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.eva;
 
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 
 import java.util.*;
 

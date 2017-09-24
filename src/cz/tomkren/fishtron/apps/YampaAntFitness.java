@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.apps;
 import cz.tomkren.fishtron.eva.FitVal;
 import cz.tomkren.fishtron.eva.TogetherFitFun;
 import cz.tomkren.fishtron.sandbox.JsonEvalInterface;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 import org.json.JSONArray;
 
 import java.util.List;

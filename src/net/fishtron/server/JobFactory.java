@@ -1,7 +1,7 @@
 package net.fishtron.server;
 
 import cz.tomkren.utils.AB;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 import org.json.JSONArray;
 
 import java.lang.reflect.Constructor;

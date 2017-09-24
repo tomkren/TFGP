@@ -5,7 +5,7 @@ import cz.tomkren.fishtron.ugen.nf.MkNF;
 import cz.tomkren.utils.AA;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Checker;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 
 import java.util.ArrayList;
 import java.util.Arrays;

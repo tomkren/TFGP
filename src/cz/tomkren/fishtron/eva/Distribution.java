@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.eva;
 
 import cz.tomkren.utils.AB;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 import cz.tomkren.utils.Log;
 import cz.tomkren.utils.Weighted;
 

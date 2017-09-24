@@ -2,7 +2,7 @@ package net.fishtron.types;
 
 import com.google.common.base.Joiner;
 import cz.tomkren.utils.AB;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 
 import java.util.*;
 import java.util.function.Function;

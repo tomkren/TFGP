@@ -9,7 +9,7 @@ import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
 import cz.tomkren.fishtron.ugen.eva.AppTreeIndiv;
 import cz.tomkren.fishtron.workflows.TypedDag;
 import cz.tomkren.utils.Checker;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 import cz.tomkren.utils.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;

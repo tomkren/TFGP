@@ -8,7 +8,7 @@ import cz.tomkren.fishtron.sandbox2.JsonEvolutionOpts;
 import cz.tomkren.fishtron.terms.PolyTree;
 import cz.tomkren.fishtron.workflows.DagEvolutionLogger;
 import cz.tomkren.utils.Checker;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 import cz.tomkren.utils.Log;
 import org.apache.xmlrpc.XmlRpcException;
 import org.json.JSONException;

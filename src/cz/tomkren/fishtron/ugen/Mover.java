@@ -10,7 +10,7 @@ import cz.tomkren.fishtron.ugen.data.Ts1Res;
 import cz.tomkren.fishtron.ugen.data.TsRes;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.utils.AB;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 
 import java.util.List;
 import java.util.TreeSet;

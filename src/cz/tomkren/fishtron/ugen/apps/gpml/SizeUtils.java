@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.ugen.apps.gpml;
 import com.google.common.collect.Sets;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.trees.Sexpr;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 
 import java.util.List;
 import java.util.Set;

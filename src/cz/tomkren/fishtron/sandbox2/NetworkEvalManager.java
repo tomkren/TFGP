@@ -5,7 +5,7 @@ import cz.tomkren.fishtron.eva.FitVal;
 import cz.tomkren.fishtron.sandbox.JsonEvalInterface;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Checker;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 import cz.tomkren.utils.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;

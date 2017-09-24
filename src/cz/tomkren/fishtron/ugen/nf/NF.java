@@ -5,7 +5,7 @@ import net.fishtron.types.Type;
 import net.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 import cz.tomkren.utils.Log;
 
 import java.util.List;

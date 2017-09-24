@@ -2,7 +2,7 @@ package cz.tomkren.fishtron.ugen.multi;
 
 import cz.tomkren.fishtron.eva.Operator;
 import cz.tomkren.utils.AB;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 
 import cz.tomkren.utils.Log;
 import org.json.JSONObject;

@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza.v1;
 
 import cz.tomkren.fishtron.ugen.apps.cellplaza.shared.PlazaImg;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

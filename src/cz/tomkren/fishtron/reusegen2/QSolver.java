@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.reusegen2;
 import cz.tomkren.fishtron.terms.SmartLibrary;
 import net.fishtron.types.Sub;
 import net.fishtron.types.Type;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 
 import java.math.BigInteger;
 import java.util.HashMap;

@@ -4,7 +4,7 @@ import cz.tomkren.fishtron.terms.SmartSymbol;
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
 import cz.tomkren.utils.AA;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

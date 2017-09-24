@@ -6,7 +6,7 @@ import net.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.Fresh;
 import cz.tomkren.fishtron.ugen.params.Params;
 import cz.tomkren.utils.AB;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 import org.json.JSONObject;
 
 import java.util.*;

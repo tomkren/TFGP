@@ -2,7 +2,7 @@ package cz.tomkren.fishtron.ugen.apps.cellplaza.v1;
 
 import cz.tomkren.fishtron.ugen.apps.cellplaza.shared.PlazaImg;
 import cz.tomkren.utils.AA;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 import cz.tomkren.utils.Log;
 
 import java.awt.Color;

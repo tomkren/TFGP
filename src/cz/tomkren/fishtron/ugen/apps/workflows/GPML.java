@@ -13,7 +13,7 @@ import cz.tomkren.fishtron.sandbox2.Evolution;
 import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
 import cz.tomkren.fishtron.ugen.eva.AppTreeIndiv;
 import cz.tomkren.utils.Checker;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 import cz.tomkren.utils.Log;
 
 /** Aka DagEva3

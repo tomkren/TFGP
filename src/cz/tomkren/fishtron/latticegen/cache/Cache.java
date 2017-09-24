@@ -5,7 +5,7 @@ import net.fishtron.types.Sub;
 import net.fishtron.types.Type;
 import net.fishtron.types.TypeVar;
 import cz.tomkren.utils.ABC;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

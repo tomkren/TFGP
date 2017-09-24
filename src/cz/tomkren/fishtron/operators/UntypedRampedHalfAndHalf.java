@@ -4,7 +4,7 @@ import cz.tomkren.fishtron.eva.IndivGenerator;
 import cz.tomkren.fishtron.terms.PolyTree;
 import cz.tomkren.fishtron.terms.SmartLibrary;
 import cz.tomkren.fishtron.terms.SmartSymbol;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 
 import java.util.*;
 

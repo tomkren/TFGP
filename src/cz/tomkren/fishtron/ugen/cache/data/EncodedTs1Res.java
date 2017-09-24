@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.ugen.cache.data;
 
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 import org.json.JSONArray;
 
 /**Created by tom on 5. 2. 2017.*/

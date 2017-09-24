@@ -8,11 +8,10 @@ import cz.tomkren.fishtron.operators.OneParamMutation;
 import cz.tomkren.fishtron.operators.SameSizeSubtreeMutation;
 import cz.tomkren.fishtron.reusegen.QuerySolver;
 import cz.tomkren.fishtron.terms.PolyTree;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.List;
 import java.util.Random;
 
 /** Created by tom on 27. 6. 2016.*/

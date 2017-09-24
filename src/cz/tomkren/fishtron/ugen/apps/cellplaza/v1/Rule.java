@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza.v1;
 
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 import org.json.JSONArray;
 
 import java.util.*;

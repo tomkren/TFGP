@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.ugen.data;
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
 import cz.tomkren.utils.AB;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 import org.json.JSONArray;
 
 

@@ -7,7 +7,7 @@ import net.fishtron.types.Type;
 import net.fishtron.types.Types;
 import cz.tomkren.utils.AA;
 import cz.tomkren.utils.AB;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 
 import com.google.common.base.Joiner;
 import org.json.JSONObject;

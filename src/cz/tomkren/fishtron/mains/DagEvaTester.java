@@ -10,7 +10,7 @@ import net.fishtron.types.Type;
 import net.fishtron.types.Types;
 import cz.tomkren.fishtron.workflows.TypedDag;
 import cz.tomkren.utils.Checker;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 import cz.tomkren.utils.Log;
 import cz.tomkren.fishtron.operators.RandomParamsPolyTreeGenerator;
 import cz.tomkren.fishtron.reusegen.QuerySolver;

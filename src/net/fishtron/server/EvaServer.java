@@ -1,7 +1,7 @@
 package net.fishtron.server;
 
 import net.fishtron.server.jobs.Test;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 import cz.tomkren.utils.Log;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;

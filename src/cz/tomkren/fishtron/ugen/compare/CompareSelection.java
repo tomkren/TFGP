@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.ugen.compare;
 
 import cz.tomkren.fishtron.ugen.multi.MultiIndiv;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 
 import java.util.Collection;
 import java.util.Random;

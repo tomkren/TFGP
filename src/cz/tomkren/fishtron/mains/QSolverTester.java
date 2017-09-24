@@ -8,7 +8,7 @@ import cz.tomkren.fishtron.terms.SmartLibrary;
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
 import cz.tomkren.utils.Checker;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 import cz.tomkren.utils.Log;
 import org.json.JSONException;
 import org.json.JSONObject;

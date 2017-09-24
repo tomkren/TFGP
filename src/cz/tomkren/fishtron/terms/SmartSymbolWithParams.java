@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.terms;
 import cz.tomkren.fishtron.eva.Distribution;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.Comb0;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

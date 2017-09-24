@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.latticegen;
 import net.fishtron.types.Sub;
 import net.fishtron.types.Type;
 import cz.tomkren.utils.ABC;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 
 import java.util.List;
 

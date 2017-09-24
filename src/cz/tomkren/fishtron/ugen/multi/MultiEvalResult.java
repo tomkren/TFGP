@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.ugen.multi;
 
 import cz.tomkren.utils.AB;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 import org.json.JSONObject;
 
 import java.util.List;

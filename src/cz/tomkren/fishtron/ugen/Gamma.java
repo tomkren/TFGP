@@ -7,7 +7,7 @@ import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.trees.Lam;
 import cz.tomkren.utils.AB;
 import cz.tomkren.utils.ABC;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 import cz.tomkren.utils.TODO;
 import org.json.JSONArray;
 

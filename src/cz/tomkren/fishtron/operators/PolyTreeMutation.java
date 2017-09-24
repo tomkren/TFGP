@@ -2,7 +2,7 @@ package cz.tomkren.fishtron.operators;
 
 import cz.tomkren.fishtron.eva.Operator;
 import cz.tomkren.fishtron.terms.PolyTree;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 
 import java.util.List;
 

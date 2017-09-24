@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.ugen.multi;
 
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 
 import java.util.Collection;
 import java.util.List;

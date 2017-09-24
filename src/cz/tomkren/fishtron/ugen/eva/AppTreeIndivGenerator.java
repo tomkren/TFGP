@@ -6,7 +6,7 @@ import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import cz.tomkren.utils.Checker;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 //import cz.tomkren.utils.Log;
 import cz.tomkren.utils.Stopwatch;
 import org.json.JSONObject;

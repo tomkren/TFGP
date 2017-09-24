@@ -2,7 +2,7 @@ package cz.tomkren.fishtron.ugen.apps.cellplaza.shared;
 
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.CellPlaza;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.CellWorld;
-import cz.tomkren.utils.F;
+import net.fishtron.utils.F;
 import cz.tomkren.utils.Log;
 import org.json.JSONArray;
 
