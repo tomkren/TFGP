@@ -1,7 +1,6 @@
 package net.fishtron.apps.workflows;
 
 import net.fishtron.eval.Value;
-import cz.tomkren.fishtron.workflows.MyList;
 import cz.tomkren.fishtron.workflows.TypedDag;
 
 import java.util.function.Function;

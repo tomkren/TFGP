@@ -1,23 +1,5 @@
-package cz.tomkren.fishtron.workflows;
+package net.fishtron.apps.gpml.dag;
 
-/** Created by tom on 7.11.2015. */
-
-import com.google.common.base.Joiner;
-import cz.tomkren.fishtron.terms.SmartSymbol;
-import cz.tomkren.fishtron.terms.SmartSymbolWithParams;
-import net.fishtron.apps.workflows.MyList;
-import net.fishtron.types.Type;
-import net.fishtron.types.TypeTerm;
-import net.fishtron.types.Types;
-
-import cz.tomkren.utils.Comb0;
-import net.fishtron.utils.TriFun;
-
-import net.fishtron.utils.AA;
-import net.fishtron.utils.AB;
-import net.fishtron.utils.F;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -25,18 +7,38 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class TypedDag {
+import com.google.common.base.Joiner;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
-    private List<Vertex> ins, outs;
+
+import net.fishtron.apps.workflows.MyList;
+import net.fishtron.types.Type;
+import net.fishtron.types.TypeTerm;
+import net.fishtron.types.Types;
+import net.fishtron.utils.AA;
+import net.fishtron.utils.AB;
+import net.fishtron.utils.F;
+import net.fishtron.utils.TriFun;
+
+import cz.tomkren.fishtron.terms.SmartSymbol;
+import cz.tomkren.fishtron.terms.SmartSymbolWithParams;
+import cz.tomkren.utils.Comb0;
+
+
+
+public class NewSimpleTypedDag {
+
+    private List<NewVertex> ins, outs;
     private Type inType, outType;
     private int width, height;
 
-    public TypedDag(String name, Type inType, Type outType, JSONObject params, TypedDag innerDag) {
+    public NewSimpleTypedDag(String name, Type inType, Type outType, JSONObject params, NewSimpleTypedDag innerDag) {
 
         this.inType = inType;
         this.outType = outType;
 
-        Vertex v = new Vertex(name, params, innerDag);
+        NewVertex v = new NewVertex(name, params, innerDag);
 
         ins  = makeInterfaceList(inType, v);
         outs = makeInterfaceList(outType, v);
@@ -45,31 +47,31 @@ public class TypedDag {
         height = 1;
     }
 
-    public TypedDag(String name, Type inType, Type outType) {
+    public NewSimpleTypedDag(String name, Type inType, Type outType) {
         this(name, inType, outType, new JSONObject(), null);
     }
 
 
-    public TypedDag copy() {
-        return new TypedDag(this);
+    public NewSimpleTypedDag copy() {
+        return new NewSimpleTypedDag(this);
     }
 
-    public TypedDag(TypedDag oldDag) {
-        Map<Integer, Vertex> oldToOld = new HashMap<>();
-        Map<Integer, Vertex> oldToNew = new HashMap<>();
+    public NewSimpleTypedDag(NewSimpleTypedDag oldDag) {
+        Map<Integer, NewVertex> oldToOld = new HashMap<>();
+        Map<Integer, NewVertex> oldToNew = new HashMap<>();
 
         oldDag.forEachVertex(v -> {
             oldToOld.put(v.getId(), v);
             oldToNew.put(v.getId(), v.pseudoCopy());
         });
 
-        for (Map.Entry<Integer,Vertex> e : oldToNew.entrySet()) {
+        for (Map.Entry<Integer,NewVertex> e : oldToNew.entrySet()) {
             int   oldId = e.getKey();
-            Vertex vNew = e.getValue();
-            Vertex vOld = oldToOld.get(oldId);
+            NewVertex vNew = e.getValue();
+            NewVertex vOld = oldToOld.get(oldId);
 
-            for (AB<Vertex,Integer> oldSuccWithPort : vOld.getSuccessorsWithPorts()) {
-                Vertex v = oldSuccWithPort._1();
+            for (AB<NewVertex,Integer> oldSuccWithPort : vOld.getSuccessorsWithPorts()) {
+                NewVertex v = oldSuccWithPort._1();
                 int port = oldSuccWithPort._2();
                 vNew.addSuccessor( oldToNew.get(v.getId()) , port );
             }
@@ -89,8 +91,8 @@ public class TypedDag {
 
     }
 
-    private List<Vertex> makeInterfaceList(Type type, Vertex v) {
-        List<Vertex> ret = new ArrayList<>();
+    private List<NewVertex> makeInterfaceList(Type type, NewVertex v) {
+        List<NewVertex> ret = new ArrayList<>();
         int arity = getArity(type);
         for (int i = 0; i < arity; i++) {
             ret.add(v);
@@ -101,8 +103,8 @@ public class TypedDag {
     public int getWidth() {return width;}
     public int getHeight() {return height;}
 
-    public int getPxWidth()  {return width  * Vertex.X_1SIZE;}
-    public int getPxHeight() {return height * Vertex.Y_1SIZE;}
+    public int getPxWidth()  {return width  * NewVertex.X_1SIZE;}
+    public int getPxHeight() {return height * NewVertex.Y_1SIZE;}
 
     private int getArity(Type type) {
 
@@ -129,31 +131,31 @@ public class TypedDag {
     }
 
 
-    public static TypedDag para(TypedDag dag1, TypedDag dag2) {
+    public static NewSimpleTypedDag para(NewSimpleTypedDag dag1, NewSimpleTypedDag dag2) {
         return dag1.copy().para(dag2.copy());
     }
 
-    public static TypedDag seri(TypedDag dag1, TypedDag dag2) {
+    public static NewSimpleTypedDag seri(NewSimpleTypedDag dag1, NewSimpleTypedDag dag2) {
         return dag1.copy().seri(dag2.copy());
     }
 
-    public static TypedDag dia(TypedDag dag1, TypedDag dag2, TypedDag dag3) {
+    public static NewSimpleTypedDag dia(NewSimpleTypedDag dag1, NewSimpleTypedDag dag2, NewSimpleTypedDag dag3) {
         return dag1.copy().seri(dag2.copy()).seri(dag3.copy());
     }
 
-    public static TypedDag dia0(TypedDag dag1, TypedDag dag2) {
+    public static NewSimpleTypedDag dia0(NewSimpleTypedDag dag1, NewSimpleTypedDag dag2) {
         return dag1.copy().seri(dag2.copy());
     }
 
 
-    public static TypedDag split(TypedDag dag, MyList dagList) {
+    public static NewSimpleTypedDag split(NewSimpleTypedDag dag, MyList dagList) {
         return dag.copy().seri(fromMyList(dagList));
     }
 
 
     // -- new in 0.5 --
 
-    public static TypedDag stacking(TypedDag stacker, TypedDag method) {
+    public static NewSimpleTypedDag stacking(NewSimpleTypedDag stacker, NewSimpleTypedDag method) {
         return stacker.copy().seri(method.copy());
     }
 
@@ -166,27 +168,27 @@ public class TypedDag {
     booster  : Boo => Boo
     */
 
-    public static TypedDag boosting(TypedDag booBegin, MyList boosterList, TypedDag booEnd) {
-        TypedDag boosterChain = fromBoosterList(boosterList);
+    public static NewSimpleTypedDag boosting(NewSimpleTypedDag booBegin, MyList boosterList, NewSimpleTypedDag booEnd) {
+        NewSimpleTypedDag boosterChain = fromBoosterList(boosterList);
         return booBegin.copy().seri(boosterChain).seri(booEnd.copy());
     }
 
     public static final Type BooType = Types.parse("Boo");
 
-    public static TypedDag booster(TypedDag innerMethod) {
-        return new TypedDag("booster", BooType, BooType, new JSONObject(), innerMethod);
+    public static NewSimpleTypedDag booster(NewSimpleTypedDag innerMethod) {
+        return new NewSimpleTypedDag("booster", BooType, BooType, new JSONObject(), innerMethod);
     }
 
-    private static TypedDag fromBoosterList(MyList boosterList) {
-        List<TypedDag> boosters = boosterList.toList(TypedDag.class);
+    private static NewSimpleTypedDag fromBoosterList(MyList boosterList) {
+        List<NewSimpleTypedDag> boosters = boosterList.toList(NewSimpleTypedDag.class);
         return serialList(boosters);
     }
 
-    private static TypedDag serialList(List<TypedDag> dags) {
+    private static NewSimpleTypedDag serialList(List<NewSimpleTypedDag> dags) {
         if (dags.isEmpty()) {return null;}
 
-        Iterator<TypedDag> it = dags.iterator();
-        TypedDag acc = it.next().copy();
+        Iterator<NewSimpleTypedDag> it = dags.iterator();
+        NewSimpleTypedDag acc = it.next().copy();
 
         while (it.hasNext()) {
             acc = acc.seri(it.next().copy());
@@ -198,15 +200,15 @@ public class TypedDag {
     // -- (end) new in 0.5
 
 
-    public static TypedDag fromMyList(MyList dagList) {
-        List<TypedDag> dags = dagList.toList(TypedDag.class);
+    public static NewSimpleTypedDag fromMyList(MyList dagList) {
+        List<NewSimpleTypedDag> dags = dagList.toList(NewSimpleTypedDag.class);
         return paraList(dags);
     }
 
-    public static TypedDag paraList(List<TypedDag> dags) {
+    public static NewSimpleTypedDag paraList(List<NewSimpleTypedDag> dags) {
         if (dags.isEmpty()) {return null;}
-        Iterator<TypedDag> it = dags.iterator();
-        TypedDag acc = it.next().copy();
+        Iterator<NewSimpleTypedDag> it = dags.iterator();
+        NewSimpleTypedDag acc = it.next().copy();
         while (it.hasNext()) {
             acc = acc.para(it.next().copy());
         }
@@ -214,21 +216,21 @@ public class TypedDag {
     }
 
 
-    public TypedDag split_someOld(MyList dagList) {
+    public NewSimpleTypedDag split_someOld(MyList dagList) {
         seri(fromMyList_noCopy(dagList) );
         return this;
     }
 
-    public static TypedDag fromMyList_noCopy(MyList dagList) {
-        List<TypedDag> dags = F.map(dagList.toList(), o -> (TypedDag) o);
+    public static NewSimpleTypedDag fromMyList_noCopy(MyList dagList) {
+        List<NewSimpleTypedDag> dags = F.map(dagList.toList(), o -> (NewSimpleTypedDag) o);
         return paraList_noCopy(dags);
     }
 
-    public static TypedDag paraList_noCopy(List<TypedDag> dags) {
+    public static NewSimpleTypedDag paraList_noCopy(List<NewSimpleTypedDag> dags) {
         return F.reduce(dags, (x, y) -> x.para(y));
     }
 
-    public TypedDag para(TypedDag dag2) {
+    public NewSimpleTypedDag para(NewSimpleTypedDag dag2) {
 
         parallelMove(dag2);
 
@@ -241,13 +243,13 @@ public class TypedDag {
     }
 
 
-    public TypedDag dia_someOld(TypedDag dag2, TypedDag dag3) {
+    public NewSimpleTypedDag dia_someOld(NewSimpleTypedDag dag2, NewSimpleTypedDag dag3) {
         seri(dag2);
         seri(dag3);
         return this;
     }
 
-    public TypedDag seri(TypedDag dag2) {
+    public NewSimpleTypedDag seri(NewSimpleTypedDag dag2) {
 
 
         if (getArity(outType) != getArity(dag2.inType)) { // moc silný, chcem napojovat ty se stejnou aritou (!outType.equals(dag2.inType)) {
@@ -255,7 +257,7 @@ public class TypedDag {
             throw new Error("TypedDag.seri : incompatible types " + outType + " & " + dag2.inType);
         }
 
-        List<Vertex> ins2 = dag2.ins;
+        List<NewVertex> ins2 = dag2.ins;
         int n = outs.size();
 
         if (n != ins2.size()) {
@@ -279,7 +281,7 @@ public class TypedDag {
 
 
 
-    private void serialMove(TypedDag dag2) {
+    private void serialMove(NewSimpleTypedDag dag2) {
         dag2.move(0, height);
         height += dag2.height;
 
@@ -294,7 +296,7 @@ public class TypedDag {
         width = Math.max(width, dag2.width);
     }
 
-    private void parallelMove(TypedDag dag2) {
+    private void parallelMove(NewSimpleTypedDag dag2) {
         dag2.move(width, 0);
         width += dag2.width;
 
@@ -317,18 +319,18 @@ public class TypedDag {
     }
 
 
-    public void forEachVertex(Consumer<Vertex> f) {
-        Set<Vertex> vSet = new HashSet<>();
-        Set<Vertex> processed = new HashSet<>();
+    public void forEachVertex(Consumer<NewVertex> f) {
+        Set<NewVertex> vSet = new HashSet<>();
+        Set<NewVertex> processed = new HashSet<>();
         vSet.addAll(ins);
         while (!vSet.isEmpty()) {
-            Set<Vertex> vSet_new = new HashSet<>();
-            for (Vertex v1 : vSet) {
+            Set<NewVertex> vSet_new = new HashSet<>();
+            for (NewVertex v1 : vSet) {
 
                 f.accept(v1);
                 processed.add(v1);
 
-                for (Vertex v2 : v1.getSuccessors()) {
+                for (NewVertex v2 : v1.getSuccessors()) {
                     if (!processed.contains(v2) && !vSet.contains(v2)) {
                         vSet_new.add(v2);
                     }
@@ -355,8 +357,8 @@ public class TypedDag {
 
         Function<JSONObject,Comb0> params2comb = params -> (haxTypeInput -> {
             Type t = (Type) haxTypeInput.get(0);
-            AA<Type> p = TypedDag.getBoxInOutTypes(t);
-            return new TypedDag(name, p._1(), p._2(), params, null);
+            AA<Type> p = NewSimpleTypedDag.getBoxInOutTypes(t);
+            return new NewSimpleTypedDag(name, p._1(), p._2(), params, null);
         });
 
 
@@ -396,12 +398,12 @@ public class TypedDag {
 
 
     public static SmartSymbol mkSplit(String name, String outType, String inType1, String inType2) {
-        Comb0 comb = xs -> ((TypedDag)xs.get(0)).split_someOld((MyList)xs.get(1));
+        Comb0 comb = xs -> ((NewSimpleTypedDag)xs.get(0)).split_someOld((MyList)xs.get(1));
         return mkDagOperationNode(name, comb, outType, inType1, inType2);
     }
 
     public static SmartSymbol mkDia(String name, String outType, String inType1, String inType2, String inType3) {
-        Comb0 comb = xs -> ((TypedDag)xs.get(0)).dia_someOld((TypedDag) xs.get(1), (TypedDag) xs.get(2));
+        Comb0 comb = xs -> ((NewSimpleTypedDag)xs.get(0)).dia_someOld((NewSimpleTypedDag) xs.get(1), (NewSimpleTypedDag) xs.get(2));
         return mkDagOperationNode(name, comb, outType, inType1, inType2, inType3);
     }
 
@@ -443,25 +445,25 @@ public class TypedDag {
         throw new Error("Unsupported arity "+n+".");
     }
 
-    public static Comb0 mkTypedDagFun2(BiFunction<TypedDag,TypedDag,TypedDag> f) {
-        return inputs -> f.apply((TypedDag)inputs.get(0),(TypedDag)inputs.get(1));
+    public static Comb0 mkTypedDagFun2(BiFunction<NewSimpleTypedDag,NewSimpleTypedDag,NewSimpleTypedDag> f) {
+        return inputs -> f.apply((NewSimpleTypedDag)inputs.get(0),(NewSimpleTypedDag)inputs.get(1));
     }
 
-    public static Comb0 mkTypedDagFun3(TriFun<TypedDag,TypedDag,TypedDag,TypedDag> f) {
-        return inputs -> f.apply((TypedDag)inputs.get(0),(TypedDag)inputs.get(1),(TypedDag)inputs.get(2));
+    public static Comb0 mkTypedDagFun3(TriFun<NewSimpleTypedDag,NewSimpleTypedDag,NewSimpleTypedDag,NewSimpleTypedDag> f) {
+        return inputs -> f.apply((NewSimpleTypedDag)inputs.get(0),(NewSimpleTypedDag)inputs.get(1),(NewSimpleTypedDag)inputs.get(2));
     }
 
 
 
 
 
-    public static BiFunction<TypedDag,TypedDag,TypedDag> mkBiFun(String name) {
+    public static BiFunction<NewSimpleTypedDag,NewSimpleTypedDag,NewSimpleTypedDag> mkBiFun(String name) {
         try {
-            Method method = TypedDag.class.getMethod(name, TypedDag.class);
+            Method method = NewSimpleTypedDag.class.getMethod(name, NewSimpleTypedDag.class);
             return (x,y)-> {
                 try {
                     Object ret = method.invoke(x, y);
-                    return (TypedDag) ret;
+                    return (NewSimpleTypedDag) ret;
                 }
                 catch (IllegalArgumentException e)  {throw new Error("IllegalArgumentException !");}
                 catch (IllegalAccessException e)    {throw new Error("IllegalAccessException !");}
@@ -473,13 +475,13 @@ public class TypedDag {
         catch (NoSuchMethodException e) {throw new Error("NoSuchMethodException !");}
     }
 
-    public static TriFun<TypedDag,TypedDag,TypedDag,TypedDag> mkTriFun(String name) {
+    public static TriFun<NewSimpleTypedDag,NewSimpleTypedDag,NewSimpleTypedDag,NewSimpleTypedDag> mkTriFun(String name) {
         try {
-            Method method = TypedDag.class.getMethod(name, TypedDag.class, TypedDag.class);
+            Method method = NewSimpleTypedDag.class.getMethod(name, NewSimpleTypedDag.class, NewSimpleTypedDag.class);
             return (x,y,z)-> {
                 try {
                     Object ret = method.invoke(x, y, z);
-                    return (TypedDag) ret;
+                    return (NewSimpleTypedDag) ret;
                 }
                 catch (IllegalArgumentException e)  {throw new Error("IllegalArgumentException !");}
                 catch (IllegalAccessException e)    {throw new Error("IllegalAccessException !");}
@@ -547,7 +549,7 @@ public class TypedDag {
         return ret;
     }
 
-    public static String toJson(List<TypedDag> dags) {
+    public static String toJson(List<NewSimpleTypedDag> dags) {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
         dags.forEach(dag -> sb.append(dag.toJson()).append(",\n"));
@@ -591,7 +593,7 @@ public class TypedDag {
     public String toJson() {
         StringBuilder sb = new StringBuilder();
         sb.append("{\n  ");
-        Vertex.toJson_input(sb, ins);
+        NewVertex.toJson_input(sb, ins);
         sb.append(",\n");
 
         Set<Integer> ids = new HashSet<>();
@@ -624,8 +626,8 @@ public class TypedDag {
         StringBuilder sb = new StringBuilder();
         StringBuilder sb2 = new StringBuilder();
 
-        List<Vertex> vsList = new ArrayList<>();
-        Set<Vertex> vsSet   = new HashSet<>();
+        List<NewVertex> vsList = new ArrayList<>();
+        Set<NewVertex> vsSet   = new HashSet<>();
 
 
         vsList.addAll(ins);
@@ -634,13 +636,13 @@ public class TypedDag {
 
             sb.append(Joiner.on(' ').join(vsList)).append('\n');
 
-            sb2.append(Joiner.on(' ').join(F.map(vsList, Vertex::successorsStr))).append('\n');
+            sb2.append(Joiner.on(' ').join(F.map(vsList, NewVertex::successorsStr))).append('\n');
 
 
-            List<Vertex> temp = new ArrayList<>();
+            List<NewVertex> temp = new ArrayList<>();
 
-            for (Vertex v1 : vsList) {
-                for (Vertex v2 : v1.getSuccessors()) {
+            for (NewVertex v1 : vsList) {
+                for (NewVertex v2 : v1.getSuccessors()) {
                     if (!vsSet.contains(v2)) {
                         temp.add(v2);
                         vsSet.add(v2);

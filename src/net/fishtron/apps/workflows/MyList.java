@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.workflows;
+package net.fishtron.apps.workflows;
 
 /** Created by tom on 7.11.2015.*/
 

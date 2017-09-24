@@ -6,12 +6,13 @@ import net.fishtron.eva.multi.FitnessSignature;
 import net.fishtron.eva.multi.MultiEvalResult;
 import net.fishtron.eva.multi.MultiIndiv;
 import net.fishtron.trees.AppTree;
-import cz.tomkren.fishtron.workflows.TypedDag;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
 import org.apache.xmlrpc.XmlRpcException;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import cz.tomkren.fishtron.workflows.TypedDag;
 
 import java.util.*;
 

@@ -9,8 +9,6 @@ import net.fishtron.gen.Gen;
 import net.fishtron.trees.params.Params;
 import net.fishtron.trees.GammaSym;
 import net.fishtron.eval.*;
-import cz.tomkren.fishtron.workflows.MyList;
-import cz.tomkren.fishtron.workflows.TypedDag;
 import net.fishtron.utils.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -18,6 +16,9 @@ import org.json.JSONObject;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+
+import cz.tomkren.fishtron.workflows.TypedDag;
+
 
 /** Created by user on 14. 2. 2017. */
 

@@ -4,7 +4,7 @@ import cz.tomkren.fishtron.terms.SmartSymbol;
 import net.fishtron.types.Type;
 import net.fishtron.types.TypeParser;
 import cz.tomkren.utils.Comb0;
-import cz.tomkren.utils.TriFun;
+import net.fishtron.utils.TriFun;
 
 import java.util.Arrays;
 import java.util.Collections;
