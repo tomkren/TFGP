@@ -1,8 +1,5 @@
 package net.fishtron.trees;
 
-import cz.tomkren.fishtron.ugen.trees.App;
-import cz.tomkren.fishtron.ugen.trees.Leaf;
-import cz.tomkren.fishtron.ugen.trees.Sexpr;
 import net.fishtron.types.Sub;
 import net.fishtron.types.TMap;
 import net.fishtron.types.Type;

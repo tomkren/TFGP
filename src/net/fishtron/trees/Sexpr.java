@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen.trees;
+package net.fishtron.trees;
 
 import com.google.common.base.Joiner;
 import net.fishtron.utils.F;

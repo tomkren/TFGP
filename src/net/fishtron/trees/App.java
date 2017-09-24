@@ -1,8 +1,6 @@
-package cz.tomkren.fishtron.ugen.trees;
+package net.fishtron.trees;
 
 import com.google.common.base.Joiner;
-import net.fishtron.trees.AppTree;
-import net.fishtron.trees.SubtreePos;
 import net.fishtron.types.Sub;
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
@@ -31,7 +29,7 @@ public class App implements AppTree {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        cz.tomkren.fishtron.ugen.trees.App app = (cz.tomkren.fishtron.ugen.trees.App) o;
+        App app = (App) o;
         return funTree.equals(app.funTree) && argTree.equals(app.argTree);
     }
 

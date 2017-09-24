@@ -1,7 +1,5 @@
-package cz.tomkren.fishtron.ugen.trees;
+package net.fishtron.trees;
 
-import net.fishtron.trees.AppTree;
-import net.fishtron.trees.SubtreePos;
 import net.fishtron.types.Sub;
 import net.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.Fresh;
@@ -42,7 +40,7 @@ public class Leaf implements AppTree {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        cz.tomkren.fishtron.ugen.trees.Leaf leaf = (cz.tomkren.fishtron.ugen.trees.Leaf) o;
+        Leaf leaf = (Leaf) o;
         return sym.equals(leaf.sym) && (params != null ? params.equals(leaf.params) : leaf.params == null);
     }
 
