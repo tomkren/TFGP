@@ -6,7 +6,7 @@ import net.fishtron.types.Types;
 import net.fishtron.trees.AppTree;
 import net.fishtron.trees.Gamma;
 import net.fishtron.gen.Gen;
-import net.fishtron.params.Params;
+import net.fishtron.trees.params.Params;
 import net.fishtron.trees.GammaSym;
 import net.fishtron.eval.*;
 import cz.tomkren.fishtron.workflows.MyList;

@@ -1,4 +1,4 @@
-package net.fishtron.params;
+package net.fishtron.trees.params;
 
 import net.fishtron.utils.AB;
 import org.json.JSONArray;
