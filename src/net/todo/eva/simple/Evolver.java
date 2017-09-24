@@ -1,8 +1,9 @@
-package net.fishtron.eva.simple;
+package net.todo.eva.simple;
 
 
 import net.fishtron.eva.IndivGenerator;
 import net.fishtron.eva.Operator;
+import net.fishtron.eva.simple.*;
 import net.fishtron.utils.Distribution;
 
 import java.util.Comparator;

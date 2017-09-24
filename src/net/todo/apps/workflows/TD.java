@@ -1,5 +1,6 @@
-package net.fishtron.apps.workflows;
+package net.todo.apps.workflows;
 
+import net.fishtron.apps.gpml.MyList;
 import net.fishtron.eval.Value;
 import cz.tomkren.fishtron.workflows.TypedDag;
 

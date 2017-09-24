@@ -12,7 +12,8 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import cz.tomkren.fishtron.workflows.TypedDag;
+import net.fishtron.apps.gpml.dag.NewSimpleTypedDag;
+//import c z.tomkren.fishtron.workflows.TypedDag;
 
 import java.util.*;
 
@@ -109,7 +110,7 @@ public class DagMultiEvalManager<Indiv extends MultiIndiv> implements XmlRpcServ
     }
 
     private JSONObject dagToJson(Object indivValue) {
-        TypedDag dag = (TypedDag) indivValue;
+        NewSimpleTypedDag dag = (NewSimpleTypedDag) indivValue;
         String jsonStr = dag.toJson(); // todo prasarna.. že toJson vrací string
         return new JSONObject(jsonStr);
     }

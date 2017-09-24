@@ -1,4 +1,4 @@
-package net.fishtron.apps.workflows;
+package net.fishtron.apps.gpml;
 
 /** Created by tom on 7.11.2015.*/
 

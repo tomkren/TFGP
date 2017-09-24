@@ -1,4 +1,4 @@
-package net.fishtron.apps.workflows;
+package net.todo.apps.workflows;
 
 import net.fishtron.utils.Distribution;
 import net.fishtron.eva.IndivGenerator;

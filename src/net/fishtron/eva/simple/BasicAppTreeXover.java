@@ -6,7 +6,6 @@ import net.fishtron.types.TMap;
 import net.fishtron.types.Type;
 import net.fishtron.trees.AppTree;
 import net.fishtron.gen.Gen;
-import net.fishtron.apps.workflows.Workflows;
 import net.fishtron.eval.EvalLib;
 import net.fishtron.utils.AA;
 import net.fishtron.utils.Checker;
@@ -15,6 +14,11 @@ import net.fishtron.utils.Log;
 import org.json.JSONObject;
 
 import java.util.*;
+
+//import n et.t odo.apps.workflows.Workflows;
+import net.fishtron.apps.gpml.dag.NewSimpleWorkflows;
+
+
 
 /** Created by tom on 15. 2. 2017.*/
 
@@ -57,10 +61,10 @@ public class BasicAppTreeXover implements Operator<AppTreeIndiv> {
     public static void main(String[] args) {
         Checker ch = new Checker(5525384885671817405L);
 
-        Gen gen = new Gen(Workflows.gamma, ch);
+        Gen gen = new Gen(NewSimpleWorkflows.gamma, ch);
 
-        AppTree mum = gen.genOne(20, Workflows.goal);
-        AppTree dad = gen.genOne(15, Workflows.goal);
+        AppTree mum = gen.genOne(20, NewSimpleWorkflows.goal);
+        AppTree dad = gen.genOne(15, NewSimpleWorkflows.goal);
 
         ch.it(mum);
         ch.it(dad);

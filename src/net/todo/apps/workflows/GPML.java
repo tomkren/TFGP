@@ -1,4 +1,4 @@
-package net.fishtron.apps.workflows;
+package net.todo.apps.workflows;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;

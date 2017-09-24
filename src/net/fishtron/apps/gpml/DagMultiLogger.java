@@ -2,7 +2,6 @@ package net.fishtron.apps.gpml;
 
 import com.google.common.base.Strings;
 import net.fishtron.eva.multi.*;
-import cz.tomkren.fishtron.workflows.TypedDag;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;
@@ -13,6 +12,10 @@ import org.json.JSONObject;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+
+//import c z.tomkren.fishtron.workflows.TypedDag;
+import net.fishtron.apps.gpml.dag.NewSimpleTypedDag;
+
 
 /**Created by tom on 09.03.2017.*/
 
@@ -155,7 +158,7 @@ public class DagMultiLogger implements MultiLogger<AppTreeMI> {
 
 
     private String showIndivRow(int ods, String label, AppTreeMI ind) {
-        String indivCode = new JSONObject(((TypedDag) ind.getValue()).toJson()).toString();
+        String indivCode = new JSONObject(((NewSimpleTypedDag) ind.getValue()).toJson()).toString();
         List<String> fitnessLabels = opts.getFitnessSignature().getFitnessLabels();
         return Strings.repeat(" ",ods)+ label +(label.length()>0?": ":"")+
                 fitnessLabels.get(0)+": "+ind.getFitness(0)+ ", "+
@@ -167,7 +170,7 @@ public class DagMultiLogger implements MultiLogger<AppTreeMI> {
     }
 
     private static JSONObject dagTreeToJson(AppTreeMI indiv, JSONObject indivData) {
-        TypedDag dag = (TypedDag) indiv.getValue();
+        NewSimpleTypedDag dag = (NewSimpleTypedDag) indiv.getValue();
         return F.obj(
                 "indivData", indivData,
                 "descriptions", F.obj(

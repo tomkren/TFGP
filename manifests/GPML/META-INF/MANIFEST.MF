@@ -1,3 +1,3 @@
 Manifest-Version: 1.0
-Main-Class: net.fishtron.apps.workflows.GPML
+Main-Class: net.todo.apps.workflows.GPML
 

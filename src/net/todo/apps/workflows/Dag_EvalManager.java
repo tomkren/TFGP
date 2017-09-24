@@ -1,4 +1,4 @@
-package net.fishtron.apps.workflows;
+package net.todo.apps.workflows;
 
 import net.fishtron.apps.gpml.Dag_JsonEvalInterface;
 import net.fishtron.eva.simple.EvalResult;

@@ -13,7 +13,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.*;
 
-import cz.tomkren.fishtron.workflows.TypedDag;
+import net.fishtron.apps.gpml.dag.NewSimpleTypedDag;
+//import c z.tomkren.fishtron.workflows.TypedDag;
 
 
 /**Created by tom on 17.03.2017.*/
@@ -38,7 +39,7 @@ public class DummyMultiEvalManager implements XmlRpcServer_MultiEvalManager<AppT
 
     @Override
     public JSONObject getAllParamsInfo(String datasetFilename) throws XmlRpcException {
-        //dřív byl: import cz.tomkren.fishtron.mains.DagEvaTester;
+        //dřív byl: import c z.tomkren.fishtron.mains.DagEvaTester;
         //return DagEvaTester.testParamsInfo;
         return new JSONObject("{\"DT\": {\"min_samples_split\": [1, 2, 5, 10, 20], \"criterion\": [\"gini\", \"entropy\"], \"max_features\": [0.05, 0.1, 0.25, 0.5, 0.75, 1], \"min_samples_leaf\": [1, 2, 5, 10, 20], \"max_depth\": [1, 2, 5, 10, 15, 25, 50, 100]}, \"gaussianNB\": {}, \"SVC\": {\"gamma\": [0.0, 0.0001, 0.001, 0.01, 0.1, 0.5], \"C\": [0.1, 0.5, 1.0, 2, 5, 10, 15], \"tol\": [0.0001, 0.001, 0.01]}, \"union\": {}, \"copy\": {}, \"PCA\": {\"feat_frac\": [0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1], \"whiten\": [false, true]}, \"logR\": {\"penalty\": [\"l1\", \"l2\"], \"C\": [0.1, 0.5, 1.0, 2, 5, 10, 15], \"tol\": [0.0001, 0.001, 0.01]}, \"kMeans\": {}, \"kBest\": {\"feat_frac\": [0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1]}, \"vote\": {}}");
     }
@@ -63,7 +64,7 @@ public class DummyMultiEvalManager implements XmlRpcServer_MultiEvalManager<AppT
             indivJson.put("id", nextId);
 
             Object indivValue = indiv.computeValue(lib);
-            JSONObject jsonCode = new JSONObject(((TypedDag) indivValue).toJson());
+            JSONObject jsonCode = new JSONObject(((NewSimpleTypedDag) indivValue).toJson());
 
             AppTree tree = indiv.getTree();
             int workflowSize = SizeUtils.workflowSize(tree);

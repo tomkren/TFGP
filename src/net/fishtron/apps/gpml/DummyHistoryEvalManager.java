@@ -12,7 +12,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.*;
 
-import cz.tomkren.fishtron.workflows.TypedDag;
+//import c z.tomkren.fishtron.workflows.TypedDag;
+import net.fishtron.apps.gpml.dag.NewSimpleTypedDag;
 
 
 /**Created by tom on 17.03.2017.*/
@@ -68,7 +69,7 @@ public class DummyHistoryEvalManager<Indiv extends MultiIndiv> implements XmlRpc
 
             Indiv indiv = indivData._1();
             Object indivValue = indiv.computeValue(lib);
-            JSONObject jsonCode = new JSONObject(((TypedDag) indivValue).toJson());
+            JSONObject jsonCode = new JSONObject(((NewSimpleTypedDag) indivValue).toJson());
 
             JSONObject indivDataToSubmit = F.obj(
                     "id",   nextId,

@@ -10,12 +10,12 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NewVertex {
+public class NewSimpleVertex {
 
     private final int id;
     private final String name;
     private final JSONObject params;
-    private final List<AB<NewVertex,Integer>> successors;
+    private final List<AB<NewSimpleVertex,Integer>> successors;
     private int nextFreeSlot;
     private double x, y;
 
@@ -24,7 +24,7 @@ public class NewVertex {
     private static int nextId = 1; // todo pak udělat míň haxově
 
 
-    public NewVertex(String boxName, JSONObject params, NewSimpleTypedDag innerDag) {
+    public NewSimpleVertex(String boxName, JSONObject params, NewSimpleTypedDag innerDag) {
         id = nextId++;
         name = boxName;
 
@@ -38,13 +38,13 @@ public class NewVertex {
         y = 0;
     }
 
-    public NewVertex(String boxName) {
+    public NewSimpleVertex(String boxName) {
         this(boxName, new JSONObject(),null);
     }
 
-    public NewVertex pseudoCopy() {return new NewVertex(this);}
+    public NewSimpleVertex pseudoCopy() {return new NewSimpleVertex(this);}
 
-    private NewVertex(NewVertex v) {
+    private NewSimpleVertex(NewSimpleVertex v) {
         id = nextId++;
         name = v.name;
 
@@ -70,15 +70,15 @@ public class NewVertex {
     public int getId() {return id;}
     public String getKutilId() {return "$v_"+id;}
 
-    public List<NewVertex> getSuccessors() {return F.map(successors,AB::_1);}
+    public List<NewSimpleVertex> getSuccessors() {return F.map(successors,AB::_1);}
 
-    public List<AB<NewVertex,Integer>> getSuccessorsWithPorts() {return successors;}
+    public List<AB<NewSimpleVertex,Integer>> getSuccessorsWithPorts() {return successors;}
 
-    public void addSuccessor(NewVertex v, int port) {
+    public void addSuccessor(NewSimpleVertex v, int port) {
         successors.add(new AB<>(v,port));
     }
 
-    public void addSuccessor(NewVertex v) {
+    public void addSuccessor(NewSimpleVertex v) {
         successors.add(new AB<>(v,v.nextFreeSlot));
         v.nextFreeSlot++;
     }
@@ -90,7 +90,7 @@ public class NewVertex {
     public static final int X_1SIZE = 64;
     public static final int Y_1SIZE = 64;
 
-    public static void toJson_input(StringBuilder sb, List<NewVertex> ins) {
+    public static void toJson_input(StringBuilder sb, List<NewSimpleVertex> ins) {
         String id   = "input";
         String name = "input";
 
@@ -99,7 +99,7 @@ public class NewVertex {
         sb.append("\"").append(id).append("\" : [ [], \"").append(name).append("\", [");
 
         int i = 0;
-        for (NewVertex s : ins) {
+        for (NewSimpleVertex s : ins) {
             sb.append('\"').append(s.id).append(':').append(i).append("\"");
             if (i < numOutputs-1) {
                 sb.append(", ");
@@ -142,8 +142,8 @@ public class NewVertex {
         sb.append("], [\"").append(name).append("\", ").append(paramsStr).append(innerDagJson).append("], [");
 
         int i = 0;
-        for (AB<NewVertex,Integer> p : successors) {
-            NewVertex s = p._1();
+        for (AB<NewSimpleVertex,Integer> p : successors) {
+            NewSimpleVertex s = p._1();
             int port = p._2();
             sb.append('\"').append(s.id).append(':').append(port).append("\"");
             if (i < numOutputs-1) {
@@ -173,8 +173,8 @@ public class NewVertex {
             shape.append(":#999999");
         }
 
-        for (AB<NewVertex,Integer> p : successors) {
-            NewVertex s = p._1();
+        for (AB<NewSimpleVertex,Integer> p : successors) {
+            NewSimpleVertex s = p._1();
             int port = p._2();
             shape.append(' ').append(s.getKutilId()).append(':').append(port);
         }
@@ -201,8 +201,8 @@ public class NewVertex {
         sb.append("<o id=\"").append(getKutilId()).append("\"")
                 .append(" shape=\"f").append(innerDag == null ? "" : "_b").append(" ").append(numInputs).append(' ').append(numOutputs).append(' ').append(name);
 
-        for (AB<NewVertex,Integer> p : successors) {
-            NewVertex s = p._1();
+        for (AB<NewSimpleVertex,Integer> p : successors) {
+            NewSimpleVertex s = p._1();
             int port = p._2();
             sb.append(' ').append(s.getKutilId()).append(':').append(port);
         }
@@ -225,7 +225,7 @@ public class NewVertex {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        NewVertex vertex = (NewVertex) o;
+        NewSimpleVertex vertex = (NewSimpleVertex) o;
         return id == vertex.id;
     }
 

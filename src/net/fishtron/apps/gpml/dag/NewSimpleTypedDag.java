@@ -5,14 +5,13 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import com.google.common.base.Joiner;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 
-import net.fishtron.apps.workflows.MyList;
+import net.fishtron.apps.gpml.MyList;
 import net.fishtron.types.Type;
 import net.fishtron.types.TypeTerm;
 import net.fishtron.types.Types;
@@ -21,15 +20,11 @@ import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
 import net.fishtron.utils.TriFun;
 
-import cz.tomkren.fishtron.terms.SmartSymbol;
-import cz.tomkren.fishtron.terms.SmartSymbolWithParams;
-import cz.tomkren.utils.Comb0;
-
 
 
 public class NewSimpleTypedDag {
 
-    private List<NewVertex> ins, outs;
+    private List<NewSimpleVertex> ins, outs;
     private Type inType, outType;
     private int width, height;
 
@@ -38,7 +33,7 @@ public class NewSimpleTypedDag {
         this.inType = inType;
         this.outType = outType;
 
-        NewVertex v = new NewVertex(name, params, innerDag);
+        NewSimpleVertex v = new NewSimpleVertex(name, params, innerDag);
 
         ins  = makeInterfaceList(inType, v);
         outs = makeInterfaceList(outType, v);
@@ -57,21 +52,21 @@ public class NewSimpleTypedDag {
     }
 
     public NewSimpleTypedDag(NewSimpleTypedDag oldDag) {
-        Map<Integer, NewVertex> oldToOld = new HashMap<>();
-        Map<Integer, NewVertex> oldToNew = new HashMap<>();
+        Map<Integer, NewSimpleVertex> oldToOld = new HashMap<>();
+        Map<Integer, NewSimpleVertex> oldToNew = new HashMap<>();
 
         oldDag.forEachVertex(v -> {
             oldToOld.put(v.getId(), v);
             oldToNew.put(v.getId(), v.pseudoCopy());
         });
 
-        for (Map.Entry<Integer,NewVertex> e : oldToNew.entrySet()) {
+        for (Map.Entry<Integer,NewSimpleVertex> e : oldToNew.entrySet()) {
             int   oldId = e.getKey();
-            NewVertex vNew = e.getValue();
-            NewVertex vOld = oldToOld.get(oldId);
+            NewSimpleVertex vNew = e.getValue();
+            NewSimpleVertex vOld = oldToOld.get(oldId);
 
-            for (AB<NewVertex,Integer> oldSuccWithPort : vOld.getSuccessorsWithPorts()) {
-                NewVertex v = oldSuccWithPort._1();
+            for (AB<NewSimpleVertex,Integer> oldSuccWithPort : vOld.getSuccessorsWithPorts()) {
+                NewSimpleVertex v = oldSuccWithPort._1();
                 int port = oldSuccWithPort._2();
                 vNew.addSuccessor( oldToNew.get(v.getId()) , port );
             }
@@ -91,8 +86,8 @@ public class NewSimpleTypedDag {
 
     }
 
-    private List<NewVertex> makeInterfaceList(Type type, NewVertex v) {
-        List<NewVertex> ret = new ArrayList<>();
+    private List<NewSimpleVertex> makeInterfaceList(Type type, NewSimpleVertex v) {
+        List<NewSimpleVertex> ret = new ArrayList<>();
         int arity = getArity(type);
         for (int i = 0; i < arity; i++) {
             ret.add(v);
@@ -103,8 +98,8 @@ public class NewSimpleTypedDag {
     public int getWidth() {return width;}
     public int getHeight() {return height;}
 
-    public int getPxWidth()  {return width  * NewVertex.X_1SIZE;}
-    public int getPxHeight() {return height * NewVertex.Y_1SIZE;}
+    public int getPxWidth()  {return width  * NewSimpleVertex.X_1SIZE;}
+    public int getPxHeight() {return height * NewSimpleVertex.Y_1SIZE;}
 
     private int getArity(Type type) {
 
@@ -161,7 +156,6 @@ public class NewSimpleTypedDag {
 
 
     /*
-
     TypedDag.boosting( TypedDag: D => Boo , MyList: V (Boo => Boo) n , TypedDag : Boo => LD ) : D => LD",
     booBegin : D => Boo
     booEnd   : Boo => LD
@@ -257,7 +251,7 @@ public class NewSimpleTypedDag {
             throw new Error("TypedDag.seri : incompatible types " + outType + " & " + dag2.inType);
         }
 
-        List<NewVertex> ins2 = dag2.ins;
+        List<NewSimpleVertex> ins2 = dag2.ins;
         int n = outs.size();
 
         if (n != ins2.size()) {
@@ -319,18 +313,18 @@ public class NewSimpleTypedDag {
     }
 
 
-    public void forEachVertex(Consumer<NewVertex> f) {
-        Set<NewVertex> vSet = new HashSet<>();
-        Set<NewVertex> processed = new HashSet<>();
+    public void forEachVertex(Consumer<NewSimpleVertex> f) {
+        Set<NewSimpleVertex> vSet = new HashSet<>();
+        Set<NewSimpleVertex> processed = new HashSet<>();
         vSet.addAll(ins);
         while (!vSet.isEmpty()) {
-            Set<NewVertex> vSet_new = new HashSet<>();
-            for (NewVertex v1 : vSet) {
+            Set<NewSimpleVertex> vSet_new = new HashSet<>();
+            for (NewSimpleVertex v1 : vSet) {
 
                 f.accept(v1);
                 processed.add(v1);
 
-                for (NewVertex v2 : v1.getSuccessors()) {
+                for (NewSimpleVertex v2 : v1.getSuccessors()) {
                     if (!processed.contains(v2) && !vSet.contains(v2)) {
                         vSet_new.add(v2);
                     }
@@ -342,33 +336,6 @@ public class NewSimpleTypedDag {
 
 
 
-    public static SmartSymbol mkAtomicDagNode(String name, String inType, String outType, JSONObject paramsInfo) {
-        return mkAtomicDagNode(name, Types.parse(inType), Types.parse(outType), paramsInfo);
-    }
-
-    public static SmartSymbol mkAtomicDagNode(String name, Type inType, Type outType, JSONObject paramsInfo) {
-
-
-        /*Comb0 comb = haxTypeInput -> {
-            Type t = (Type) haxTypeInput.get(0);
-            AA<Type> p = getBoxInOutTypes(t);
-            return new TypedDag(name, p._1(), p._2());
-        };*/
-
-        Function<JSONObject,Comb0> params2comb = params -> (haxTypeInput -> {
-            Type t = (Type) haxTypeInput.get(0);
-            AA<Type> p = NewSimpleTypedDag.getBoxInOutTypes(t);
-            return new NewSimpleTypedDag(name, p._1(), p._2(), params, null);
-        });
-
-
-        // ... původní před #newFish
-        //ProtoNode protoNode = new ProtoNode(name, inType + " => " + outType);
-        //return new CodeNodeWithParams(protoNode, params2comb, paramsInfo, null);
-
-        SmartSymbol proto = new SmartSymbol(name, Types.parse(inType + " => " + outType), SmartSymbol.EMPTY_INS, null); // TODO #newFish: nevim esli to null je ok
-        return new SmartSymbolWithParams(proto, params2comb, paramsInfo, null);
-    }
 
     public static AA<Type> getBoxInOutTypes(Type type) {
         if (type instanceof TypeTerm) {
@@ -379,78 +346,6 @@ public class NewSimpleTypedDag {
             }
         }
         throw new Error("Type "+type+" was expected to be box type!");
-    }
-
-    public static SmartSymbol mkDagOperationNode(String name, Comb0 comb, String outType, String... inTypes) {
-
-        // ... původní před #newFish
-        //ProtoNode protoNode = new ProtoNode(name, outType, inTypes);
-        //return new CodeNode(protoNode, comb);
-
-        return new SmartSymbol(name, Types.parse(outType), F.map(inTypes , Types::parse), comb);
-    }
-
-
-    /*public static CodeNode mkCodeNode(String... args) {
-        return mkCodeNode(args);
-    }*/
-
-
-
-    public static SmartSymbol mkSplit(String name, String outType, String inType1, String inType2) {
-        Comb0 comb = xs -> ((NewSimpleTypedDag)xs.get(0)).split_someOld((MyList)xs.get(1));
-        return mkDagOperationNode(name, comb, outType, inType1, inType2);
-    }
-
-    public static SmartSymbol mkDia(String name, String outType, String inType1, String inType2, String inType3) {
-        Comb0 comb = xs -> ((NewSimpleTypedDag)xs.get(0)).dia_someOld((NewSimpleTypedDag) xs.get(1), (NewSimpleTypedDag) xs.get(2));
-        return mkDagOperationNode(name, comb, outType, inType1, inType2, inType3);
-    }
-
-
-    public static SmartSymbol mkCodeNode(JSONObject allParamsInfo, String... args) {
-        if (args.length < 2) {throw new Error("Too few arguments.");}
-
-        String name    = args[0].trim();
-        String outType = args[1].trim();
-
-        if (args.length == 2) {
-            String[] ps = outType.split("=>");
-            if (ps.length != 2) {throw new Error("Atom type must have 2 parts (split by =>).");}
-
-            //Log.it(allParamsInfo);
-
-            JSONObject paramsInfo = allParamsInfo.has(name) ? allParamsInfo.getJSONObject(name) : new JSONObject();
-
-            return mkAtomicDagNode(name, ps[0].trim(), ps[1].trim(), paramsInfo);
-        } else {
-            return mkDagOperationNode(name, outType, Arrays.copyOfRange(args,2,args.length) );
-        }
-    }
-
-    /* Snad nepotřebný po #newFish
-    public static CodeNode mkCodeNode(String... args) {
-        return mkCodeNode(new JSONObject(), args);
-    }*/
-
-
-    public static SmartSymbol mkDagOperationNode(String name, String outType, String... inTypes) {
-        int n = inTypes.length;
-        if (n == 2) {
-            return mkDagOperationNode(name, mkTypedDagFun2(mkBiFun(name)), outType, inTypes);
-        } else if (n == 3) {
-            return mkDagOperationNode(name, mkTypedDagFun3(mkTriFun(name)), outType, inTypes);
-        }
-
-        throw new Error("Unsupported arity "+n+".");
-    }
-
-    public static Comb0 mkTypedDagFun2(BiFunction<NewSimpleTypedDag,NewSimpleTypedDag,NewSimpleTypedDag> f) {
-        return inputs -> f.apply((NewSimpleTypedDag)inputs.get(0),(NewSimpleTypedDag)inputs.get(1));
-    }
-
-    public static Comb0 mkTypedDagFun3(TriFun<NewSimpleTypedDag,NewSimpleTypedDag,NewSimpleTypedDag,NewSimpleTypedDag> f) {
-        return inputs -> f.apply((NewSimpleTypedDag)inputs.get(0),(NewSimpleTypedDag)inputs.get(1),(NewSimpleTypedDag)inputs.get(2));
     }
 
 
@@ -493,44 +388,6 @@ public class NewSimpleTypedDag {
         catch (NoSuchMethodException e) {throw new Error("NoSuchMethodException !");}
     }
 
-
-    /*
-    public List<SimpleVertex> toSimpleGraph() {
-
-        // TODO retardně implementováno, ale mělo by stačit, dyštak pak odretardnit
-
-        List<SimpleVertex> begin  = new ArrayList<>();
-        List<SimpleVertex> middle = new ArrayList<>();
-        List<SimpleVertex> end    = new ArrayList<>();
-
-        forEachVertex(v -> {
-            AB<SimpleVertex, Vertex.Info> p = v.toSimpleVertex();
-            SimpleVertex sv = p._1();
-            Vertex.Info vInfo = p._2();
-
-            switch (vInfo) {
-                case BEGIN:
-                    begin.add(sv);
-                    break;
-                case MIDDLE:
-                    middle.add(sv);
-                    break;
-                case END:
-                    end.add(sv);
-                    break;
-            }
-
-        });
-
-        if (begin.size() != 1) {throw new Error("There should be exactly one begin.");}
-        if (end.size() > 1) {throw new Error("There should be at most one end.");}
-
-        begin.addAll(middle);
-        begin.addAll(end);
-
-        return begin;
-    }
-    */
 
     public String toKutilXML(int xx, int yy) {
         StringBuilder sb = new StringBuilder();
@@ -593,7 +450,7 @@ public class NewSimpleTypedDag {
     public String toJson() {
         StringBuilder sb = new StringBuilder();
         sb.append("{\n  ");
-        NewVertex.toJson_input(sb, ins);
+        NewSimpleVertex.toJson_input(sb, ins);
         sb.append(",\n");
 
         Set<Integer> ids = new HashSet<>();
@@ -626,8 +483,8 @@ public class NewSimpleTypedDag {
         StringBuilder sb = new StringBuilder();
         StringBuilder sb2 = new StringBuilder();
 
-        List<NewVertex> vsList = new ArrayList<>();
-        Set<NewVertex> vsSet   = new HashSet<>();
+        List<NewSimpleVertex> vsList = new ArrayList<>();
+        Set<NewSimpleVertex> vsSet   = new HashSet<>();
 
 
         vsList.addAll(ins);
@@ -636,13 +493,13 @@ public class NewSimpleTypedDag {
 
             sb.append(Joiner.on(' ').join(vsList)).append('\n');
 
-            sb2.append(Joiner.on(' ').join(F.map(vsList, NewVertex::successorsStr))).append('\n');
+            sb2.append(Joiner.on(' ').join(F.map(vsList, NewSimpleVertex::successorsStr))).append('\n');
 
 
-            List<NewVertex> temp = new ArrayList<>();
+            List<NewSimpleVertex> temp = new ArrayList<>();
 
-            for (NewVertex v1 : vsList) {
-                for (NewVertex v2 : v1.getSuccessors()) {
+            for (NewSimpleVertex v1 : vsList) {
+                for (NewSimpleVertex v2 : v1.getSuccessors()) {
                     if (!vsSet.contains(v2)) {
                         temp.add(v2);
                         vsSet.add(v2);

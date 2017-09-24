@@ -12,6 +12,7 @@ import net.fishtron.utils.Checker;
 import net.fishtron.utils.Distribution;
 import net.fishtron.utils.Log;
 import ec.util.MersenneTwisterFast;
+import net.todo.eva.simple.Evolver;
 
 import java.util.Arrays;
 import java.util.Random;

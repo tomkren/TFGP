@@ -11,7 +11,7 @@ import cz.tomkren.fishtron.terms.SmartLibrary;
 import net.fishtron.eva.IndivGenerator;
 import net.fishtron.eva.Operator;
 import net.fishtron.eva.simple.EvoOpts;
-import net.fishtron.eva.simple.Evolver;
+import net.todo.eva.simple.Evolver;
 import net.fishtron.eva.simple.Selection;
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;

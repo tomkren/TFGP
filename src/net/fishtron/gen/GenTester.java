@@ -11,7 +11,6 @@ import net.fishtron.types.TypeTerm;
 import net.fishtron.types.Types;
 import net.fishtron.apps.gpml.DummyHistoryEvalManager;
 import net.fishtron.apps.gpml.XmlRpcServer_MultiEvalManager;
-import net.fishtron.apps.workflows.Workflows;
 import net.fishtron.eval.EvalLib;
 import net.fishtron.eva.multi.AppTreeMI;
 import net.fishtron.eva.multi.Configs;
@@ -29,6 +28,10 @@ import java.util.*;
 import net.fishtron.utils.*;
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
 import org.json.JSONObject;
+
+
+//import n et.t odo.apps.workflows.Workflows;
+import net.fishtron.apps.gpml.dag.NewSimpleWorkflows;
 
 /** Created by Tomáš Křen on 5.2.2017. */
 
@@ -141,7 +144,7 @@ public class GenTester {
 
 
             JSONObject methods = config.getJSONObject("methods");
-            AB<EvalLib,Gamma> libAndGamma = Workflows.mkLibAndGamma(methods);
+            AB<EvalLib,Gamma> libAndGamma = NewSimpleWorkflows.mkLibAndGamma(methods);
             EvalLib lib = libAndGamma._1();
             Gamma gamma = libAndGamma._2();
             Log.it("Gamma = \n"+gamma);
@@ -154,7 +157,7 @@ public class GenTester {
                 gen = new Gen(gamma, checker);
             }
 
-            Type goal = Workflows.goal;
+            Type goal = NewSimpleWorkflows.goal;
             int generatingMaxTreeSize = Configs.getInt(config, Configs.generatingMaxTreeSize, 37);
 
             XmlRpcServer_MultiEvalManager<AppTreeMI> evalManager = new DummyHistoryEvalManager<>(lib, "configs/multi_gpml/history_multiProblem.json");

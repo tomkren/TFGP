@@ -5,7 +5,7 @@ package cz.tomkren.fishtron.workflows;
 import com.google.common.base.Joiner;
 import cz.tomkren.fishtron.terms.SmartSymbol;
 import cz.tomkren.fishtron.terms.SmartSymbolWithParams;
-import net.fishtron.apps.workflows.MyList;
+import net.fishtron.apps.gpml.MyList;
 import net.fishtron.types.Type;
 import net.fishtron.types.TypeTerm;
 import net.fishtron.types.Types;

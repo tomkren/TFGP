@@ -1,15 +1,19 @@
-package net.fishtron.apps.workflows;
+package net.fishtron.apps.gpml.dag;
 
+import net.fishtron.apps.gpml.MyList;
+import net.fishtron.eval.EvalCode;
+import net.fishtron.eval.EvalLib;
+import net.fishtron.eval.EvalTester;
+import net.fishtron.gen.Gen;
+import net.fishtron.trees.AppTree;
+import net.fishtron.trees.Gamma;
+import net.fishtron.trees.GammaSym;
+import net.fishtron.trees.params.Params;
 import net.fishtron.types.Type;
 import net.fishtron.types.TypeTerm;
 import net.fishtron.types.Types;
-import net.fishtron.trees.AppTree;
-import net.fishtron.trees.Gamma;
-import net.fishtron.gen.Gen;
-import net.fishtron.trees.params.Params;
-import net.fishtron.trees.GammaSym;
-import net.fishtron.eval.*;
 import net.fishtron.utils.*;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -17,12 +21,10 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import cz.tomkren.fishtron.workflows.TypedDag;
-
 
 /** Created by user on 14. 2. 2017. */
 
-public class Workflows {
+public class NewSimpleWorkflows {
 
     public static void main(String[] args) {
         //test_generating();
@@ -82,10 +84,10 @@ public class Workflows {
     private static final Type Dag = Types.parse("Dag");
 
     public static final EvalLib lib = EvalLib.mk(
-            "dia",        (TD.Op3) TypedDag::dia,
-            "dia0",       (TD.Op2) TypedDag::dia0,
-            "split",      (TD.DL)  TypedDag::split,
-            "cons",       (TD.OL)  MyList::cons,
+            "dia",        (NewSimpleTD.Op3) NewSimpleTypedDag::dia,
+            "dia0",       (NewSimpleTD.Op2) NewSimpleTypedDag::dia0,
+            "split",      (NewSimpleTD.DL)  NewSimpleTypedDag::split,
+            "cons",       (NewSimpleTD.OL)  MyList::cons,
             "nil",        MyList.NIL,
 
             "PCA",         mkMethod("PCA"),
@@ -98,41 +100,39 @@ public class Workflows {
             "DT",          mkMethod("DT"),
             "vote",        mkMethod("vote"),
 
-            "stacking",    (TD.Op2) TypedDag::stacking,
+            "stacking",    (NewSimpleTD.Op2) NewSimpleTypedDag::stacking,
             "stacker",     mkMethod("stacker"),
 
-            "boosting",    (TD.DLD) TypedDag::boosting,
+            "boosting",    (NewSimpleTD.DLD) NewSimpleTypedDag::boosting,
             "booBegin",    mkMethod("booBegin"),
-            "booster",     (TD.Op) TypedDag::booster,
+            "booster",     (NewSimpleTD.Op) NewSimpleTypedDag::booster,
             "booEnd",      mkMethod("booEnd")
     );
 
     private static final EvalLib lib_general = EvalLib.mk(
-            "dia",        (TD.Op3) TypedDag::dia,
-            "dia0",       (TD.Op2) TypedDag::dia0,
-            "split",      (TD.DL)  TypedDag::split,
-            "cons",       (TD.OL)  MyList::cons,
+            "dia",        (NewSimpleTD.Op3) NewSimpleTypedDag::dia,
+            "dia0",       (NewSimpleTD.Op2) NewSimpleTypedDag::dia0,
+            "split",      (NewSimpleTD.DL)  NewSimpleTypedDag::split,
+            "cons",       (NewSimpleTD.OL)  MyList::cons,
             "nil",        MyList.NIL
     );
 
     private static final EvalLib lib_stacking = EvalLib.mk(
-            "stacking",    (TD.Op2) TypedDag::stacking,
+            "stacking",    (NewSimpleTD.Op2) NewSimpleTypedDag::stacking,
             "stacker",     mkMethod("stacker")
     );
 
     private static final EvalLib lib_boosting = EvalLib.mk(
-            "boosting",    (TD.DLD) TypedDag::boosting,
+            "boosting",    (NewSimpleTD.DLD) NewSimpleTypedDag::boosting,
             "booBegin",    mkMethod("booBegin"),
-            "booster",     (TD.Op) TypedDag::booster,
+            "booster",     (NewSimpleTD.Op) NewSimpleTypedDag::booster,
             "booEnd",      mkMethod("booEnd")
     );
 
     public static AB<EvalLib,Gamma> mkLibAndGamma(JSONObject methods) {
 
-        //JSONObject methods = workflowsConfig.getJSONObject("methods");
-
-        List<EvalLib> libs = new ArrayList<>();
         List<Gamma> gammas = new ArrayList<>();
+        List<EvalLib> libs = new ArrayList<>();
 
         addAndCheck(lib_general, gamma_general, libs, gammas);
 
@@ -159,16 +159,14 @@ public class Workflows {
     private static void addLibAndGamma(JSONObject methods, String groupName, String typeStr,
                                        List<EvalLib> libs, List<Gamma> gammas) {
         JSONArray names = methods.getJSONArray(groupName);
-        EvalLib lib = EvalLib.mk(names, Workflows::mkMethod);
+        EvalLib lib = EvalLib.mk(names, NewSimpleWorkflows::mkMethod);
 
         Type commonType = Types.parse(typeStr);
 
-        List<GammaSym> gammaList = F.map(names, name -> {
+        Gamma gamma = new Gamma(F.map(names, name -> {
             if (!(name instanceof String)) {throw new Error("symbols must be strings!");}
             return new GammaSym((String) name, commonType, false);
-        });
-
-        Gamma gamma = new Gamma(gammaList);
+        }));
 
         addAndCheck(lib, gamma, libs, gammas);
     }
@@ -196,14 +194,13 @@ public class Workflows {
             Params params = leaf.getParams();
             AA<Type> p = getDagInOutTypes(type);
             JSONObject jsonParams = params == null ? new JSONObject() : params.toJson();
-            return new TypedDag(name, p._1(), p._2(), jsonParams, null);
+            return new NewSimpleTypedDag(name, p._1(), p._2(), jsonParams, null);
         };
     }
 
     private static AA<Type> getDagInOutTypes(Type type) {
         if (type instanceof TypeTerm) {
-            TypeTerm tt = (TypeTerm) type;
-            List<Type> args = tt.getArgs();
+            List<Type> args = ((TypeTerm) type).getArgs();
             if (args.size() == 3 && args.get(0).equals(Dag)) {
                 return new AA<>(args.get(1),args.get(2));
             }
@@ -215,17 +212,11 @@ public class Workflows {
     // -- Testing ----------------------------------
 
 
-    private static void test_dynamicMagic() {
-        JSONObject code = F.obj(
-                "cast", "net.fishtron.apps.workflows.TD.Op3",
-                "method", "cz.tomkren.fishtron.workflows.TypedDag.dia"
-        );
-        // todo....
-    }
+
 
     private static void test_evaluating(int k_max) {
         Checker ch = new Checker();
-        EvalTester.testLib(ch, k_max, lib, gamma, goal, true, dag -> ((TypedDag)dag).toJson());
+        EvalTester.testLib(ch, k_max, lib, gamma, goal, true, dag -> ((NewSimpleTypedDag)dag).toJson());
         ch.results();
     }
 
@@ -246,8 +237,7 @@ public class Workflows {
         boolean allTreesWereStrictlyWellTyped = true;
         List<AppTree> treeExamples = new ArrayList<>();
 
-        Log.it("Num trees to generate for each size: "+numToGenerate);
-        Log.it();
+        Log.it("Num trees to generate for each size: "+numToGenerate+"\n");
 
         Log.it("Tree size   | Num trees     | build time    | mean genOne time ");
         Log.it("------------|---------------|---------------|------------------");
@@ -272,7 +262,7 @@ public class Workflows {
                     sumGenOneTime += genOneTime;
 
                     if (!tree.isStrictlyWellTyped(gamma)) {
-                        ch.fail("tree is not strictly well-typed: "+tree+"\n"+tree.getTypeTrace().toString());
+                        ch.fail("Tree is not strictly well-typed: "+tree+"\n"+tree.getTypeTrace().toString());
                         allTreesWereStrictlyWellTyped = false;
                     }
 

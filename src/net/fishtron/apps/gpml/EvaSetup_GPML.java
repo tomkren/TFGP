@@ -6,7 +6,6 @@ import net.fishtron.eva.Operator;
 import net.fishtron.types.Type;
 import net.fishtron.trees.Gamma;
 import net.fishtron.gen.Gen;
-import net.fishtron.apps.workflows.Workflows;
 import net.fishtron.eval.EvalLib;
 import net.fishtron.eva.multi.*;
 import net.fishtron.eva.multi.operators.AppTreeMIGenerator;
@@ -18,6 +17,8 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import net.fishtron.apps.gpml.dag.NewSimpleWorkflows;
+//import n et.fishtron.apps.workflows.Workflows;
 
 
 /**Created by tom on 07.03.2017.*/
@@ -65,7 +66,7 @@ public class EvaSetup_GPML {
 
         JSONObject methods = config.getJSONObject("methods"); // todo .. dát defaultní
 
-        AB<EvalLib,Gamma> libAndGamma = Workflows.mkLibAndGamma(methods);
+        AB<EvalLib,Gamma> libAndGamma = NewSimpleWorkflows.mkLibAndGamma(methods);
         EvalLib lib = libAndGamma._1();
         Gamma gamma = libAndGamma._2();
 
@@ -91,7 +92,7 @@ public class EvaSetup_GPML {
         Log.it("Gamma = \n"+gamma);
 
         Gen gen = Gen.fromJson(generatorDumpPath, gamma, checker);
-        Type goal = Workflows.goal;
+        Type goal = NewSimpleWorkflows.goal;
 
         IndivGenerator<AppTreeMI> generator = new AppTreeMIGenerator(goal, generatingMaxTreeSize, gen, allParamsInfo);
         MultiSelection<AppTreeMI> parentSelection = new MultiSelection.Tournament<>(tournamentBetterWinsProbability, checker.getRandom());

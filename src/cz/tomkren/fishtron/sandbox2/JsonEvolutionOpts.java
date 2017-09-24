@@ -5,7 +5,7 @@ import cz.tomkren.fishtron.operators.*;
 import cz.tomkren.fishtron.reusegen.QuerySolver;
 import cz.tomkren.fishtron.terms.PolyTree;
 import cz.tomkren.fishtron.terms.SmartLibrary;
-import net.fishtron.apps.workflows.Dag_EvalManager;
+import net.todo.apps.workflows.Dag_EvalManager;
 import net.fishtron.eva.CopyOp;
 import net.fishtron.eva.IndivGenerator;
 import net.fishtron.eva.Operator;
