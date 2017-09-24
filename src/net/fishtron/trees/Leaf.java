@@ -1,16 +1,19 @@
 package net.fishtron.trees;
 
-import net.fishtron.types.Sub;
-import net.fishtron.types.Type;
-import cz.tomkren.fishtron.ugen.Fresh;
-import cz.tomkren.fishtron.ugen.params.Params;
-import net.fishtron.utils.AB;
-import net.fishtron.utils.F;
-import org.json.JSONObject;
-
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+import org.json.JSONObject;
+
+import net.fishtron.types.Sub;
+import net.fishtron.types.Type;
+import net.fishtron.utils.AB;
+import net.fishtron.utils.F;
+
+import cz.tomkren.fishtron.ugen.Fresh;
+import cz.tomkren.fishtron.ugen.params.Params;
+
 
 /** Created by tom on 18.03.2017. */
 

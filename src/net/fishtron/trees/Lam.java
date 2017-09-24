@@ -1,19 +1,21 @@
 package net.fishtron.trees;
 
-import net.fishtron.types.Sub;
-import net.fishtron.types.Type;
-import net.fishtron.types.Types;
-import net.fishtron.utils.AA;
-import net.fishtron.utils.AB;
-import net.fishtron.utils.TODO;
-import org.json.JSONObject;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+import org.json.JSONObject;
+
+import net.fishtron.types.Sub;
+import net.fishtron.types.Type;
+import net.fishtron.types.Types;
+import net.fishtron.utils.AA;
+import net.fishtron.utils.AB;
+import net.fishtron.utils.TODO;
+
 
 /**Created by tom on 18.03.2017.*/
 

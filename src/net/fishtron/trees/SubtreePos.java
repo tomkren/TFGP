@@ -1,12 +1,12 @@
 package net.fishtron.trees;
 
+import java.util.ArrayList;
+import java.util.List;
 
 import net.fishtron.types.Type;
 import net.fishtron.utils.Listek;
 import net.fishtron.utils.Log;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class SubtreePos {
 

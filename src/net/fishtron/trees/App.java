@@ -1,17 +1,19 @@
 package net.fishtron.trees;
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
 import com.google.common.base.Joiner;
+import org.json.JSONObject;
+
 import net.fishtron.types.Sub;
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
 import net.fishtron.utils.AA;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
-import org.json.JSONObject;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 /** Created by tom on 18.03.2017. */
 
