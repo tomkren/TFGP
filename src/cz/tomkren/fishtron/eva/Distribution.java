@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.eva;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
 import net.fishtron.utils.Log;
-import cz.tomkren.utils.Weighted;
+import net.fishtron.utils.Weighted;
 
 import java.util.ArrayList;
 import java.util.Arrays;

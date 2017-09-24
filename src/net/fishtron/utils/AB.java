@@ -1,7 +1,5 @@
 package net.fishtron.utils;
 
-import cz.tomkren.utils.Weighted;
-
 // modifikovatelný Pár
 public class AB<A,B> implements Weighted {
 

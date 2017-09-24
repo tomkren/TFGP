@@ -1,7 +1,6 @@
 package cz.tomkren.fishtron.sandbox2;
 
 import cz.tomkren.fishtron.eva.FitIndiv;
-import cz.tomkren.utils.Weighted;
 
 /** Created by tom on 2. 6. 2016.*/
 

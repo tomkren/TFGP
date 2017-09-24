@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.eva;
 
 import net.fishtron.utils.AB;
-import cz.tomkren.utils.Weighted;
+import net.fishtron.utils.Weighted;
 
 import java.util.List;
 import java.util.Random;

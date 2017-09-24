@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.eva;
 
-import cz.tomkren.utils.Weighted;
+import net.fishtron.utils.Weighted;
 
 public interface FitIndiv extends Weighted {
 

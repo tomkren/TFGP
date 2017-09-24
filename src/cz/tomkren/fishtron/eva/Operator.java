@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.eva;
 
 import net.fishtron.utils.F;
-import cz.tomkren.utils.Weighted;
+import net.fishtron.utils.Weighted;
 import org.json.JSONObject;
 
 import java.util.List;
