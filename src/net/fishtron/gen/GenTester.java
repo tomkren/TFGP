@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen.tests;
+package net.fishtron.gen;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -6,7 +6,6 @@ import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Longs;
 
 import net.fishtron.eva.IndivGenerator;
-import net.fishtron.gen.StaticGen;
 import net.fishtron.types.Type;
 import net.fishtron.types.TypeTerm;
 import net.fishtron.types.Types;
@@ -19,7 +18,6 @@ import net.fishtron.eva.multi.Configs;
 import net.fishtron.eva.multi.operators.AppTreeMIGenerator;
 import net.fishtron.trees.AppTree;
 import net.fishtron.trees.Gamma;
-import net.fishtron.gen.Gen;
 import net.fishtron.gen.data.SubsRes;
 import net.fishtron.gen.data.TsRes;
 import net.fishtron.gen.nf.NF;
