@@ -2,7 +2,7 @@ package cz.tomkren.fishtron.terms;
 
 
 import net.fishtron.types.Type;
-import cz.tomkren.utils.Listek;
+import net.fishtron.utils.Listek;
 import net.fishtron.utils.Log;
 
 import java.util.ArrayList;

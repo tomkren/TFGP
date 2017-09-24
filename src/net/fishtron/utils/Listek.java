@@ -1,11 +1,9 @@
-package cz.tomkren.utils;
+package net.fishtron.utils;
 
 // TODO | myslim že tu je debilně udělaný něco možná, občas tam naběhne stackOverflow když to je extra velký,
 // todo | tak nějak nezávisle otestovat a dyštak najít oficiální alternativu jak se má dělat když člověk chce funkcionální seznamy
 
 import com.google.common.collect.Lists;
-import net.fishtron.utils.Checker;
-import net.fishtron.utils.F;
 
 import java.util.ArrayList;
 import java.util.Arrays;
