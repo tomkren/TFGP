@@ -1,20 +1,19 @@
-package cz.tomkren.fishtron.eva;
+package net.fishtron.eva.simple;
 
-import net.fishtron.eva.simple.FitIndiv;
-import net.fishtron.eva.simple.FitVal;
+
 import net.fishtron.utils.Distribution;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/** Created by tom on 1. 7. 2015. */
+/** Created by tom on 21.11.2015.*/
 
-public class BasicEvaledPop<Indiv extends FitIndiv> implements EvaledPop<Indiv> {
+public class IndivEvaledPop<Indiv extends FitIndiv> implements EvaledPop<Indiv> {
 
     private Distribution<Indiv> popDist;
     private List<Indiv> terminators;
 
-    public BasicEvaledPop(List<Indiv> pop, FitFun fitness, int gen) {
+    public IndivEvaledPop(List<Indiv> pop, IndivFitFun<Indiv> fitness, int gen) {
         fitness.initGeneration(gen);
         terminators = new ArrayList<>();
 
@@ -22,7 +21,7 @@ public class BasicEvaledPop<Indiv extends FitIndiv> implements EvaledPop<Indiv> 
 
             FitVal fitVal = ind.getFitVal();
             if (fitVal == null || fitness.doRecomputeFitVal()) {
-                fitVal = fitness.getFitVal(ind.computeValue());
+                fitVal = fitness.getIndivFitVal(ind);
                 ind.setFitVal(fitVal);
             }
 
@@ -33,8 +32,6 @@ public class BasicEvaledPop<Indiv extends FitIndiv> implements EvaledPop<Indiv> 
 
         popDist = new Distribution<>(pop);
     }
-
-
 
     @Override
     public boolean isTerminating() {

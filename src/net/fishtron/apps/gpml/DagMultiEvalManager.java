@@ -1,6 +1,5 @@
 package net.fishtron.apps.gpml;
 
-import cz.tomkren.fishtron.sandbox2.Dag_JsonEvalInterface;
 import net.fishtron.eval.EvalLib;
 import net.fishtron.eva.multi.AppTreeMI;
 import net.fishtron.eva.multi.FitnessSignature;

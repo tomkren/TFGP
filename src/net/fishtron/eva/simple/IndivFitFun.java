@@ -1,6 +1,5 @@
-package cz.tomkren.fishtron.eva;
+package net.fishtron.eva.simple;
 
-import net.fishtron.eva.simple.FitVal;
 
 /** Created by tom on 21.11.2015.*/
 

@@ -1,6 +1,5 @@
 package cz.tomkren.fishtron.apps;
 
-import cz.tomkren.fishtron.eva.*;
 import net.fishtron.eva.CopyOp;
 import cz.tomkren.fishtron.operators.UntypedKozaXover;
 import cz.tomkren.fishtron.operators.UntypedRampedHalfAndHalf;
@@ -8,6 +7,7 @@ import cz.tomkren.fishtron.terms.PolyTree;
 import cz.tomkren.fishtron.terms.SmartLibrary;
 import net.fishtron.eva.IndivGenerator;
 import net.fishtron.eva.Operator;
+import net.fishtron.eva.simple.*;
 import net.fishtron.utils.Checker;
 import net.fishtron.utils.Distribution;
 import net.fishtron.utils.Log;

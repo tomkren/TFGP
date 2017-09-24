@@ -1,10 +1,10 @@
 package cz.tomkren.fishtron.workflows;
 
 import com.google.common.base.Strings;
-import cz.tomkren.fishtron.eva.EvaledPop;
-import cz.tomkren.fishtron.eva.Logger;
-import cz.tomkren.fishtron.sandbox2.EvalResult;
-import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
+import net.fishtron.eva.simple.EvaledPop;
+import net.fishtron.eva.simple.Logger;
+import net.fishtron.eva.simple.EvalResult;
+import net.fishtron.eva.simple.EvolutionOpts;
 import cz.tomkren.fishtron.terms.PolyTree;
 
 import net.fishtron.utils.Checker;

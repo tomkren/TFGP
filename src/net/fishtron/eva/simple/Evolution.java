@@ -1,13 +1,11 @@
-package cz.tomkren.fishtron.sandbox2;
+package net.fishtron.eva.simple;
 
-import cz.tomkren.fishtron.eva.*;
-import net.fishtron.eva.simple.FitIndiv;
-import net.fishtron.eva.simple.FitVal;
 import net.fishtron.eva.Operator;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.Distribution;
 import net.fishtron.utils.F;
 import net.fishtron.utils.Log;
+
 import org.json.JSONObject;
 
 import java.util.*;

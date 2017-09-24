@@ -2,8 +2,8 @@ package cz.tomkren.fishtron.mains;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
-import cz.tomkren.fishtron.eva.Logger;
-import cz.tomkren.fishtron.sandbox2.Evolution;
+import net.fishtron.eva.simple.Logger;
+import net.fishtron.eva.simple.Evolution;
 import cz.tomkren.fishtron.sandbox2.JsonEvolutionOpts;
 import cz.tomkren.fishtron.terms.PolyTree;
 import cz.tomkren.fishtron.workflows.DagEvolutionLogger;

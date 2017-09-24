@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.eva;
+package net.fishtron.eva.simple;
 
 import net.fishtron.utils.AB;
 import net.fishtron.utils.Distribution;

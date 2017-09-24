@@ -1,8 +1,5 @@
-package cz.tomkren.fishtron.eva;
+package net.fishtron.eva.simple;
 
-import cz.tomkren.fishtron.sandbox2.EvalResult;
-import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
-import net.fishtron.eva.simple.FitIndiv;
 import net.fishtron.utils.Log;
 import org.json.JSONObject;
 

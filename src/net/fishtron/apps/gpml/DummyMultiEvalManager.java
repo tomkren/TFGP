@@ -1,11 +1,9 @@
 package net.fishtron.apps.gpml;
 
-import cz.tomkren.fishtron.mains.DagEvaTester;
 import net.fishtron.eval.EvalLib;
 import net.fishtron.eva.multi.AppTreeMI;
 import net.fishtron.eva.multi.MultiEvalResult;
 import net.fishtron.trees.AppTree;
-import cz.tomkren.fishtron.workflows.TypedDag;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;
@@ -13,8 +11,10 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.eclipse.jetty.util.ArrayQueue;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.util.*;
+
+import cz.tomkren.fishtron.workflows.TypedDag;
+
 
 /**Created by tom on 17.03.2017.*/
 
@@ -38,7 +38,9 @@ public class DummyMultiEvalManager implements XmlRpcServer_MultiEvalManager<AppT
 
     @Override
     public JSONObject getAllParamsInfo(String datasetFilename) throws XmlRpcException {
-        return DagEvaTester.testParamsInfo;
+        //dřív byl: import cz.tomkren.fishtron.mains.DagEvaTester;
+        //return DagEvaTester.testParamsInfo;
+        return new JSONObject("{\"DT\": {\"min_samples_split\": [1, 2, 5, 10, 20], \"criterion\": [\"gini\", \"entropy\"], \"max_features\": [0.05, 0.1, 0.25, 0.5, 0.75, 1], \"min_samples_leaf\": [1, 2, 5, 10, 20], \"max_depth\": [1, 2, 5, 10, 15, 25, 50, 100]}, \"gaussianNB\": {}, \"SVC\": {\"gamma\": [0.0, 0.0001, 0.001, 0.01, 0.1, 0.5], \"C\": [0.1, 0.5, 1.0, 2, 5, 10, 15], \"tol\": [0.0001, 0.001, 0.01]}, \"union\": {}, \"copy\": {}, \"PCA\": {\"feat_frac\": [0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1], \"whiten\": [false, true]}, \"logR\": {\"penalty\": [\"l1\", \"l2\"], \"C\": [0.1, 0.5, 1.0, 2, 5, 10, 15], \"tol\": [0.0001, 0.001, 0.01]}, \"kMeans\": {}, \"kBest\": {\"feat_frac\": [0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1]}, \"vote\": {}}");
     }
 
     @Override

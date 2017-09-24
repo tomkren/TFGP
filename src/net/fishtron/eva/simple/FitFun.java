@@ -1,6 +1,4 @@
-package cz.tomkren.fishtron.eva;
-
-import net.fishtron.eva.simple.FitVal;
+package net.fishtron.eva.simple;
 
 public interface FitFun {
 

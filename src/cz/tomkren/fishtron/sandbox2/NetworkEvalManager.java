@@ -1,5 +1,7 @@
 package cz.tomkren.fishtron.sandbox2;
 
+import net.fishtron.eva.simple.EvalManager;
+import net.fishtron.eva.simple.EvalResult;
 import net.fishtron.eva.simple.FitIndiv;
 import net.fishtron.eva.simple.FitVal;
 import cz.tomkren.fishtron.sandbox.JsonEvalInterface;

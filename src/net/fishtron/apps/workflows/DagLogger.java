@@ -1,21 +1,25 @@
 package net.fishtron.apps.workflows;
 
+import java.io.*;
+import java.util.List;
+
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
-import cz.tomkren.fishtron.eva.EvaledPop;
-import cz.tomkren.fishtron.eva.Logger;
-import cz.tomkren.fishtron.sandbox2.EvalResult;
-import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
-import net.fishtron.eva.simple.AppTreeIndiv;
-import cz.tomkren.fishtron.workflows.TypedDag;
-import net.fishtron.utils.Checker;
-import net.fishtron.utils.F;
-import net.fishtron.utils.Log;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.*;
-import java.util.List;
+import net.fishtron.eva.simple.EvaledPop;
+import net.fishtron.eva.simple.Logger;
+import net.fishtron.eva.simple.EvalResult;
+import net.fishtron.eva.simple.EvolutionOpts;
+import net.fishtron.eva.simple.AppTreeIndiv;
+import net.fishtron.utils.Checker;
+import net.fishtron.utils.F;
+import net.fishtron.utils.Log;
+
+import cz.tomkren.fishtron.workflows.TypedDag;
+
+
 
 /**  Created by tom on 17. 2. 2017.*/
 

@@ -3,7 +3,6 @@ package net.fishtron.apps.gpml;
 import net.fishtron.eval.EvalLib;
 import net.fishtron.eva.multi.MultiEvalResult;
 import net.fishtron.eva.multi.MultiIndiv;
-import cz.tomkren.fishtron.workflows.TypedDag;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.ABC;
 import net.fishtron.utils.F;
@@ -11,8 +10,10 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.eclipse.jetty.util.ArrayQueue;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.util.*;
+
+import cz.tomkren.fishtron.workflows.TypedDag;
+
 
 /**Created by tom on 17.03.2017.*/
 

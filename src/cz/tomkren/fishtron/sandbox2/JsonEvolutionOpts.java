@@ -1,14 +1,18 @@
 package cz.tomkren.fishtron.sandbox2;
 
 import cz.tomkren.fishtron.apps.AntLibs;
-import cz.tomkren.fishtron.eva.*;
 import cz.tomkren.fishtron.operators.*;
 import cz.tomkren.fishtron.reusegen.QuerySolver;
 import cz.tomkren.fishtron.terms.PolyTree;
 import cz.tomkren.fishtron.terms.SmartLibrary;
+import net.fishtron.apps.workflows.Dag_EvalManager;
 import net.fishtron.eva.CopyOp;
 import net.fishtron.eva.IndivGenerator;
 import net.fishtron.eva.Operator;
+import net.fishtron.eva.simple.BasicEvolutionOpts;
+import net.fishtron.eva.simple.EvalManager;
+import net.fishtron.eva.simple.EvolutionOpts;
+import net.fishtron.eva.simple.Selection;
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
 import net.fishtron.utils.Checker;
@@ -25,7 +29,7 @@ import java.util.function.BiFunction;
 
 /** Created by tom on 13.6.2016 */
 
-public class JsonEvolutionOpts implements EvolutionOpts<PolyTree>  {
+public class JsonEvolutionOpts implements EvolutionOpts<PolyTree> {
 
     // todo narychlo hax aby šlo vypínat server
     private EvalManager<PolyTree> evalManager;

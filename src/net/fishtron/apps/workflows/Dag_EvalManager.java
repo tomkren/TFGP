@@ -1,19 +1,22 @@
-package cz.tomkren.fishtron.sandbox2;
+package net.fishtron.apps.workflows;
 
+import net.fishtron.apps.gpml.Dag_JsonEvalInterface;
+import net.fishtron.eva.simple.EvalResult;
 import net.fishtron.eva.simple.FitIndiv;
 import net.fishtron.eva.simple.FitVal;
-import cz.tomkren.fishtron.workflows.TypedDag;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
 import net.fishtron.utils.Log;
 import org.apache.xmlrpc.XmlRpcException;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import cz.tomkren.fishtron.workflows.TypedDag;
+
 
 /** Created by user on 10. 6. 2016.*/
 

@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.eva;
+package net.fishtron.eva.simple;
 
 import org.json.JSONObject;
 
@@ -51,10 +51,10 @@ public class EvoOpts {
         return saveBest;
     }
 
-    boolean isUniqueCheckPerformed() {
+    public boolean isUniqueCheckPerformed() {
         return performUniqueCheck;
     }
-    int getMaxNumUniqueCheckFails() {
+    public int getMaxNumUniqueCheckFails() {
         return maxNumUniqueCheckFails;
     }
 

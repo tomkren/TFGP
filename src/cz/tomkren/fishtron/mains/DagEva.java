@@ -1,6 +1,5 @@
 package cz.tomkren.fishtron.mains;
 
-import cz.tomkren.fishtron.eva.*;
 import cz.tomkren.fishtron.operators.BasicTypedXover;
 import net.fishtron.eva.CopyOp;
 import cz.tomkren.fishtron.operators.OneParamMutation;
@@ -11,6 +10,9 @@ import cz.tomkren.fishtron.terms.PolyTree;
 import cz.tomkren.fishtron.terms.SmartLibrary;
 import net.fishtron.eva.IndivGenerator;
 import net.fishtron.eva.Operator;
+import net.fishtron.eva.simple.EvoOpts;
+import net.fishtron.eva.simple.Evolver;
+import net.fishtron.eva.simple.Selection;
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
 

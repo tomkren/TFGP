@@ -8,7 +8,10 @@ import cz.tomkren.fishtron.terms.SmartSymbolWithParams;
 import net.fishtron.types.Type;
 import net.fishtron.types.TypeTerm;
 import net.fishtron.types.Types;
-import cz.tomkren.utils.*;
+
+import cz.tomkren.utils.Comb0;
+import cz.tomkren.utils.TriFun;
+
 import net.fishtron.utils.AA;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.F;

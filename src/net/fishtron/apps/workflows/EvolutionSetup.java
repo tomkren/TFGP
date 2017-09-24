@@ -3,12 +3,10 @@ package net.fishtron.apps.workflows;
 import net.fishtron.utils.Distribution;
 import net.fishtron.eva.IndivGenerator;
 import net.fishtron.eva.Operator;
-import cz.tomkren.fishtron.eva.Selection;
-import cz.tomkren.fishtron.sandbox2.BasicEvolutionOpts;
-import cz.tomkren.fishtron.sandbox2.Dag_EvalManager;
+import net.fishtron.eva.simple.Selection;
+import net.fishtron.eva.simple.BasicEvolutionOpts;
 
-import cz.tomkren.fishtron.sandbox2.Dag_IEvalManager;
-import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
+import net.fishtron.eva.simple.EvolutionOpts;
 import net.fishtron.types.Type;
 import net.fishtron.trees.Gamma;
 import net.fishtron.gen.Gen;

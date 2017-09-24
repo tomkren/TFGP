@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.sandbox2;
+package net.fishtron.apps.gpml;
 
 import net.fishtron.utils.Checker;
 import net.fishtron.utils.Log;

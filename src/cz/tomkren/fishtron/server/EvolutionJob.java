@@ -1,10 +1,10 @@
 package cz.tomkren.fishtron.server;
 
-import cz.tomkren.fishtron.eva.EvaledPop;
-import cz.tomkren.fishtron.eva.Logger;
-import cz.tomkren.fishtron.sandbox2.EvalResult;
-import cz.tomkren.fishtron.sandbox2.Evolution;
-import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
+import net.fishtron.eva.simple.EvaledPop;
+import net.fishtron.eva.simple.Logger;
+import net.fishtron.eva.simple.EvalResult;
+import net.fishtron.eva.simple.Evolution;
+import net.fishtron.eva.simple.EvolutionOpts;
 import cz.tomkren.fishtron.sandbox2.JsonEvolutionOpts;
 import cz.tomkren.fishtron.terms.PolyTree;
 import org.apache.xmlrpc.XmlRpcException;

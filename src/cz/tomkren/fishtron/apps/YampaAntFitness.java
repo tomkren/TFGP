@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.apps;
 
 import net.fishtron.eva.simple.FitVal;
-import cz.tomkren.fishtron.eva.TogetherFitFun;
+import net.fishtron.eva.simple.TogetherFitFun;
 import cz.tomkren.fishtron.sandbox.JsonEvalInterface;
 import net.fishtron.utils.F;
 import org.json.JSONArray;

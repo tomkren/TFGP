@@ -1,7 +1,5 @@
-package cz.tomkren.fishtron.eva;
+package net.fishtron.eva.simple;
 
-import net.fishtron.eva.simple.FitIndiv;
-import net.fishtron.eva.simple.FitVal;
 import net.fishtron.utils.Distribution;
 import net.fishtron.utils.F;
 import net.fishtron.utils.Log;

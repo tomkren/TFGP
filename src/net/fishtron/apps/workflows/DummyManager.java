@@ -1,19 +1,20 @@
 package net.fishtron.apps.workflows;
 
-import net.fishtron.eva.simple.FitIndiv;
-import net.fishtron.eva.simple.FitVal;
-import cz.tomkren.fishtron.mains.DagEvaTester;
-import cz.tomkren.fishtron.sandbox2.Dag_IEvalManager;
-import cz.tomkren.fishtron.sandbox2.EvalResult;
-import cz.tomkren.fishtron.workflows.TypedDag;
-import net.fishtron.utils.AB;
-import net.fishtron.utils.F;
+import java.util.*;
+
 import org.apache.xmlrpc.XmlRpcException;
 import org.eclipse.jetty.util.ArrayQueue;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.*;
+import net.fishtron.eva.simple.FitIndiv;
+import net.fishtron.eva.simple.FitVal;
+import net.fishtron.eva.simple.EvalResult;
+import net.fishtron.utils.AB;
+import net.fishtron.utils.F;
+
+import cz.tomkren.fishtron.workflows.TypedDag;
+
 
 /** Created by tom on 17. 2. 2017.*/
 
@@ -34,7 +35,9 @@ public class DummyManager<Indiv extends FitIndiv> implements Dag_IEvalManager<In
 
     @Override
     public JSONObject getAllParamsInfo(String datasetFilename) throws XmlRpcException {
-        return DagEvaTester.testParamsInfo;
+        //dřív bylo: import cz.tomkren.fishtron.mains.DagEvaTester;
+        //return DagEvaTester.testParamsInfo;
+        return new JSONObject("{\"DT\": {\"min_samples_split\": [1, 2, 5, 10, 20], \"criterion\": [\"gini\", \"entropy\"], \"max_features\": [0.05, 0.1, 0.25, 0.5, 0.75, 1], \"min_samples_leaf\": [1, 2, 5, 10, 20], \"max_depth\": [1, 2, 5, 10, 15, 25, 50, 100]}, \"gaussianNB\": {}, \"SVC\": {\"gamma\": [0.0, 0.0001, 0.001, 0.01, 0.1, 0.5], \"C\": [0.1, 0.5, 1.0, 2, 5, 10, 15], \"tol\": [0.0001, 0.001, 0.01]}, \"union\": {}, \"copy\": {}, \"PCA\": {\"feat_frac\": [0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1], \"whiten\": [false, true]}, \"logR\": {\"penalty\": [\"l1\", \"l2\"], \"C\": [0.1, 0.5, 1.0, 2, 5, 10, 15], \"tol\": [0.0001, 0.001, 0.01]}, \"kMeans\": {}, \"kBest\": {\"feat_frac\": [0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1]}, \"vote\": {}}");
     }
 
     @Override

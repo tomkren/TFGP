@@ -8,9 +8,9 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 
-import cz.tomkren.fishtron.eva.Logger;
-import cz.tomkren.fishtron.sandbox2.Evolution;
-import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
+import net.fishtron.eva.simple.Logger;
+import net.fishtron.eva.simple.Evolution;
+import net.fishtron.eva.simple.EvolutionOpts;
 import net.fishtron.eva.simple.AppTreeIndiv;
 import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;

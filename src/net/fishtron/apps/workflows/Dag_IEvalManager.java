@@ -1,5 +1,7 @@
-package cz.tomkren.fishtron.sandbox2;
+package net.fishtron.apps.workflows;
 
+import net.fishtron.eva.simple.EvalManager;
+import net.fishtron.eva.simple.EvalResult;
 import net.fishtron.eva.simple.FitIndiv;
 import net.fishtron.utils.AB;
 import org.apache.xmlrpc.XmlRpcException;
