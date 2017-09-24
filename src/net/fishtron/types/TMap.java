@@ -1,6 +1,6 @@
 package net.fishtron.types;
 
-import cz.tomkren.utils.AA;
+import net.fishtron.utils.AA;
 
 import java.util.*;
 import java.util.function.Function;

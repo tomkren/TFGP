@@ -5,7 +5,7 @@ package cz.tomkren.fishtron.latticegen;
 import net.fishtron.types.Sub;
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
-import cz.tomkren.utils.AA;
+import net.fishtron.utils.AA;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
 

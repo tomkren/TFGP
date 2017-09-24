@@ -2,7 +2,7 @@ package net.fishtron.types;
 
 import com.google.common.base.Joiner;
 import cz.tomkren.fishtron.ugen.nf.MkNF;
-import cz.tomkren.utils.AA;
+import net.fishtron.utils.AA;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;

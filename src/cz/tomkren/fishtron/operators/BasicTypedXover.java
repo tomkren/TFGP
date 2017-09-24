@@ -8,7 +8,7 @@ import net.fishtron.types.TMap;
 import net.fishtron.types.Type;
 import cz.tomkren.fishtron.workflows.DataScientistLibs;
 
-import cz.tomkren.utils.AA;
+import net.fishtron.utils.AA;
 import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;
 import net.fishtron.utils.Log;

@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza.v1;
 
-import cz.tomkren.utils.AA;
+import net.fishtron.utils.AA;
 
 import java.awt.Color;
 import java.util.ArrayList;

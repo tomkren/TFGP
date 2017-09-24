@@ -3,7 +3,7 @@ package net.fishtron.server.jobs;
 import net.fishtron.server.Api;
 import net.fishtron.server.EvaJob;
 import net.fishtron.server.EvaJobProcess;
-import cz.tomkren.utils.AA;
+import net.fishtron.utils.AA;
 import net.fishtron.utils.F;
 import org.json.JSONArray;
 import org.json.JSONObject;

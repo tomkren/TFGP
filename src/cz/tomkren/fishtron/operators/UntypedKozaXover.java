@@ -4,7 +4,7 @@ package cz.tomkren.fishtron.operators;
 
 import cz.tomkren.fishtron.eva.Operator;
 import cz.tomkren.fishtron.terms.PolyTree;
-import cz.tomkren.utils.AA;
+import net.fishtron.utils.AA;
 import net.fishtron.utils.F;
 
 import java.util.ArrayList;

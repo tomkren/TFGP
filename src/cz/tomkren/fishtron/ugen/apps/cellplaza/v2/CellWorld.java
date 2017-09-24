@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza.v2;
 
 import cz.tomkren.fishtron.ugen.apps.cellplaza.shared.PlazaImg;
-import cz.tomkren.utils.AA;
+import net.fishtron.utils.AA;
 import net.fishtron.utils.F;
 import net.fishtron.utils.Log;
 import org.json.JSONArray;

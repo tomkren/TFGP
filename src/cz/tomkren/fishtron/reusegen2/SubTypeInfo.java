@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.reusegen2;
 import cz.tomkren.fishtron.terms.SmartSymbol;
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
-import cz.tomkren.utils.AA;
+import net.fishtron.utils.AA;
 import net.fishtron.utils.F;
 
 import java.math.BigInteger;
