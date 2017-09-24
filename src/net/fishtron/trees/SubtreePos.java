@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.terms;
+package net.fishtron.trees;
 
 
 import net.fishtron.types.Type;

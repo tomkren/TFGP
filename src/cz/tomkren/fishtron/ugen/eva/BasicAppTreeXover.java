@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.ugen.eva;
 
 import cz.tomkren.fishtron.eva.Operator;
-import cz.tomkren.fishtron.terms.SubtreePos;
+import net.fishtron.trees.SubtreePos;
 import net.fishtron.types.TMap;
 import net.fishtron.types.Type;
 import cz.tomkren.fishtron.ugen.trees.AppTree;

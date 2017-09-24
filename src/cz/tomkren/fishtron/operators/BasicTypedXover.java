@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.operators;
 import cz.tomkren.fishtron.eva.Operator;
 import cz.tomkren.fishtron.reusegen.QuerySolver;
 import cz.tomkren.fishtron.terms.PolyTree;
-import cz.tomkren.fishtron.terms.SubtreePos;
+import net.fishtron.trees.SubtreePos;
 import net.fishtron.types.TMap;
 import net.fishtron.types.Type;
 import cz.tomkren.fishtron.workflows.DataScientistLibs;

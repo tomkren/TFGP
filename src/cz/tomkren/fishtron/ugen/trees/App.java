@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.ugen.trees;
 
 import com.google.common.base.Joiner;
-import cz.tomkren.fishtron.terms.SubtreePos;
+import net.fishtron.trees.SubtreePos;
 import net.fishtron.types.Sub;
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
