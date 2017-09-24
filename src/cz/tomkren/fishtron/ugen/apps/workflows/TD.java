@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.ugen.apps.workflows;
 
-import cz.tomkren.fishtron.ugen.eval.Value;
+import net.fishtron.eval.Value;
 import cz.tomkren.fishtron.workflows.MyList;
 import cz.tomkren.fishtron.workflows.TypedDag;
 

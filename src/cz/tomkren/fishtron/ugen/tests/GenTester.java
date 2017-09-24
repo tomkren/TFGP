@@ -13,7 +13,7 @@ import net.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.apps.gpml.DummyHistoryEvalManager;
 import cz.tomkren.fishtron.ugen.apps.gpml.XmlRpcServer_MultiEvalManager;
 import cz.tomkren.fishtron.ugen.apps.workflows.Workflows;
-import cz.tomkren.fishtron.ugen.eval.EvalLib;
+import net.fishtron.eval.EvalLib;
 import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
 import cz.tomkren.fishtron.ugen.multi.Configs;
 import cz.tomkren.fishtron.ugen.multi.operators.AppTreeMIGenerator;

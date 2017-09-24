@@ -7,7 +7,7 @@ import net.fishtron.types.Type;
 import net.fishtron.trees.AppTree;
 import net.fishtron.gen.Gen;
 import cz.tomkren.fishtron.ugen.apps.workflows.Workflows;
-import cz.tomkren.fishtron.ugen.eval.EvalLib;
+import net.fishtron.eval.EvalLib;
 import net.fishtron.utils.AA;
 import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;

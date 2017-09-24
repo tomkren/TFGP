@@ -11,7 +11,7 @@ import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.Libs;
 import cz.tomkren.fishtron.ugen.compare.BasicCompareOpts;
 import cz.tomkren.fishtron.ugen.compare.CompareOpts;
 import cz.tomkren.fishtron.ugen.compare.CompareSelection;
-import cz.tomkren.fishtron.ugen.eval.EvalLib;
+import net.fishtron.eval.EvalLib;
 import cz.tomkren.fishtron.ugen.multi.*;
 import cz.tomkren.fishtron.ugen.multi.operators.AppTreeMIGenerator;
 import cz.tomkren.fishtron.ugen.multi.operators.MultiGenOpFactory;

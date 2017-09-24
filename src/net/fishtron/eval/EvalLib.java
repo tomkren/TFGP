@@ -1,4 +1,4 @@
-package cz.tomkren.fishtron.ugen.eval;
+package net.fishtron.eval;
 
 import net.fishtron.trees.App;
 import net.fishtron.trees.AppTree;

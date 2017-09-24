@@ -8,7 +8,7 @@ import net.fishtron.trees.Gamma;
 import net.fishtron.gen.Gen;
 import cz.tomkren.fishtron.ugen.eva.AppTreeIndiv;
 import cz.tomkren.fishtron.ugen.eva.AppTreeIndivGenerator;
-import cz.tomkren.fishtron.ugen.eval.EvalLib;
+import net.fishtron.eval.EvalLib;
 import cz.tomkren.fishtron.workflows.TypedDag;
 import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;

@@ -4,7 +4,7 @@ import net.fishtron.types.Type;
 import net.fishtron.types.Types;
 import net.fishtron.trees.Gamma;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.shared.CellEvalCodes;
-import cz.tomkren.fishtron.ugen.eval.*;
+import net.fishtron.eval.*;
 import net.fishtron.trees.AppTree;
 import net.fishtron.trees.Leaf;
 import net.fishtron.utils.AB;

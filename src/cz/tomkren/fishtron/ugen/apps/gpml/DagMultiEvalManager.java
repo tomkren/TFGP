@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.ugen.apps.gpml;
 
 import cz.tomkren.fishtron.sandbox2.Dag_JsonEvalInterface;
-import cz.tomkren.fishtron.ugen.eval.EvalLib;
+import net.fishtron.eval.EvalLib;
 import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
 import cz.tomkren.fishtron.ugen.multi.FitnessSignature;
 import cz.tomkren.fishtron.ugen.multi.MultiEvalResult;

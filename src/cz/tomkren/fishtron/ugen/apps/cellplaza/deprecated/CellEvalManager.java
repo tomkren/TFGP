@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.ugen.apps.cellplaza.deprecated;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.CellOpts;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.Libs;
 import cz.tomkren.fishtron.ugen.apps.cellplaza.v2.Rule;
-import cz.tomkren.fishtron.ugen.eval.EvalLib;
+import net.fishtron.eval.EvalLib;
 import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
 import cz.tomkren.fishtron.ugen.multi.MultiEvalManager;
 import cz.tomkren.fishtron.ugen.multi.MultiEvalResult;

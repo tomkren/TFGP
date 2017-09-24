@@ -7,7 +7,7 @@ import net.fishtron.types.Type;
 import net.fishtron.trees.Gamma;
 import net.fishtron.gen.Gen;
 import cz.tomkren.fishtron.ugen.apps.workflows.Workflows;
-import cz.tomkren.fishtron.ugen.eval.EvalLib;
+import net.fishtron.eval.EvalLib;
 import cz.tomkren.fishtron.ugen.multi.*;
 import cz.tomkren.fishtron.ugen.multi.operators.AppTreeMIGenerator;
 import cz.tomkren.fishtron.ugen.multi.operators.MultiGenOpFactory;
