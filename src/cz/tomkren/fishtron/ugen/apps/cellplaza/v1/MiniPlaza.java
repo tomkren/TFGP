@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza.v1;
 
-import cz.tomkren.fishtron.ugen.trees.AppTree;
+import net.fishtron.trees.AppTree;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import net.fishtron.utils.AB;

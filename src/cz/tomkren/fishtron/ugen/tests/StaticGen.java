@@ -4,7 +4,7 @@ import net.fishtron.types.Sub;
 import net.fishtron.types.Type;
 import net.fishtron.types.TypeVar;
 import net.fishtron.types.Types;
-import cz.tomkren.fishtron.ugen.trees.AppTree;
+import net.fishtron.trees.AppTree;
 import net.fishtron.trees.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.Mover;

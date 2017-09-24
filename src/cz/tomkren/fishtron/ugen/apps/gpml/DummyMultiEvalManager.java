@@ -4,7 +4,7 @@ import cz.tomkren.fishtron.mains.DagEvaTester;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
 import cz.tomkren.fishtron.ugen.multi.MultiEvalResult;
-import cz.tomkren.fishtron.ugen.trees.AppTree;
+import net.fishtron.trees.AppTree;
 import cz.tomkren.fishtron.workflows.TypedDag;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.Checker;

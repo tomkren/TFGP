@@ -1,5 +1,6 @@
 package cz.tomkren.fishtron.ugen.trees;
 
+import net.fishtron.trees.AppTree;
 import net.fishtron.trees.SubtreePos;
 import net.fishtron.types.Sub;
 import net.fishtron.types.Type;
@@ -24,7 +25,7 @@ public class Leaf implements AppTree {
     private Type originalType;
     private JSONObject debugInfo;
 
-    Leaf(String sym, Type type) {
+    public Leaf(String sym, Type type) {
         this(sym, type, type, null, null);
     }
 
@@ -76,7 +77,7 @@ public class Leaf implements AppTree {
         }
     }
 
-    Leaf randomlyShiftOneParam(Random rand, List<AB<Integer, Double>> shiftsWithProbabilities) {
+    public Leaf randomlyShiftOneParam(Random rand, List<AB<Integer, Double>> shiftsWithProbabilities) {
         Params newParams = params.randomlyShiftOneParam(rand, shiftsWithProbabilities);
         return new Leaf(sym, type, originalType, debugInfo, newParams);
     }

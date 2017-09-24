@@ -2,7 +2,6 @@ package net.fishtron.trees;
 
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
-import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.trees.Lam;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.ABC;

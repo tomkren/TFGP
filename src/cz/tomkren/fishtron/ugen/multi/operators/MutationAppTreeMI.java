@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.ugen.multi.operators;
 
 import cz.tomkren.fishtron.eva.Operator;
-import cz.tomkren.fishtron.ugen.trees.AppTree;
+import net.fishtron.trees.AppTree;
 import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
 import net.fishtron.utils.F;
 

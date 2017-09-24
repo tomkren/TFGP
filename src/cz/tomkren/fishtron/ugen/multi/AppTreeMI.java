@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.ugen.multi;
 
-import cz.tomkren.fishtron.ugen.trees.AppTree;
+import net.fishtron.trees.AppTree;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
 
 import java.util.List;

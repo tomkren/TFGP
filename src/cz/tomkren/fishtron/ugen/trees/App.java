@@ -1,6 +1,7 @@
 package cz.tomkren.fishtron.ugen.trees;
 
 import com.google.common.base.Joiner;
+import net.fishtron.trees.AppTree;
 import net.fishtron.trees.SubtreePos;
 import net.fishtron.types.Sub;
 import net.fishtron.types.Type;
@@ -41,7 +42,7 @@ public class App implements AppTree {
         return result;
     }
 
-    App(AppTree funTree, AppTree argTree, Type type) {
+    public App(AppTree funTree, AppTree argTree, Type type) {
         this(funTree, argTree, type, type, null);
     }
 

@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.ugen.eva;
 
-import cz.tomkren.fishtron.ugen.trees.AppTree;
+import net.fishtron.trees.AppTree;
 import cz.tomkren.fishtron.ugen.params.Params;
 import net.fishtron.utils.AB;
 import org.json.JSONObject;

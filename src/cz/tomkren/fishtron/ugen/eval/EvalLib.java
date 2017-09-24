@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.ugen.eval;
 
 import cz.tomkren.fishtron.ugen.trees.App;
-import cz.tomkren.fishtron.ugen.trees.AppTree;
+import net.fishtron.trees.AppTree;
 import cz.tomkren.fishtron.ugen.trees.Leaf;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.F;

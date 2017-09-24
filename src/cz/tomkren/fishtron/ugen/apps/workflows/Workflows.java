@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.ugen.apps.workflows;
 import net.fishtron.types.Type;
 import net.fishtron.types.TypeTerm;
 import net.fishtron.types.Types;
-import cz.tomkren.fishtron.ugen.trees.AppTree;
+import net.fishtron.trees.AppTree;
 import net.fishtron.trees.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.params.Params;

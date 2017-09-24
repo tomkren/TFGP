@@ -8,7 +8,7 @@ import cz.tomkren.fishtron.ugen.data.PreTs1Res;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
 import cz.tomkren.fishtron.ugen.data.Ts1Res;
 import cz.tomkren.fishtron.ugen.data.TsRes;
-import cz.tomkren.fishtron.ugen.trees.AppTree;
+import net.fishtron.trees.AppTree;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
 

@@ -16,7 +16,7 @@ import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
 import cz.tomkren.fishtron.ugen.multi.Configs;
 import cz.tomkren.fishtron.ugen.multi.operators.AppTreeMIGenerator;
-import cz.tomkren.fishtron.ugen.trees.AppTree;
+import net.fishtron.trees.AppTree;
 import net.fishtron.trees.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.data.SubsRes;

@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.ugen.eval;
 
-import cz.tomkren.fishtron.ugen.trees.AppTree;
+import net.fishtron.trees.AppTree;
 
 /**Created by tom on 13.03.2017.*/
 

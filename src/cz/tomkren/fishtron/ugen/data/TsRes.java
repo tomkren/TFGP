@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.ugen.data;
 
 import net.fishtron.types.Sub;
-import cz.tomkren.fishtron.ugen.trees.AppTree;
+import net.fishtron.trees.AppTree;
 import net.fishtron.utils.AB;
 
 /** Created by Tomáš Křen on 6.2.2017. */

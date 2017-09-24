@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.ugen.nf;
 import net.fishtron.types.Sub;
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
-import cz.tomkren.fishtron.ugen.trees.AppTree;
+import net.fishtron.trees.AppTree;
 import cz.tomkren.fishtron.ugen.data.SubsRes;
 import net.fishtron.utils.F;
 import net.fishtron.utils.Log;

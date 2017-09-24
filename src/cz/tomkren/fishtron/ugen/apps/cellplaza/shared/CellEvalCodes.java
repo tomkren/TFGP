@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza.shared;
 
 import cz.tomkren.fishtron.ugen.eval.EvalCode;
-import cz.tomkren.fishtron.ugen.trees.AppTree;
+import net.fishtron.trees.AppTree;
 import cz.tomkren.fishtron.ugen.trees.Leaf;
 
 import java.util.function.Function;

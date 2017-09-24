@@ -6,7 +6,7 @@ import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
 import cz.tomkren.fishtron.ugen.multi.FitnessSignature;
 import cz.tomkren.fishtron.ugen.multi.MultiEvalResult;
 import cz.tomkren.fishtron.ugen.multi.MultiIndiv;
-import cz.tomkren.fishtron.ugen.trees.AppTree;
+import net.fishtron.trees.AppTree;
 import cz.tomkren.fishtron.workflows.TypedDag;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.F;

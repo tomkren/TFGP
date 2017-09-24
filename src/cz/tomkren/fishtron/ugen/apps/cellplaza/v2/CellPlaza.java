@@ -2,7 +2,7 @@ package cz.tomkren.fishtron.ugen.apps.cellplaza.v2;
 
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
-import cz.tomkren.fishtron.ugen.trees.AppTree;
+import net.fishtron.trees.AppTree;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;

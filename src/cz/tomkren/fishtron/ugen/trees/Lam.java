@@ -1,5 +1,6 @@
 package cz.tomkren.fishtron.ugen.trees;
 
+import net.fishtron.trees.AppTree;
 import net.fishtron.trees.SubtreePos;
 import net.fishtron.types.Sub;
 import net.fishtron.types.Type;
