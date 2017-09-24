@@ -1,6 +1,8 @@
 package cz.tomkren.utils;
 
 
+import net.fishtron.utils.Checker;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;

@@ -1,6 +1,5 @@
-package cz.tomkren.utils;
+package net.fishtron.utils;
 
-import net.fishtron.utils.Log;
 import org.json.JSONObject;
 import java.util.List;
 import java.util.Random;

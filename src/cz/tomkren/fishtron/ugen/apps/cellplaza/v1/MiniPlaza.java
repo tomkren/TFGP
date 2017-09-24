@@ -4,7 +4,7 @@ import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.Gen;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import net.fishtron.utils.AB;
-import cz.tomkren.utils.Checker;
+import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;
 import net.fishtron.utils.Log;
 

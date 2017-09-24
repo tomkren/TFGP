@@ -7,7 +7,7 @@ import cz.tomkren.fishtron.operators.UntypedRampedHalfAndHalf;
 import cz.tomkren.fishtron.sandbox2.*;
 import cz.tomkren.fishtron.terms.PolyTree;
 import cz.tomkren.fishtron.terms.SmartLibrary;
-import cz.tomkren.utils.Checker;
+import net.fishtron.utils.Checker;
 
 import java.util.Arrays;
 import java.util.Random;

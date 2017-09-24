@@ -1,6 +1,6 @@
 package cz.tomkren.fishtron.ugen.apps.cellplaza.v1;
 
-import cz.tomkren.utils.Checker;
+import net.fishtron.utils.Checker;
 
 
 /**Created by tom on 11.03.2017.*/

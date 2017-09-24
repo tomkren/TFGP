@@ -4,7 +4,7 @@ import cz.tomkren.fishtron.eva.Distribution;
 import cz.tomkren.fishtron.eva.IndivGenerator;
 import cz.tomkren.fishtron.eva.Operator;
 import cz.tomkren.fishtron.ugen.multi.MultiIndiv;
-import cz.tomkren.utils.Checker;
+import net.fishtron.utils.Checker;
 
 import java.util.Random;
 import java.util.function.BiFunction;

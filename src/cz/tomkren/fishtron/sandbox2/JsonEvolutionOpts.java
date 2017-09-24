@@ -8,7 +8,7 @@ import cz.tomkren.fishtron.terms.PolyTree;
 import cz.tomkren.fishtron.terms.SmartLibrary;
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
-import cz.tomkren.utils.Checker;
+import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;
 import net.fishtron.utils.Log;
 import org.apache.xmlrpc.XmlRpcException;

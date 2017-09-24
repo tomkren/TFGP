@@ -7,7 +7,7 @@ import net.fishtron.server.EvaJob;
 import net.fishtron.server.EvaJobProcess;
 import net.fishtron.server.EvaServer;
 import net.fishtron.server.jobs.Test;
-import cz.tomkren.utils.Checker;
+import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;
 import net.fishtron.utils.Log;
 import org.json.JSONArray;

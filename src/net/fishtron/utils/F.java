@@ -5,7 +5,6 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.io.Files;
-import cz.tomkren.utils.Checker;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

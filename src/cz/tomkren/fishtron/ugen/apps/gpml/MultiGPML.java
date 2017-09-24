@@ -6,7 +6,7 @@ import cz.tomkren.fishtron.ugen.multi.AppTreeMI;
 import cz.tomkren.fishtron.ugen.multi.MultiEvaOpts;
 import cz.tomkren.fishtron.ugen.multi.MultiEvolution;
 import cz.tomkren.fishtron.ugen.multi.MultiLogger;
-import cz.tomkren.utils.Checker;
+import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;
 import net.fishtron.utils.Log;
 import org.apache.xmlrpc.XmlRpcException;

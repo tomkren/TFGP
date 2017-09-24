@@ -15,7 +15,7 @@ import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import cz.tomkren.fishtron.ugen.multi.*;
 import cz.tomkren.fishtron.ugen.multi.operators.AppTreeMIGenerator;
 import cz.tomkren.fishtron.ugen.multi.operators.MultiGenOpFactory;
-import cz.tomkren.utils.Checker;
+import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;
 import org.json.JSONArray;
 import org.json.JSONObject;

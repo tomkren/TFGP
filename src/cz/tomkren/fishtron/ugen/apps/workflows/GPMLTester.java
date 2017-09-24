@@ -10,7 +10,7 @@ import cz.tomkren.fishtron.ugen.eva.AppTreeIndiv;
 import cz.tomkren.fishtron.ugen.eva.AppTreeIndivGenerator;
 import cz.tomkren.fishtron.ugen.eval.EvalLib;
 import cz.tomkren.fishtron.workflows.TypedDag;
-import cz.tomkren.utils.Checker;
+import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;
 import net.fishtron.utils.Log;
 import org.json.JSONArray;

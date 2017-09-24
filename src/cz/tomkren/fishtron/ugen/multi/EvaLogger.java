@@ -1,7 +1,7 @@
 package cz.tomkren.fishtron.ugen.multi;
 
 import net.fishtron.utils.AB;
-import cz.tomkren.utils.Checker;
+import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;
 import org.json.JSONArray;
 import org.json.JSONObject;

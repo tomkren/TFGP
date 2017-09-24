@@ -5,7 +5,7 @@ import net.fishtron.types.Types;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.Gamma;
 import cz.tomkren.fishtron.ugen.Gen;
-import cz.tomkren.utils.Checker;
+import net.fishtron.utils.Checker;
 import net.fishtron.utils.Log;
 import org.json.JSONObject;
 

@@ -9,7 +9,7 @@ import net.fishtron.types.TMap;
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
 import cz.tomkren.fishtron.workflows.TypedDag;
-import cz.tomkren.utils.Checker;
+import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;
 import net.fishtron.utils.Log;
 import cz.tomkren.fishtron.operators.RandomParamsPolyTreeGenerator;

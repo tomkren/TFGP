@@ -4,6 +4,7 @@ package cz.tomkren.utils;
 // todo | tak nějak nezávisle otestovat a dyštak najít oficiální alternativu jak se má dělat když člověk chce funkcionální seznamy
 
 import com.google.common.collect.Lists;
+import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;
 
 import java.util.ArrayList;

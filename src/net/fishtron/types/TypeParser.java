@@ -1,6 +1,6 @@
 package net.fishtron.types;
 
-import cz.tomkren.utils.Checker;
+import net.fishtron.utils.Checker;
 import java.util.*;
 
 /** Created by tom on 7.11.2015. */

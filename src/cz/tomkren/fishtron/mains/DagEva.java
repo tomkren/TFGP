@@ -14,7 +14,7 @@ import net.fishtron.types.Types;
 
 import cz.tomkren.fishtron.workflows.DagEvolutionLogger;
 import cz.tomkren.fishtron.workflows.DataScientistFitness;
-import cz.tomkren.utils.Checker;
+import net.fishtron.utils.Checker;
 import net.fishtron.utils.Log;
 
 import com.google.common.base.Charsets;

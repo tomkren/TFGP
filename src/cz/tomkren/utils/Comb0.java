@@ -1,5 +1,7 @@
 package cz.tomkren.utils;
 
+import net.fishtron.utils.Checker;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;

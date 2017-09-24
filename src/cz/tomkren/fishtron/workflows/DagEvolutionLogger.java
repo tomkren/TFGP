@@ -7,7 +7,7 @@ import cz.tomkren.fishtron.sandbox2.EvalResult;
 import cz.tomkren.fishtron.sandbox2.EvolutionOpts;
 import cz.tomkren.fishtron.terms.PolyTree;
 
-import cz.tomkren.utils.Checker;
+import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;
 import net.fishtron.utils.Log;
 

@@ -3,9 +3,8 @@ package cz.tomkren.fishtron.ugen.multi;
 import cz.tomkren.fishtron.eva.Distribution;
 import cz.tomkren.fishtron.eva.IndivGenerator;
 import cz.tomkren.fishtron.eva.Operator;
-import cz.tomkren.utils.Checker;
+import net.fishtron.utils.Checker;
 
-import java.util.List;
 import java.util.Random;
 
 /** Created by tom on 07.03.2017. */

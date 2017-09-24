@@ -1,5 +1,7 @@
 package cz.tomkren.utils;
 
+import net.fishtron.utils.Checker;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

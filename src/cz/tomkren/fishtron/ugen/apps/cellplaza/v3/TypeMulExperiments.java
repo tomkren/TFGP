@@ -8,7 +8,7 @@ import cz.tomkren.fishtron.ugen.eval.*;
 import cz.tomkren.fishtron.ugen.trees.AppTree;
 import cz.tomkren.fishtron.ugen.trees.Leaf;
 import net.fishtron.utils.AB;
-import cz.tomkren.utils.Checker;
+import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;
 
 
