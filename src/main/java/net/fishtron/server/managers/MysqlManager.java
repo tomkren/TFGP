@@ -144,21 +144,5 @@ public class MysqlManager implements Manager {
     }
 
 
-    //todo remove
-    /*
-    public static void main(String[] args) {
-
-        MysqlManager mysqlMan = new MysqlManager(BrickSim.loadMysqlConfig());
-
-        JSONObject sqlResult = mysqlMan.execute("SELECT * FROM `ebay` ORDER BY id DESC LIMIT 2", false);
-
-        Log.it(sqlResult.toString(2));
-
-        Instant now = Instant.now();
-        Log.it(now.toString());
-        Log.it(toSqlTime(now));
-
-    }*/
-
 
 }

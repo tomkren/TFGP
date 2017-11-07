@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Eva</title>
+
+    <script src="vendor/lodash.js"></script>
+    <script src="vendor/jquery.min.js"></script>
+    <script src="vendor/immutable.min.js"></script>
+    <script src="vendor/google.charts.loader.js"></script>
+
+    <script src="config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/modelManager.js"></script>
+    <script src="js/stateManager.js"></script>
+    <script src="js/pageView.js"></script>
+    <script src="js/jobsView.js"></script>
+
+    <script src="js/userView.js"></script>
+    <script src="js/serverInfoView.js"></script>
+    <script src="js/jobViewer.js"></script>
+    <script src="js/logView.js"></script>
+
+    <!-- cellplaza -->
+    <script src="js/cellplaza/cellplazaModel.js"></script>
+    <script src="js/cellplaza/cellplazaView.js"></script>
+    <script src="js/cellplaza/cellComparatorView.js"></script>
+    <script src="js/cellplaza/cellZoomView.js"></script>
+
+    <link href='css/cellplaza.css' rel='stylesheet' type='text/css'>
+
+
+    <link href='css/app.css' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,600,600italic,700,700italic,800,800italic&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+
+<script>$(function () {App = mkApp(evaConfig);});</script>
+
+</head>
+<body>
+
+<div id="topBar">
+    <h1>Eva</h1>
+    <div id="serverInfoView"></div>
+    <div id="pageView"></div>
+    <div id="userView"></div>
+</div>
+
+<div id="pages">
+
+
+    <div id="page-jobs" class="hidden">
+        <!-- &nbsp; <span id="jobsViewLoader"  class="hidden"><img src="img/ajax_b.gif"></span> -->
+        <div id="jobsView">loading jobs..</div>
+        <div id="jobViewer"></div>
+        <h2>JobLog <span id="logViewLoader" class="hidden"><img src="img/ajax_b.gif"></span></h2>
+        <div id="logView"></div>
+    </div>
+
+</div>
+
+</body>
+</html>

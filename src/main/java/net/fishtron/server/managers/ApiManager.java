@@ -106,7 +106,7 @@ public class ApiManager implements Api, Manager {
 
     private JSONObject mkIndexResponse() {
         return Api.ok(
-                Api.KEY_msg, "Welcome to BrickSim API! :)",
+                Api.KEY_msg, "Welcome to Fishtron API! :)",
                 Api.KEY_version, version,
                 Api.KEY_cmds, F.jsonMap(cmdManuals, x->x)
         );

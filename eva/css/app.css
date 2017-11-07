@@ -1,0 +1,169 @@
+html {
+    font-family: 'Open Sans', sans-serif;
+}
+
+body {
+    margin: 0 0 10px;
+}
+
+#pages {
+    margin-left: 10px;
+}
+
+input, select {
+    border: 1px solid #C9E6F2;
+}
+
+pre {
+    font-family: Consolas,monospace;
+    font-size: 9pt;
+}
+
+th {
+    text-align: left;
+    padding-right: 20px;
+}
+
+.hidden {
+    display: none;
+}
+
+.red {
+    color: red;
+}
+
+.hand {
+    cursor: pointer;
+}
+
+.link {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.centered {
+    text-align: center;
+}
+
+h1 {
+    float: left;
+    font-size: 12pt;
+    margin: 2px;
+}
+
+
+.tab {
+    margin-right: 5px;
+}
+
+#topBar {
+    overflow:auto;
+    background: black;
+    color: white;
+    font-weight: bold;
+    padding: 5px 10px 8px 6px;
+}
+
+#serverInfoView {
+    float:left;
+    margin-top: 2px;
+}
+
+#pageView {
+    float: left;
+    margin-top: 1px;
+    margin-left: 10px;
+}
+
+#userView {
+    float:right;
+    margin-top: 1px;
+}
+
+.userInput {
+    width: 80px;
+    padding: 3px;
+}
+
+.offerDetailQuery {
+    width: 500px;
+}
+
+.errorBox {
+    color: white;
+    background-color: red;
+    font-weight: bold;
+    padding: 5px;
+    margin-left: 10px;
+}
+
+.newFlagInput {
+    width: 90px;
+}
+
+.job-tab {
+    border: 1px solid #C9E6F2;
+    background-color: #F2F9FC;
+}
+
+.job-td {
+    padding-right: 7px;
+}
+
+.jobConfigButt {
+    margin-right: 5px;
+}
+
+.refresh {
+    margin-bottom: 10px;
+}
+
+.offers-tab {
+    border: 1px solid #7FC143;
+    background-color: #DEF3CA;
+}
+
+.offers-tab td {
+    /*border: 1px solid #e4f9d1;*/
+    background-color: #e4f9d1;
+    padding: 10px;
+}
+
+.offers-tab td .link {
+    color: #636660;
+}
+
+.link {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.ajax {
+    display: block;
+    margin: 0 auto;
+    padding-top: 100px;
+}
+
+
+.blue-tab {
+    border: 1px solid #C9E6F2;
+    background-color: #F2F9FC;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.blue-tab td {
+    padding: 4px;
+}
+
+.log-header {
+    position:relative;
+    top:-10px;
+}
+
+
+
+.setIdInput {
+    width: 80px;
+}
+

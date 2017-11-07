@@ -1,5 +1,7 @@
 package net.fishtron.server;
 
+import net.fishtron.server.api.Api;
+import net.fishtron.server.api.ApiCmd;
 import net.fishtron.server.jobs.templates.TestFactorization;
 import net.fishtron.server.jobs.EvaJob;
 import net.fishtron.server.managers.ApiManager;
@@ -18,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -28,7 +31,7 @@ import java.util.function.BiFunction;
  */
 public class EvaServer extends AbstractHandler implements Manager {
 
-    private static final String VERSION = "0.2.1";
+    private static final String VERSION = "0.2.33";
 
     public static final String KEY_port = "port";
 
@@ -90,6 +93,19 @@ public class EvaServer extends AbstractHandler implements Manager {
     @Override
     public String greetings() {
         return "EvaServer at your command, sir!";
+    }
+
+    @Override
+    public List<ApiCmd> mkApiCmds() {
+        return Collections.singletonList(
+                new ApiCmd(Api.CMD_getInitState, this::getInitState_api, Api.MAN_todo)
+        );
+    }
+
+    private JSONObject getInitState_api() {
+        return Api.ok(
+                "version", VERSION
+        );
     }
 
 
