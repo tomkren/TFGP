@@ -1,0 +1,50 @@
+{
+
+  "runOnServer": true,
+  "evaServer": {"port": 4224},
+
+  "numFrames": 10,
+
+  "numIndividualsToGenerate": 64,
+  "generatingMaxTreeSize": 3,
+
+  "maxPopulationSize": 128,
+
+  "numEvaluations": 100000,
+  "timeLimit": 2147483647,
+  "sleepTime": 100,
+
+  "tournamentBetterWinsProbability": 1,
+
+  "operators" : [
+    {"name": "basicTypedXover", "probability": 0.4 , "maxTreeSize": 128},
+    {"name": "sameSizeSubtreeMutation", "probability": 0.3, "maxSubtreeSize": 32},
+    {"name": "oneParamMutation", "probability" : 0.3, "shiftsWithProbabilities": [[-2, 0.1], [-1, 0.4], [1, 0.4], [2, 0.1]]}
+  ],
+
+
+
+  "cellPlaza": {
+    "evaPlaza": "mini_50",
+    "run": ["mini_10", "mini_50", "mini_100"],
+    "plazas": {
+      "mini_10": {
+        "numStates": 3,
+        "pixelSizes": [10, 1]
+      },
+      "mini_50": {
+        "numStates": 3,
+        "pixelSizes": [3, 1]
+      },
+      "mini_100": {
+        "numStates": 3,
+        "pixelSizes": [5, 1]
+      },
+      "stred_50": {
+        "numStates": 3,
+        "pixelSizes": [2,1]
+      }
+    }
+  }
+
+}
