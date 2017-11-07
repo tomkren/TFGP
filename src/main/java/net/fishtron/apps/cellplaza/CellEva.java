@@ -3,10 +3,14 @@ package net.fishtron.apps.cellplaza;
 import net.fishtron.apps.cellplaza.v2.CellPlaza;
 import net.fishtron.eva.compare.CompareEvolution;
 import net.fishtron.eva.multi.*;
-import net.fishtron.server.EvaJob;
-import net.fishtron.server.EvaJobProcess;
 import net.fishtron.server.EvaServer;
-import net.fishtron.server.jobs.Test;
+import net.fishtron.server.OLD.EvaJob_OLD;
+import net.fishtron.server.OLD.EvaJobProcess;
+import net.fishtron.server.OLD.EvaServer_OLD;
+import net.fishtron.server.OLD.jobs.Test;
+import net.fishtron.server.api.Api;
+import net.fishtron.server.jobs.EvaJob;
+import net.fishtron.server.jobs.JobContainer;
 import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;
 import net.fishtron.utils.Log;
@@ -17,10 +21,11 @@ import java.io.IOException;
 
 /** Created by tom on 20.03.2017. */
 
-public class CellEva implements EvaJob {
-    private static final String version = "0.0.1";
-
+public class CellEva implements EvaJob, EvaJob_OLD {
+    private static final String version = "0.0.2";
     private static final String CELL_EVA_JOB_NAME = "CellEva";
+    public static String getJobName() {return CELL_EVA_JOB_NAME;}
+
 
     private final CellEvaOpts ceOpts;
     private final Checker checker;
@@ -35,15 +40,14 @@ public class CellEva implements EvaJob {
 
     private CellEva(CellEvaOpts ceOpts) {
         this.ceOpts = ceOpts;
-        this.checker = Checker.mk(ceOpts.config);
+        this.checker = Checker.mk(ceOpts.getConfig());
     }
 
     private void runEvolution(JSONObject jobOpts) {
-        JSONObject config = ceOpts.config;
-        String logPath = ceOpts.logPath;
+        JSONObject config = ceOpts.getConfig();
+        String logPath = ceOpts.getLogPath();
 
         EvaSetup_CellEva setup = new EvaSetup_CellEva(jobOpts, config, logPath, checker);
-        //evalManager = setup.getEvalManager();
         interactiveComparator = setup.getInteractiveComparator();
 
         CompareEvolution<AppTreeMI> eva = new CompareEvolution<>(setup.getOpts(), setup.getLogger());
@@ -57,7 +61,7 @@ public class CellEva implements EvaJob {
 
 
     @Override
-    public void runJob(JSONObject jobOpts, EvaJobProcess jobProcess) {
+    public void runJob_OLD(JSONObject jobOpts, EvaJobProcess jobProcess) {
 
 
         checker.setLogFun(jobProcess::log);
@@ -74,6 +78,30 @@ public class CellEva implements EvaJob {
         } catch (Error e) {
             resolveError(e);
         }
+    }
+
+    @Override
+    public JSONObject runJob(Config jobConfig, JobContainer jobContainer) {
+
+        checker.setLogFun(jobContainer::log);
+        checker.setLogFun_noln(jobContainer::log); // TODO nebude fungovat to _noln
+        checker.setIsStopRequestedFun(jobContainer::isStopRequested);
+
+        log("Starting CellEva (new) ...");
+        log(ceOpts);
+        log();
+
+        try {
+
+            runEvolution(jobConfig.getOpts());
+            return Api.ok(Api.KEY_msg, "evolution finished");
+
+        } catch (Error e) {
+            resolveError(e);
+            return Api.error(e.getMessage());
+        }
+
+
     }
 
     private void resolveError(Error e) {
@@ -94,6 +122,12 @@ public class CellEva implements EvaJob {
             return interactiveComparator.processApiCall(path, query);
         }
     }
+
+    @Override
+    public JSONObject processApiCall_OLD(JSONArray path, JSONObject query) {
+        return processApiCall(path, query);
+    }
+
 
     public static void main(String[] args) {
         Log.it("CellEva [v "+version+"]");
@@ -120,15 +154,28 @@ public class CellEva implements EvaJob {
 
             if (runOnServer) {
 
-                EvaServer evaServer = new EvaServer(config.getJSONObject("evaServer"));
-                evaServer.addJobClass(CELL_EVA_JOB_NAME, CellEva.class, ceOpts);
-                //evaServer.addJobClass(InteractiveEvaluatorJob.JOB_NAME, InteractiveEvaluatorJob.class);
-                evaServer.addJobClass("Test", Test.class);
+                if (!true) {
 
-                evaServer.getJobManager().runJob(CELL_EVA_JOB_NAME, F.obj("plazaDir", "mini_50"));
-                //evaServer.getJobManager().runJob(CELL_EVA_JOB_NAME, F.obj("plazaDir", "mini_10"));
+                    EvaServer_OLD evaServer = new EvaServer_OLD(config.getJSONObject("evaServer"));
+                    evaServer.addJobClass(CELL_EVA_JOB_NAME, CellEva.class, ceOpts);
+                    evaServer.addJobClass("Test", Test.class);
+                    evaServer.getJobManager().runJob(CELL_EVA_JOB_NAME, F.obj("plazaDir", "mini_50"));
+                    evaServer.startServer();
 
-                evaServer.startServer();
+                } else {
+
+
+                    EvaServer evaServer = new EvaServer(config.getJSONObject("evaServer"));
+                    evaServer.addJobClass(CELL_EVA_JOB_NAME, CellEva.class, ceOpts);
+
+                    evaServer.startEvaServer();
+
+                    EvaJob.Config jobConfig = new EvaJob.Config("cell_eva", CELL_EVA_JOB_NAME, F.obj("plazaDir", "mini_50"), 0, null, true);
+                    evaServer.getJobManager().scheduleJob(jobConfig);
+
+                }
+
+
 
             } else {
                 new CellEva((Object)ceOpts).runEvolution(null);
@@ -144,22 +191,6 @@ public class CellEva implements EvaJob {
         }
 
 
-    }
-
-    private static class CellEvaOpts {
-
-        private final JSONObject config;
-        private final String logPath;
-
-        CellEvaOpts(JSONObject config, String logPath) {
-            this.config = config;
-            this.logPath = logPath;
-        }
-
-        @Override
-        public String toString() {
-            return "CellEvaOpts{logPath='" + logPath + "', config=" + config + "}";
-        }
     }
 
 }

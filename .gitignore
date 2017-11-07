@@ -6,9 +6,21 @@
 
 /logs/
 /out/
+/target/
 /results/raw/
 /results/stats/
 /results/imgs/
+
+/eva/config.js
+
+/eva/foolship/evaLog/
+
+/eva/cellplaza/evaLog/
+/eva/cellplaza/mini_10/indivs/
+/eva/cellplaza/mini_50/indivs/
+/eva/cellplaza/mini_100/indivs/
+/eva/cellplaza/stred_50/indivs/
+
 
 /tex/readme.aux
 /tex/readme.dvi

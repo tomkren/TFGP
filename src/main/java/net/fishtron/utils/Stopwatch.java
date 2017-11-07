@@ -16,13 +16,17 @@ public class Stopwatch {
 
     public Stopwatch(int precision) {
         this.precision = precision;
-        restart();
+        reset();
     }
 
     public String restart() {
+        return "\t["+reset()+" s]";
+    }
+
+    public double reset() {
         double previousTime = getTime(precision);
         this.startTime = System.nanoTime();
-        return "\t["+previousTime+" s]";
+        return previousTime;
     }
 
     public double getTime() {

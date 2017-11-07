@@ -1,5 +1,6 @@
 package net.fishtron.eva.multi;
 
+import net.fishtron.server.api.Api;
 import net.fishtron.utils.Distribution;
 import net.fishtron.eva.IndivGenerator;
 import net.fishtron.eva.Operator;
@@ -24,6 +25,7 @@ public class BasicMultiEvaOpts<Indiv extends MultiIndiv> implements MultiEvaOpts
     private final MultiEvalManager<Indiv> evalManager;
     private final MultiSelection<Indiv> parentSelection;
     private final Distribution<Operator<Indiv>> operators;
+    private final Api api; // may be null
     private final Checker checker;
 
     public BasicMultiEvaOpts(int numEvaluations, int numIndividualsToGenerate, int minPopulationSizeToOperate,
@@ -32,6 +34,7 @@ public class BasicMultiEvaOpts<Indiv extends MultiIndiv> implements MultiEvaOpts
                              FitnessSignature fitnessSignature, /*List<Boolean> isMaxims, List<String> fitnessLabels,*/ MultiEvalManager<Indiv> evalManager,
                              MultiSelection<Indiv> parentSelection,
                              Distribution<Operator<Indiv>> operators,
+                             Api api,
                              Checker checker) {
         this.numEvaluations = numEvaluations;
         this.numIndividualsToGenerate = numIndividualsToGenerate;
@@ -46,6 +49,7 @@ public class BasicMultiEvaOpts<Indiv extends MultiIndiv> implements MultiEvaOpts
         this.evalManager = evalManager;
         this.parentSelection = parentSelection;
         this.operators = operators;
+        this.api = api;
         this.checker = checker;
     }
 
@@ -63,5 +67,6 @@ public class BasicMultiEvaOpts<Indiv extends MultiIndiv> implements MultiEvaOpts
     @Override public MultiSelection<Indiv> getParentSelection() {return parentSelection;}
     @Override public Distribution<Operator<Indiv>> getOperators() {return operators;}
     @Override public Random getRandom() {return checker.getRandom();}
+    @Override public Api getApi() {return api;}
     @Override public Checker getChecker() {return checker;}
 }

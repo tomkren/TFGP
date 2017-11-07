@@ -7,9 +7,9 @@ import net.fishtron.eval.EvalLib;
 import net.fishtron.eva.multi.AppTreeMI;
 import net.fishtron.eva.multi.MultiEvalManager;
 import net.fishtron.eva.multi.MultiEvalResult;
-import net.fishtron.server.Api;
-import net.fishtron.server.EvaJobProcess;
-import net.fishtron.server.JobManager;
+import net.fishtron.server.OLD.Api_OLD;
+import net.fishtron.server.OLD.EvaJobProcess;
+import net.fishtron.server.OLD.JobManager;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;
@@ -23,11 +23,11 @@ import java.util.Map;
 
 /** Created by tom on 20.03.2017. */
 
-class CellEvalManager implements MultiEvalManager<AppTreeMI>, Api {
+class CellEvalManager implements MultiEvalManager<AppTreeMI>, Api_OLD {
 
     private final EvalLib lib;
     private final Checker ch;
-    private final Api interactiveEvalApi;
+    private final Api_OLD interactiveEvalApi;
 
     private Map<Integer, AB<AppTreeMI,JSONObject>> id2indivData;
     private int nextId;
@@ -50,15 +50,15 @@ class CellEvalManager implements MultiEvalManager<AppTreeMI>, Api {
         JobManager jobMan = jobProcess.getJobManager();
 
         JSONObject response = jobMan.runJob(F.obj(
-                Api.CMD, Api.CMD_RUN,
-                Api.JOB_NAME, InteractiveEvaluatorJob.JOB_NAME
+                Api_OLD.CMD, Api_OLD.CMD_RUN,
+                Api_OLD.JOB_NAME, InteractiveEvaluatorJob.JOB_NAME
         ));
 
-        if (!response.getString(Api.STATUS).equals(Api.OK)) {
+        if (!response.getString(Api_OLD.STATUS).equals(Api_OLD.OK)) {
             throw new Error("Unable to create "+InteractiveEvaluatorJob.JOB_NAME+" job, response: "+response);
         }
 
-        int jobId = response.getInt(Api.JOB_ID);
+        int jobId = response.getInt(Api_OLD.JOB_ID);
 
         ch.log("\n>>> Created "+ InteractiveEvaluatorJob.JOB_NAME+" job: "+ response+", jobId: "+jobId+"\n");
 
@@ -89,8 +89,8 @@ class CellEvalManager implements MultiEvalManager<AppTreeMI>, Api {
             jsonIndivs.put(indivDataToSubmit);
         }
 
-        interactiveEvalApi.processApiCall(null, F.obj(
-                Api.JOB_CMD, InteractiveEvaluatorJob.CMD_ADD_TO_POOL,
+        interactiveEvalApi.processApiCall_OLD(null, F.obj(
+                Api_OLD.JOB_CMD, InteractiveEvaluatorJob.CMD_ADD_TO_POOL,
                 InteractiveEvaluatorJob.INDIVS, jsonIndivs
         ));
 
@@ -127,8 +127,8 @@ class CellEvalManager implements MultiEvalManager<AppTreeMI>, Api {
     }
 
     @Override
-    public JSONObject processApiCall(JSONArray path, JSONObject query) {
-        return interactiveEvalApi.processApiCall(path, query);
+    public JSONObject processApiCall_OLD(JSONArray path, JSONObject query) {
+        return interactiveEvalApi.processApiCall_OLD(path, query);
     }
 
 

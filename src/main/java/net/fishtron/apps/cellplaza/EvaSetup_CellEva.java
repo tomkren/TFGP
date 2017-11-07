@@ -1,5 +1,6 @@
 package net.fishtron.apps.cellplaza;
 
+import net.fishtron.eva.compare.CompareEvaSetup;
 import net.fishtron.utils.Distribution;
 import net.fishtron.eva.IndivGenerator;
 import net.fishtron.eva.Operator;
@@ -23,13 +24,16 @@ import org.json.JSONObject;
 
 /** Created by tom on 20.03.2017.*/
 
-class EvaSetup_CellEva {
+public class EvaSetup_CellEva implements CompareEvaSetup {
+
+    public static final String SETUP_NAME = "cellplaza";
+
 
     private CompareOpts<AppTreeMI> opts;
     private InteractiveComparator interactiveComparator;
     private EvaLogger<AppTreeMI> logger;
 
-    EvaSetup_CellEva(JSONObject jobOpts, JSONObject config, String logPath, Checker ch) {
+    public EvaSetup_CellEva(JSONObject jobOpts, JSONObject config, String logPath, Checker ch) {
 
         int numEvaluations  = Configs.getInt(config,  Configs.numEvaluations, Integer.MAX_VALUE);
 
@@ -80,11 +84,10 @@ class EvaSetup_CellEva {
 
         interactiveComparator = new InteractiveComparator(lib, cellOpts, numFrames, logger.getRunDirPath(), sleepTime, ch);
 
-        opts = new BasicCompareOpts<>(interactiveComparator::compare, numEvaluations, numToGen, maxPopSize, timeLimit, sleepTime, generator, parentSelection, operators, ch);
+        opts = new BasicCompareOpts<>(interactiveComparator::compare, numEvaluations, numToGen, maxPopSize, timeLimit, sleepTime, generator, parentSelection, operators, interactiveComparator, ch);
     }
 
-    CompareOpts<AppTreeMI> getOpts() {return opts;}
-    //CellEvalManager getEvalManager() {return evalManager;}
-    InteractiveComparator getInteractiveComparator() {return interactiveComparator;}
-    MultiLogger<AppTreeMI> getLogger() {return logger;}
+    @Override public CompareOpts<AppTreeMI> getOpts() {return opts;}
+    @Override public InteractiveComparator getInteractiveComparator() {return interactiveComparator;}
+    @Override public MultiLogger<AppTreeMI> getLogger() {return logger;}
 }

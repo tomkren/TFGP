@@ -1,4 +1,4 @@
-package net.fishtron.server;
+package net.fishtron.server.OLD;
 
 import net.fishtron.utils.F;
 import org.json.JSONObject;
@@ -13,20 +13,20 @@ public class EvaJobProcess {
 
     private Status status;
     private final int jobId;
-    private final EvaJob job;
+    private final EvaJob_OLD job;
     private final JSONObject jobOpts;
     private final StringBuffer output;
     private final JobManager jobMan;
 
-    EvaJobProcess(int jobId, EvaJob job, JSONObject jobOpts, JobManager jobMan) {
+    EvaJobProcess(int jobId, EvaJob_OLD job, JSONObject jobOpts, JobManager jobMan) {
         setStatus(Status.beforeStart);
         this.jobId = jobId;
         this.job = job;
         this.jobOpts = jobOpts;
         this.jobMan = jobMan;
 
-        if (jobOpts.has(Api.CMD)) {
-            jobOpts.remove(Api.CMD);
+        if (jobOpts.has(Api_OLD.CMD)) {
+            jobOpts.remove(Api_OLD.CMD);
         }
 
         output = new StringBuffer();
@@ -35,7 +35,7 @@ public class EvaJobProcess {
     public void start() {
         setStatus(Status.running);
         (new Thread(()->{
-            job.runJob(jobOpts, this);
+            job.runJob_OLD(jobOpts, this);
             setStatus(Status.finished);
         })).start();
     }
@@ -66,7 +66,7 @@ public class EvaJobProcess {
         return status;
     }
 
-    Api getJobApi() {
+    Api_OLD getJobApi() {
         return job;
     }
 
@@ -76,9 +76,9 @@ public class EvaJobProcess {
 
     public JSONObject toJson() {
         return F.obj(
-                Api.JOB_ID, jobId,
-                Api.JOB_OPTS, jobOpts,
-                Api.JOB_STATUS, getStatus().name()
+                Api_OLD.JOB_ID, jobId,
+                Api_OLD.JOB_OPTS, jobOpts,
+                Api_OLD.JOB_STATUS, getStatus().name()
         );
     }
 

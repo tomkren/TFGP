@@ -2,8 +2,8 @@ package net.fishtron.eva.multi;
 
 
 import net.fishtron.utils.AB;
+import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;
-import net.fishtron.utils.Log;
 import net.fishtron.utils.Stopwatch;
 
 import java.util.*;
@@ -22,8 +22,14 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
     private List<Indiv> terminators;
     private Indiv worstIndividual;
 
+    private Checker checker;
 
-    MultiPopulation(FitnessSignature fitnessSignature) {
+
+    MultiPopulation(MultiEvaOpts<Indiv> opts) {
+
+        FitnessSignature fitnessSignature = opts.getFitnessSignature();
+        checker = opts.getChecker();
+
         if (fitnessSignature.getNumFitnesses() == 0) {throw new Error("0-fitness error : isMaxis is empty.");}
 
         this.isMaxis = fitnessSignature.getIsMaximizationList();
@@ -52,11 +58,11 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
         //Indiv indiv = indivData._1();
         if (individuals.contains(indiv) || removedIndividuals.contains(indiv) || yetToBeEvaluated.contains(indiv)) {
             numUniqueCheckFails ++;
-            Log.it("  -> UniqueCheck failed, numUniqueCheckFails = "+numUniqueCheckFails);
+            log("  -> UniqueCheck failed, numUniqueCheckFails = "+numUniqueCheckFails);
             return false;
         }
 
-        Log.it("  -> New individual found!");
+        // log("  -> New individual found!");
         markYetToBeEvaluated(indiv);
         return true;
     }
@@ -136,7 +142,7 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
     void removeWorstIndividual() {
         boolean success = individuals.remove(worstIndividual);
         if (!success) {
-            Log.it("MISSING WORST INDIVIDUAL: "+worstIndividual);
+            log("MISSING WORST INDIVIDUAL: "+worstIndividual);
             throw new Error("Population dos not contain the worst individual.");
         }
         removedIndividuals.add(worstIndividual);
@@ -150,6 +156,9 @@ public class MultiPopulation<Indiv extends MultiIndiv> {
     }
 
 
+    private void log(Object x) {
+        checker.log(x);
+    }
 
 
     public int size() {

@@ -9,7 +9,7 @@ import java.io.File;
 import java.io.IOException;
 
 import net.fishtron.eva.simple.Logger;
-import net.fishtron.eva.simple.Evolution;
+import net.fishtron.eva.simple.SimpleEvolution;
 import net.fishtron.eva.simple.EvolutionOpts;
 import net.fishtron.eva.simple.AppTreeIndiv;
 import net.fishtron.utils.Checker;
@@ -40,7 +40,7 @@ public class GPML {
 
         Log.it("Config [OK] ...");
 
-        Evolution<AppTreeIndiv> eva = new Evolution<>(opts, dagLogger);
+        SimpleEvolution<AppTreeIndiv> eva = new SimpleEvolution<>(opts, dagLogger);
         eva.startIterativeEvolution(1);
 
         if (config.getBoolean("killServer")) {

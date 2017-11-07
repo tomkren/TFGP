@@ -1,4 +1,4 @@
-package net.fishtron.server;
+package net.fishtron.server.OLD;
 
 import net.fishtron.utils.F;
 import org.json.JSONArray;
@@ -6,9 +6,9 @@ import org.json.JSONObject;
 
 /**Created by tom on 20.03.2017.*/
 
-public interface Api {
+public interface Api_OLD {
 
-    JSONObject processApiCall(JSONArray path, JSONObject query);
+    JSONObject processApiCall_OLD(JSONArray path, JSONObject query);
 
 
     String CMD = "cmd";
@@ -38,8 +38,8 @@ public interface Api {
 
     static JSONObject error(String msg) {
         return F.obj(
-                Api.STATUS, Api.ERROR,
-                Api.MSG, msg
+                Api_OLD.STATUS, Api_OLD.ERROR,
+                Api_OLD.MSG, msg
         );
     }
 

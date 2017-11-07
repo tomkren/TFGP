@@ -1,7 +1,8 @@
-package net.fishtron.server;
+package net.fishtron.server.jobs;
 
 import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
+
 import org.json.JSONArray;
 
 import java.lang.reflect.Constructor;
@@ -9,21 +10,25 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Created by tom on 05.03.2017. */
+/** Created by Tomáš Křen on 13.12.2016. */
 
-class JobFactory {
+public class JobFactory {
 
     private final Map<String,AB<Class<? extends EvaJob>,Object>> jobClasses;
 
-    JobFactory() {
+    public JobFactory() {
         jobClasses = new HashMap<>();
     }
 
-    void addJobClass(String jobName, Class<? extends EvaJob> jobClass, Object initData) {
+    public void addJobClass(String jobName, Class<? extends EvaJob> jobClass, Object initData) {
         jobClasses.put(jobName, AB.mk(jobClass, initData));
     }
 
-    EvaJob mkJob(String jobName) {
+    public void addJobClass(String jobName, Class<? extends EvaJob> jobClass) {
+        addJobClass(jobName, jobClass, null);
+    }
+
+    public EvaJob mkJob(String jobName) {
 
         AB<Class<? extends EvaJob>,Object> jobClassData = jobClasses.get(jobName);
 
@@ -33,7 +38,6 @@ class JobFactory {
         Object initData = jobClassData._2();
 
         try {
-
             if (initData == null) {
                 Constructor<? extends EvaJob> jobConstructor = jobClass.getConstructor();
                 return jobConstructor.newInstance();
@@ -41,14 +45,22 @@ class JobFactory {
                 Constructor<? extends EvaJob> jobConstructor = jobClass.getConstructor(Object.class);
                 return jobConstructor.newInstance(initData);
             }
-
-
-        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+        } catch (NoSuchMethodException e) {
+            F.log("NoSuchMethodException: "+ e.getMessage());
+            return null;
+        } catch(InstantiationException e) {
+            F.log("InstantiationException: "+e.getMessage());
+            return null;
+        } catch (IllegalAccessException e) {
+            F.log("IllegalAccessException: "+e.getMessage());
+            return null;
+        } catch (InvocationTargetException e) {
+            F.log("InvocationTargetException: "+e.getMessage());
             return null;
         }
     }
 
-    JSONArray getJobNames() {
+    public JSONArray getJobNames() {
         return F.jsonMap(jobClasses.keySet());
     }
 

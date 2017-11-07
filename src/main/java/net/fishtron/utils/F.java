@@ -1,34 +1,145 @@
 package net.fishtron.utils;
 
-
-import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
+import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
+import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.net.URL;
+import java.net.URLConnection;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import org.apache.commons.io.IOUtils;
+
+/** Utility functions for everyday use. */
 
 public class F {
 
-    public static <A, B, C> Function<A, C> dot(Function<B, C> g, Function<A, B> f) {
-        return x -> g.apply(f.apply(x));
+    public enum DiffMode {before, after, both}
+
+    public static JSONObject jsonDiff(JSONObject before, JSONObject after, DiffMode mode) {
+        JSONObject diff = new JSONObject();
+        for (String key : Sets.union(before.keySet(), after.keySet())) {
+
+            Object before_val = before.opt(key);
+            Object after_val = after.opt(key);
+
+            if (before_val == null) {before_val = JSONObject.NULL;}
+            if (after_val  == null) {after_val  = JSONObject.NULL;}
+
+            String before_str = before_val.toString();
+            String after_str  = after_val.toString();
+
+            if (!before_str.equals(after_str)) {
+
+                switch (mode) {
+                    case before: diff.put(key, before_val); break;
+                    case after:  diff.put(key, after_val); break;
+                    case both:   diff.put(key, F.arr(before_val,after_val)); break;
+                    default: throw new Error("Unsupported diffMode '"+mode.name()+"'.");
+                }
+
+            }
+
+        }
+        return diff;
     }
 
     public static double prettyDouble(double x, int precision) {
         return BigDecimal.valueOf(x).setScale(precision, RoundingMode.HALF_UP).doubleValue();
     }
+
+    public static JSONObject getHttpJson(String urlStr) {
+        try {
+            URL url = new URL(urlStr);
+            URLConnection con = url.openConnection();
+            InputStream response = con.getInputStream();
+            String encoding = con.getContentEncoding();  // ** WRONG: should use "con.getContentType()" instead but it returns something like "text/html; charset=UTF-8" so this value must be parsed to extract the actual encoding
+            encoding = encoding == null ? "UTF-8" : encoding;
+            String jsonStr = IOUtils.toString(response, encoding);
+            return new JSONObject(jsonStr);
+        } catch (Exception e) {
+            throw new Error(e);
+        }
+    }
+
+    public static String jsonGet(JSONObject jsonObj, String key, String defaultVal) {
+        if (jsonObj.has(key)) {
+            Object val = jsonObj.get(key);
+            return val instanceof String ? (String) val : defaultVal;
+        } else {
+            return defaultVal;
+        }
+    }
+
+    public static int jsonGet(JSONObject jsonObj, String key, int defaultVal) {
+        if (jsonObj.has(key)) {
+            Object val = jsonObj.get(key);
+            return val instanceof Integer ? (int) val : defaultVal;
+        } else {
+            return defaultVal;
+        }
+    }
+
+    public static double jsonGet(JSONObject jsonObj, String key, double defaultVal) {
+        if (jsonObj.has(key)) {
+            Object val = jsonObj.get(key);
+            return val instanceof Double ? (double) val : defaultVal;
+        } else {
+            return defaultVal;
+        }
+    }
+
+    private static NumberFormat numberFormat =  new DecimalFormat("#0.00");
+    public static String fo(Double x) {
+        return numberFormat.format(x);
+    }
+
+    public static String fo(Date date) {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+    }
+
+    private static final Joiner logJoiner = Joiner.on(" ");
+
+    public static void log(Object... xs) {
+        //log_noln(xs); System.out.println();
+        System.out.println(logJoiner.join(xs));
+    }
+
+    public static void log_noln(Object... xs) {
+        System.out.print(logJoiner.join(xs));
+        /*for (Object x : xs) {
+            System.out.print(x+" ");
+        }*/
+    }
+
+    public static String readFile(String filename) {
+        try {
+            return Files.toString(new File(filename), Charsets.UTF_8);
+        } catch (IOException e) {
+            throw new Error(e);
+        }
+    }
+
+    public static <A, B, C> Function<A, C> dot(Function<B, C> g, Function<A, B> f) {
+        return x -> g.apply(f.apply(x));
+    }
+
 
     public static class ListResult <T> {
 
@@ -142,6 +253,10 @@ public class F {
         xs.forEach(f);
     }
 
+    public static <T> void each(T[] xs, Consumer<? super T> f) {
+        Arrays.stream(xs).forEach(f);
+    }
+
     public static void each(JSONArray xs, Consumer<? super Object> f) {
         F.map(xs,x->x).forEach(f);
     }
@@ -181,6 +296,15 @@ public class F {
             ret.put(key, f.apply(jsonObj.get(key)));
         }
         return ret;
+    }
+
+    public static <A> boolean or(Collection<A> xs, Function<A,Boolean> test) {
+        for (A x : xs) {
+            if (test.apply(x)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static <A,B> B foldr(List<A> xs, B z, BiFunction<A,B,B> f) {
@@ -231,15 +355,37 @@ public class F {
         return ret;
     }
 
-
     public static <T> List<T> sort(List<T> xs) {
         return xs.stream().sorted().collect(Collectors.toList());
     }
 
     public static <T> List<T> sort(Collection<T> xs, Function<T,Double> f) {
-        return xs.stream().sorted( (a,b)-> Double.compare(f.apply(a),f.apply(b)) ).collect(Collectors.toList());
+        return xs.stream().sorted(Comparator.comparingDouble(f::apply)).collect(Collectors.toList());
     }
 
+    public static <T> List<T> sortLong(Collection<T> xs, Function<T,Long> f) {
+        return xs.stream().sorted(Comparator.comparingLong(f::apply)).collect(Collectors.toList());
+    }
+
+    public static <T> Double median(Collection<T> xs, Function<T,Double> f) {
+        if (xs.isEmpty()) {
+            return null;
+        }
+        List<T> sorted = F.sort(xs, f);
+        int middle = sorted.size() / 2;
+        if (sorted.size() % 2 == 1) {
+            return f.apply(sorted.get(middle));
+        } else {
+            return (f.apply(sorted.get(middle-1)) + f.apply(sorted.get(middle))) / 2.0;
+        }
+    }
+
+    public static <T> Double mean(Collection<T> xs, Function<T,Double> f) {
+        if (xs.isEmpty()) {
+            return null;
+        }
+        return F.sum(xs, f) / xs.size();
+    }
 
     private static class ElemInfo<T> {
         public final int i;
@@ -276,7 +422,6 @@ public class F {
         return rearrange(xs, getRearrangeFun(byList, x -> x));
     }
 
-
     public static <T> List<T> filter(Collection<T> xs, Predicate<T> f) {
         return xs.stream().filter(f).collect(Collectors.toList());
     }
@@ -297,7 +442,6 @@ public class F {
         public List<T> getKO() {return ko;}
     }
 
-
     public static <T> T randomElement(List<T> xs, Random r) {
         return xs.get(r.nextInt(xs.size()));
     }
@@ -310,13 +454,10 @@ public class F {
         return randomElement(F.map(xs,x->x),r);
     }
 
-
-
     public static <T> T removeRandomElement(List<T> xs, Random r) {
         int i = r.nextInt(xs.size());
         return xs.remove(i);
     }
-
 
     public static <T> List<T> nTimes(int n, Supplier<T> f) {
         List<T> ret = new ArrayList<>(n);
@@ -334,6 +475,14 @@ public class F {
         return sum;
     }
 
+    public static <T> double sum(Collection<T> xs, Function<T,Double> f) {
+        double sum = 0;
+        for (T x : xs) {
+            sum += f.apply(x);
+        }
+        return sum;
+    }
+
     public static BigInteger sumBigInteger(List<BigInteger> xs) {
         BigInteger sum = BigInteger.ZERO;
         for (BigInteger x : xs) {
@@ -341,7 +490,6 @@ public class F {
         }
         return sum;
     }
-
 
     public static int sumInt(List<Integer> xs) {
         int sum = 0;
@@ -358,7 +506,6 @@ public class F {
         }
         return max;
     }
-
 
     public static <A> List<A> take(int n, List<A> xs) {
         int n_ = Math.min(n, xs.size());
@@ -410,7 +557,6 @@ public class F {
         int numZeros = Math.max(outputLength - iNumDigits, 0);
         return (i<0?"-":"") + Strings.repeat("0", numZeros) + Math.abs(i);
     }
-
 
     public static String underline(String str) {
         return underline(str, "-");
@@ -474,7 +620,7 @@ public class F {
             PrintWriter writer = new PrintWriter(filename, "UTF-8");
             writer.println(str);
             writer.close();
-            Log.it("File "+filename+" written..");
+            F.log("File "+filename+" written..");
         } catch (Exception e) {
             throw new Error(e);
         }
@@ -505,7 +651,6 @@ public class F {
         String jsonStr = Files.toString(new File(jsonPath), Charsets.UTF_8);
         return new JSONArray(jsonStr);
     }
-
 
     public static void writeJsonAsJsFile(String filename, String mkFunName, JSONObject json) {
         writeFile(filename,
@@ -588,20 +733,30 @@ public class F {
         return ret;
     }
 
+    public static JSONObject jsonMap(JSONObject json, Function<Object,Object> f) {
+        JSONObject ret = new JSONObject();
+        for (String key : json.keySet()) {
+            ret.put(key, f.apply(json.get(key)));
+        }
+        return ret;
+    }
+
     public static JSONArray concat(List<JSONArray> arrs) {
-
         JSONArray ret = new JSONArray();
-
         for (JSONArray arr : arrs) {
-
             for (int i = 0; i < arr.length(); i++) {
                 ret.put(arr.get(i));
             }
         }
-
         return ret;
     }
 
+    public static <A> List<A> concat(Collection<A> xs, Collection<A> ys) {
+        List<A> ret = new ArrayList<>(xs.size()+ys.size());
+        ret.addAll(xs);
+        ret.addAll(ys);
+        return ret;
+    }
 
     public static String prettyJson(Object json, Object indObj) {
         return prettyJson(json, 0, indObj);
@@ -673,29 +828,6 @@ public class F {
         } else {
             return "[\n"+Joiner.on(",\n").join(parts)+"\n"+indStr(actInd)+"]";
         }
-
-
-        /*if (indentationObj instanceof Integer) {
-            int ind = (int) indentationObj;
-            return json.toString(ind);
-        } else if (indentationObj instanceof JSONArray) {
-            JSONArray indArr = (JSONArray) indentationObj;
-
-            if (indArr.length() == 0) {
-                return json.toString();
-            } else {
-
-                int ind = (int) indArr.get(0);
-                JSONArray indArrRest = subArr(indArr, 1);
-
-                List<String> parts = F.map(json, x -> F.fillStr(ind," ") + prettyJson(x,indArrRest));
-
-                return  "[\n"+Joiner.on(",\n").join(parts)+"\n]";
-            }
-
-        } else {
-            return json.toString();
-        }*/
     }
 
     public static JSONArray subArr(JSONArray xs, int fromIncluded) {
@@ -705,8 +837,6 @@ public class F {
         }
         return ret;
     }
-
-
 
     public static int plus(int x,int y) {
         return x+y;

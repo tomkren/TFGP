@@ -1,8 +1,8 @@
-package net.fishtron.server.jobs;
+package net.fishtron.server.OLD.jobs;
 
-import net.fishtron.server.Api;
-import net.fishtron.server.EvaJob;
-import net.fishtron.server.EvaJobProcess;
+import net.fishtron.server.OLD.Api_OLD;
+import net.fishtron.server.OLD.EvaJob_OLD;
+import net.fishtron.server.OLD.EvaJobProcess;
 import net.fishtron.utils.AA;
 import net.fishtron.utils.F;
 import org.json.JSONArray;
@@ -12,13 +12,13 @@ import java.util.*;
 
 /** Created by tom on 05.03.2017. */
 
-public class Test implements EvaJob {
+public class Test implements EvaJob_OLD {
 
     private String lastLog;
     private EvaJobProcess jobProcess;
 
     @Override
-    public void runJob(JSONObject jobOpts, EvaJobProcess jobProcess) {
+    public void runJob_OLD(JSONObject jobOpts, EvaJobProcess jobProcess) {
 
         this.jobProcess = jobProcess;
 
@@ -38,16 +38,16 @@ public class Test implements EvaJob {
     }
 
     @Override
-    public JSONObject processApiCall(JSONArray path, JSONObject query) {
-        if (query.getString(Api.JOB_CMD).equals("lastLog")) {
+    public JSONObject processApiCall_OLD(JSONArray path, JSONObject query) {
+        if (query.getString(Api_OLD.JOB_CMD).equals("lastLog")) {
 
             jobProcess.log("Někdo chce last log tý vole.................");
-            return Api.ok("lastLog", getLastLog());
+            return Api_OLD.ok("lastLog", getLastLog());
 
         } else {
 
             jobProcess.log("Olol, někdo mi zavolal moje osobní Jobový apíčko, mě testovacího EvaJoba, jaká pocta!");
-            return Api.ok("you asked maaan", F.obj("path",path, "query",query));
+            return Api_OLD.ok("you asked maaan", F.obj("path",path, "query",query));
 
         }
     }

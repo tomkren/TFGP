@@ -16,7 +16,7 @@ import java.util.function.Function;
  */
 
 
-public class Evolution<Indiv extends FitIndiv> {
+public class SimpleEvolution<Indiv extends FitIndiv> {
 
     private EvolutionOpts<Indiv> opts;
     private Logger<Indiv> logger;
@@ -27,7 +27,7 @@ public class Evolution<Indiv extends FitIndiv> {
 
     private long startTime;
 
-    public Evolution(EvolutionOpts<Indiv> opts, Logger<Indiv> logger) {
+    public SimpleEvolution(EvolutionOpts<Indiv> opts, Logger<Indiv> logger) {
         this.opts = opts;
         this.logger = logger;
     }

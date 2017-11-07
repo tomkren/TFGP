@@ -1,8 +1,10 @@
 package net.fishtron.eva.compare;
 
+import net.fishtron.eva.Evolution;
 import net.fishtron.eva.Operator;
 import net.fishtron.eva.multi.MultiIndiv;
 import net.fishtron.eva.multi.MultiLogger;
+import net.fishtron.server.api.Api;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
 import org.json.JSONObject;
@@ -16,7 +18,7 @@ import java.util.List;
  *
  * */
 
-public class CompareEvolution<Indiv extends MultiIndiv> {
+public class CompareEvolution<Indiv extends MultiIndiv> implements Evolution {
 
     private CompareOpts<Indiv> opts;
     private MultiLogger<Indiv> logger;
@@ -31,6 +33,16 @@ public class CompareEvolution<Indiv extends MultiIndiv> {
     public CompareEvolution(CompareOpts<Indiv> opts, MultiLogger<Indiv> logger) {
         this.opts = opts;
         this.logger = logger;
+    }
+
+    @Override
+    public void startEvolution() {
+        start(1);
+    }
+
+    @Override
+    public Api getApi() {
+        return opts.getApi();
     }
 
     public void start() {
@@ -75,7 +87,7 @@ public class CompareEvolution<Indiv extends MultiIndiv> {
     private boolean isEvaluationUnfinished() {
         double runTimeInSeconds = (System.nanoTime()-startTime)/1E9;
         boolean stillSomeTime = opts.getTimeLimit() - runTimeInSeconds > 0.0;
-        return stillSomeTime && numEvaluations < opts.getNumEvaluations();
+        return stillSomeTime && numEvaluations < opts.getNumEvaluations() && !opts.getChecker().isStopRequested();
     }
 
 

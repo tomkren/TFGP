@@ -109,7 +109,7 @@ public class EvaSetup_GPML {
 
 
         opts = new BasicMultiEvaOpts<>(numEvaluations, numToGen, minPopToOperate, maxPopSize, timeLimit, sleepTime,
-                generator, fitnessSignature, evalManager, parentSelection, operators, checker);
+                generator, fitnessSignature, evalManager, parentSelection, operators, null, checker);
     }
 
     public MultiEvaOpts<AppTreeMI> getOpts() {

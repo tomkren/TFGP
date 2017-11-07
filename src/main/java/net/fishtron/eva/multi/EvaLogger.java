@@ -48,7 +48,9 @@ public class EvaLogger<Indiv extends MultiIndiv> implements MultiLogger<Indiv> {
         writeToFile("config.json", config.toString(2));
         evalsLogDir = mkDir("evals");
 
-        F.each(runSubdirNames, runSubdirName -> mkDir((String)runSubdirName));
+        if (runSubdirNames != null) {
+            F.each(runSubdirNames, runSubdirName -> mkDir((String) runSubdirName));
+        }
     }
 
     public String getRunDirPath() {
@@ -70,7 +72,9 @@ public class EvaLogger<Indiv extends MultiIndiv> implements MultiLogger<Indiv> {
         stdout("eval #"+ evalId); //+(opts==null ? "" : "/"+opts.getNumEvaluations()));
         //JSONObject bestInfo = logBest(evalId, evalResult); //todo
         stdout(" Evaluated individuals:");
-        stdout(F.map(evalResult.getIndividuals(), this::showIndivRow));
+        for (Indiv indiv : evalResult.getIndividuals()) {
+            stdout(showIndivRow(indiv));
+        }
 
         // to json file logging :
         JSONObject evalInfo = F.obj(

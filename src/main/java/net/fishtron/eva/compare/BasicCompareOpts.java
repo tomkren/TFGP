@@ -1,5 +1,6 @@
 package net.fishtron.eva.compare;
 
+import net.fishtron.server.api.Api;
 import net.fishtron.utils.Distribution;
 import net.fishtron.eva.IndivGenerator;
 import net.fishtron.eva.Operator;
@@ -23,6 +24,7 @@ public class BasicCompareOpts<Indiv extends MultiIndiv> implements CompareOpts<I
     private IndivGenerator<Indiv> generator;
     private CompareSelection<Indiv> parentSelection;
     private Distribution<Operator<Indiv>> operators;
+    private Api api;
     private Checker checker;
 
     public BasicCompareOpts(
@@ -32,6 +34,7 @@ public class BasicCompareOpts<Indiv extends MultiIndiv> implements CompareOpts<I
             IndivGenerator<Indiv> generator,
             CompareSelection<Indiv> parentSelection,
             Distribution<Operator<Indiv>> operators,
+            Api api, // may be null
             Checker checker) {
 
         this.compareFun = compareFun;
@@ -43,6 +46,7 @@ public class BasicCompareOpts<Indiv extends MultiIndiv> implements CompareOpts<I
         this.generator = generator;
         this.parentSelection = parentSelection;
         this.operators = operators;
+        this.api = api;
         this.checker = checker;
     }
 
@@ -57,5 +61,6 @@ public class BasicCompareOpts<Indiv extends MultiIndiv> implements CompareOpts<I
     @Override public CompareSelection<Indiv> getParentSelection() {return parentSelection;}
     @Override public Distribution<Operator<Indiv>> getOperators() {return operators;}
     @Override public Random getRandom() {return checker.getRandom();}
+    @Override public Api getApi() {return api;}
     @Override public Checker getChecker() {return checker;}
 }

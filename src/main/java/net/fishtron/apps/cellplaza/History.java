@@ -1,6 +1,7 @@
 package net.fishtron.apps.cellplaza;
 
 import net.fishtron.apps.cellplaza.shared.PlazaImg;
+import net.fishtron.apps.cellplaza.v2.CellPlaza;
 import net.fishtron.utils.F;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 
 class History {
 
-    private static String tileDir = "cellplaza/mini_10/cores";
+    private static String tileDir = CellPlaza.BASE_DIR + "/mini_10/cores";
 
     private final List<JSONObject> clickWinners;
     private final int numStates;

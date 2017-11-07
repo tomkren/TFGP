@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.server;
 import net.fishtron.eva.simple.EvaledPop;
 import net.fishtron.eva.simple.Logger;
 import net.fishtron.eva.simple.EvalResult;
-import net.fishtron.eva.simple.Evolution;
+import net.fishtron.eva.simple.SimpleEvolution;
 import net.fishtron.eva.simple.EvolutionOpts;
 import cz.tomkren.fishtron.sandbox2.JsonEvolutionOpts;
 import cz.tomkren.fishtron.terms.PolyTree;
@@ -18,7 +18,7 @@ public class EvolutionJob implements Logger<PolyTree> {
     private enum Status {beforeStart, running, finished};
 
 
-    private Evolution<PolyTree> eva;
+    private SimpleEvolution<PolyTree> eva;
     private EvolutionOpts<PolyTree> opts;
 
     private Status status;
@@ -35,7 +35,7 @@ public class EvolutionJob implements Logger<PolyTree> {
             opts = new JsonEvolutionOpts(jsonOpts).getDirectOpts();
             //Logger<PolyTree> logger = new Logger.Basic<>(opts);
 
-            eva = new Evolution<>(opts, this);
+            eva = new SimpleEvolution<>(opts, this);
 
         } catch (XmlRpcException e) {
             throw new Error(e);

@@ -1,5 +1,6 @@
 package net.fishtron.eva.compare;
 
+import net.fishtron.server.api.Api;
 import net.fishtron.utils.Distribution;
 import net.fishtron.eva.IndivGenerator;
 import net.fishtron.eva.Operator;
@@ -32,5 +33,7 @@ public interface CompareOpts<Indiv extends MultiIndiv> {
     Random getRandom();
 
     Checker getChecker();
+
+    Api getApi();
 
 }

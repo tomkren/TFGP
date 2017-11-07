@@ -4,6 +4,7 @@ import org.json.JSONObject;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class Checker {
 
@@ -18,6 +19,7 @@ public class Checker {
 
     private Consumer<Object> logFun;
     private Consumer<Object> logFun_noln;
+    private Supplier<Boolean> isStopRequestedFun;
 
 
     private StringBuilder errors;
@@ -31,9 +33,16 @@ public class Checker {
     }
 
     public Checker(Long seed, boolean silent) {
+        this(seed, silent, Log::it, Log::it_noln, null);
+    }
 
-        this.logFun = Log::it;
-        this.logFun_noln = Log::it_noln;
+
+
+    public Checker(Long seed, boolean silent, Consumer<Object> logFun, Consumer<Object> logFun_noln, Supplier<Boolean> isStopRequestedFun) {
+
+        this.logFun = logFun;
+        this.logFun_noln = logFun_noln;
+        this.isStopRequestedFun = isStopRequestedFun;
 
         sum = 0;
         ok = 0;
@@ -63,6 +72,18 @@ public class Checker {
 
     public void setLogFun(Consumer<Object> logFun) {
         this.logFun = logFun;
+    }
+
+    public void setIsStopRequestedFun(Supplier<Boolean> isStopRequestedFun) {
+        this.isStopRequestedFun = isStopRequestedFun;
+    }
+
+    public boolean isStopRequested() {
+        if (isStopRequestedFun == null) {
+            return false;
+        } else {
+            return isStopRequestedFun.get();
+        }
     }
 
     public void setLogFun_noln(Consumer<Object> logFun_noln) {
@@ -122,6 +143,12 @@ public class Checker {
         logFun.accept(o);
         return this;
     }
+
+    public Checker log_noln(Object o) {
+        logFun_noln.accept(o);
+        return this;
+    }
+
 
     public Checker it_noln(Object o) {
         logFun_noln.accept(o);

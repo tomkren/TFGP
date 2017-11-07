@@ -1,4 +1,4 @@
-package net.fishtron.server;
+package net.fishtron.server.OLD;
 
 import net.fishtron.utils.F;
 import net.fishtron.utils.Log;
@@ -32,41 +32,41 @@ public class JobManager {
         //todo
     }
 
-    void addJobClass(String jobName, Class<? extends EvaJob> jobClass, Object initData) {
+    void addJobClass(String jobName, Class<? extends EvaJob_OLD> jobClass, Object initData) {
         jobFactory.addJobClass(jobName, jobClass, initData);
     }
 
 
     JSONObject getJobsInfo() {
          JSONArray jobsArr = F.jsonMap(jobs.keySet(), this::getJobInfo);
-         return Api.ok(
-                 Api.JOBS, jobsArr,
-                 Api.JOB_NAMES, jobFactory.getJobNames()
+         return Api_OLD.ok(
+                 Api_OLD.JOBS, jobsArr,
+                 Api_OLD.JOB_NAMES, jobFactory.getJobNames()
          );
     }
 
     private JSONObject getJobInfo(int jobId) {
         EvaJobProcess jobProcess = jobs.get(jobId);
         if (jobProcess == null) {
-            return Api.error("There is no job with jobId "+jobId);
+            return Api_OLD.error("There is no job with jobId "+jobId);
         }
-        return Api.addOk(jobProcess.toJson());
+        return Api_OLD.addOk(jobProcess.toJson());
     }
 
     private JSONObject getJobLog(int jobId) {
         EvaJobProcess jobProcess = jobs.get(jobId);
         if (jobProcess == null) {
-            return Api.error("There is no job with jobId "+jobId);
+            return Api_OLD.error("There is no job with jobId "+jobId);
         }
         String logStr = jobProcess.getLog();
         JSONArray logLines = F.jsonMap(logStr.split("\\n"));
-        return Api.ok(
+        return Api_OLD.ok(
                 "log", logLines,
                 "jobId", jobId
         );
     }
 
-    public Api getJobApi(int jobId) {
+    public Api_OLD getJobApi(int jobId) {
         EvaJobProcess jobProcess = jobs.get(jobId);
         if (jobProcess == null) {
             return null;
@@ -76,26 +76,26 @@ public class JobManager {
 
 
     public JSONObject runJob(String jobName, JSONObject jobOpts) {
-        jobOpts.put(Api.JOB_NAME, jobName);
+        jobOpts.put(Api_OLD.JOB_NAME, jobName);
         return runJob(jobOpts);
     }
 
     public JSONObject runJob(JSONObject jobOpts) {
 
-        if (!jobOpts.has(Api.JOB_NAME)) {
-            return Api.error("Missing key: "+ Api.JOB_NAME);
+        if (!jobOpts.has(Api_OLD.JOB_NAME)) {
+            return Api_OLD.error("Missing key: "+ Api_OLD.JOB_NAME);
         }
 
-        Object jobNameObj = jobOpts.get(Api.JOB_NAME);
+        Object jobNameObj = jobOpts.get(Api_OLD.JOB_NAME);
         if (!(jobNameObj instanceof String)) {
-            return Api.error(Api.JOB_NAME +" must be a String.");
+            return Api_OLD.error(Api_OLD.JOB_NAME +" must be a String.");
         }
 
         String jobName = (String) jobNameObj;
-        EvaJob job = jobFactory.mkJob(jobName);
+        EvaJob_OLD job = jobFactory.mkJob(jobName);
 
         if (job == null) {
-            return Api.error("Unknown job: "+jobOpts.getString("job"));
+            return Api_OLD.error("Unknown job: "+jobOpts.getString("job"));
         }
 
         int jobId = nextJobId;
@@ -106,15 +106,15 @@ public class JobManager {
         jobs.put(jobId, newJobProcess);
         newJobProcess.start();
 
-        Log.it("New '"+jobName+"' job ["+ Api.JOB_ID +"="+jobId+"] successfully started.");
+        Log.it("New '"+jobName+"' job ["+ Api_OLD.JOB_ID +"="+jobId+"] successfully started.");
 
-        return Api.addOk(F.obj(Api.JOB_ID,jobId));
+        return Api_OLD.addOk(F.obj(Api_OLD.JOB_ID,jobId));
     }
 
 
     JSONObject runJob(JSONArray path, JSONObject query) {
         if (path.length() > 1) {
-            query.put(Api.JOB_NAME, path.get(1));
+            query.put(Api_OLD.JOB_NAME, path.get(1));
         }
         return runJob(query);
     }
@@ -134,36 +134,36 @@ public class JobManager {
             String idStr = path.getString(1);
             try {
                 int idInt = Integer.parseInt(idStr);
-                query.put(Api.JOB_ID, idInt);
+                query.put(Api_OLD.JOB_ID, idInt);
             } catch (NumberFormatException e) {
-                return Api.error(Api.JOB_ID +" in path must be an integer.");
+                return Api_OLD.error(Api_OLD.JOB_ID +" in path must be an integer.");
             }
         }
 
         if (path.length() > 2) {
             String jobCmdStr = path.getString(2);
-            query.put(Api.JOB_CMD, jobCmdStr);
+            query.put(Api_OLD.JOB_CMD, jobCmdStr);
         }
 
-        if (!query.has(Api.JOB_ID)) {
-            return Api.error("Missing key: "+ Api.JOB_ID);
+        if (!query.has(Api_OLD.JOB_ID)) {
+            return Api_OLD.error("Missing key: "+ Api_OLD.JOB_ID);
         }
 
-        Object jobIdObj = query.get(Api.JOB_ID);
+        Object jobIdObj = query.get(Api_OLD.JOB_ID);
         if (!(jobIdObj instanceof Integer)) {
-            return Api.error(Api.JOB_ID +" must be an integer.");
+            return Api_OLD.error(Api_OLD.JOB_ID +" must be an integer.");
         }
 
         int jobId = (int) jobIdObj;
 
-        if (query.has(Api.JOB_CMD) && query.has(Api.CMD) && query.get(Api.CMD).equals(Api.CMD_JOB)) {
+        if (query.has(Api_OLD.JOB_CMD) && query.has(Api_OLD.CMD) && query.get(Api_OLD.CMD).equals(Api_OLD.CMD_JOB)) {
             // instead of showing some job info we process jobCmd
             // e.g. when /job/1/someJobCmd was called.
             //      or   /job/1?{"jobCmd":"someJobCmd"}
             //      or   ?{"cmd":"job", "jobId":1, "jobCmd":"someJobCmd"}
-            Api jobApi = getJobApi(jobId);
-            if (jobApi == null) {return Api.error("There is no job with jobId "+jobId);}
-            return jobApi.processApiCall(path, query);
+            Api_OLD jobApi = getJobApi(jobId);
+            if (jobApi == null) {return Api_OLD.error("There is no job with jobId "+jobId);}
+            return jobApi.processApiCall_OLD(path, query);
         }
 
         return infoFun.apply(jobId);

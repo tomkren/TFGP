@@ -20,6 +20,11 @@ public interface MultiEvalResult<Indiv extends MultiIndiv> {
         return F.map(getEvalResult(), p -> p._2().getInt("id"));
     }
 
+    // meant to be overridden in evaluator
+    default int getNumRequestedIndividualsByEvaluator() {
+        return getIndividuals().size();
+    }
+
     default int getNumEvaluatedIndividuals() {
         return getIndividuals().size();
     }

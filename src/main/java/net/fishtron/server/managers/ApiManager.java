@@ -1,6 +1,10 @@
-package net.fishtron.server;
+package net.fishtron.server.managers;
+
+import net.fishtron.server.api.Api;
+import net.fishtron.server.api.ApiCmd;
 
 import net.fishtron.utils.F;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -8,35 +12,37 @@ import org.json.JSONObject;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
-/** Created by Tomáš Křen on 19.2.2017.*/
 
-class ApiManager implements Api {
+/** Created by sekol on 12.12.2016. */
+
+public class ApiManager implements Api, Manager {
 
     private final Map<String,Api> apiCmds;
+    private final Map<String,String> cmdManuals;
+    private final String version;
 
-
-    ApiManager(JobManager jobMan) {
+    public ApiManager(String version) {
         apiCmds = new HashMap<>();
-
-        addApiCmd(Api.CMD_RUN, jobMan::runJob);
-        addApiCmd(Api.CMD_JOB, jobMan::getJobInfo);
-        addApiCmd(Api.CMD_LOG, jobMan::getJobLog);
-        addApiCmd(Api.CMD_JOBS, jobMan::getJobsInfo);
+        cmdManuals = new HashMap<>();
+        this.version = version;
     }
 
-    private void addApiCmd(String cmdName, Api apiCmd) {
-        apiCmds.put(cmdName, apiCmd);
+    public void addApiCmds(List<ApiCmd> apiCmds) {
+        apiCmds.forEach(this::addApiCmd);
     }
 
-    private void addApiCmd(String cmdName, Supplier<JSONObject> apiCmd) {
-        addApiCmd(cmdName, (p,q) -> apiCmd.get());
+    private void addApiCmd(ApiCmd apiCmd) {
+        String cmdName = apiCmd.getName();
+        apiCmds.put(cmdName, apiCmd.getApiProcessor());
+        cmdManuals.put(cmdName, apiCmd.getManual());
+        F.log(" ADD cmd", cmdName, ":", apiCmd.getManual());
     }
 
 
-    JSONObject processRawApiCall(String path, String query) {
+    public JSONObject processRawApiCall(String path, String query) {
 
         String[] pathParts = path.split("/");
         JSONArray pathJson = F.jsonMap(F.filter(Arrays.asList(pathParts), x->!x.equals("")), x->x);
@@ -75,9 +81,9 @@ class ApiManager implements Api {
 
         if (path.length() > 0) {
             cmd = path.getString(0); // higher priority than cmd field in query
-            query.put(Api.CMD, cmd);   // and it overrides it, so we know that actual cmd is in the query
-        } else if (query.has(Api.CMD) && query.get(Api.CMD) instanceof String) {
-            cmd = query.getString(Api.CMD);
+            query.put(Api.KEY_cmd, cmd);   // and it overrides it, so we know that actual cmd is in the query
+        } else if (query.has(Api.KEY_cmd) && query.get(Api.KEY_cmd) instanceof String) {
+            cmd = query.getString(Api.KEY_cmd);
         }
 
         if (cmd != null) {
@@ -89,17 +95,23 @@ class ApiManager implements Api {
             }
         }
 
-        return F.obj(
-                Api.STATUS, Api.ERROR,
-                Api.MSG, "Unsupported command.",
-                "path", path,
-                "query", query
+        return Api.addError("Unsupported command.", F.obj("path",path, "query",query));
+    }
+
+
+    @Override
+    public String greetings() {
+        return "ApiManager, watching the requests for you, no problemo.";
+    }
+
+    private JSONObject mkIndexResponse() {
+        return Api.ok(
+                Api.KEY_msg, "Welcome to BrickSim API! :)",
+                Api.KEY_version, version,
+                Api.KEY_cmds, F.jsonMap(cmdManuals, x->x)
         );
     }
 
-    private static JSONObject mkIndexResponse() {
-        return Api.ok(Api.MSG, "Welcome to EvaServer API!");
-    }
 
     private static JSONObject mkUnexpectedErrorResponse(Exception e) {
         String msg = (e.getMessage() == null ? "" : " ... " + e.getMessage());

@@ -16,7 +16,7 @@ import java.util.Random;
 
 public class CellPlaza {
 
-    public static final String BASE_DIR = "cellplaza";
+    public static final String BASE_DIR = "eva/cellplaza";
     public static final String CONFIG_PATH = BASE_DIR + "/config.json";
 
     public static void main(String[] args) {

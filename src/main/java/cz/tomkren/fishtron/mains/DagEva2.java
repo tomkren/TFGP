@@ -3,7 +3,7 @@ package cz.tomkren.fishtron.mains;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import net.fishtron.eva.simple.Logger;
-import net.fishtron.eva.simple.Evolution;
+import net.fishtron.eva.simple.SimpleEvolution;
 import cz.tomkren.fishtron.sandbox2.JsonEvolutionOpts;
 import cz.tomkren.fishtron.terms.PolyTree;
 import cz.tomkren.fishtron.workflows.DagEvolutionLogger;
@@ -50,7 +50,7 @@ public class DagEva2 {
             Log.it("Config [OK] ...");
             Log.it("Generating initial population...");
 
-            Evolution<PolyTree> eva = new Evolution<>(opts, dagLogger);
+            SimpleEvolution<PolyTree> eva = new SimpleEvolution<>(opts, dagLogger);
 
             eva.startIterativeEvolution(1); // todo numRuns ??
 

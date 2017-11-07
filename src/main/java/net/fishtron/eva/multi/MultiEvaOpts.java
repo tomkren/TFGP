@@ -1,5 +1,6 @@
 package net.fishtron.eva.multi;
 
+import net.fishtron.server.api.Api;
 import net.fishtron.utils.Distribution;
 import net.fishtron.eva.IndivGenerator;
 import net.fishtron.eva.Operator;
@@ -36,6 +37,8 @@ public interface MultiEvaOpts<Indiv extends MultiIndiv> {
     MultiSelection<Indiv> getParentSelection();
     Distribution<Operator<Indiv>> getOperators();
     Random getRandom();
+
+    Api getApi();
 
     Checker getChecker();
 

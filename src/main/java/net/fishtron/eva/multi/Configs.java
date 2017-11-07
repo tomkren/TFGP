@@ -9,6 +9,8 @@ import java.util.function.BiFunction;
 
 /**Created by tom on 20.03.2017.*/
 
+// TODO sjednotit s net.fishtron.server.api;
+
 public class Configs {
 
     public static final String numEvaluations = "numEvaluations";

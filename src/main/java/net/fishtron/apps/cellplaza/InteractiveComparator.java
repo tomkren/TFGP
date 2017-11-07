@@ -6,7 +6,7 @@ import net.fishtron.apps.cellplaza.v2.Libs;
 import net.fishtron.apps.cellplaza.v2.Rule;
 import net.fishtron.eval.EvalLib;
 import net.fishtron.eva.multi.AppTreeMI;
-import net.fishtron.server.Api;
+import net.fishtron.server.api.Api;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;
@@ -86,11 +86,16 @@ public class InteractiveComparator implements Api {
 
         JSONObject result = comparedInivPairs.poll();
         int i = 0;
-        while (result == null) {
+        while (result == null && !ch.isStopRequested()) {
             if (i % 50 == 0) {ch.log("("+(i/50)+") Waiting for user to compare pair...");}
             F.sleep(sleepTime);
             result = comparedInivPairs.poll();
             i++;
+        }
+
+        if (result == null) {
+            // stopped manually
+            return true; // the result does not matter anyway, but todo, probably
         }
 
         indivPairsToCompare.remove(indivPair);
@@ -149,13 +154,13 @@ public class InteractiveComparator implements Api {
 
 
     static JSONObject mkInitializingResponse() {
-        return F.obj(Api.STATUS, "initializing");
+        return F.obj(Api.KEY_status, "initializing");
     }
 
 
     @Override
     public JSONObject processApiCall(JSONArray path, JSONObject query) {
-        String jobCmd = query.optString(Api.JOB_CMD, "WRONG FORMAT OR MISSING, MUST BE STRING");
+        String jobCmd = query.optString(Api.KEY_jobCmd, "WRONG FORMAT OR MISSING, MUST BE STRING");
         switch (jobCmd) {
 
             case CMD_GET_PAIR_TO_COMPARE: return api_getPairToCompare();
@@ -164,7 +169,7 @@ public class InteractiveComparator implements Api {
             case CMD_HISTORY_VERSION:     return Api.ok("version",history.getVersion());
             case CMD_ZOOM:                return api_zoom(query);
 
-            default: return Api.error("Unsupported " + Api.JOB_CMD + ": " + jobCmd);
+            default: return Api.error("Unsupported " + Api.KEY_jobCmd + ": " + jobCmd);
         }
     }
 
@@ -233,7 +238,7 @@ public class InteractiveComparator implements Api {
 
         history.addClickWinner(winnerFramePath, winnerFramePath1px, winnerId, loserId);
 
-        return Api.ok(MSG, "Thanks!");
+        return Api.ok(KEY_msg, "Thanks!");
     }
 
 

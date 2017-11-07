@@ -1,10 +1,11 @@
 package net.fishtron.eva.multi;
 
+import net.fishtron.eva.Evolution;
 import net.fishtron.eva.Operator;
+import net.fishtron.server.api.Api;
 import net.fishtron.utils.AB;
 import net.fishtron.utils.F;
 
-import net.fishtron.utils.Log;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import java.util.List;
 
 /** Created by tom on 07.03.2017. */
 
-public class MultiEvolution<Indiv extends MultiIndiv> {
+public class MultiEvolution<Indiv extends MultiIndiv> implements Evolution {
 
     private MultiEvaOpts<Indiv> opts;
     private MultiLogger<Indiv> logger;
@@ -26,6 +27,16 @@ public class MultiEvolution<Indiv extends MultiIndiv> {
     public MultiEvolution(MultiEvaOpts<Indiv> opts, MultiLogger<Indiv> logger) {
         this.opts = opts;
         this.logger = logger;
+    }
+
+    @Override
+    public void startEvolution() {
+        startIterativeEvolution(1);
+    }
+
+    @Override
+    public Api getApi() {
+        return opts.getApi();
     }
 
     public void startIterativeEvolution(int run) {
@@ -54,7 +65,7 @@ public class MultiEvolution<Indiv extends MultiIndiv> {
 
             if (evalResult.isEmpty()) {
 
-                Log.it_noln("=");
+                log_noln("=");
                 F.sleep(opts.getSleepTime());
 
             } else {
@@ -62,9 +73,9 @@ public class MultiEvolution<Indiv extends MultiIndiv> {
                 StringBuilder info = new StringBuilder();
                 updatePopulation(evalResult, info);
 
-                Log.it("\n\n--- Evolution Loop #"+loop_i+" ----------------------------------------------");
+                log("\n\n--- Evolution Loop #"+loop_i+" ----------------------------------------------");
                 logger.log(run, numEvaluatedIndividuals, evalResult);
-                Log.it("\n"+info.toString());
+                log("\n"+info.toString());
             }
 
             loop_i++;
@@ -78,7 +89,7 @@ public class MultiEvolution<Indiv extends MultiIndiv> {
     }
 
     private void makeEmptyPopulation() {
-        population = new MultiPopulation<>(opts.getFitnessSignature());
+        population = new MultiPopulation<>(opts);
         numSentIndividuals = 0;
         numEvaluatedIndividuals = 0;
     }
@@ -86,7 +97,7 @@ public class MultiEvolution<Indiv extends MultiIndiv> {
     private boolean isEvaluationUnfinished() {
         double runTimeInSeconds = (System.nanoTime()-startTime)/1E9;
         boolean stillSomeTime = opts.getTimeLimit() - runTimeInSeconds > 0.0;
-        return stillSomeTime && numEvaluatedIndividuals < opts.getNumEvaluations();
+        return stillSomeTime && numEvaluatedIndividuals < opts.getNumEvaluations() && !opts.getChecker().isStopRequested();
     }
 
     private boolean isGeneratingNeeded() {
@@ -95,7 +106,11 @@ public class MultiEvolution<Indiv extends MultiIndiv> {
 
 
     private void log(Object x) {
-        opts.getChecker().it(x);
+        opts.getChecker().log(x);
+    }
+
+    private void log_noln(Object x) {
+        opts.getChecker().log_noln(x);
     }
 
     private List<AB<Indiv,JSONObject>> generateIndividuals(MultiEvalResult<Indiv> evalResult) {
@@ -103,7 +118,7 @@ public class MultiEvolution<Indiv extends MultiIndiv> {
 
         int yetToGenerate = opts.getNumIndividualsToGenerate() - numSentIndividuals;
         int evaluatorCapabilities = evalResult == null ? opts.getEvalManager().getEvalPoolSize(yetToGenerate)
-                                                       : evalResult.getNumEvaluatedIndividuals();
+                                                       : evalResult.getNumRequestedIndividualsByEvaluator();
 
         int numToGenerate = opts.generateMaxOfCapabilitiesAndNeeds()
                           ? Math.max(evaluatorCapabilities, yetToGenerate)
@@ -138,12 +153,12 @@ public class MultiEvolution<Indiv extends MultiIndiv> {
 
         List<AB<Indiv,JSONObject>> children = new ArrayList<>();
 
-        int requestedByEvaluator = evalResult.getNumEvaluatedIndividuals();
+        int requestedByEvaluator = evalResult.getNumRequestedIndividualsByEvaluator();
         int yetToBeSent = opts.getNumEvaluations() - numSentIndividuals;
         int numChildren = Math.min(requestedByEvaluator, yetToBeSent);
 
         if (numChildren > 0) {
-            Log.it("MAKING LOVE in loop: " + loop_i+ "(numChildren="+numChildren+")");
+            log("MAKING LOVE in loop: " + loop_i+ "(numChildren="+numChildren+")");
         }
 
         while (children.size() < numChildren) {
@@ -153,7 +168,7 @@ public class MultiEvolution<Indiv extends MultiIndiv> {
 
             List<Indiv> chs = operator.operate(parents);
 
-            Log.it(" SelectedGenOp: "+operator.getOperatorInfo());
+            log(" SelectedGenOp: "+operator.getOperatorInfo());
 
             int neededToMakeYet = numChildren - children.size();
             chs = F.take(neededToMakeYet, chs);
