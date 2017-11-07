@@ -23,7 +23,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="jar-libs" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:21.0" level="project" />
     <orderEntry type="library" name="Maven: org.mongodb:mongodb-driver:3.4.2" level="project" />
     <orderEntry type="library" name="Maven: org.mongodb:bson:3.4.2" level="project" />
