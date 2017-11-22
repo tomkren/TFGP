@@ -40,6 +40,24 @@ public class Types {
         return new TypeTerm(Types.FUN_ARROW, argType, returnType);
     }
 
+    public static Type mk(Type... types) {
+        Type acc = types[types.length-1];
+        for (int i = types.length-2; i >= 0; i--) {
+            acc = mkFunType(types[i], acc);
+        }
+        return acc;
+    }
+
+    public static int countNumArgs(Type type) {
+        // todo not effective ..., two times check
+        if (isFunType(type)) {
+            AA<Type> parts = splitFunType(type);
+            return 1 + countNumArgs(parts._2());
+        } else {
+            return 0;
+        }
+    }
+
     public static List<Type> fromSyntaxSugar(List<Type> ts) {
         if (ts.size() == 3 && ts.get(1).equals(FUN_ARROW)) {
             return Arrays.asList(ts.get(1), ts.get(0), ts.get(2));
