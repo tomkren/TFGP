@@ -42,11 +42,20 @@ public class JobManager implements Manager {
         this.mongoMan = mongoMan;
     }
 
-    private static List<EvaJob.Config> getJobConfigsFromMongo(MongoManager mongoMan) {
-        return F.map(mongoMan.find("jobs"), o -> new EvaJob.Config((JSONObject)o));
+    public JobManager(JSONArray jobConfigsJson) {
+        this(getJobConfigsFromJson(jobConfigsJson));
     }
 
-    public JobManager(List<EvaJob.Config> jobConfigs) {
+    private static List<EvaJob.Config> getJobConfigsFromMongo(MongoManager mongoMan) {
+        return getJobConfigsFromJson(mongoMan.find("jobs"));
+    }
+
+    private static List<EvaJob.Config> getJobConfigsFromJson(JSONArray jobConfigsJson) {
+        if (jobConfigsJson == null) { return Collections.emptyList(); }
+        return F.map(jobConfigsJson, o -> new EvaJob.Config((JSONObject)o));
+    }
+
+    private JobManager(List<EvaJob.Config> jobConfigs) {
         this.jobConfigs = new ArrayList<>(jobConfigs);
         this.jobFactory = new JobFactory();
         this.jobContainers = new HashMap<>();

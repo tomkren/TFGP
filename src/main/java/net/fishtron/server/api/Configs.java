@@ -1,6 +1,7 @@
 package net.fishtron.server.api;
 
 import net.fishtron.utils.F;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -37,6 +38,25 @@ public class Configs {
                     return null;
                 }
                 return o.getJSONObject(key);
+            } else {
+                return defaultVal;
+            }
+        } catch (JSONException e) {
+            return defaultVal;
+        }
+    }
+
+    public static JSONArray get_JSONArray(JSONObject o, String key, JSONArray defaultVal) {
+        if (o == null) {
+            F.log("WARNING: NULL obj get_JSONObject warning");
+            return defaultVal;
+        }
+        try {
+            if (o.has(key)) {
+                if (o.get(key) == JSONObject.NULL) {
+                    return null;
+                }
+                return o.getJSONArray(key);
             } else {
                 return defaultVal;
             }

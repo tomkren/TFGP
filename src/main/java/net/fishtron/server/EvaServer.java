@@ -4,6 +4,7 @@ import net.fishtron.apps.cellplaza.CellEva;
 import net.fishtron.apps.cellplaza.CellEvaOpts;
 import net.fishtron.server.api.Api;
 import net.fishtron.server.api.ApiCmd;
+import net.fishtron.server.api.Configs;
 import net.fishtron.server.jobs.templates.TestFactorization;
 import net.fishtron.server.jobs.EvaJob;
 import net.fishtron.server.jobs.templates.TestTroll;
@@ -16,6 +17,7 @@ import net.fishtron.utils.F;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.servlet.ServletException;
@@ -35,13 +37,10 @@ import java.util.function.BiFunction;
  */
 public class EvaServer extends AbstractHandler implements Manager {
 
-    private static final String VERSION = "0.2.33b";
+    private static final String VERSION = "0.2.33c";
 
     private static final String KEY_port = "port";
-
-    /*private static JSONObject defaultConfig = F.obj(
-            KEY_port, 4224
-    );*/
+    private static final String KEY_jobConfigs = "jobConfigs";
 
     private static JSONObject loadConfig() {
 
@@ -72,7 +71,9 @@ public class EvaServer extends AbstractHandler implements Manager {
         managers.add(this);
 
 
-        jobMan = new JobManager(Collections.emptyList());
+        JSONArray jobConfigsJson = Configs.get_JSONArray(config, KEY_jobConfigs, F.arr());
+
+        jobMan = new JobManager(jobConfigsJson);
         managers.add(jobMan);
 
         apiMan = new ApiManager(VERSION);
