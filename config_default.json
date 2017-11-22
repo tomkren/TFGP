@@ -1,0 +1,12 @@
+{
+  "port" : 4224,
+  "mysql" : null,
+  "mongo" : null,
+  "jobConfigs": [
+    {
+      "_id" : "foolship", "jobName" : "EvolutionJob",
+      "delay" : 0, "period" : null, "scheduleOnStartup" : true,
+      "opts" : {"setup" : "foolship", "evalTime" : 20}
+    }
+  ]
+}

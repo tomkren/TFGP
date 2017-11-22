@@ -1,12 +1,16 @@
 package net.fishtron.server;
 
+import net.fishtron.apps.cellplaza.CellEva;
+import net.fishtron.apps.cellplaza.CellEvaOpts;
 import net.fishtron.server.api.Api;
 import net.fishtron.server.api.ApiCmd;
 import net.fishtron.server.jobs.templates.TestFactorization;
 import net.fishtron.server.jobs.EvaJob;
+import net.fishtron.server.jobs.templates.TestTroll;
 import net.fishtron.server.managers.ApiManager;
 import net.fishtron.server.managers.JobManager;
 import net.fishtron.server.managers.Manager;
+import net.fishtron.utils.Either;
 import net.fishtron.utils.F;
 
 import org.eclipse.jetty.server.Request;
@@ -17,10 +21,10 @@ import org.json.JSONObject;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -31,13 +35,31 @@ import java.util.function.BiFunction;
  */
 public class EvaServer extends AbstractHandler implements Manager {
 
-    private static final String VERSION = "0.2.33";
+    private static final String VERSION = "0.2.33b";
 
-    public static final String KEY_port = "port";
+    private static final String KEY_port = "port";
 
-    private static JSONObject defaultConfig = F.obj(
-            KEY_port, 2342
-    );
+    /*private static JSONObject defaultConfig = F.obj(
+            KEY_port, 4224
+    );*/
+
+    private static JSONObject loadConfig() {
+
+        String configPath = "config.json";
+        String defaultConfigPath = "config_default.json";
+
+        try {
+            if (new File(configPath).exists()) {
+                return F.tryLoadJson(configPath);
+            } else if (new File(defaultConfigPath).exists()) {
+                return F.tryLoadJson(defaultConfigPath);
+            } else {
+                throw new Error("Missing both '" + configPath + "' and '" + defaultConfigPath + "' config files.");
+            }
+        } catch (IOException e) {
+            throw new Error("Unable to load config, probably parsing error: "+e.getMessage());
+        }
+    }
 
     private final Server server;
     private final ApiManager apiMan;
@@ -132,7 +154,7 @@ public class EvaServer extends AbstractHandler implements Manager {
         handleRequest(baseRequest, request, apiMan::processRawApiCall, response);
     }
 
-    public static void handleRequest(Request baseRequest,
+    private static void handleRequest(Request baseRequest,
                                      HttpServletRequest request,
                                      BiFunction<String,String,JSONObject> processRawApiCall,
                                      HttpServletResponse response)
@@ -152,16 +174,38 @@ public class EvaServer extends AbstractHandler implements Manager {
         response.getWriter().println(jsonResponse.toString());
     }
 
-    public static void addHeaders(HttpServletResponse response) {
+    private static void addHeaders(HttpServletResponse response) {
         response.addHeader("Access-Control-Allow-Origin", "*");
         response.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
         response.addHeader("Access-Control-Allow-Headers", "X-Unity-Version, X-PINGOTHER, Origin, X-Requested-With, Content-Type, Accept");
         response.addHeader("Access-Control-Max-Age", "1728000");
     }
 
+    private void addJobClasses() {
+
+        //Fishtron:
+        jobMan.addJobClass(EvolutionJob.getJobName(), EvolutionJob.class);
+        jobMan.addJobClass("CellplazaJob", EvolutionJob.class); // todo : Temporary hax for JobView handling in frontend
+
+        //Test:
+        jobMan.addJobClass(TestFactorization.getJobName(), TestFactorization.class);
+        jobMan.addJobClass(TestTroll.getJobName(), TestTroll.class);
+
+        // OLD CellPlaza: // todo get rid of ...
+        Either<CellEvaOpts,JSONObject> cellEvaOpts = CellEvaOpts.mkDefault();
+        if (cellEvaOpts.isOK()) {
+            jobMan.addJobClass(CellEva.getJobName(), CellEva.class, cellEvaOpts.getOK());
+        } else {
+            F.log("!!! ERROR LOADING CellEvaOpts: "+ cellEvaOpts.getKO().toString());
+        }
+    }
+
     private static void runServer() {
-        EvaServer evaServer = new EvaServer(defaultConfig);
-        evaServer.addJobClass(TestFactorization.getJobName(), TestFactorization.class);
+        EvaServer evaServer = new EvaServer(loadConfig());
+
+        /*evaServer.addJobClass(TestFactorization.getJobName(), TestFactorization.class);*/
+        evaServer.addJobClasses();
+
         evaServer.startEvaServer();
     }
 
