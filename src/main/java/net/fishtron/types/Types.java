@@ -40,6 +40,10 @@ public class Types {
         return new TypeTerm(Types.FUN_ARROW, argType, returnType);
     }
 
+    public static Type mkTerm(Type... args) {
+        return new TypeTerm(args);
+    }
+
     public static Type mk(Type... types) {
         Type acc = types[types.length-1];
         for (int i = types.length-2; i >= 0; i--) {

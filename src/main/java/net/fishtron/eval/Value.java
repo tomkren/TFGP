@@ -12,7 +12,7 @@ public interface Value extends EvalCode {
     Object getValue();
 
     @Override
-    default Object evalCode(Leaf leaf, Function<AppTree,Object> eval) {
+    default Object evalCode(Leaf leaf, Function<AppTree,Object> eval, int numArgs) {
         return getValue();
     }
 }

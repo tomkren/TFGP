@@ -130,7 +130,7 @@ public class TypeMulExperiments {
 
     public static class PokusImg implements EvalCode {
         @Override
-        public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun) {
+        public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun, int numArgs) {
             return getImageWidth(leaf.getType());
         }
     }

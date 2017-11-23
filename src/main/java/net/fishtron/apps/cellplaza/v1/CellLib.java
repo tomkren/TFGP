@@ -281,7 +281,7 @@ public class CellLib {
 
     private static class BitRule implements EvalCode {
         @Override
-        public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun) {
+        public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun, int numArgs) {
             JSONArray bits = leaf.getParams().toJson().getJSONArray("bits");
             return Rule.fromBits(bits);
         }

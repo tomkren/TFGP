@@ -53,7 +53,13 @@ class FoolshipLib {
 
     static LibPackage mkLibPack(JSONObject jobConfigOpts) {
 
-        Type TreeDNA = Types.parse("TreeDNA");
+        Type TreeInput = Types.parse("TreeInput");
+
+        Type List = Types.parse("List");
+        Type TreeCmd = Types.parse("TreeCmd");
+        Type CmdList = Types.mkTerm(List, TreeCmd);
+
+        Type TreeProgram = Types.mk(TreeInput, CmdList);
 
         Type Angle = Types.parse("Angle");
         Type Ratio = Types.parse("Ratio");
@@ -71,7 +77,7 @@ class FoolshipLib {
 
 
         Gamma gamma = Gamma.mk(
-                basicTreeProgram, Types.mk(UseSaveRatio, ConsumeGiveRatio, ConsumeGiveRatio, Angle, Angle, TreeDNA),
+                basicTreeProgram, Types.mk(UseSaveRatio, ConsumeGiveRatio, ConsumeGiveRatio, Angle, Angle, TreeProgram),
                 useSaveRatio, UseSaveRatio,
                 consumeGiveRatio, ConsumeGiveRatio,
                 ratio, Ratio,
@@ -93,14 +99,13 @@ class FoolshipLib {
                 angle, F.obj(DEFAULT_PARAM_NAME, F.arr( 0, 23, 45, 60,  90, 120, 135, 150, 180, 200, 225, 250, 270, 300, 315, 340))
         );
 
-        return new LibPackage(TreeDNA, gamma, evalLib, allParamsInfo);
+        return new LibPackage(TreeProgram, gamma, evalLib, allParamsInfo);
     }
 
 
     private static class ReflexiveJsonLeaf implements EvalCode {
         @Override
-        public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun) {
-            int numArgs = Types.countNumArgs( leaf.getType() );
+        public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun, int numArgs) {
             return mkValue(numArgs, leaf.getSym());
         }
         private static Object mkValue(int numArgs, Object acc) {
@@ -116,14 +121,14 @@ class FoolshipLib {
 
     private static class ReflexiveJsonParam implements EvalCode {
         @Override
-        public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun) {
+        public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun, int numArgs) {
             return leaf.getParams().toJson().get(DEFAULT_PARAM_NAME);
         }
     }
 
     private static class SimpleDNA implements EvalCode {
         @Override
-        public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun) {
+        public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun, int numArgs) {
             return leaf.getParams().toJson();
         }
     }

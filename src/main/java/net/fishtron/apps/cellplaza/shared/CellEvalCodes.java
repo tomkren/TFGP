@@ -12,14 +12,14 @@ public class CellEvalCodes {
 
     public static class SeedImg implements EvalCode {
         @Override
-        public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun) {
+        public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun, int numArgs) {
             return leaf.getParams().toJson().getString("filename");
         }
     }
 
     public static class NumSteps implements EvalCode {
         @Override
-        public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun) {
+        public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun, int numArgs) {
             return leaf.getParams().toJson().getInt("n");
         }
     }

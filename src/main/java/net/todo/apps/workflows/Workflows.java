@@ -192,7 +192,7 @@ public class Workflows {
     }
 
     private static EvalCode mkMethod(String name) {
-        return (leaf,eval) -> {
+        return (leaf,eval, numArgs) -> {
             Type type = leaf.getType();
             Params params = leaf.getParams();
             AA<Type> p = getDagInOutTypes(type);

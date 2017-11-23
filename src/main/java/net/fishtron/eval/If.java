@@ -12,7 +12,7 @@ public class If implements EvalCode {
 
 
     @Override
-    public Object evalCode(Leaf leaf, Function<AppTree,Object> eval) {
+    public Object evalCode(Leaf leaf, Function<AppTree,Object> eval, int numArgs) {
 
         return (Function<Boolean,LazyFunObject>) p ->
             p ? (LazyFunObject) (a_tree -> (LazyFunObject) (b_tree -> eval.apply(a_tree)))
@@ -31,7 +31,7 @@ public class If implements EvalCode {
             } else {
                 return x;
             }
-        });
+        }, 0);
 
         Function<Object,Object> if1fun = (Function<Object,Object>) if1val;
 

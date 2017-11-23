@@ -21,7 +21,7 @@ public class EvalLib {
         for (AB<String,Object> def : defs) {
             String sym = def._1();
             Object val = def._2();
-            EvalCode code = (val instanceof EvalCode) ? (EvalCode) val : (l,e) -> val;
+            EvalCode code = (val instanceof EvalCode) ? (EvalCode) val : (l,e,n) -> val;
             codes.put(sym, code);
         }
     }
@@ -94,18 +94,22 @@ public class EvalLib {
     }
 
     public Object eval(AppTree tree) {
+        return eval_(tree, 0);
+    }
+
+    private Object eval_(AppTree tree, int numArgs) {
 
         if (tree instanceof Leaf) {
-            return eval_leaf((Leaf) tree);
+            return eval_leaf((Leaf) tree, numArgs);
         } else if (tree instanceof App) {
-            return eval_app((App) tree);
+            return eval_app((App) tree, numArgs);
         } else {
             throw new Error("Unsupported AppTree implementation: "+tree.getClass());
         }
 
     }
 
-    private Object eval_leaf(Leaf leaf) {
+    private Object eval_leaf(Leaf leaf, int numArgs) {
         String sym = leaf.getSym();
         EvalCode code = codes.get(sym);
 
@@ -113,16 +117,16 @@ public class EvalLib {
             throw new Error("Undefined symbol "+sym+".");
         }
 
-        return code.evalCode(leaf/*.getParams(), leaf.getType()*/, this::eval);
+        return code.evalCode(leaf, tree -> eval_(tree, 0), numArgs);
     }
 
     @SuppressWarnings("unchecked")
-    private Object eval_app(App app) {
+    private Object eval_app(App app, int numArgs) {
 
         AppTree funTree = app.getFunTree();
         AppTree argTree = app.getArgTree();
 
-        Object funObject = eval(funTree);
+        Object funObject = eval_(funTree, numArgs+1);
 
         if (funObject instanceof LazyFunObject) {
 
@@ -131,7 +135,7 @@ public class EvalLib {
 
         } else {
 
-            Object argObject = eval(argTree);
+            Object argObject = eval_(argTree, 0);
             Function<Object,Object> fun = (Function<Object,Object>) funObject;
             return fun.apply(argObject);
 
