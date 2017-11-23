@@ -7,6 +7,7 @@ import net.fishtron.utils.AB;
 import net.fishtron.utils.Checker;
 import net.fishtron.utils.Either;
 import net.fishtron.utils.F;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.*;
@@ -38,7 +39,9 @@ public class FoolshipEvalManager extends ServerEvalManager {
     @Override
     protected JSONObject mkIndivDataToSubmit(Object indivValue, int id) {
 
-        if (indivValue instanceof JSONObject) {
+        // TODO potenciálně může bejt i string ("one symbol implementation")
+
+        if (indivValue instanceof JSONObject || indivValue instanceof JSONArray) {
 
             return F.obj(
                     KEY_treeID, id,
@@ -47,7 +50,7 @@ public class FoolshipEvalManager extends ServerEvalManager {
             );
 
         } else {
-            throw new Error("indiv supposed to be JSONObject. toString ="+ indivValue.toString());
+            throw new Error("indiv supposed to be JSONObject or JSONArray. toString ="+ indivValue.toString());
         }
     }
 

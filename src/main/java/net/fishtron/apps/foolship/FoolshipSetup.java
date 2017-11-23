@@ -5,11 +5,9 @@ import net.fishtron.eva.Operator;
 import net.fishtron.eva.multi.*;
 import net.fishtron.eva.multi.operators.AppTreeMIGenerator;
 import net.fishtron.eva.multi.operators.MultiGenOpFactory;
-import net.fishtron.eval.EvalLib;
+import net.fishtron.eval.LibPackage;
 import net.fishtron.gen.Gen;
 import net.fishtron.server.api.Configs;
-import net.fishtron.trees.Gamma;
-import net.fishtron.types.Type;
 import net.fishtron.utils.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -39,16 +37,16 @@ public class FoolshipSetup implements MultiEvaSetup {
         int sleepTime = 1000;
 
         // Building parts
-        ABC<EvalLib,Gamma,Type> libGammaGoal = FoolshipLib.mkLibGammaGoal(jobConfigOpts);
-        EvalLib evalLib = libGammaGoal._1();
-        Gamma gamma = libGammaGoal._2();
-        Type goal = libGammaGoal._3();
-        JSONObject allParamsInfo = FoolshipLib.mkAllParamsInfo();
+        LibPackage libPack = FoolshipLib.mkLibPack(jobConfigOpts);
+        //EvalLib evalLib          = libPack.getEvalLib();
+        //Gamma gamma              = libPack.getGamma();
+        //Type goal                = libPack.getGoal();
+        //JSONObject allParamsInfo = libPack.getAllParamsInfo();
 
         // Generating
-        Gen gen = new Gen(gamma, checker); //TODO replace with: Gen.fromJson(generatorDumpPath, gamma, checker)
+        Gen gen = new Gen(libPack.getGamma(), checker); //TODO replace with: Gen.fromJson(generatorDumpPath, gamma, checker)
         int generatingMaxTreeSize = 32;
-        IndivGenerator<AppTreeMI> generator = new AppTreeMIGenerator(goal, generatingMaxTreeSize, gen, allParamsInfo);
+        IndivGenerator<AppTreeMI> generator = new AppTreeMIGenerator(libPack.getGoal(), generatingMaxTreeSize, gen, libPack.getAllParamsInfo());
 
         // Operators
         JSONArray operatorsConfig = F.arr(
@@ -56,13 +54,13 @@ public class FoolshipSetup implements MultiEvaSetup {
                 F.obj("name","sameSizeSubtreeMutation", "probability",0.3, "maxSubtreeSize",32),
                 F.obj("name","oneParamMutation", "probability",0.3, "shiftsWithProbabilities",F.arr(F.arr(-2,0.1), F.arr(-1, 0.4), F.arr(1, 0.4), F.arr(2, 0.1)))
         );
-        Distribution<Operator<AppTreeMI>> operators = MultiGenOpFactory.mkOperators(operatorsConfig, checker.getRandom(), gen, allParamsInfo);
+        Distribution<Operator<AppTreeMI>> operators = MultiGenOpFactory.mkOperators(operatorsConfig, checker.getRandom(), gen, libPack.getAllParamsInfo());
 
         // Evaluation
         double evalTime = Configs.get_double(jobConfigOpts, "evalTime", 30);
         int preferredBufferSize = Configs.get_int(jobConfigOpts, "preferredBufferSize", 32);
         FitnessSignature fitnessSignature = new FitnessSignature(F.arr(F.arr("max","performance")));
-        FoolshipEvalManager evalManager = new FoolshipEvalManager(evalLib, checker, evalTime, preferredBufferSize);
+        FoolshipEvalManager evalManager = new FoolshipEvalManager(libPack.getEvalLib(), checker, evalTime, preferredBufferSize);
 
         // Selection
         double tournamentBetterWinsProbability = 0.8;

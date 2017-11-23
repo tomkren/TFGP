@@ -2,13 +2,13 @@ package net.fishtron.apps.foolship;
 
 import net.fishtron.eval.EvalCode;
 import net.fishtron.eval.EvalLib;
+import net.fishtron.eval.LibPackage;
 import net.fishtron.gen.Gen;
 import net.fishtron.trees.AppTree;
 import net.fishtron.trees.Gamma;
 import net.fishtron.trees.Leaf;
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
-import net.fishtron.utils.ABC;
 import net.fishtron.utils.Checker;
 import net.fishtron.utils.F;
 import org.json.JSONObject;
@@ -26,7 +26,7 @@ class FoolshipLib {
 
     private static final String simpleDNA = "simpleDNA";
 
-    static JSONObject mkAllParamsInfo() {
+    private static JSONObject mkAllParamsInfo() {
         return F.obj(
                 simpleDNA, F.obj(
                         KEY_splitLeafAngle1, F.arr( 0, 23, 45, 60,  90, 120, 135, 150, 180, 200, 225, 250, 270, 300, 315, 340),
@@ -35,7 +35,7 @@ class FoolshipLib {
         );
     }
 
-    static ABC<EvalLib,Gamma,Type> mkLibGammaGoal(JSONObject config) {
+    static LibPackage mkLibGammaGoal_old(JSONObject jobConfigOpts) {
 
         Type TreeDNA = Types.parse("TreeDNA");
 
@@ -47,59 +47,48 @@ class FoolshipLib {
                 simpleDNA, new SimpleDNA()
         );
 
-        return ABC.mk(evalLib, gamma, TreeDNA);
-    }
-
-    public static class LibPackage {
-        public final Type goal;
-        public final Gamma gamma;
-        public final EvalLib evalLib;
-        public final JSONObject allParamsInfo;
-
-        public LibPackage(Type goal, Gamma gamma, EvalLib evalLib, JSONObject allParamsInfo) {
-            this.goal = goal;
-            this.gamma = gamma;
-            this.evalLib = evalLib;
-            this.allParamsInfo = allParamsInfo;
-        }
-
-        @Override
-        public String toString() {
-            return "LibPackage{" +
-                    "goal=" + goal +
-                    ", gamma=" + gamma +
-                    ", evalLib=" + evalLib +
-                    ", allParamsInfo=" + allParamsInfo +
-                    '}';
-        }
+        return new LibPackage(TreeDNA, gamma, evalLib, mkAllParamsInfo());
     }
 
 
-    static LibPackage mkLibGammaGoal_new() {
+    static LibPackage mkLibPack(JSONObject jobConfigOpts) {
 
         Type TreeDNA = Types.parse("TreeDNA");
 
         Type Angle = Types.parse("Angle");
         Type Ratio = Types.parse("Ratio");
 
+        Type UseSaveRatio = Types.parse("UseSaveRatio");
+        Type ConsumeGiveRatio = Types.parse("ConsumeGiveRatio");
+
+
         String basicTreeProgram = "basicTreeProgram";
         String ratio = "ratio";
         String angle = "angle";
 
+        String useSaveRatio = "useSaveRatio";
+        String consumeGiveRatio = "consumeGiveRatio";
+
 
         Gamma gamma = Gamma.mk(
-                basicTreeProgram, Types.mk(Ratio, Ratio, Ratio, Angle, Angle, TreeDNA),
+                basicTreeProgram, Types.mk(UseSaveRatio, ConsumeGiveRatio, ConsumeGiveRatio, Angle, Angle, TreeDNA),
+                useSaveRatio, UseSaveRatio,
+                consumeGiveRatio, ConsumeGiveRatio,
                 ratio, Ratio,
                 angle, Angle
         );
 
         EvalLib evalLib = EvalLib.mk(
                 basicTreeProgram, new ReflexiveJsonLeaf(),
-                ratio, new ReflexiveJsonParam(),
-                angle, new ReflexiveJsonParam()
+                useSaveRatio,     new ReflexiveJsonParam(),
+                consumeGiveRatio, new ReflexiveJsonParam(),
+                ratio,            new ReflexiveJsonParam(),
+                angle,            new ReflexiveJsonParam()
         );
 
         JSONObject allParamsInfo = F.obj(
+                useSaveRatio,     F.obj(DEFAULT_PARAM_NAME, F.arr(0.8)),
+                consumeGiveRatio, F.obj(DEFAULT_PARAM_NAME, F.arr(0.25)),
                 ratio, F.obj(DEFAULT_PARAM_NAME, F.arr(0, 0.25, 0.5, 0.8, 1)),
                 angle, F.obj(DEFAULT_PARAM_NAME, F.arr( 0, 23, 45, 60,  90, 120, 135, 150, 180, 200, 225, 250, 270, 300, 315, 340))
         );
@@ -143,22 +132,21 @@ class FoolshipLib {
     public static void main(String[] args) {
         Checker ch = new Checker();
 
-        LibPackage lp = mkLibGammaGoal_new();
+        LibPackage lp = mkLibPack(null);
         F.log(lp, "\n");
 
-        Type t = lp.gamma.getSymbols().get(0)._2();
+        Type t = lp.getGamma().getSymbols().get(0)._2();
         F.log(t+" has "+ Types.countNumArgs(t)+" args.");
 
 
-        Gen gen = new Gen(lp.gamma, ch);
+        Gen gen = new Gen(lp.getGamma(), ch);
 
         for (int i = 0; i<10; i++) {
-            AppTree tree = gen.genOne(6, lp.goal).randomizeParams(lp.allParamsInfo, ch.getRandom());
+            AppTree tree = gen.genOne(6, lp.getGoal()).randomizeParams(lp.getAllParamsInfo(), ch.getRandom());
             F.log(tree);
-            Object value = lp.evalLib.eval(tree);
 
+            Object value = lp.getEvalLib().eval(tree);
             F.log(value);
-
         }
 
 
