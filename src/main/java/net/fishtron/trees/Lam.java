@@ -127,6 +127,11 @@ public class Lam implements AppTree {
     }
 
     @Override
+    public String toString() {
+        return showLambdaFun(varName, bodyTree.toString());
+    }
+
+    @Override
     public String toRawString() {
         return showLambdaFun(varName, bodyTree.toRawString());
     }

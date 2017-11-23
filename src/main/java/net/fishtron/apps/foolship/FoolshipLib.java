@@ -6,13 +6,16 @@ import net.fishtron.eval.LibPackage;
 import net.fishtron.gen.Gen;
 import net.fishtron.trees.AppTree;
 import net.fishtron.trees.Gamma;
+import net.fishtron.trees.GammaSym;
 import net.fishtron.trees.Leaf;
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
-import net.fishtron.utils.Checker;
-import net.fishtron.utils.F;
+import net.fishtron.utils.*;
 import org.json.JSONObject;
 
+
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -20,22 +23,22 @@ import java.util.function.Function;
  */
 class FoolshipLib {
 
+    /*
     private static final String KEY_splitLeafAngle1 = "splitLeafAngle1";
     private static final String KEY_splitLeafAngle2 = "splitLeafAngle2";
-
-
     private static final String simpleDNA = "simpleDNA";
+    */
 
-    private static JSONObject mkAllParamsInfo() {
+    /*private static JSONObject mkAllParamsInfo() {
         return F.obj(
                 simpleDNA, F.obj(
                         KEY_splitLeafAngle1, F.arr( 0, 23, 45, 60,  90, 120, 135, 150, 180, 200, 225, 250, 270, 300, 315, 340),
                         KEY_splitLeafAngle2, F.arr(10, 33, 55, 66, 100, 122, 145, 170, 190, 235, 255, 280, 305, 325)
                 )
         );
-    }
+    }*/
 
-    static LibPackage mkLibGammaGoal_old(JSONObject jobConfigOpts) {
+    /*static LibPackage mkLibGammaGoal_old(JSONObject jobConfigOpts) {
 
         Type TreeDNA = Types.parse("TreeDNA");
 
@@ -48,7 +51,7 @@ class FoolshipLib {
         );
 
         return new LibPackage(TreeDNA, gamma, evalLib, mkAllParamsInfo());
-    }
+    }*/
 
 
     static LibPackage mkLibPack(JSONObject jobConfigOpts) {
@@ -126,12 +129,14 @@ class FoolshipLib {
         }
     }
 
+    /*
     private static class SimpleDNA implements EvalCode {
         @Override
         public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun, int numArgs) {
             return leaf.getParams().toJson();
         }
     }
+    */
 
 
     public static void main(String[] args) {
@@ -140,17 +145,45 @@ class FoolshipLib {
         LibPackage lp = mkLibPack(null);
         F.log(lp, "\n");
 
-        Type t = lp.getGamma().getSymbols().get(0)._2();
+
+
+        Gamma gamma_basic = lp.getGamma();
+        Type goal_basic = lp.getGoal();
+        EvalLib evalLib_basic = lp.getEvalLib();
+
+        List<String> suggestedVarNames = Collections.singletonList("info");
+
+        ABCD<Type, Gamma, Function<AppTree, AppTree>,List<GammaSym>> gammaRes = gamma_basic.mkGammaWithGoalTypeVars(goal_basic, suggestedVarNames);
+
+        Type goal = gammaRes._1();
+        Gamma gamma = gammaRes._2();
+        Function<AppTree, AppTree> addLambdas = gammaRes._3();
+        List<GammaSym> varList = gammaRes._4();
+
+        EvalLib evalLib_vars = new EvalLib(F.map(varList, var -> AB.mk(var.getSym(), new ReflexiveJsonLeaf())));
+        EvalLib evalLib = EvalLib.union(evalLib_basic, evalLib_vars);
+
+        Type t = gamma.getSymbols().get(0)._2();
         F.log(t+" has "+ Types.countNumArgs(t)+" args.");
 
+        Function<Object,Object> addJsonLambdas = acc -> {
+            for (int i = varList.size()-1; i >= 0; i--) {
+                acc = F.obj(varList.get(i).getSym(), acc);
+            }
+            return acc;
+        };
 
-        Gen gen = new Gen(lp.getGamma(), ch);
+        Gen gen = new Gen(gamma, ch);
 
         for (int i = 0; i<10; i++) {
-            AppTree tree = gen.genOne(6, lp.getGoal()).randomizeParams(lp.getAllParamsInfo(), ch.getRandom());
-            F.log(tree);
+            AppTree tree = gen.genOne(7, goal).randomizeParams(lp.getAllParamsInfo(), ch.getRandom());
 
-            Object value = lp.getEvalLib().eval(tree);
+            AppTree treeWithLams = addLambdas.apply(tree);
+
+            F.log(treeWithLams);
+
+            Object value = evalLib.eval(tree);
+            value = addJsonLambdas.apply(value);
             F.log(value);
         }
 

@@ -16,7 +16,7 @@ public class EvalLib {
 
     private Map<String,EvalCode> codes;
 
-    private EvalLib(List<AB<String,Object>> defs) {
+    public EvalLib(List<AB<String,Object>> defs) {
         codes = new HashMap<>();
         for (AB<String,Object> def : defs) {
             String sym = def._1();

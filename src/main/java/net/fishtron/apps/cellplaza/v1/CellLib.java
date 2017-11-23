@@ -1,5 +1,6 @@
 package net.fishtron.apps.cellplaza.v1;
 
+import net.fishtron.trees.GammaSym;
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
 import net.fishtron.apps.cellplaza.shared.CellEvalCodes;
@@ -27,8 +28,8 @@ public class CellLib {
         Checker ch = new Checker();
 
         //testBitVersion(ch);
-        testBitVersion_2(ch);
-        //testSimpleVarVersion(ch);
+        //testBitVersion_2(ch);
+        testSimpleVarVersion(ch);
 
         ch.results();
     }
@@ -77,7 +78,7 @@ public class CellLib {
 
         int k_max = 64;
 
-        ABC<Type,Gamma,Function<AppTree,AppTree>> res = simpleVarGamma.mkGammaWithGoalTypeVars(simpleVarGoal, inputVarNames);
+        ABCD<Type,Gamma,Function<AppTree,AppTree>,List<GammaSym>> res = simpleVarGamma.mkGammaWithGoalTypeVars(simpleVarGoal, inputVarNames);
         Type newGoal   = res._1();
         Gamma newGamma = res._2();
         Function<AppTree,AppTree> addLams = res._3();

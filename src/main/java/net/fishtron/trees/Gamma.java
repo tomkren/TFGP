@@ -4,14 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import net.fishtron.utils.*;
 import org.json.JSONArray;
 
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
-import net.fishtron.utils.AB;
-import net.fishtron.utils.ABC;
-import net.fishtron.utils.F;
-import net.fishtron.utils.TODO;
 
 
 /**  Created by user on 31. 1. 2017. */
@@ -41,7 +38,7 @@ public class Gamma {
     }
 
 
-    public ABC<Type,Gamma,Function<AppTree,AppTree>> mkGammaWithGoalTypeVars(Type goalType, List<String> varNames) {
+    public ABCD<Type,Gamma,Function<AppTree,AppTree>,List<GammaSym>> mkGammaWithGoalTypeVars(Type goalType, List<String> varNames) {
 
         AB<List<Type>,Type> p = Types.fullSplitFunType(goalType);
         List<Type> argTypes = p._1();
@@ -77,7 +74,7 @@ public class Gamma {
 
         Gamma newGamma = new Gamma(newSymList);
         Function<AppTree,AppTree> addLambdasFun = bodyTree -> addLambdas(varList, bodyTree);
-        return ABC.mk(newGoalType, newGamma, addLambdasFun);
+        return ABCD.mk(newGoalType, newGamma, addLambdasFun, varList);
     }
 
     private static AppTree addLambdas(List<GammaSym> varList, AppTree bodyTree) {
