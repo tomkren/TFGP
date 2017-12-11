@@ -37,7 +37,7 @@ import java.util.function.BiFunction;
  */
 public class EvaServer extends AbstractHandler implements Manager {
 
-    private static final String VERSION = "0.2.34d";
+    private static final String VERSION = "0.2.35";
 
     private static final String KEY_port = "port";
     private static final String KEY_jobConfigs = "jobConfigs";
