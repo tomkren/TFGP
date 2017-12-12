@@ -1,5 +1,7 @@
 /config.json
 
+/configs/multi_gpml/GPML_generator_dump.json
+
 /test_outputs/
 /cellplaza/
 
