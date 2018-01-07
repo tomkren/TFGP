@@ -480,6 +480,9 @@ to kulminuje v hodící se funkci subs, která pro danej dotaz (k,tau) vrátí s
 In this paper we present a novel tree generating method for strongly typed genetic programming using a type system with parametric polymorphism. Our method is capable of uniform generating suitable both for a population initialization and a mutation operation. In order to perform this task effectively, the method utilizes type normalization and caching using dynamic programming. We concentrate on a deeper description of theoretical and technical aspects of our method to show its connection with logic programming. The method is demonstrated, analyzed and experimentally evaluated on a simple problem.
 
 
+
+
+
 \chapter{Generating}
 
 \section{General notions}
@@ -1101,6 +1104,292 @@ $ \op{weakSubs}(\tau_g) \defi \{ \sigma_g \mid \inhab{\sigma_g(\tau_g)} \}$
 \begin{preLemma} 
 $ \subs{\tau_g}{1} = \{ \sigma_g \mid (s,\tau_s) \in \Gamma, \sigma_g = \MGU{\tau_g}{\tau^\mathit{fresh}_s}  \} $
 \end{preLemma} 
+
+
+
+\chapter{Hindley-Milner type system}
+
+V 0.1
+
+\newcommand{\letin}[3]{\op{let}#1 = #2 \op{in} #3}
+\newcommand{\W}{\op{\textbf{W}}}
+\newcommand{\Mgu}{\op{\textbf{MGU}}}
+\newcommand{\where}{\op{\textbf{where~}}}
+
+
+\section{Introduction}
+
+\red{Why Hindley-Milner (= simplified system F capable of type inference in curry style)}
+
+
+\section{Language of type expressions}
+
+\red{Explain simple types and type schemes.}
+
+\section{Type substitutions}
+
+\red{definition} ; \red{informally explain: makes a type more specific} ; \red{as function} ; \red{can be composed by $\circ$}
+
+\section{Contexts}
+\red{building symbols}
+
+\red{def $\Gamma_x$} ; \red{def $\overline{\Gamma}(\tau)$}
+
+
+
+
+\section{Inference rules}
+
+
+\section{Hindley-Milner algorithm W}
+
+The Hindley-Milner algorithm $\W$ is used for type inference.
+Loosely speaking, we give to $\W$ as an input 
+a \textit{program expression} $e$ without type information 
+and it returns a \textit{type} $\tau$ of that expression as a result, 
+or it tells us that the expression cannot be typed correctly.
+
+From this simplified point of view we may see the algorithm usage as:
+
+(1) We have an expression $e$, for which we would like to know the type. 
+
+So we run $\W$ on $e$ and we may either get as a result:
+
+(2a) a type $\tau$, so we know that $e$ has type $\tau$,
+
+(2b) or the \textit{fail result} $\bot$ (usually called \textit{bottom}), so we know there is a type error inside $e$.
+
+~   
+
+The first simplification of this description lies in that we have omitted 
+the typing contexts (the "Gammas"). 
+All the inference rules deal with \textit{judgments} of the form:
+
+$$\Gamma \vdash e : \tau$$
+
+And so does the $\W$ algorithm.
+If $e$ is the top-level program expression,
+we can think of a context $\Gamma$ as a collection of type information about the "library"
+in which the program expression $e$ is written.
+Or, if $e$ is some local sub-expression, then its $\Gamma$ contains also type information about
+all the local variables defined in its scope.
+
+We can think of a judgment of the form $\Gamma \vdash e : \tau$ as: 
+\textit{From the building symbols described in the typing context $\Gamma$ we can build 
+a well-typed program expression $e$ which has type $\tau$.}
+Therefore it makes sense to provide a typing context $\Gamma$ to the $\W$ algorithm as another argument: $\W(\Gamma, e)$.
+
+But $\W$ algorithm is even stronger: We may use libraries for which we do not know the proper typing information yet.
+
+For example consider the following expression $e$:
+
+$$ \lambda x . ((+~((+~x)~1))~x) $$
+
+Or, in a more readable fashion, $e = \lambda x . (x+1)+x $.
+
+
+And let's pretend that the only thing we know is that $1 : \op{Int}$, 
+but we don't know the type of $+$. 
+$\W$ can deal with this situation and infer that $e$ has type $Int \ar Int$ and
+that $+$ has type $Int \ar Int \ar Int$. This can be achieved by calling $\W$ with
+typing context $\Gamma = \{ 1 : \op{Int}, + : \alpha \}$, 
+where $\alpha$ is a \textit{type variable}.
+
+But if the only result of the $\W(\Gamma,e)$ is the type $\tau$ of $e$, 
+how we get the information about the inferred type of $+$? 
+Well, $\W$ actually returns a pair $(S, \tau)$, where $S$ is a substitution
+containing the rest of the inferred type information. 
+More specifically, $S(\alpha) = Int \ar Int \ar Int$.  
+
+Now we can state the behavior of the $\W$ algorithm more formally:
+
+~
+
+Given context $\Gamma$ and expression $e$ the Hindley-Milner algorithm $\W$ 
+is looking for the substitution $S$ and type $\tau$ such that: 
+$$ S(\Gamma) \vdash e : \tau $$
+If there are no such $S$ and $\tau$, then the $\W$ algorithm fails.
+But if there are any, $\W$ finds the most general $S$ a $\tau$.
+
+\newcommand{\SPr}{S^\prime}
+
+\begin{align*}
+\W(\Gamma, e) = &
+\begin{cases*}
+  (S, \tau) 
+  & \textbf{if} there is any $\SPr$ and $\tauPr$ such that $S^\prime(\Gamma) \vdash e : \tauPr$  \\
+  \bot & \textbf{otherwise}
+\end{cases*}\\
+\end{align*}
+
+
+
+
+\subsection{Definition of W algorithm}
+
+Here we present a recursive definition of $\W$ algorithm based on case analysis of all possible patterns that program expression $e$ may have 
+(i.e. $e$ may be a \textit{variable}, an \textit{application}, an \textit{abstraction}, or a \textit{let-expression}). 
+
+~
+
+\textbf{(1)} Expression $e$ is a \textit{variable}; $e = x$:
+
+\begin{align*}
+\W(\Gamma, x) \defi ~ &
+\begin{cases*}
+  (\{\}, R(\tauPr) ) 
+  & \textbf{if} $(x : \forall \alpha_1 \dots \alpha_n.\tauPr) \in \Gamma$  \\
+  \bot & \textbf{otherwise}
+\end{cases*}\\
+\where & R = \{\alpha_1 \mapsto \beta_1, \dots, \alpha_n \mapsto \beta_n\} \\
+\end{align*}
+
+
+\textbf{(2)} Expression $e$ is an \textit{application}; $e = (e_1~e_2)$:
+
+\begin{align*}
+\W(\Gamma, (e_1~e_2)) \defi ~ & 
+\begin{cases*}
+  (R \circ S_2 \circ S_1, R(\beta) ) & \textbf{if} $R \neq \bot$ \\
+  \bot & \textbf{if} $R = \bot$
+\end{cases*}\\
+\where & (S_1, \tau_1) = \W(\Gamma, e_1), \\
+       & (S_2, \tau_2) = \W(S_1(\Gamma), e_2), \\
+       & R = \Mgu( S_2(\tau_1), \tau_2 \ar \beta ).\\
+\end{align*}
+
+
+\textbf{(3)} Expression $e$ is an \textit{abstraction}; $e = \lambda x . e_1$:
+
+\begin{align*}
+\W(\Gamma, \lambda x .e_1) \defi ~ & (S_1, S_1(\beta) \ar \tau_1 ) \\
+\where & (S_1, \tau_1) = \W(\Gamma_x, x : \beta ~;~ e_1). \\
+\end{align*}
+
+
+
+\textbf{(4)} Expression $e$ is a \textit{let-expression}; $e = (\letin{x}{e_1}{e_2})$:
+
+\begin{align*}
+\W(\Gamma, \letin{x}{e_1}{e_2}) \defi ~ & (S_2 \circ s_1, \tau_2) \\
+\where & (S_1, \tau_1) = \W(\Gamma, e_1), \\
+       & (S_2, \tau_2) = \W(S_1(\Gamma_x),x:\overline{(S_1(\Gamma))}(\tau_1); e_2). \\
+\end{align*}
+
+\subsection{Example run of W algorithm}
+\red{todo}
+
+
+\subsection{Correctness and completeness of W}
+
+~
+
+\textbf{Correctness of $\W$}:
+
+If $\W(\Gamma, e) = (S, \tau)$, then exist derivation of the judgment $S(\Gamma) \vdash e : \tau$.
+
+~
+
+\textbf{Completeness of $\W$}:
+
+Let $\Gamma$ be a context and $e$ a program expression,
+and let $\SPr$ be a substitution and $\tauPr$ a type such that:
+$ \SPr(\Gamma) \vdash e : \tauPr $, 
+then:
+
+(1) $\W(\Gamma,e)$ succeeds (i.e. $\W(\Gamma,e) \neq \bot$), 
+let $\W(\Gamma,e) = (S, \tau)$,
+
+(2) there is a substitution $R$ such that $\SPr = R \circ S$ 
+and $R\overline{(S(\Gamma))}(\tau) \sqsupseteq \tauPr$. 
+
+~ 
+
+The correctness theorem states that if $\W$ finds a solution, then the solution is correct.
+The first part of the completeness theorem, states that if there is a solution, then $\W$ finds one. And the second part formally states that the found solution $(S,\tau)$ is the most general one, by comparing it with an arbitrary solution $(\SPr,\tauPr)$. The substitution $R$ acts as a witness of the fact that we can obtain $\SPr$ by making $S$ more specific ($\SPr = R \circ S$).  
+
+~
+
+\section{Unification algorithm}
+\red{todo: some comment}
+
+\Pseudokod{Algorithm finding the most general unification.}
+{\textbf{MGU}($\tau_1$, $\tau_2$)}{
+	
+	$result = \{\}$ \;
+	$agenda \la [(\tau_1$, $\tau_2)]$ \;	
+	$isOK \la True$ \;
+
+	\;	
+	
+	\While {agenda not empty $\wedge$ isOK}{
+		$(\tau_a, \tau_b) \la agenda.removeFirst()$ \;
+		$isOK = \textbf{process}(\tau_a, \tau_b, agenda, result)$			
+	}
+	\;
+	
+	\If {$isOK$} {
+		\Return $result$
+	} \Else {
+		\Return $\bot$				
+	}
+	
+}{mguAlg}
+
+\Pseudokod{Processes one type pair.}
+{\textbf{process}($\tau_1$, $\tau_2, agenda, result$)}{
+	\;
+	\If {$\tau_1$ and $\tau_2$ are the same \textbf{TypeVar}} {
+		\Return $True$
+	} \;
+
+	\If {$\tau_1$ and $\tau_2$ are the same \textbf{TypeSym}} {
+		\Return $True$
+	} \;
+
+	\If {$\tau_1$ and $\tau_2$ are both \textbf{TypeTerm} with the same length} {
+		$agenda.addAll(zip(\tau_1.args(), \tau_2.args()))$ \;
+		\Return $True$
+	} \;
+	
+	\If {$\tau_1$ is a \textbf{TypeVar}} {
+		\Return $\textbf{processTypeVar}(\tau_1$, $\tau_2, agenda, result)$
+	} \;
+	
+	\If {$\tau_2$ is a \textbf{TypeVar}} {
+		\Return $\textbf{processTypeVar}(\tau_2$, $\tau_1, agenda, result)$
+	} \;	
+	
+	\Return $False$
+	
+}{mguAlgProcess}
+
+\Pseudokod{Processes one $var \mapsto type$ binding.}
+{\textbf{processTypeVar}($var, type, agenda, result$)}{
+	\;
+	
+	\If {$type$ contains $var$} {
+		\Return $False$
+	} \;
+
+	$S \la \{var \mapsto type \}$\;\;
+
+	\For {$entry$ in $result$} {
+		$(v \mapsto \tau) \la entry$ \;
+		$entry.setValue( S(\tau) )$
+	} \;
+
+	\For {$entry$ in $agenda$} {
+		$(\tau_1, \tau_2) \la entry$ \;
+		$entry.setValue( S(\tau_1), S(\tau_2) )$
+	} \;
+
+	
+	$result.add(var \mapsto type)$ \;\;
+	
+	\Return $True$
+	
+}{mguAlgProcessTypeVar}
 
 
 
