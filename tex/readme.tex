@@ -1109,12 +1109,13 @@ $ \subs{\tau_g}{1} = \{ \sigma_g \mid (s,\tau_s) \in \Gamma, \sigma_g = \MGU{\ta
 
 \chapter{Hindley-Milner type system}
 
-V 0.1
+V 0.2
 
-\newcommand{\letin}[3]{\op{let}#1 = #2 \op{in} #3}
+\newcommand{\letin}[3]{\texttt{let} \, #1 = #2 \, \texttt{in} \, #3}
 \newcommand{\W}{\op{\textbf{W}}}
 \newcommand{\Mgu}{\op{\textbf{MGU}}}
 \newcommand{\where}{\op{\textbf{where~}}}
+\newcommand{\SPr}{S^\prime}
 
 
 \section{Introduction}
@@ -1211,7 +1212,6 @@ $$ S(\Gamma) \vdash e : \tau $$
 If there are no such $S$ and $\tau$, then the $\W$ algorithm fails.
 But if there are any, $\W$ finds the most general $S$ a $\tau$.
 
-\newcommand{\SPr}{S^\prime}
 
 \begin{align*}
 \W(\Gamma, e) = &
@@ -1229,6 +1229,12 @@ But if there are any, $\W$ finds the most general $S$ a $\tau$.
 
 Here we present a recursive definition of $\W$ algorithm based on case analysis of all possible patterns that program expression $e$ may have 
 (i.e. $e$ may be a \textit{variable}, an \textit{application}, an \textit{abstraction}, or a \textit{let-expression}). 
+
+~
+
+\red{need to comment the need for fresh type variables $\beta$s}
+
+\red{need to comment that when sub call fail, then also the calling computation fails}
 
 ~
 
@@ -1271,26 +1277,128 @@ Here we present a recursive definition of $\W$ algorithm based on case analysis 
 \textbf{(4)} Expression $e$ is a \textit{let-expression}; $e = (\letin{x}{e_1}{e_2})$:
 
 \begin{align*}
-\W(\Gamma, \letin{x}{e_1}{e_2}) \defi ~ & (S_2 \circ s_1, \tau_2) \\
+\W(\Gamma, \letin{x}{e_1}{e_2}) \defi ~ & (S_2 \circ S_1, \tau_2) \\
 \where & (S_1, \tau_1) = \W(\Gamma, e_1), \\
        & (S_2, \tau_2) = \W(S_1(\Gamma_x),x:\overline{(S_1(\Gamma))}(\tau_1); e_2). \\
 \end{align*}
 
 \subsection{Example run of W algorithm}
+
+We demonstrate $\W$ algorithm on simple example which contains all four possible forms of expressions as sub-expressions:
+$$\letin{x}{\lambda x . x}{f~f}$$
+
+All the contained program variables
+($f$ and $x$) are locally defined variables, so we don't need to provide any further type
+information, therefore we call $\W$ with an empty typing context $\Gamma = \emptyset$. 
+
+$$\W(\emptyset, \letin{f}{\lambda x . x}{f~f})$$
+
+The expression matches the case \textbf{(4)}:
+\begin{align*}
+\W(\emptyset, \letin{f}{\lambda x . x}{f~f}) \defi ~ & (S_2 \circ S_1, \tau_2) \\
+\where & (S_1, \tau_1) = \W(\emptyset, \lambda x . x), \\
+       & (S_2, \tau_2) = \W(S_1(\emptyset_f),f:\overline{(S_1(\emptyset))}(\tau_1); f~f).
+\end{align*}
+
+So we need to first compute the type (and substitution) of the $e_1 = \lambda x . x$, matching the case \textbf{(3)}:
+\begin{align*}
+\W(\emptyset, \lambda x .x) \defi ~ & (S_1, S_1(\beta_1) \ar \tau_1 ) \\
+\where & (S_1, \tau_1) = \W(\{x : \beta_1 \}~,~ x).
+\end{align*}
+
+Finally we get to the first variable (case \textbf{(1)}), thus we will get our first result.
+\begin{align*}
+\W(\{x : \beta_1 \}~,~ x) \defi ~ & ( \{\}, R(\beta_1) ) \where  R = \{\} \\
+                              = ~ & ( \{\}, \beta_1 )
+\end{align*}
+
+Because $x$ has type $\beta_1$ in the context $\{x : \beta_1\}$, and $\beta_1$ has no universally quantified prefix head, the substitution $R$ is empty, therefore identity. With this information we can get back to computation of $\W(\emptyset, \lambda x .x)$ and finish it. 
+\begin{align*}
+\W(\emptyset, \lambda x . x) \defi ~ & (S_1, S_1(\beta_1) \ar \tau_1 ) \where (S_1, \tau_1) = ( \{\}, \beta_1 ) \\
+ = ~ & (\{\}, \{\}(\beta_1) \ar \beta_1 ) = (\{\}, \beta_1 \ar \beta_1 )
+\end{align*}
+
+By this we have finished the first recursive call in computation of \\
+$\W(\emptyset, \letin{f}{\lambda x . x}{f~f})$. So we can compute the second recursive call:
+\begin{align*}
+& \W(S_1(\emptyset_f),f:\overline{(S_1(\emptyset))}(\tau_1); f~f) \where (S_1, \tau_1) = (\{\}, \beta_1 \ar \beta_1 ) \\
+= & \W(\{\}(\emptyset_f),f:\overline{(\{\}(\emptyset))}(\beta_1 \ar \beta_1); f~f) \\
+= & \W(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}; f~f)
+\end{align*}
+
+Now wee need to compute the type of expression $(f~f)$ which is an application (case \textbf{(2)}) from typing context $\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}$, specifying that $f$ has type of the \textit{polymorphic} identity. 
+\begin{align*}
+\W(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}; f~f) \defi ~ & 
+(R \circ S_2 \circ S_1, R(\beta_?) ) \\
+\where & (S_1, \tau_1) = \W(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}, f), \\
+       & (S_2, \tau_2) = \W(S_1(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}), f), \\
+       & R = \Mgu( S_2(\tau_1), \tau_2 \ar \beta_? ).\\
+\end{align*}
+
+You can see $\beta_?$ which is used to signify that it is not obvious what index the new fresh variable will have, since the two recursive calls to $\W$ may produce some new fresh variables before $\beta_?$ is introduced. Actually both calls produce one new type variable, thus $\beta_?$ will be $\beta_4$, as we will see.
+\begin{align*}
+\W(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}, f) \defi ~ & (\{\}, R(\beta_1 \ar \beta_1) ) 
+~ \where R = \{\beta_1 \mapsto \beta_2\} \\
+= ~ &  (\{\}, \beta_2 \ar \beta_2)
+\end{align*}
+
+Now we can continue with the second call:
+\begin{align*}
+\W(\{\}(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}), f) \defi ~ & (\{\}, R(\beta_1 \ar \beta_1) ) 
+~ \where R = \{\beta_1 \mapsto \beta_3\} \\
+= ~ &  (\{\}, \beta_3 \ar \beta_3)
+\end{align*}
+
+And finally we compute the \textit{most general unification} $R$:
+\begin{align*}
+R & = \Mgu(\beta_2 \ar \beta_2, (\beta_3 \ar \beta_3) \ar \beta_4 ) \\
+  & = \{ \beta_2 \mapsto (\beta_3 \ar \beta_3),~ \beta_4 \mapsto (\beta_3 \ar \beta_3) \}
+\end{align*}
+
+One can see that R really unifies $\beta_2 \ar \beta_2$ and $(\beta_3 \ar \beta_3) \ar \beta_4$,
+because $R(\beta_2 \ar \beta_2) = (\beta_3 \ar \beta_3) \ar (\beta_3 \ar \beta_3) = R((\beta_3 \ar \beta_3) \ar \beta_4)$. Now the computation of $\W(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}; f~f)$ can be finished:
+\begin{align*}
+\W(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}; f~f) 
+\defi ~ & (R \circ S_2 \circ S_1, R(\beta_4) ) \\
+    = ~ & (\{ \beta_2 \mapsto (\beta_3 \ar \beta_3), \beta_4 \mapsto (\beta_3 \ar \beta_3) \} \circ \{\} \circ \{\},~ \beta_3 \ar \beta_3 )\\ 
+    = ~ & (\{ \beta_2 \mapsto (\beta_3 \ar \beta_3), \beta_4 \mapsto (\beta_3 \ar \beta_3) \}, ~ \beta_3 \ar \beta_3 ) 
+\end{align*}
+
+Now we can compute the final result:
+\begin{align*}
+\W(\emptyset, \letin{f}{\lambda x . x}{f~f}) = ~ & (S_2 \circ S_1, \tau_2) \\
+\where & (S_1, \tau_1) = (\{\}, \beta_1 \ar \beta_1 ), \\
+       & (S_2, \tau_2) = (\{ \beta_2 \mapsto (\beta_3 \ar \beta_3), \beta_4 \mapsto (\beta_3 \ar \beta_3) \}, ~ \beta_3 \ar \beta_3 ).
+\end{align*}
+
+And therefore:
+\begin{align*}
+\W(\emptyset, \letin{f}{\lambda x . x}{f~f}) = ~ & (\{ \beta_2 \mapsto (\beta_3 \ar \beta_3), \beta_4 \mapsto (\beta_3 \ar \beta_3) \},~ \beta_3 \ar \beta_3)
+\end{align*}
+
+We get an unsurprising result:
+$$\emptyset \vdash (\letin{f}{\lambda x . x}{f~f}) : \beta_3 \ar \beta_3$$
+~
+
+~
+
 \red{todo}
+
+
+
 
 
 \subsection{Correctness and completeness of W}
 
 ~
 
-\textbf{Correctness of $\W$}:
+\subsubsection{Correctness of W}
 
 If $\W(\Gamma, e) = (S, \tau)$, then exist derivation of the judgment $S(\Gamma) \vdash e : \tau$.
 
 ~
 
-\textbf{Completeness of $\W$}:
+\subsubsection{Completeness of W}
 
 Let $\Gamma$ be a context and $e$ a program expression,
 and let $\SPr$ be a substitution and $\tauPr$ a type such that:
@@ -1307,6 +1415,8 @@ and $R\overline{(S(\Gamma))}(\tau) \sqsupseteq \tauPr$.
 
 The correctness theorem states that if $\W$ finds a solution, then the solution is correct.
 The first part of the completeness theorem, states that if there is a solution, then $\W$ finds one. And the second part formally states that the found solution $(S,\tau)$ is the most general one, by comparing it with an arbitrary solution $(\SPr,\tauPr)$. The substitution $R$ acts as a witness of the fact that we can obtain $\SPr$ by making $S$ more specific ($\SPr = R \circ S$).  
+
+\red{Než bude možno vysvětlit druhou část dvojky, je třeba zavést ten closure overline někde vejš}
 
 ~
 
