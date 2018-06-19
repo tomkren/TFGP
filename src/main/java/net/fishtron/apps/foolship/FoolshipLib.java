@@ -7,7 +7,6 @@ import net.fishtron.gen.Gen;
 import net.fishtron.trees.AppTree;
 import net.fishtron.trees.Gamma;
 import net.fishtron.trees.GammaSym;
-import net.fishtron.trees.Leaf;
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
 import net.fishtron.utils.*;
@@ -88,24 +87,25 @@ class FoolshipLib {
         );
 
         EvalLib evalLib = EvalLib.mk(
-                basicTreeProgram, new ReflexiveJsonLeaf(),
-                useSaveRatio,     new ReflexiveJsonParam(),
-                consumeGiveRatio, new ReflexiveJsonParam(),
-                ratio,            new ReflexiveJsonParam(),
-                angle,            new ReflexiveJsonParam()
+                basicTreeProgram, new EvalCode.ReflexiveJsonLeaf(),
+                useSaveRatio,     new EvalCode.ReflexiveJsonParam(),
+                consumeGiveRatio, new EvalCode.ReflexiveJsonParam(),
+                ratio,            new EvalCode.ReflexiveJsonParam(),
+                angle,            new EvalCode.ReflexiveJsonParam()
         );
 
         JSONObject allParamsInfo = F.obj(
-                useSaveRatio,     F.obj(DEFAULT_PARAM_NAME, F.arr(0.8)),
-                consumeGiveRatio, F.obj(DEFAULT_PARAM_NAME, F.arr(0.25)),
-                ratio, F.obj(DEFAULT_PARAM_NAME, F.arr(0, 0.25, 0.5, 0.8, 1)),
-                angle, F.obj(DEFAULT_PARAM_NAME, F.arr( 0, 23, 45, 60,  90, 120, 135, 150, 180, 200, 225, 250, 270, 300, 315, 340))
+                useSaveRatio,     F.obj(EvalCode.DEFAULT_PARAM_NAME, F.arr(0.8)),
+                consumeGiveRatio, F.obj(EvalCode.DEFAULT_PARAM_NAME, F.arr(0.25)),
+                ratio, F.obj(EvalCode.DEFAULT_PARAM_NAME, F.arr(0, 0.25, 0.5, 0.8, 1)),
+                angle, F.obj(EvalCode.DEFAULT_PARAM_NAME, F.arr( 0, 23, 45, 60,  90, 120, 135, 150, 180, 200, 225, 250, 270, 300, 315, 340))
         );
 
         return new LibPackage(TreeProgram, gamma, evalLib, allParamsInfo);
     }
 
-
+    /* Moved to net.fishtron.eval.EvalCode
+       TODO ensure that it hasn't been broken by the move.
     private static class ReflexiveJsonLeaf implements EvalCode {
         @Override
         public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun, int numArgs) {
@@ -128,6 +128,10 @@ class FoolshipLib {
             return leaf.getParams().toJson().get(DEFAULT_PARAM_NAME);
         }
     }
+    */
+
+
+
 
     /*
     private static class SimpleDNA implements EvalCode {
@@ -160,7 +164,7 @@ class FoolshipLib {
         Function<AppTree, AppTree> addLambdas = gammaRes._3();
         List<GammaSym> varList = gammaRes._4();
 
-        EvalLib evalLib_vars = new EvalLib(F.map(varList, var -> AB.mk(var.getSym(), new ReflexiveJsonLeaf())));
+        EvalLib evalLib_vars = new EvalLib(F.map(varList, var -> AB.mk(var.getSym(), new EvalCode.ReflexiveJsonLeaf())));
         EvalLib evalLib = EvalLib.union(evalLib_basic, evalLib_vars);
 
         Type t = gamma.getSymbols().get(0)._2();
