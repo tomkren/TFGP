@@ -1,4 +1,4 @@
-package net.fishtron.apps.foolship;
+package net.fishtron.apps.tomkraft;
 
 import net.fishtron.eva.multi.evaluators.ServerEvalManager;
 import net.fishtron.eval.EvalLib;
@@ -10,23 +10,18 @@ import net.fishtron.utils.F;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 
-/**
- * Created by tom on 09.10.2017.
- */
-public class FoolshipEvalManager extends ServerEvalManager {
+public class TomkraftEvalManager extends ServerEvalManager {
 
-    private static final String KEY_treeID = "treeID"; // TODO replace with id (needs to be done in Unity also)
-    private static final String KEY_DNA = "DNA"; // TODO replace with "code" possibly
-    private static final String KEY_evalTime = "evalTime";
+    private static final String KEY_id = "id";
+    private static final String KEY_code = "code";
     private static final String KEY_score = "score";
 
-    private final double evalTime;
-
-    FoolshipEvalManager(EvalLib evalLib, Checker checker, double evalTime, int preferredBufferSize) {
+    TomkraftEvalManager(EvalLib evalLib, Checker checker, int preferredBufferSize) {
         super(evalLib, checker, preferredBufferSize);
-        this.evalTime = evalTime;
+
     }
 
     @Override
@@ -35,18 +30,17 @@ public class FoolshipEvalManager extends ServerEvalManager {
         return suggestedPoolSize;
     }
 
-
     @Override
     protected JSONObject mkIndivDataToSubmit(Object indivValue, int id) {
 
-        // TODO potenciálně může bejt i string, či číslo ("one symbol implementation")
+        // TODO : potenciálně může bejt i string, či číslo ("one symbol implementation") asi dát ček uplne pryč
+        // TODO | vubec bych tuhle metodu zrušil a dal ji do rodiče s pevnym nazvosloví klíčů
 
         if (indivValue instanceof JSONObject || indivValue instanceof JSONArray) {
 
             return F.obj(
-                    KEY_treeID, id,
-                    KEY_DNA, indivValue,
-                    KEY_evalTime, evalTime
+                    KEY_id, id,
+                    KEY_code, indivValue
             );
 
         } else {
@@ -57,9 +51,9 @@ public class FoolshipEvalManager extends ServerEvalManager {
     @Override
     protected Either<AB<Integer,List<Double>>,JSONObject> reportQueryToEvalRes(JSONObject reportQuery) {
 
-        int treeID = reportQuery.optInt(KEY_treeID, -1);
+        int treeID = reportQuery.optInt(KEY_id, -1);
         if (treeID == -1) {
-            return Either.ko(Api.error("Wrong format or unspecified "+KEY_treeID+".."));
+            return Either.ko(Api.error("Wrong format or unspecified "+KEY_id+".."));
         }
 
         double score = reportQuery.optDouble(KEY_score, -Double.MAX_VALUE);
@@ -70,4 +64,5 @@ public class FoolshipEvalManager extends ServerEvalManager {
         List<Double> scores = Collections.singletonList(score);
         return Either.ok(AB.mk(treeID, scores));
     }
+
 }

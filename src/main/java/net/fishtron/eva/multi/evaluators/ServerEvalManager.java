@@ -108,7 +108,7 @@ public abstract class ServerEvalManager extends GeneralEvalManager implements Ap
     protected abstract Either<AB<Integer,List<Double>>,JSONObject> reportQueryToEvalRes(JSONObject reportQuery);
 
     private JSONObject api_reportResult(JSONObject query) {
-        return reportQueryToEvalRes(query).ifOK(this::reportResult);
+        return reportQueryToEvalRes(query).ifOK(this::reportResult); // TODO : should react appropriately to KO result!
     }
 
     private JSONObject reportResult(AB<Integer,List<Double>> evalRes) {
