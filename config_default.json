@@ -5,8 +5,12 @@
   "jobConfigs": [
     {
       "_id" : "foolship", "jobName" : "EvolutionJob",
-      "delay" : 0, "period" : null, "scheduleOnStartup" : true,
+      "delay" : 0, "period" : null, "scheduleOnStartup" : false,
       "opts" : {"setup" : "foolship", "evalTime" : 20}
+    },{
+      "_id" : "tomkraft", "jobName" : "EvolutionJob",
+      "delay" : 0, "period" : null, "scheduleOnStartup" : true,
+      "opts" : {"setup" : "tomkraft"}
     }
   ]
 }

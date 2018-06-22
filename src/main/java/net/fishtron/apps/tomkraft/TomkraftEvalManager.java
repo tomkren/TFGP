@@ -12,6 +12,7 @@ import org.json.JSONObject;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 public class TomkraftEvalManager extends ServerEvalManager {
 
@@ -19,9 +20,11 @@ public class TomkraftEvalManager extends ServerEvalManager {
     private static final String KEY_code = "code";
     private static final String KEY_score = "score";
 
-    TomkraftEvalManager(EvalLib evalLib, Checker checker, int preferredBufferSize) {
-        super(evalLib, checker, preferredBufferSize);
+    private Function<Object,Object> addJsonLambdas;
 
+    TomkraftEvalManager(EvalLib evalLib, Checker checker, int preferredBufferSize, Function<Object,Object> addJsonLambdas) {
+        super(evalLib, checker, preferredBufferSize);
+        this.addJsonLambdas = addJsonLambdas;
     }
 
     @Override
@@ -33,10 +36,15 @@ public class TomkraftEvalManager extends ServerEvalManager {
     @Override
     protected JSONObject mkIndivDataToSubmit(Object indivValue, int id) {
 
+        return F.obj(
+                KEY_id, id,
+                KEY_code, addJsonLambdas.apply(indivValue)
+        );
+
         // TODO : potenciálně může bejt i string, či číslo ("one symbol implementation") asi dát ček uplne pryč
         // TODO | vubec bych tuhle metodu zrušil a dal ji do rodiče s pevnym nazvosloví klíčů
 
-        if (indivValue instanceof JSONObject || indivValue instanceof JSONArray) {
+        /*if (indivValue instanceof JSONObject || indivValue instanceof JSONArray) {
 
             return F.obj(
                     KEY_id, id,
@@ -45,7 +53,7 @@ public class TomkraftEvalManager extends ServerEvalManager {
 
         } else {
             throw new Error("indiv supposed to be JSONObject or JSONArray. toString ="+ indivValue.toString());
-        }
+        }*/
     }
 
     @Override
@@ -61,8 +69,7 @@ public class TomkraftEvalManager extends ServerEvalManager {
             return Either.ko(Api.error("Wrong format or unspecified "+KEY_score+".."));
         }
 
-        List<Double> scores = Collections.singletonList(score);
-        return Either.ok(AB.mk(treeID, scores));
+        return Either.ok(AB.mk(treeID, Collections.singletonList(score)));
     }
 
 }

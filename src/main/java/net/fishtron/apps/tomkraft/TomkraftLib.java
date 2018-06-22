@@ -133,9 +133,7 @@ public class TomkraftLib {
         for (int i = 0; i<10; i++) {
             AppTree tree = gen.genOne(7, goal).randomizeParams(lp.getAllParamsInfo(), ch.getRandom());
 
-            AppTree treeWithLams = addLambdas.apply(tree);
-
-            F.log(treeWithLams);
+            F.log(addLambdas.apply(tree));
 
             Object value = evalLib.eval(tree);
             value = addJsonLambdas.apply(value);
