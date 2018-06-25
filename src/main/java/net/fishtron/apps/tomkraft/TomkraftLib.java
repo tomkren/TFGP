@@ -11,14 +11,62 @@ import net.fishtron.trees.GammaSym;
 import net.fishtron.types.Type;
 import net.fishtron.types.Types;
 import net.fishtron.utils.*;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
 
 public class TomkraftLib {
+
+    static LibPackage mkReflexivePack(Type goal, Object... args) {
+
+        if (args.length % 3 != 0) {throw new Error("args.length % 4 != 0");}
+
+        int numSymbols = args.length / 3;
+
+        List<GammaSym> gammaSymList = new ArrayList<>(numSymbols);
+        List<AB<String,Object>> defs = new ArrayList<>(numSymbols);
+
+        JSONObject allParamsInfo = new JSONObject();
+
+        for (int i_name = 0; i_name < numSymbols; i_name+=3) {
+
+            int i_type = i_name + 1;
+            int i_para = i_name + 2;
+
+            if (!(args[i_name] instanceof String)) {
+                throw new Error("Arg #"+i_name+" '"+args[i_name]+"' is not a String.");
+            }
+            if (!(args[i_type] instanceof Type)) {
+                throw new Error("Arg #"+i_type+" '"+args[i_type]+"' is not a Type.");
+            }
+            if (args[i_para] != null && !(args[i_para] instanceof JSONArray)) {
+                throw new Error("Arg #"+i_para+" '"+args[i_para]+"' is not a Type.");
+            }
+
+            String name = (String) args[i_name];
+            Type   type = (Type)   args[i_type];
+
+            boolean isParam = args[i_para] != null;
+
+            gammaSymList.add(new GammaSym(name, type, false));
+            defs.add(AB.mk(name, isParam ? new EvalCode.ReflexiveJsonParam() : new EvalCode.ReflexiveJsonLeaf()));
+
+            if (isParam) {
+                JSONArray paramValues = (JSONArray) args[i_para];
+                allParamsInfo.append(name, F.obj(EvalCode.DEFAULT_PARAM_NAME, paramValues));
+            }
+        }
+
+        Gamma gamma = new Gamma(gammaSymList);
+        EvalLib evalLib = new EvalLib(defs);
+
+        return new LibPackage(goal, gamma, evalLib, allParamsInfo);
+    }
 
     static LibPackage mkLibPack(JSONObject jobConfigOpts) {
 
