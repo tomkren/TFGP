@@ -33,23 +33,24 @@ public class TomkraftLib {
 
         JSONObject allParamsInfo = new JSONObject();
 
-        for (int i_name = 0; i_name < numSymbols; i_name+=3) {
+        for (int i = 0; i < numSymbols; i++) {
 
+            int i_name = 3*i;
             int i_type = i_name + 1;
             int i_para = i_name + 2;
 
             if (!(args[i_name] instanceof String)) {
                 throw new Error("Arg #"+i_name+" '"+args[i_name]+"' is not a String.");
             }
-            if (!(args[i_type] instanceof Type)) {
-                throw new Error("Arg #"+i_type+" '"+args[i_type]+"' is not a Type.");
+            if (!(args[i_type] instanceof Type) && !(args[i_type] instanceof String)) {
+                throw new Error("Arg #"+i_type+ " '" +args[i_type]+"' is not a Type.");
             }
             if (args[i_para] != null && !(args[i_para] instanceof JSONArray)) {
-                throw new Error("Arg #"+i_para+" '"+args[i_para]+"' is not a Type.");
+                throw new Error("Arg #"+i_para+" '"+args[i_para]+"' is not a param description.");
             }
 
             String name = (String) args[i_name];
-            Type   type = (Type)   args[i_type];
+            Type   type = (args[i_type] instanceof Type) ? (Type) args[i_type] : Types.parse((String)args[i_type]);
 
             boolean isParam = args[i_para] != null;
 
@@ -58,7 +59,7 @@ public class TomkraftLib {
 
             if (isParam) {
                 JSONArray paramValues = (JSONArray) args[i_para];
-                allParamsInfo.append(name, F.obj(EvalCode.DEFAULT_PARAM_NAME, paramValues));
+                allParamsInfo.put(name, F.obj(EvalCode.DEFAULT_PARAM_NAME, paramValues));
             }
         }
 
@@ -70,6 +71,8 @@ public class TomkraftLib {
 
     static LibPackage mkLibPack(JSONObject jobConfigOpts) {
 
+
+
         Type R = Types.parse("R"); // float
         Type B = Types.parse("B"); // bool
 
@@ -79,67 +82,59 @@ public class TomkraftLib {
         Type Compare_R = Types.mk(R,R,B);
         Type If_R = Types.mk(B,R,R,R);
 
-        //Type IfakBody_R = Types.mk(B,R);
-        //Type Ifak_R = Types.mk(B,IfakBody_R,IfakBody_R,R);
+        Type IfakBody_R = Types.mk(B,R);
+        Type Ifak_R = Types.mk(B,IfakBody_R,IfakBody_R,R);
 
-        String SYM_perlin = "perlin";
-        String SYM_c   =    "c";
-        String SYM_add =    "+";
-        String SYM_sub =    "-";
-        String SYM_mul =    "*";
-        String SYM_div =    "/";
-        String SYM_sin =    "sin";
-        String SYM_cos =    "cos";
-        String SYM_leq =    "<=";
-        String SYM_ifak =   "ifak";
-        String SYM_s_if =   "s_if";
-
-        Gamma gamma = Gamma.mk(
-                SYM_c       , R,
-                SYM_perlin  , R2,
-                SYM_add     , R2,
-                SYM_sub     , R2,
-                SYM_mul     , R2,
-                SYM_div     , R2,
-                SYM_sin     , R1,
-                SYM_cos     , R1,
-                SYM_leq     , Compare_R,
-                //SYM_ifak    , Ifak_R,
-                SYM_s_if    , If_R
-        );
-
-
-        /*
-          Q: Should we use just ReflexiveJsons, or implement it here also?
-          A: Quicker way is reflexive, "also here" is can be done later.
-        */
-
-        EvalLib evalLib = EvalLib.mk(
-                SYM_c       , new EvalCode.ReflexiveJsonParam(),
-                SYM_add     , new EvalCode.ReflexiveJsonLeaf(),
-                SYM_sub     , new EvalCode.ReflexiveJsonLeaf(),
-                SYM_mul     , new EvalCode.ReflexiveJsonLeaf(),
-                SYM_div     , new EvalCode.ReflexiveJsonLeaf(),
-                SYM_sin     , new EvalCode.ReflexiveJsonLeaf(),
-                SYM_cos     , new EvalCode.ReflexiveJsonLeaf(),
-                SYM_perlin  , new EvalCode.ReflexiveJsonLeaf(),
-                SYM_leq     , new EvalCode.ReflexiveJsonLeaf(),
-                SYM_ifak    , new EvalCode.ReflexiveJsonLeaf(),
-                SYM_s_if    , new EvalCode.ReflexiveJsonLeaf()
-        );
 
         double golden_ratio = 0.5 * (1.0 + Math.sqrt(5));
         double golden_ratio_inverse = golden_ratio - 1;
+        JSONArray c_params = F.arr(-1, 0, 0.25, 0.333, 0.5, golden_ratio_inverse, 1, Math.sqrt(2), 0.5*Math.PI,
+                golden_ratio, 2, 3, Math.PI, 4, 8, 16, 32);
 
-        JSONObject allParamsInfo = F.obj(
-                SYM_c, F.obj(EvalCode.DEFAULT_PARAM_NAME, F.arr(
-                        -1, 0, 0.25, 0.333, 0.5, golden_ratio_inverse,
-                        1, Math.sqrt(2), 0.5*Math.PI, golden_ratio, 2, 3,
-                        Math.PI, 4, 8, 16, 32
-                ))
+        double PI = Math.PI;
+
+        LibPackage libPackage_01 = mkReflexivePack(R2,
+                "c",        R, c_params,
+                "perlin",   R2, null,
+                "+",        R2, null,
+                "-",        R2, null,
+                "*",        R2, null,
+                "/",        R2, null,
+                "sin",      R1, null,
+                "cos",      R1, null,
+                "<=",       Compare_R, null,
+                //"ifak",     Ifak_R, null,
+                "s_if",     If_R, null
         );
 
-        return new LibPackage(R2, gamma, evalLib, allParamsInfo);
+        Type Terrain = Types.parse("T");
+        Type TerrainBinOp = Types.mk(Terrain,Terrain,Terrain);
+        Type Move_1 = Types.parse("M");
+        Type PerlinDY = Types.parse("Dy");
+        Type Scale = Types.parse("S");
+        Type Height = Types.parse("H");
+        Type Rot_1 = Types.parse("R");
+        Type Sigma_1 = Types.parse("Si");
+
+
+
+        Type PerlinType = Types.mk(Height, PerlinDY, Move_1, Move_1, Scale, Terrain);
+        Type GaussType  = Types.mk(Height, Move_1, Move_1, Sigma_1, Sigma_1, Rot_1, Terrain);
+
+        LibPackage libPackage_02 = mkReflexivePack(Terrain,
+                "+", TerrainBinOp, null,
+                "gauss", GaussType, null,
+                "perlin", PerlinType, null,
+                "m", Move_1, F.arr(-64, -32, -16, -8, -4, -2, -1, 0, 1, 2, 4, 8, 16, 32, 64),
+                "h", Height, F.arr(1,2,4,8,16,32,64),
+                "dy", PerlinDY, F.arr(-1,-0.75,-0.5,-0.25,0,0.25,0.5,0.75,1),
+                "s", Scale, F.arr(1,2,4,8,16,32,64),
+                "r", Rot_1, F.arr(0, 0.25*PI, 0.5*PI, 0.75*PI, PI, 1.25*PI, 1.5*PI, 1.75*PI),
+                "si",Sigma_1, F.arr(2, 4, 8, 16, 32, 64)
+        );
+
+        //return new LibPackage(R2, gamma, evalLib, allParamsInfo);
+        return libPackage_02;
     }
 
     public static void main(String[] args) {
@@ -178,14 +173,26 @@ public class TomkraftLib {
 
         Gen gen = new Gen(gamma, ch);
 
-        for (int i = 0; i<10; i++) {
-            AppTree tree = gen.genOne(7, goal).randomizeParams(lp.getAllParamsInfo(), ch.getRandom());
 
-            F.log(addLambdas.apply(tree));
+        for (int tree_size = 1; tree_size < 30; tree_size++) {
 
-            Object value = evalLib.eval(tree);
-            value = addJsonLambdas.apply(value);
-            F.log(value);
+            F.log("\n-- tree_size =", tree_size, "---------------------------------------------------------------\n");
+            if (gen.getNum(tree_size, goal).doubleValue() > 0) {
+                for (int i = 0; i<10; i++) {
+
+
+                    AppTree tree = gen.genOne(tree_size, goal).randomizeParams(lp.getAllParamsInfo(), ch.getRandom());
+
+                    F.log(addLambdas.apply(tree));
+
+                    Object value = evalLib.eval(tree);
+                    value = addJsonLambdas.apply(value);
+                    F.log(value);
+                }
+            } else {
+                F.log("No tree for size ", tree_size+".");
+            }
+
         }
 
 
