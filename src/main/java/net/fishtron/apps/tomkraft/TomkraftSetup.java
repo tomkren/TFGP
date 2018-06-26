@@ -34,8 +34,8 @@ public class TomkraftSetup implements MultiEvaSetup {
         // -- Settings ----------------------------------------------
 
         // Basic settings
-        int numEvaluations = 1000;
-        int numToGen = 40;
+        int numEvaluations = 10000;
+        int numToGen = 100;
         int minPopToOperate = numToGen/2;
         int maxPopSize = numToGen*4;
 

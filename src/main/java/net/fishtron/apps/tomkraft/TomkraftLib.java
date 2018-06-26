@@ -22,7 +22,7 @@ import java.util.function.Function;
 
 public class TomkraftLib {
 
-    static LibPackage mkReflexivePack(Type goal, Object... args) {
+    private static LibPackage mkReflexivePack(Type goal, Object... args) {
 
         if (args.length % 3 != 0) {throw new Error("args.length % 4 != 0");}
 
@@ -125,16 +125,56 @@ public class TomkraftLib {
                 "+", TerrainBinOp, null,
                 "gauss", GaussType, null,
                 "perlin", PerlinType, null,
-                "m", Move_1, F.arr(-64, -32, -16, -8, -4, -2, -1, 0, 1, 2, 4, 8, 16, 32, 64),
-                "h", Height, F.arr(1,2,4,8,16,32,64),
-                "dy", PerlinDY, F.arr(-1,-0.75,-0.5,-0.25,0,0.25,0.5,0.75,1),
-                "s", Scale, F.arr(1,2,4,8,16,32,64),
+                "m", Move_1, F.arr(-32, -16, -8, -4, -2, -1, 0, 1, 2, 4, 8, 16, 32),
+                "h", Height, F.arr(4, 8,16,32,64),
+                "dy", PerlinDY, F.arr(-0.5,-0.25,0,0.25,0.5),
+                "s", Scale, F.arr(0.05f),
                 "r", Rot_1, F.arr(0, 0.25*PI, 0.5*PI, 0.75*PI, PI, 1.25*PI, 1.5*PI, 1.75*PI),
-                "si",Sigma_1, F.arr(2, 4, 8, 16, 32, 64)
+                "si",Sigma_1, F.arr(16, 32)
         );
 
+
+        // TODO add move_x, move_y to pcone
+        // TODO transfor to single argument with many params, it will be less comp expensive on the client side
+
+        Type PC_coneAmp = Types.parse("PC_coneAmp");
+        Type PC_cone_a  = Types.parse("PC_cone_a");
+        Type PC_cone_b  = Types.parse("PC_cone_b");
+        Type PC_cone_c  = Types.parse("PC_cone_c");
+        Type PC_Amp     = Types.parse("PC_Amp");
+        Type PC_delta_y = Types.parse("PC_delta_y");
+        Type PC_x0      = Types.parse("PC_x0");
+        Type PC_z0      = Types.parse("PC_z0");
+        Type PC_scale   = Types.parse("PC_scale");
+
+        Type PerlinConeType = Types.mk(PC_coneAmp, PC_cone_a, PC_cone_b, PC_cone_c, PC_Amp, PC_delta_y, PC_x0, PC_z0, PC_scale, Terrain);
+
+        LibPackage libPackage_03 = mkReflexivePack(Terrain,
+            "+", TerrainBinOp, null,
+
+            "pcone", PerlinConeType, null,
+            "pc_coneAmp", PC_coneAmp  , F.arr(0.75, 1, 1.25, 1.5, 1.75),
+            "pc_cone_a",  PC_cone_a   , F.arr(32.0, 52, 64.0, 91),
+            "pc_cone_b",  PC_cone_b   , F.arr(32.0, 42, 64.0, 82),
+            "pc_cone_c",  PC_cone_c   , F.arr(0.75, 1.0, 2.5, 5),
+            "pc_Amp",     PC_Amp      , F.arr(25.0, 50, 75),
+            "pc_delta_y", PC_delta_y  , F.arr(-7.5, -4, 0),
+            "pc_x0",      PC_x0       , F.arr(123.4, 333.3, 555.9, 623.0),
+            "pc_z0",      PC_z0       , F.arr(256.7, 321.0, 784.8, 987.2),
+            "pc_scale",   PC_scale    , F.arr(0.03, 0.05, 0.08),
+
+            "gauss", GaussType, null,
+            "h", Height, F.arr(4, 8,16,32),
+            "m", Move_1, F.arr(-16, -8, -4, -2, -1, 0, 1, 2, 4, 8, 16),
+            "si",Sigma_1, F.arr(16, 32),
+            "r", Rot_1, F.arr(0, 0.25*PI, 0.5*PI, 0.75*PI, PI, 1.25*PI, 1.5*PI, 1.75*PI)
+
+        );
+
+
+
         //return new LibPackage(R2, gamma, evalLib, allParamsInfo);
-        return libPackage_02;
+        return libPackage_03;
     }
 
     public static void main(String[] args) {

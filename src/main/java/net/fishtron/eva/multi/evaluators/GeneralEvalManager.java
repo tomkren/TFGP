@@ -43,7 +43,11 @@ public abstract class GeneralEvalManager implements MultiEvalManager<AppTreeMI> 
         return getEvaluated();
     }
 
-    private void submit(List<AB<AppTreeMI, JSONObject>> indivs) {
+    private void submit(List<AB<AppTreeMI, JSONObject>> inIndivs) {
+
+        List<AB<AppTreeMI, JSONObject>> indivs = new ArrayList<>(inIndivs);
+        Collections.shuffle(indivs);
+
         for (AB<AppTreeMI,JSONObject> indivData : indivs) {
             AppTreeMI  indiv     = indivData._1();
             JSONObject indivJson = indivData._2();
