@@ -109,6 +109,20 @@ public class InteractiveComparator implements Api {
         return (boolean) i1wins;
     }
 
+    public AppTreeMI compareFun(List<AppTreeMI> indivs) {
+
+        if (indivs.size() != 2) {
+            throw new Error("Current version of comparison supports only comparing 2 individuals, but "+indivs.size()+" were given.");
+        }
+
+        AppTreeMI indiv_1 = indivs.get(0);
+        AppTreeMI indiv_2 = indivs.get(1);
+
+        boolean i1wins = compare(indiv_1, indiv_2);
+
+        return i1wins ? indiv_1 : indiv_2;
+    }
+
     private static boolean checkResult(JSONObject result) {
         if (!result.has(I1_WINS)) {return false;}
         Object i1wins = result.get(I1_WINS);

@@ -7,14 +7,15 @@ import net.fishtron.eva.Operator;
 import net.fishtron.eva.multi.MultiIndiv;
 import net.fishtron.utils.Checker;
 
+import java.util.List;
 import java.util.Random;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /** Created by tom on 22.03.2017.*/
 
 public class BasicCompareOpts<Indiv extends MultiIndiv> implements CompareOpts<Indiv> {
 
-    private BiFunction<Indiv,Indiv,Boolean> compareFun;
+    private Function<List<Indiv>,Indiv> compareFun;
 
     private int numEvaluations;
     private int numIndividualsToGenerate;
@@ -28,7 +29,7 @@ public class BasicCompareOpts<Indiv extends MultiIndiv> implements CompareOpts<I
     private Checker checker;
 
     public BasicCompareOpts(
-            BiFunction<Indiv,Indiv,Boolean> compareFun,
+            Function<List<Indiv>,Indiv> compareFun,
             int numEvaluations, int numIndividualsToGenerate,
             int maxPopulationSize, int timeLimit, long sleepTime,
             IndivGenerator<Indiv> generator,
@@ -50,7 +51,7 @@ public class BasicCompareOpts<Indiv extends MultiIndiv> implements CompareOpts<I
         this.checker = checker;
     }
 
-    @Override public boolean compareIndividuals(Indiv i1, Indiv i2) {return compareFun.apply(i1,i2);}
+    @Override public Indiv compareIndividuals(List<Indiv> indivs) {return compareFun.apply(indivs);}
 
     @Override public int getNumEvaluations() {return numEvaluations;}
     @Override public int getNumIndividualsToGenerate() {return numIndividualsToGenerate;}

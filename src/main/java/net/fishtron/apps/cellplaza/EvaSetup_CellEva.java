@@ -84,7 +84,7 @@ public class EvaSetup_CellEva implements CompareEvaSetup {
 
         interactiveComparator = new InteractiveComparator(lib, cellOpts, numFrames, logger.getRunDirPath(), sleepTime, ch);
 
-        opts = new BasicCompareOpts<>(interactiveComparator::compare, numEvaluations, numToGen, maxPopSize, timeLimit, sleepTime, generator, parentSelection, operators, interactiveComparator, ch);
+        opts = new BasicCompareOpts<>(interactiveComparator::compareFun, numEvaluations, numToGen, maxPopSize, timeLimit, sleepTime, generator, parentSelection, operators, interactiveComparator, ch);
     }
 
     @Override public CompareOpts<AppTreeMI> getOpts() {return opts;}
