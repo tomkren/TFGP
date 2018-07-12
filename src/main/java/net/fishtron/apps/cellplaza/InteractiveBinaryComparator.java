@@ -4,6 +4,7 @@ import net.fishtron.apps.cellplaza.shared.PlazaImg;
 import net.fishtron.apps.cellplaza.v2.CellOpts;
 import net.fishtron.apps.cellplaza.v2.Libs;
 import net.fishtron.apps.cellplaza.v2.Rule;
+import net.fishtron.eva.compare.IndivComparator;
 import net.fishtron.eval.EvalLib;
 import net.fishtron.eva.multi.AppTreeMI;
 import net.fishtron.server.api.Api;
@@ -22,7 +23,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**Created by tom on 22.03.2017.*/
 
-public class InteractiveComparator implements Api {
+public class InteractiveBinaryComparator implements Api, IndivComparator<AppTreeMI> {
 
     private static final String CMD_GET_PAIR_TO_COMPARE = "getPairToCompare";
     private static final String CMD_OFFER_RESULT = "offerResult";
@@ -49,15 +50,15 @@ public class InteractiveComparator implements Api {
     private int nextId;
 
     private Queue<JSONArray> indivPairsToCompare;
-    private Queue<JSONObject> comparedInivPairs;
+    private Queue<JSONObject> comparedIndivPairs;
 
-    private final History history;
+    private final CellplazaHistory history;
 
     private long sleepTime;
 
 
 
-    InteractiveComparator(EvalLib lib, CellOpts cellOpts, int numFrames, String runDirPath, long sleepTime, Checker ch) {
+    InteractiveBinaryComparator(EvalLib lib, CellOpts cellOpts, int numFrames, String runDirPath, long sleepTime, Checker ch) {
         this.lib = lib;
         this.ch = ch;
 
@@ -70,13 +71,13 @@ public class InteractiveComparator implements Api {
         nextId = 1;
 
         indivPairsToCompare = new ConcurrentLinkedQueue<>();
-        comparedInivPairs = new ConcurrentLinkedQueue<>();
+        comparedIndivPairs = new ConcurrentLinkedQueue<>();
 
-        history = new History(cellOpts.getNumStates());
+        history = new CellplazaHistory(cellOpts.getNumStates());
     }
 
 
-    public boolean compare(AppTreeMI indiv1, AppTreeMI indiv2) {
+    private boolean compare(AppTreeMI indiv1, AppTreeMI indiv2) {
 
         JSONObject indivJson1 = indivToJson(indiv1);
         JSONObject indivJson2 = indivToJson(indiv2);
@@ -84,12 +85,12 @@ public class InteractiveComparator implements Api {
         JSONArray indivPair = F.arr(indivJson1,indivJson2);
         indivPairsToCompare.offer(indivPair);
 
-        JSONObject result = comparedInivPairs.poll();
+        JSONObject result = comparedIndivPairs.poll();
         int i = 0;
         while (result == null && !ch.isStopRequested()) {
             if (i % 50 == 0) {ch.log("("+(i/50)+") Waiting for user to compare pair...");}
             F.sleep(sleepTime);
-            result = comparedInivPairs.poll();
+            result = comparedIndivPairs.poll();
             i++;
         }
 
@@ -100,15 +101,26 @@ public class InteractiveComparator implements Api {
 
         indivPairsToCompare.remove(indivPair);
 
+        //TODO: Omg !!! [9.7.2018] The result may be for some different pair!!! <----===================================
+        // Some id-to-indivData map is clearly needed, this issue will be solved in Tomkraft InteractiveComparator,
+        // so adapt that solution, ideally generalize and apply the same thing.
+
         if (!result.has(I1_WINS)) {throw new Error("Compare result must have "+I1_WINS+" key.");}
         Object i1wins = result.get(I1_WINS);
         if (!(i1wins instanceof Boolean)) {throw new Error(I1_WINS+" must be boolean.");}
+
+
+
+
+
+
 
         // todo reflect frame selection !
 
         return (boolean) i1wins;
     }
 
+    @Override
     public AppTreeMI compareFun(List<AppTreeMI> indivs) {
 
         if (indivs.size() != 2) {
@@ -222,7 +234,7 @@ public class InteractiveComparator implements Api {
         JSONObject result = query.getJSONObject(RESULT);
         if (!checkResult(result)) {return Api.error("Wrong (inner) result format.");}
 
-        comparedInivPairs.offer(result);
+        comparedIndivPairs.offer(result);
 
 
 

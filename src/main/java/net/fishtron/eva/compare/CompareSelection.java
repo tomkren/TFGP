@@ -3,17 +3,37 @@ package net.fishtron.eva.compare;
 import net.fishtron.eva.multi.MultiIndiv;
 import net.fishtron.utils.F;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.function.Function;
 
 /**Created by tom on 22.03.2017.*/
 
 public interface CompareSelection<Indiv extends MultiIndiv> {
 
-    Indiv select(Collection<Indiv> pop, Function<List<Indiv>,Indiv> compareFun);
+    Indiv select(Collection<Indiv> pop, IndivComparator<Indiv> comparator);
+
+    class StrictMultiTournament<T extends MultiIndiv> implements CompareSelection<T> {
+
+        private final int numParentCandidates;
+        private final Random rand;
+
+        public StrictMultiTournament(int numParentCandidates, Random rand) {
+            this.numParentCandidates = numParentCandidates;
+            this.rand = rand;
+        }
+
+        @Override
+        public T select(Collection<T> pop, IndivComparator<T> comparator) {
+
+            List<T> parentCandidates = new ArrayList<>(numParentCandidates);
+            for (int i = 0; i < numParentCandidates; i++) {
+                T parentCandidate = F.randomElement(pop, rand);
+                parentCandidates.add(parentCandidate);
+            }
+
+            return comparator.compareFun(parentCandidates);
+        }
+    }
 
     class Tournament<T extends MultiIndiv> implements CompareSelection<T> {
 
@@ -26,7 +46,7 @@ public interface CompareSelection<Indiv extends MultiIndiv> {
         }
 
         @Override
-        public T select(Collection<T> pop, Function<List<T>,T> compareFun) {
+        public T select(Collection<T> pop, IndivComparator<T> comparator) {
 
             T i1 = F.randomElement(pop, rand);
             T i2 = F.randomElement(pop, rand);
@@ -34,7 +54,7 @@ public interface CompareSelection<Indiv extends MultiIndiv> {
             List<T> indivsToCompare = Arrays.asList(i1, i2);
 
             //boolean i1wins = compareFun.apply(i1,i2);
-            T winner = compareFun.apply(indivsToCompare);
+            T winner = comparator.compareFun(indivsToCompare);
             boolean i1wins = i1 == winner;
 
             if (i1wins) {

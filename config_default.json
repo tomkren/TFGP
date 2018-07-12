@@ -15,6 +15,10 @@
       "_id" : "tomkraft", "jobName" : "EvolutionJob",
       "delay" : 0, "period" : null, "scheduleOnStartup" : false,
       "opts" : {"setup" : "tomkraft"}
+    },{
+      "_id" : "tomkraft_interactive", "jobName" : "EvolutionJob",
+      "delay" : 0, "period" : null, "scheduleOnStartup" : true,
+      "opts" : {"setup" : "tomkraft_interactive"}
     }
   ]
 }

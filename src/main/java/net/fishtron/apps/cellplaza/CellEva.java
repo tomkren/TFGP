@@ -30,7 +30,7 @@ public class CellEva implements EvaJob, EvaJob_OLD {
     private final CellEvaOpts ceOpts;
     private final Checker checker;
     //private CellEvalManager evalManager;
-    private InteractiveComparator interactiveComparator;
+    private InteractiveBinaryComparator interactiveComparator;
 
 
 
@@ -48,7 +48,7 @@ public class CellEva implements EvaJob, EvaJob_OLD {
         String logPath = ceOpts.getLogPath();
 
         EvaSetup_CellEva setup = new EvaSetup_CellEva(jobOpts, config, logPath, checker);
-        interactiveComparator = setup.getInteractiveComparator();
+        interactiveComparator = setup.getInteractiveBinaryComparator();
 
         CompareEvolution<AppTreeMI> eva = new CompareEvolution<>(setup.getOpts(), setup.getLogger());
         eva.start();
@@ -117,7 +117,7 @@ public class CellEva implements EvaJob, EvaJob_OLD {
     @Override
     public JSONObject processApiCall(JSONArray path, JSONObject query) {
         if (interactiveComparator == null) {
-            return InteractiveComparator.mkInitializingResponse();
+            return InteractiveBinaryComparator.mkInitializingResponse();
         } else {
             return interactiveComparator.processApiCall(path, query);
         }

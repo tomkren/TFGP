@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 /**Created by tom on 23.03.2017.*/
 
-class History {
+class CellplazaHistory {
 
     private static String tileDir = CellPlaza.BASE_DIR + "/mini_10/cores";
 
@@ -23,7 +23,7 @@ class History {
     private final int numStates;
     private int version;
 
-    History(int numStates) {
+    CellplazaHistory(int numStates) {
         clickWinners = new ArrayList<>();
         this.numStates = numStates;
         version = 1;

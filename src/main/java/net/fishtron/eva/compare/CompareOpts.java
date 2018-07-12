@@ -7,7 +7,6 @@ import net.fishtron.eva.Operator;
 import net.fishtron.eva.multi.MultiIndiv;
 import net.fishtron.utils.Checker;
 
-import java.util.List;
 import java.util.Random;
 
 /**Created by tom on 22.03.2017.*/
@@ -27,7 +26,7 @@ public interface CompareOpts<Indiv extends MultiIndiv> {
     IndivGenerator<Indiv> getGenerator();
 
     //boolean compareIndividuals(Indiv i1, Indiv i2);
-    Indiv compareIndividuals(List<Indiv> indivs);
+    IndivComparator<Indiv> getComparator();
 
     // Selection, operators etc.
     CompareSelection<Indiv> getParentSelection();
@@ -36,6 +35,6 @@ public interface CompareOpts<Indiv extends MultiIndiv> {
 
     Checker getChecker();
 
-    Api getApi();
+    //Api getApi();
 
 }

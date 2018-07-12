@@ -1,6 +1,5 @@
 package net.fishtron.eva.compare;
 
-import net.fishtron.apps.cellplaza.InteractiveComparator;
 import net.fishtron.eva.EvaSetup;
 import net.fishtron.eva.multi.AppTreeMI;
 
@@ -10,6 +9,6 @@ import net.fishtron.eva.multi.AppTreeMI;
 public interface CompareEvaSetup extends EvaSetup {
 
     CompareOpts<AppTreeMI> getOpts();
-    InteractiveComparator getInteractiveComparator();
+    IndivComparator<AppTreeMI> getIndivComparator();
 
 }

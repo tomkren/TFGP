@@ -2,14 +2,15 @@ package net.fishtron.apps.tomkraft;
 
 import net.fishtron.eva.IndivGenerator;
 import net.fishtron.eva.Operator;
-import net.fishtron.eva.multi.*;
+import net.fishtron.eva.compare.*;
+import net.fishtron.eva.multi.AppTreeMI;
+import net.fishtron.eva.multi.MultiLogger;
 import net.fishtron.eva.multi.operators.AppTreeMIGenerator;
 import net.fishtron.eva.multi.operators.MultiGenOpFactory;
 import net.fishtron.eval.EvalCode;
 import net.fishtron.eval.EvalLib;
 import net.fishtron.eval.LibPackage;
 import net.fishtron.gen.Gen;
-import net.fishtron.server.api.Configs;
 import net.fishtron.trees.AppTree;
 import net.fishtron.trees.Gamma;
 import net.fishtron.trees.GammaSym;
@@ -22,26 +23,30 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
-public class TomkraftSetup implements MultiEvaSetup {
+/**
+ * Created by tom on 09.07.2018.
+ */
+public class TkCompareSetup implements CompareEvaSetup {
 
-    public static final String SETUP_NAME = "tomkraft";
+    // TODO: merge this class with TomkraftSetup
 
-    private final MultiEvaOpts<AppTreeMI> opts;
+    public static final String SETUP_NAME = "tomkraft_interactive";
+
+
+    private final CompareOpts<AppTreeMI> opts;
+    private final IndivComparator<AppTreeMI> interactiveComparator;
     private final MultiLogger<AppTreeMI> logger;
 
-    public TomkraftSetup(JSONObject jobConfigOpts, Checker checker) {
-
-        // -- Settings ----------------------------------------------
+    public TkCompareSetup(JSONObject jobConfigOpts, Checker checker) {
 
         // Basic settings
         int numEvaluations = 10000;
         int numToGen = 100;
-        int minPopToOperate = numToGen/2;
         int maxPopSize = numToGen*4;
 
         // Time settings
         int timeLimit = Integer.MAX_VALUE;
-        int sleepTime = 1000;
+        int sleepTime = 100;
 
         // Generating settings
         int generatingMaxTreeSize = 32;
@@ -54,19 +59,14 @@ public class TomkraftSetup implements MultiEvaSetup {
                         F.arr(F.arr(-2,0.1), F.arr(-1, 0.4), F.arr(1, 0.4), F.arr(2, 0.1)))
         );
 
-        // Evaluation settings
-        int preferredBufferSize = Configs.get_int(jobConfigOpts, "preferredBufferSize", 32);
-        FitnessSignature fitnessSignature = new FitnessSignature(F.arr(F.arr("max","rating")));
-
-        // Selection settings
-        double tournamentBetterWinsProbability = 0.8;
-
+        // Selection & Evaluation settings
+        int numParentCandidates = 9;
+        boolean removeGivenTasksImmediately = !true;
 
         // -- Construction of evolution components -----------------------------------------------
 
         // Building parts of individuals
         LibPackage libPac = TomkraftLib.mkLibPack(jobConfigOpts);
-
 
         // TODO : The following code dealing with lambda-head prefix should be properly encapsulated!
 
@@ -103,25 +103,18 @@ public class TomkraftSetup implements MultiEvaSetup {
                 operatorsConfig, checker.getRandom(), gen, allParamsInfo);
 
         // Evaluation
-        TomkraftEvalManager evalManager = new TomkraftEvalManager(evalLib, checker, preferredBufferSize, addJsonLambdas);
+        interactiveComparator = new TkInteractiveComparator(evalLib, sleepTime, removeGivenTasksImmediately, addJsonLambdas, checker);
 
-        // Selection
-        MultiSelection<AppTreeMI> parentSelection = new MultiSelection.Tournament<>(tournamentBetterWinsProbability, checker.getRandom());
+        // Parent Selection
+        CompareSelection<AppTreeMI> parentSelection = new CompareSelection.StrictMultiTournament<>(numParentCandidates, checker.getRandom());
 
         logger = TomkraftLogger.mk(jobConfigOpts, checker);
-
-        opts = new BasicMultiEvaOpts<>(
-                numEvaluations, numToGen,
-                minPopToOperate, maxPopSize,
-                timeLimit, sleepTime,
-                generator, fitnessSignature,
-                evalManager, parentSelection,
-                operators,
-                evalManager,
-                checker
-        );
+        opts = new BasicCompareOpts<>(interactiveComparator, numEvaluations, numToGen, maxPopSize, timeLimit, sleepTime, generator, parentSelection, operators, checker);
     }
 
-    @Override public MultiEvaOpts<AppTreeMI> getEvaOpts() { return opts; }
-    @Override public MultiLogger<AppTreeMI> getLogger() { return logger; }
+
+    @Override public CompareOpts<AppTreeMI> getOpts() {return opts;}
+    @Override public IndivComparator<AppTreeMI> getIndivComparator() {return interactiveComparator;}
+    @Override public MultiLogger<AppTreeMI> getLogger() {return logger;}
+
 }

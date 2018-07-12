@@ -42,7 +42,7 @@ public class CompareEvolution<Indiv extends MultiIndiv> implements Evolution {
 
     @Override
     public Api getApi() {
-        return opts.getApi();
+        return opts.getComparator();
     }
 
     public void start() {
@@ -107,10 +107,11 @@ public class CompareEvolution<Indiv extends MultiIndiv> implements Evolution {
         List<Indiv> parents = new ArrayList<>(numParents);
 
         for (int i = 0; i < numParents; i++) {
-            Indiv selectedParent = parentSelection.select(population.getPopulation(), opts::compareIndividuals);
+            Indiv selectedParent = parentSelection.select(population.getPopulation(), opts.getComparator());
             numEvaluations++; // 1 selection <==> 1 evaluation
             parents.add(selectedParent);
         }
+
         return parents;
     }
 

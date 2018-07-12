@@ -1,6 +1,6 @@
 package net.fishtron.apps.cellplaza;
 
-import net.fishtron.eva.compare.CompareEvaSetup;
+import net.fishtron.eva.compare.*;
 import net.fishtron.utils.Distribution;
 import net.fishtron.eva.IndivGenerator;
 import net.fishtron.eva.Operator;
@@ -9,9 +9,6 @@ import net.fishtron.trees.Gamma;
 import net.fishtron.gen.Gen;
 import net.fishtron.apps.cellplaza.v2.CellOpts;
 import net.fishtron.apps.cellplaza.v2.Libs;
-import net.fishtron.eva.compare.BasicCompareOpts;
-import net.fishtron.eva.compare.CompareOpts;
-import net.fishtron.eva.compare.CompareSelection;
 import net.fishtron.eval.EvalLib;
 import net.fishtron.eva.multi.*;
 import net.fishtron.eva.multi.operators.AppTreeMIGenerator;
@@ -30,7 +27,7 @@ public class EvaSetup_CellEva implements CompareEvaSetup {
 
 
     private CompareOpts<AppTreeMI> opts;
-    private InteractiveComparator interactiveComparator;
+    private InteractiveBinaryComparator interactiveComparator;
     private EvaLogger<AppTreeMI> logger;
 
     public EvaSetup_CellEva(JSONObject jobOpts, JSONObject config, String logPath, Checker ch) {
@@ -82,12 +79,13 @@ public class EvaSetup_CellEva implements CompareEvaSetup {
         int numFrames = config.optInt("numFrames", 16);
         //evalManager = new CellEvalManager(lib, cellOpts, numFrames, logger.getRunDirPath(), ch, jobProcess);
 
-        interactiveComparator = new InteractiveComparator(lib, cellOpts, numFrames, logger.getRunDirPath(), sleepTime, ch);
+        interactiveComparator = new InteractiveBinaryComparator(lib, cellOpts, numFrames, logger.getRunDirPath(), sleepTime, ch);
 
-        opts = new BasicCompareOpts<>(interactiveComparator::compareFun, numEvaluations, numToGen, maxPopSize, timeLimit, sleepTime, generator, parentSelection, operators, interactiveComparator, ch);
+        opts = new BasicCompareOpts<>(interactiveComparator, numEvaluations, numToGen, maxPopSize, timeLimit, sleepTime, generator, parentSelection, operators, ch);
     }
 
     @Override public CompareOpts<AppTreeMI> getOpts() {return opts;}
-    @Override public InteractiveComparator getInteractiveComparator() {return interactiveComparator;}
+    @Override public IndivComparator<AppTreeMI> getIndivComparator() {return interactiveComparator;}
+    public InteractiveBinaryComparator getInteractiveBinaryComparator() {return interactiveComparator;}
     @Override public MultiLogger<AppTreeMI> getLogger() {return logger;}
 }

@@ -3,6 +3,7 @@ package net.fishtron.eva;
 import net.fishtron.apps.cellplaza.CellEvaOpts;
 import net.fishtron.apps.cellplaza.EvaSetup_CellEva;
 import net.fishtron.apps.foolship.FoolshipSetup;
+import net.fishtron.apps.tomkraft.TkCompareSetup;
 import net.fishtron.apps.tomkraft.TomkraftSetup;
 import net.fishtron.server.api.Api;
 import net.fishtron.server.api.Configs;
@@ -22,9 +23,10 @@ public class EvaSetupFactory {
         if (setupName == null) {return Either.ko(Api.error("EvaSetupFactory: Missing or null key '"+KEY_setup+"'."));}
 
         switch (setupName) {
-            case FoolshipSetup.SETUP_NAME:    return Either.ok(new FoolshipSetup(jobConfigOpts, checker));
-            case EvaSetup_CellEva.SETUP_NAME: return mkCellplazaSetup(jobConfigOpts, checker);
-            case TomkraftSetup.SETUP_NAME:    return Either.ok(new TomkraftSetup(jobConfigOpts, checker));
+            case FoolshipSetup.SETUP_NAME:        return Either.ok(new FoolshipSetup(jobConfigOpts, checker));
+            case EvaSetup_CellEva.SETUP_NAME:     return mkCellplazaSetup(jobConfigOpts, checker);
+            case TomkraftSetup.SETUP_NAME:        return Either.ok(new TomkraftSetup(jobConfigOpts, checker));
+            case TkCompareSetup.SETUP_NAME: return Either.ok(new TkCompareSetup(jobConfigOpts, checker));
         }
 
         return Either.ko(Api.error("Unsupported "+KEY_setup+": '"+setupName+"'."));
