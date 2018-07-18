@@ -236,9 +236,9 @@ public class TomkraftLib {
         );
 
         LibPackage libPackage_pcy = mkReflexivePack(Terrain,
-                "+", TerrainBinOp, null,
+                /*"+", TerrainBinOp, null,
                 "-", TerrainBinOp, null,
-                "avg", TerrainBinOp, null,
+                "avg", TerrainBinOp, null,*/
 
                 "pcy",      Pcy_type, null,
                 "pcy_args", Pcy_args, F.obj(
@@ -246,7 +246,10 @@ public class TomkraftLib {
                         "x", F.arr(-32,-16, -8, -4, -2, -1, 0, 1, 2, 4, 8, 16,32),
                         "y", F.arr(-32,-16, -8, -4, -2, -1, 0, 1, 2, 4, 8, 16,32),
                         "A", F.arr(8, 16, 32, 64, 80),
-                        "dy", F.arr(40, 80, 100)
+                        "dy", F.arr(40, 80, 100),
+                        "x0",  F.arr(123.4, 237.0, 333.3, 555.9, 623.0),
+                        "z0",  F.arr(121.0, 256.7, 321.0, 784.8, 987.2),
+                        "s",   F.arr(2.5, 3.0, 3.5)
                 )
         );
 
@@ -254,6 +257,16 @@ public class TomkraftLib {
                 "+", TerrainBinOp, null,
                 "-", TerrainBinOp, null,
                 "avg", TerrainBinOp, null,
+
+                "ga",      Ga_type, null,
+                "ga_args", Ga_args, F.obj(
+                        "h",    F.arr(4, 8,16,32),
+                        "m1",   F.arr(-32,-16, -8, -4, -2, -1, 0, 1, 2, 4, 8, 16,32),
+                        "m2",   F.arr(-32,-16, -8, -4, -2, -1, 0, 1, 2, 4, 8, 16,32),
+                        "s1",   F.arr(16, 32),
+                        "s2",   F.arr(16, 32),
+                        "r",    F.arr(0, 0.25*PI, 0.5*PI, 0.75*PI, PI, 1.25*PI, 1.5*PI, 1.75*PI)
+                ),
 
                 "pc",      PC_type, null,
                 "pc_args", PC_args, F.obj(
@@ -268,23 +281,16 @@ public class TomkraftLib {
                         "s",   F.arr(0.03, 0.05, 0.08)
                 ),
 
-                "ga",      Ga_type, null,
-                "ga_args", Ga_args, F.obj(
-                        "h",    F.arr(4, 8,16,32),
-                        "m1",   F.arr(-32,-16, -8, -4, -2, -1, 0, 1, 2, 4, 8, 16,32),
-                        "m2",   F.arr(-32,-16, -8, -4, -2, -1, 0, 1, 2, 4, 8, 16,32),
-                        "s1",   F.arr(16, 32),
-                        "s2",   F.arr(16, 32),
-                        "r",    F.arr(0, 0.25*PI, 0.5*PI, 0.75*PI, PI, 1.25*PI, 1.5*PI, 1.75*PI)
-                ),
-
                 "pcy",      Pcy_type, null,
                 "pcy_args", Pcy_args, F.obj(
                         "h", F.arr(1,2,4, 8,16,32),
                         "x", F.arr(-32,-16, -8, -4, -2, -1, 0, 1, 2, 4, 8, 16,32),
                         "y", F.arr(-32,-16, -8, -4, -2, -1, 0, 1, 2, 4, 8, 16,32),
                         "A", F.arr(8, 16, 32, 64, 80),
-                        "dy", F.arr(40, 80, 100)
+                        "dy", F.arr(40, 80, 100),
+                        "x0",  F.arr(123.4, 237.0, 333.3, 555.9, 623.0),
+                        "z0",  F.arr(121.0, 256.7, 321.0, 784.8, 987.2),
+                        "s",   F.arr(2.5, 3.0, 3.5)
                 )
         );
 

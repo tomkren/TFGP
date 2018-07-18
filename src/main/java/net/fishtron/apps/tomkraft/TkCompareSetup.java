@@ -49,7 +49,7 @@ public class TkCompareSetup implements CompareEvaSetup {
         int sleepTime = 100;
 
         // Generating settings
-        int generatingMaxTreeSize = 10;
+        int generatingMaxTreeSize = 16;
 
         // Operators settings
         JSONArray operatorsConfig = F.arr(

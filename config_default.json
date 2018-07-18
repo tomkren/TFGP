@@ -5,11 +5,11 @@
   "jobConfigs": [
     {
       "_id" : "foolship", "jobName" : "EvolutionJob",
-      "delay" : 0, "period" : null, "scheduleOnStartup" : false,
+      "delay" : 0, "period" : null, "scheduleOnStartup" : true,
       "opts" : {"setup" : "foolship", "evalTime" : 20}
     },{
       "_id" : "cellplaza", "jobName" : "CellplazaJob",
-      "delay" : 0, "period" : null, "scheduleOnStartup" : false,
+      "delay" : 0, "period" : null, "scheduleOnStartup" : true,
       "opts" : {"setup":"cellplaza", "plazaDir":"mini_50"}
     },{
       "_id" : "tomkraft", "jobName" : "EvolutionJob",

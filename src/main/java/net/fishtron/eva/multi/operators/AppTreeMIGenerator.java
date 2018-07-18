@@ -35,7 +35,7 @@ public class AppTreeMIGenerator implements IndivGenerator<AppTreeMI> {
     @Override
     public List<AppTreeMI> generate(int numToGenerate) {
 
-        // TODO řádně parametrizovat gen metodu !!!!!!!!!!!!!!!!!!!!!!!!!!
+        // TODO řádně parametrizovat gen metodu !!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         //Set<AppTree> treeSet = AppTreeIndivGenerator.generate_cleverSizes(numToGenerate, goalType, maxTreeSize,gen, allParamsInfo, rand, gen.getChecker());
         Set<AppTree> treeSet = AppTreeIndivGenerator.generate_randomSize(numToGenerate, goalType, maxTreeSize, gen, allParamsInfo, rand, /*silent*/ false);
