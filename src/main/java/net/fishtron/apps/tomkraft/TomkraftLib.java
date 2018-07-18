@@ -45,7 +45,7 @@ public class TomkraftLib {
             if (!(args[i_type] instanceof Type) && !(args[i_type] instanceof String)) {
                 throw new Error("Arg #"+i_type+ " '" +args[i_type]+"' is not a Type.");
             }
-            if (args[i_para] != null && !(args[i_para] instanceof JSONArray)) {
+            if (args[i_para] != null && !(args[i_para] instanceof JSONArray) && !(args[i_para] instanceof JSONObject)) {
                 throw new Error("Arg #"+i_para+" '"+args[i_para]+"' is not a param description.");
             }
 
@@ -53,14 +53,33 @@ public class TomkraftLib {
             Type   type = (args[i_type] instanceof Type) ? (Type) args[i_type] : Types.parse((String)args[i_type]);
 
             boolean isParam = args[i_para] != null;
+            boolean isSimpleParam = isParam && (args[i_para] instanceof JSONArray);
 
-            gammaSymList.add(new GammaSym(name, type, false));
-            defs.add(AB.mk(name, isParam ? new EvalCode.ReflexiveJsonParam() : new EvalCode.ReflexiveJsonLeaf()));
+            Object defValue;
 
             if (isParam) {
-                JSONArray paramValues = (JSONArray) args[i_para];
-                allParamsInfo.put(name, F.obj(EvalCode.DEFAULT_PARAM_NAME, paramValues));
+
+                if (isSimpleParam) {
+
+                    JSONArray oneParamValues = (JSONArray) args[i_para];
+                    allParamsInfo.put(name, F.obj(EvalCode.DEFAULT_PARAM_NAME, oneParamValues));
+
+                    defValue = new EvalCode.SimpleJsonReflexiveParam();
+
+                } else {
+
+                    JSONObject multipleParamsValues = (JSONObject) args[i_para];
+                    allParamsInfo.put(name, multipleParamsValues);
+
+                    defValue = new EvalCode.JsonObjectReflexiveParam();
+                }
+
+            } else {
+                defValue = new EvalCode.ReflexiveJsonLeaf();
             }
+
+            gammaSymList.add(new GammaSym(name, type, false));
+            defs.add(AB.mk(name, defValue));
         }
 
         Gamma gamma = new Gamma(gammaSymList);
@@ -171,10 +190,109 @@ public class TomkraftLib {
 
         );
 
+        LibPackage libPackage_selection01 = mkReflexivePack(Terrain,
+                "gauss", GaussType, null,
+                "h", Height, F.arr(4, 8,16,32),
+                "m", Move_1, F.arr(-16, -8, -4, -2, -1, 0, 1, 2, 4, 8, 16),
+                "si",Sigma_1, F.arr(16, 32),
+                "r", Rot_1, F.arr(0, 0.25*PI, 0.5*PI, 0.75*PI, PI, 1.25*PI, 1.5*PI, 1.75*PI)
+        );
+
+        Type PC_args = Types.parse("PC_args");
+        Type PC_type = Types.mk(PC_args, Terrain);
+
+        Type Ga_args  = Types.parse("Ga_args");
+        Type Ga_type  = Types.mk(Ga_args, Terrain);
+
+        Type Pcy_args  = Types.parse("Pcy_args");
+        Type Pcy_type  = Types.mk(Pcy_args, Terrain);
+
+
+        LibPackage libPackage_pc = mkReflexivePack(Terrain,
+                "pc",      PC_type, null,
+                "pc_args", PC_args, F.obj(
+                        "cA",   F.arr(0.75, 1, 1.25, 1.5, 1.75),
+                        "ca",   F.arr(32.0, 52, 64.0, 91),
+                        "cb",   F.arr(32.0, 42, 64.0, 82),
+                        "cc",   F.arr(0.75, 1.0, 2.5, 5),
+                        "A",    F.arr(25.0, 50, 75),
+                        "dy",   F.arr(-7.5, -4, 0),
+                        "x0",   F.arr(123.4, 333.3, 555.9, 623.0),
+                        "z0",   F.arr(256.7, 321.0, 784.8, 987.2),
+                        "s",    F.arr(0.03, 0.05, 0.08)
+                )
+        );
+
+        LibPackage libPackage_ga = mkReflexivePack(Terrain,
+                "ga",      Ga_type, null,
+                "ga_args", Ga_args, F.obj(
+                        "h",    F.arr(4, 8,16,23,32,42,64),
+                        "m1",   F.arr(-32,-16, -8, -4, -2, -1, 0, 1, 2, 4, 8, 16,32),
+                        "m2",   F.arr(-32,-16, -8, -4, -2, -1, 0, 1, 2, 4, 8, 16,32),
+                        "s1",   F.arr(16, 23, 24, 32,42),
+                        "s2",   F.arr(16, 23, 24, 32,42),
+                        "r",    F.arr(0, 0.125*PI, 0.25*PI, 0.333*PI, 0.5*PI, 0.612*PI, 0.75*PI, 0.875*PI, PI, 1.125*PI, 1.25*PI, 1.5*PI, 1.75*PI)
+                )
+        );
+
+        LibPackage libPackage_pcy = mkReflexivePack(Terrain,
+                "+", TerrainBinOp, null,
+                "-", TerrainBinOp, null,
+                "avg", TerrainBinOp, null,
+
+                "pcy",      Pcy_type, null,
+                "pcy_args", Pcy_args, F.obj(
+                        "h", F.arr(1,2,4, 8,16,32),
+                        "x", F.arr(-32,-16, -8, -4, -2, -1, 0, 1, 2, 4, 8, 16,32),
+                        "y", F.arr(-32,-16, -8, -4, -2, -1, 0, 1, 2, 4, 8, 16,32),
+                        "A", F.arr(8, 16, 32, 64, 80),
+                        "dy", F.arr(40, 80, 100)
+                )
+        );
+
+        LibPackage libPackage_04 = mkReflexivePack(Terrain,
+                "+", TerrainBinOp, null,
+                "-", TerrainBinOp, null,
+                "avg", TerrainBinOp, null,
+
+                "pc",      PC_type, null,
+                "pc_args", PC_args, F.obj(
+                        "cA",  F.arr(0.75, 1, 1.25, 1.5, 1.75),
+                        "ca",  F.arr(32.0, 52, 64.0, 91),
+                        "cb",  F.arr(32.0, 42, 64.0, 82),
+                        "cc",  F.arr(0.75, 1.0, 2.5, 5),
+                        "A",   F.arr(25.0, 50, 75),
+                        "dy",  F.arr(-7.5, -4, 0),
+                        "x0",  F.arr(123.4, 333.3, 555.9, 623.0),
+                        "z0",  F.arr(256.7, 321.0, 784.8, 987.2),
+                        "s",   F.arr(0.03, 0.05, 0.08)
+                ),
+
+                "ga",      Ga_type, null,
+                "ga_args", Ga_args, F.obj(
+                        "h",    F.arr(4, 8,16,32),
+                        "m1",   F.arr(-32,-16, -8, -4, -2, -1, 0, 1, 2, 4, 8, 16,32),
+                        "m2",   F.arr(-32,-16, -8, -4, -2, -1, 0, 1, 2, 4, 8, 16,32),
+                        "s1",   F.arr(16, 32),
+                        "s2",   F.arr(16, 32),
+                        "r",    F.arr(0, 0.25*PI, 0.5*PI, 0.75*PI, PI, 1.25*PI, 1.5*PI, 1.75*PI)
+                ),
+
+                "pcy",      Pcy_type, null,
+                "pcy_args", Pcy_args, F.obj(
+                        "h", F.arr(1,2,4, 8,16,32),
+                        "x", F.arr(-32,-16, -8, -4, -2, -1, 0, 1, 2, 4, 8, 16,32),
+                        "y", F.arr(-32,-16, -8, -4, -2, -1, 0, 1, 2, 4, 8, 16,32),
+                        "A", F.arr(8, 16, 32, 64, 80),
+                        "dy", F.arr(40, 80, 100)
+                )
+        );
+
 
 
         //return new LibPackage(R2, gamma, evalLib, allParamsInfo);
-        return libPackage_03;
+
+        return libPackage_04; // libPackage_pcy;  // //libPackage_03; / //_03;
     }
 
     public static void main(String[] args) {

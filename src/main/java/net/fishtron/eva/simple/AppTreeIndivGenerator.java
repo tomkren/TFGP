@@ -156,9 +156,12 @@ public class AppTreeIndivGenerator implements IndivGenerator<AppTreeIndiv> {
         //return F.map(treeSet, tree -> new AppTreeIndiv(tree, lib));
     }
 
-    private List<AppTreeIndiv> generate_randomSize(int numToGenerate) {
 
-        SortedSet<AppTree> treeSet = new TreeSet<>(AppTree.compareTrees);
+    public static /*List<AppTreeIndiv>*/ Set<AppTree> generate_randomSize(int numToGenerate, Type goalType, int maxTreeSize, Gen gen, JSONObject allParamsInfo, Random rand, boolean silent) {  //(int numToGenerate) {
+
+        //SortedSet<AppTree> treeSet = new TreeSet<>(AppTree.compareTrees);
+        HashSet<AppTree> treeSet = new HashSet<>();
+
 
         int numGenerated = 0;
         while (treeSet.size() < numToGenerate) {
@@ -186,7 +189,8 @@ public class AppTreeIndivGenerator implements IndivGenerator<AppTreeIndiv> {
 
         }
 
-        return F.map(treeSet, tree -> new AppTreeIndiv(tree, lib));
+        return treeSet;
+        //return F.map(treeSet, tree -> new AppTreeIndiv(tree, lib));
     }
 
 

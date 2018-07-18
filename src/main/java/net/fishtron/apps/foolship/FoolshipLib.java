@@ -88,10 +88,10 @@ class FoolshipLib {
 
         EvalLib evalLib = EvalLib.mk(
                 basicTreeProgram, new EvalCode.ReflexiveJsonLeaf(),
-                useSaveRatio,     new EvalCode.ReflexiveJsonParam(),
-                consumeGiveRatio, new EvalCode.ReflexiveJsonParam(),
-                ratio,            new EvalCode.ReflexiveJsonParam(),
-                angle,            new EvalCode.ReflexiveJsonParam()
+                useSaveRatio,     new EvalCode.SimpleJsonReflexiveParam(),
+                consumeGiveRatio, new EvalCode.SimpleJsonReflexiveParam(),
+                ratio,            new EvalCode.SimpleJsonReflexiveParam(),
+                angle,            new EvalCode.SimpleJsonReflexiveParam()
         );
 
         JSONObject allParamsInfo = F.obj(

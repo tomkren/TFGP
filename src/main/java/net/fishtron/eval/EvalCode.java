@@ -3,6 +3,7 @@ package net.fishtron.eval;
 import net.fishtron.trees.AppTree;
 import net.fishtron.trees.Leaf;
 import net.fishtron.utils.F;
+import org.json.JSONObject;
 
 import java.util.function.Function;
 
@@ -28,10 +29,22 @@ public interface EvalCode {
 
     String DEFAULT_PARAM_NAME = "_";
 
-    class ReflexiveJsonParam implements EvalCode {
+    class SimpleJsonReflexiveParam implements EvalCode {
         @Override
         public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun, int numArgs) {
             return leaf.getParams().toJson().get(DEFAULT_PARAM_NAME);
+        }
+    }
+
+    String META_KEY_LEAF_SYMBOL = "'";
+
+    class JsonObjectReflexiveParam implements EvalCode {
+        @Override
+        public Object evalCode(Leaf leaf, Function<AppTree, Object> evalFun, int numArgs) {
+            JSONObject ret = leaf.getParams().toJson();
+            String sym = leaf.getSym();
+            ret.put(META_KEY_LEAF_SYMBOL, sym);
+            return ret;
         }
     }
 
