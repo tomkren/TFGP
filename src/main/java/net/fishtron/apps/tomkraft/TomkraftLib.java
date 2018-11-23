@@ -90,8 +90,6 @@ public class TomkraftLib {
 
     static LibPackage mkLibPack(JSONObject jobConfigOpts) {
 
-
-
         Type R = Types.parse("R"); // float
         Type B = Types.parse("B"); // bool
 
