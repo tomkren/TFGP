@@ -141,120 +141,718 @@
 
 \newcommand{\la}{\leftarrow\xspace}
 
-\chapter{i já it}
-
-\section{Osnova}
-
-\subsection{Mantry}
-
-\textbf{Jak to napsat?}
-
-- Jako bych psal TFGP blogísek, todle je trénink.
-
-- Tak aby se to z toho pěkně pochopilo, ne aby to bylo HC formální nečitelná píčovina.
-
-~\\
-
-\subsection{High-level osnova}
-
-\textbf{Problém popisu dagů} : 
-
-- workflows jsou dagy
-
-- dagy jde popsat operacema skladající jiný dagy
-
-\textbf{Parametricky polymorfní Typovej systém} : 
-
-- chceme konstruovat jen korektní dagy
-
-- chceme aby na sebe navazovali správně počty atd
-
-\textbf{Aplikativní notace}
-
-- klasicka představa je že funkce jsou ve vnitřních uzlech a jejich parametry jsou syni
-
-- aplikativní notace využívá toho, že každou funkci si díky curringu mužu chápat jako fci 1 proměný. 
-
-- pak mužu vzit stromovou reprezentaci explicitně zachycující jednotlivé aplikace
-
-\textbf{Generování}
-
-Dosud jsme popsali co je cílem tvořit, ted popíšem jak na to jdeme.
-
-- 1. základ našeho přístupu: generuje strom pro danou velikost stromu (počet symbolů).
-  
-  - což mimojiné umožnuje mnohem přímější kontrolu nad tím, z jakého rozložení taháme naše jhedince 
-  - zde popsat to jak to děláme (32, 16,16, 8,8,8,8, ...)
-
-- 2. základ našeho přístupu: počítáme si počty stromů pro jednotlivý dotazy 
-     - abychom byli schopný generovat (semi-)uniformě
-
-- 3. základ našeho přístupu: ex. sigma že z gamma de vyvodit že M je typu sigma(tau)
-
-  - k tomu je potřeba definovat prerekvizitní pojmy, minimálně tyto:
-    - substituce
-    - a to jakym způsobem vypadá dotaz (k,tau) - a že je teda obecnejší to tau než přímo typ že pak M:Tau
-      - to by šlo snad názorně ukázat na příkladě generování stromu k>1:
-      - Generujem Dag D LD, k>1 -> v kořeni stromu je aplikace tedy:
-         - levej syn je funkce z něčeho do (Dag D LD), pravej syn je to něco
-
-  - to kulminuje v hodící se funkci subs, která pro danej dotaz (k,tau) vrátí substituce spolu s počtama stromů
-
-
-- \textit{vygenerování jednoho jedince/stromu/programu}
-
- - (a) strom velikosti 1 - výběr symbolu z gammy aby to pasovalo
- - (b) strom velikosti k>1 - tedy jde o aplikaci a
-
-- \textit{předpočítání pomocných dat pro generování}
-
-
-- "semi-unfiromní" generování - poznámka o nedokonalosti v uniformitě
-
-~\\
-
-~\\
-
-\subsection{Low-level osnova}
-
-- Čim začít: 
-Co je to ml workflow. 
-ML workflows přirozeně tvoří graf. 
-Natrénovat a vyhodnotit takový ensamble je to výpočetně náročný a tak chceme vyloučit cykly. 
-Tedy budeme tvořit dagy. 
-
-Architektura našeho systému sestává ze dvou základních úkolů:
-(1) Vytvořit DAG reprezentující daný workflow - pomocí evoluce by GP
-(2) Natrénovat a vyhodnotit daný workflow
-
-Během evoluce však nepracujemes přímo s grafovou reprezentací ale nepřímo skrze stromovou reprezentaci programu, jehož výsledkem je DAG popisující daný workflow.
-
-Tedy jsou to 3 kroky: strom popisuje program který když se vyhodnotí tak jeho výsledek je graf podle kterého se postavý ML workflow který se natrénuje a vyhodnotí.
-
-
-Základní stavební bloky jsou basic klasifikační metody.
-Dálešími elementárními prvky jsou jedotlivé preprocessingy, clusteringy a votovací metody. 
-Každou z elementárních metod můžeme chápat jako dag.
-Tyto elementární prvky jsou kombinovány do větších pomocí operací skladajících dva a víc menších dagů do jednoho většího.
-
- 
-
-
-Výsledkem prvního kroku je tedy graf. 
-To jak zacházíme s Při vytváření daného , ten však může být výsledkem  
-
-My ale
-Dagy reprezentujeme jako výrazy.
-
-- Co je jádro:
-
-- Jak to schrnout:
-
-~\\
 
 
 
-\section{Our approach}
+
+
+
+
+\chapter{Hindley-Milner Type System}
+
+
+
+\newcommand{\Real}{\mathbb{R}}
+\newcommand{\letin}[3]{\texttt{let} \, #1 = #2 \, \texttt{in} \, #3}
+\newcommand{\W}{\op{\textbf{W}}}
+\newcommand{\Mgu}{\op{\textbf{MGU}}}
+\newcommand{\where}{\op{\textbf{where~}}}
+\newcommand{\SPr}{S^\prime}
+
+\newcommand{\unaRule}[2]{\dfrac{#1}{#2}}
+
+
+
+\red{(V0.6) The text is not completely finished, but hopefully the sections dealing with the Hindley-Milner algorithm $\W$ are sufficiently understandable.}
+
+
+\section*{TODO list}
+
+\red{
+\begin{itemize}
+\item Define rest of the context stuff
+\item Textually describe unification algorithm
+\item In W comment for each case what is going on.
+\item write Intro
+\end{itemize}
+}
+
+\section{Introduction}
+
+\red{Todo: Why Hindley-Milner? (= simplified system F capable of type inference in curry style).}
+
+\section{Type Language}
+\label{sec:typelang}
+
+\red{TODO probably replace simple-type with mono-type}
+
+A type system connects a type language with a program language.
+In this section we present the type language (i.e. what are legal type expressions and what are they supposed to mean) used in Hindley-Milner type system.
+
+We start with a subset of the language, \textit{simple-types}.
+The whole language is obtained by enriching the simple-types with polymorphism.
+
+Language of simple-types consists of tree type constructs, a simple-type is either: 
+a type \textit{symbol}, 
+a type \textit{term}, 
+or a type \textit{variable}.
+Let us have a closer look on each of the constructs.
+
+A~\textit{type symbol} is a symbol of a specific basic type, such as 
+$Int$, $Bool$, $String$, or $\Real$ (which are all inhabited by values); 
+or a symbol of a specific parametric type such as $List$ or $\ar$ 
+which are not inhabited. These uninhabited symbols serve as "functions over types" 
+and need one or more types as type parameters. For example, in $(List~Int)$
+or $(Int \ar Bool)$, we need to know what elements does the list have, 
+or what is the function's domain and co-domain. Type symbol is written as 
+a single capitalized word.
+
+A~\textit{type term} is a construct for creating compound types given 
+by a sequence of types, e.g., $(List~Int)$, or $(Int \ar Bool)$. 
+Type term construct is a basis for construction of \textit{parametric} types,
+which are generally written as a parenthesized sequence of type expressions, 
+i.e. $(\tau_1~\tau_2~\dots~\tau_n)$, where $\tau_i$ are arbitrary 
+simple-type expressions.
+
+A~\textit{type variable} is a construct representing a type which has not been fully
+specified yet. For instance, $\alpha$, $\beta_1$ and $\beta_2$ are type variables.
+Type variables form \textit{polymorphic} types, 
+e.g. $(List~\alpha)$, standing for a list of every (not yet specified) type. For instance,
+this list is inhabited by an empty list, $[~] : (List~\alpha)$.
+Other example of polymorphic type includes $(\alpha \ar \alpha)$ which stands for an unary 
+operation over every type, for instance inhabited by
+an identity function $id : \alpha \ar \alpha$. 
+But not all polymorphic types are inhabited, e.g., there is no reasonable program having 
+type $(\alpha \ar \beta)$ since there is no function such that it is from any type to any other 
+type. 
+In this text, type variables are written as Greek letters from the beginning of the alphabet ($\alpha$ and $\beta$ with possible index, e.g. $\beta_{42}$); 
+in Haskell a type variable is written as a single lowercase word, usually one character long.
+
+We get the full type language by adding \textit{poly-types} (from \textit{polymorphic}). Poly-types  are created by use of the fourth type construct: the universal quantification using $\forall$. 
+
+More specifically we can take any type expression $\sigma$ (simple-type or poly-type) and make 
+it a poly-type by prefixing it with a quantification of one type variable (which usually appears inside $\sigma$). If the quantified type variable is $\alpha$, then the newly created poly-type expression is $\forall \alpha . \sigma$. All the occurrences of $\alpha$ inside $\forall \alpha . \sigma$ are said to be \textit{bound}, as opposed to \textit{free}.
+
+% Roughly speaking, when a type variable is quantified in a poly-type it means that any type can be plugged inside instead of this    
+
+Here is a subtle and confusing yet very important difference between the way how polymorphic types 
+are written in Haskell type language and in Hindley-Milner type language, simply said:
+
+~
+
+\textbf{In Haskell all the type variables in polymorphic types are implicitly quantified.} 
+
+~
+
+For example the \texttt{map} function has Haskell type \texttt{(a -> b) -> [a] -> [b]},
+or we can pretend that it is \texttt{(a -> b) -> (List a) -> (List b)} to be compatible with our type term notation.
+And \texttt{map} in Haskell with this type is polymorphic in both its type variables \texttt{a}
+and \texttt{b}. So if we need to translate this Haskell type to Hindley-Milner type, we must prepend a quantification for each type variable occurring in the type:
+
+$\forall a . (\forall b . (a \ar b) \ar (\op{List}~a) \ar (\op{List}~b))$
+
+Which is abbreviated (similarly as with lambda abstractions) as:
+
+$\forall a\,b\,.\,(a \ar b) \ar (\op{List}~a) \ar (\op{List}~b)$
+
+Or even closer to our conventions as (because when something is bounded we can rename in the similar fashion as with lambda abstractions bounding program variables):
+
+$\forall \alpha\,\beta\,.\,(\alpha \ar \beta) \ar (\op{List}~\alpha) \ar (\op{List}~\beta)$
+
+~
+
+So what is the purpose of free type variables?
+
+We may say that in Hindley-Milner algorithm the type variables are used for two different purposes, depending on whether they are free or bound by $\forall$ quantifier.
+
+The bound variables act as we know them from Haskell, the tricky part are the free variables.
+
+\red{TODO specifiy the convetions regarding $\sigma$ for poly-types (well more precisely any-type) and  $\tau$ for mono-types}
+
+
+We demonstrate the difference 
+on an example type $\tau = (\alpha \ar \beta)$ and $\sigma = (\forall \alpha \beta . \alpha \ar \beta)$:
+\begin{itemize}
+\item There is no program expression $e$ such that $e : \forall \alpha \beta . \alpha \ar \beta$, because it would be a polymorphic function magically converting values between every pair of types.
+\item On the other hand statement $e : \alpha \ar \beta$ tells us only that $e$ is some function, we don't know yet, which specific types will stand for $\alpha$ and $\beta$. It corresponds to a more intermediate result.    
+
+\red{TODO: formulate more precisely...}
+\end{itemize}
+
+
+
+
+
+\section{Type Substitutions}
+
+Generally speaking, a substitution is a function used for replacement 
+of variables in an expression by some other expression.
+Substitution is used both in program expressions 
+(e.g. it is the core of $\beta$-reduction) and type expressions.
+Here we will be dealing with substitutions on the type level. 
+
+A type substitution is a finite mapping from type variables to types.
+It is usually denoted as a collection of $key \mapsto value$ pairs.
+The general form is:
+
+$$\{ \alpha_1 \mapsto \tau_1, \alpha_2 \mapsto \tau_2, \dots, \alpha_n \mapsto \tau_n \}$$ 
+
+For example, let 
+
+$S = \{ \alpha_3 \mapsto \op{Int}, 
+\beta_3 \mapsto (\op{List}~\alpha_6),
+\alpha_5 \mapsto \beta_1, 
+\beta_{23} \mapsto (\alpha_3 \ar \beta_1) \}$ 
+and 
+
+$\tau = ((\alpha_3 \ar \alpha_5) \ar ( \beta_1  \ar (\op{List}~\alpha_6) ) )$,
+then 
+
+$\tauPr = S(\tau) = ((\op{Int} \ar \beta_1) \ar (\beta_1  \ar (\op{List}~\alpha_6) ) )$.
+
+Generally, by applying a substitution $S$ to type $\tau$, we get a \textit{more specific} type $\tauPr = S(\tau)$.
+
+A special (but often seen, e.g. in Hindley-Milner algorithm) case of substitution is an
+empty substitution, denoted as $\{\}$, having no effect when applied; 
+i.e. $\{\}(\tau) = \tau$.
+
+
+Because substitutions can be dealt with as with functions, we can compose them using composition operator $\circ$. Let $R = S_2 \circ S_1$, then 
+$R(\tau) = (S_2 \circ S_1)(\tau) = S_2 ( S_1(\tau) )$. 
+
+
+
+\section{Typing Contexts}
+
+\begin{definition}
+A $\mathit{term:type}$ statement $\mathit{M}:\mathit{\tau}$ states that (program) term $M$ has type $\tau$.   
+A \textit{declaration} is a statement $s : \tau$ where $s$ is a term symbol and $\tau$ is a type.
+A \textit{context} is set of declarations with distinct term symbols.\footnote{Interestingly, the definition of a \textit{context} and definition of a \textit{substitution} are almost the same. The difference is that "keys" in a context are term symbols/variables, whereas substitution "keys" are type variables. Maybe this fact could be utilized in an interesting way...}
+\end{definition}
+
+\red{def $\Gamma_x$} ; \red{def $\overline{\Gamma}(\tau)$}
+
+
+
+\section{Hindley-Milner Algorithm W}
+
+The Hindley-Milner algorithm $\W$ is used for type inference.
+Loosely speaking, we give to $\W$ as an input 
+a \textit{program expression} $e$ without type information 
+and it returns a \textit{type} $\tau$ of that expression as a result, 
+or it tells us that the expression cannot be typed correctly.
+
+From this simplified point of view we may see the algorithm usage as:
+
+(1) We have an expression $e$, for which we would like to know the type. 
+
+So we run $\W$ on $e$ and we may either get as a result:
+
+(2a) a type $\tau$, so we know that $e$ has type $\tau$,
+
+(2b) or the \textit{fail result} $\bot$ (usually called \textit{bottom}), so we know there is a type error inside $e$.
+
+~   
+
+The first simplification of this description lies in that we have omitted 
+the typing contexts (the "Gammas"). 
+All the inference rules deal with \textit{judgments} of the form:
+
+$$\Gamma \vdash e : \tau$$
+
+And so does the $\W$ algorithm.
+If $e$ is the top-level program expression,
+we can think of a context $\Gamma$ as a collection of type information about the "library"
+in which the program expression $e$ is written.
+Or, if $e$ is some local sub-expression, then its $\Gamma$ contains also type information about
+all the local variables defined in its scope.
+
+We can think of a judgment of the form $\Gamma \vdash e : \tau$ as: 
+\textit{From the building symbols described in the typing context $\Gamma$ we can build 
+a well-typed program expression $e$ which has type $\tau$.}
+Therefore it makes sense to provide a typing context $\Gamma$ to the $\W$ algorithm as another argument: $\W(\Gamma, e)$.
+
+But $\W$ algorithm is even stronger: We may use libraries for which we do not know the proper typing information yet.
+
+For example consider the following expression $e$:
+
+$$ \lambda x . ((+~((+~x)~1))~x) $$
+
+Or, in a more readable fashion, $e = \lambda x . (x+1)+x $.
+
+
+And let's pretend that the only thing we know is that $1 : \op{Int}$, 
+but we don't know the type of $+$. 
+$\W$ can deal with this situation and infer that $e$ has type $Int \ar Int$ and
+that $+$ has type $Int \ar Int \ar Int$. This can be achieved by calling $\W$ with
+typing context $\Gamma = \{ 1 : \op{Int}, + : \alpha \}$, 
+where $\alpha$ is a \textit{type variable}.
+
+But if the only result of the $\W(\Gamma,e)$ is the type $\tau$ of $e$, 
+how we get the information about the inferred type of $+$? 
+Well, $\W$ actually returns a pair $(S, \tau)$, where $S$ is a substitution
+containing the rest of the inferred type information. 
+More specifically, $S(\alpha) = Int \ar Int \ar Int$.  
+
+Now we can state the behavior of the $\W$ algorithm more formally:
+
+~
+
+Given context $\Gamma$ and expression $e$ the Hindley-Milner algorithm $\W$ 
+is looking for the substitution $S$ and type $\tau$ such that: 
+$$ S(\Gamma) \vdash e : \tau $$
+If there are no such $S$ and $\tau$, then the $\W$ algorithm fails.
+But if there are any, $\W$ finds the most general $S$ a $\tau$.
+
+
+\begin{align*}
+\W(\Gamma, e) = &
+\begin{cases*}
+  (S, \tau) 
+  & \textbf{if} there is any $\SPr$ and $\tauPr$ such that $S^\prime(\Gamma) \vdash e : \tauPr$  \\
+  \bot & \textbf{otherwise}
+\end{cases*}\\
+\end{align*}
+
+
+
+
+\subsection{Definition of W algorithm}
+
+Here we present a recursive definition of $\W$ algorithm based on case analysis of all possible patterns that program expression $e$ may have 
+(i.e. $e$ may be a \textit{variable}, an \textit{application}, an \textit{abstraction}, or a \textit{let-expression}). 
+
+~
+
+Whenever there is a type variable $\beta$ (or $\beta_i$) it is meant to be a \textit{new fresh type variable}, that has not occurred anywhere in $\Gamma$ or during the computation of some other sub-expression. Namely, fresh type variables $\beta$ are introduced in cases \textbf{(1)}, \textbf{(2)} and \textbf{(3)}. 
+
+During the computation of cases \textbf{(2)}, \textbf{(3)} and \textbf{(4)} there is a recursive call to $\W$ which can possibly fail; whenever a recursive call fails, then also the calling computation fails.
+
+~
+
+\textbf{(1)} Expression $e$ is a \textit{variable}; $e = x$:
+
+\begin{align*}
+\W(\Gamma, x) \defi ~ &
+\begin{cases*}
+  (\{\}, R(\tauPr) ) 
+  & \textbf{if} $(x : \forall \alpha_1 \dots \alpha_n.\tauPr) \in \Gamma$  \\
+  \bot & \textbf{otherwise}
+\end{cases*}\\
+\where & R = \{\alpha_1 \mapsto \beta_1, \dots, \alpha_n \mapsto \beta_n\} \\
+\end{align*}
+
+
+\textbf{(2)} Expression $e$ is an \textit{application}; $e = (e_1~e_2)$:
+
+\begin{align*}
+\W(\Gamma, (e_1~e_2)) \defi ~ & 
+\begin{cases*}
+  (R \circ S_2 \circ S_1, R(\beta) ) & \textbf{if} $R \neq \bot$ \\
+  \bot & \textbf{if} $R = \bot$
+\end{cases*}\\
+\where & (S_1, \tau_1) = \W(\Gamma, e_1), \\
+       & (S_2, \tau_2) = \W(S_1(\Gamma), e_2), \\
+       & R = \Mgu( S_2(\tau_1), \tau_2 \ar \beta ).\\
+\end{align*}
+
+
+\textbf{(3)} Expression $e$ is an \textit{abstraction}; $e = \lambda x . e_1$:
+
+\begin{align*}
+\W(\Gamma, \lambda x .e_1) \defi ~ & (S_1, S_1(\beta) \ar \tau_1 ) \\
+\where & (S_1, \tau_1) = \W(\Gamma_x, x : \beta ~;~ e_1). \\
+\end{align*}
+
+
+
+\textbf{(4)} Expression $e$ is a \textit{let-expression}; $e = (\letin{x}{e_1}{e_2})$:
+
+\begin{align*}
+\W(\Gamma, \letin{x}{e_1}{e_2}) \defi ~ & (S_2 \circ S_1, \tau_2) \\
+\where & (S_1, \tau_1) = \W(\Gamma, e_1), \\
+       & (S_2, \tau_2) = \W(S_1(\Gamma_x),x:\overline{(S_1(\Gamma))}(\tau_1); e_2). \\
+\end{align*}
+
+\subsection{Example run of W algorithm}
+
+We demonstrate $\W$ algorithm on simple example which contains all four possible forms of expressions as sub-expressions:
+$$\letin{x}{\lambda x . x}{f~f}$$
+
+All the contained program variables
+($f$ and $x$) are locally defined variables, so we don't need to provide any further type
+information, therefore we call $\W$ with an empty typing context $\Gamma = \emptyset$. 
+
+$$\W(\emptyset, \letin{f}{\lambda x . x}{f~f})$$
+
+The expression matches the case \textbf{(4)}:
+\begin{align*}
+\W(\emptyset, \letin{f}{\lambda x . x}{f~f}) \defi ~ & (S_2 \circ S_1, \tau_2) \\
+\where & (S_1, \tau_1) = \W(\emptyset, \lambda x . x), \\
+       & (S_2, \tau_2) = \W(S_1(\emptyset_f),f:\overline{(S_1(\emptyset))}(\tau_1); f~f).
+\end{align*}
+
+So we need to first compute the type (and substitution) of the $e_1 = \lambda x . x$, matching the case \textbf{(3)}:
+\begin{align*}
+\W(\emptyset, \lambda x .x) \defi ~ & (S_1, S_1(\beta_1) \ar \tau_1 ) \\
+\where & (S_1, \tau_1) = \W(\{x : \beta_1 \}~,~ x).
+\end{align*}
+
+Finally we get to the first variable (case \textbf{(1)}), thus we will get our first result.
+\begin{align*}
+\W(\{x : \beta_1 \}~,~ x) \defi ~ & ( \{\}, R(\beta_1) ) \where  R = \{\} \\
+                              = ~ & ( \{\}, \beta_1 )
+\end{align*}
+
+Because $x$ has type $\beta_1$ in the context $\{x : \beta_1\}$, and $\beta_1$ has no universally quantified prefix head, the substitution $R$ is empty, therefore identity. With this information we can get back to computation of $\W(\emptyset, \lambda x .x)$ and finish it. 
+\begin{align*}
+\W(\emptyset, \lambda x . x) \defi ~ & (S_1, S_1(\beta_1) \ar \tau_1 ) \where (S_1, \tau_1) = ( \{\}, \beta_1 ) \\
+ = ~ & (\{\}, \{\}(\beta_1) \ar \beta_1 ) = (\{\}, \beta_1 \ar \beta_1 )
+\end{align*}
+
+By this we have finished the first recursive call in computation of \\
+$\W(\emptyset, \letin{f}{\lambda x . x}{f~f})$. So we can compute the second recursive call:
+\begin{align*}
+& \W(S_1(\emptyset_f),f:\overline{(S_1(\emptyset))}(\tau_1); f~f) \where (S_1, \tau_1) = (\{\}, \beta_1 \ar \beta_1 ) \\
+= & \W(\{\}(\emptyset_f),f:\overline{(\{\}(\emptyset))}(\beta_1 \ar \beta_1); f~f) \\
+= & \W(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}; f~f)
+\end{align*}
+
+Now wee need to compute the type of expression $(f~f)$ which is an application (case \textbf{(2)}) from typing context $\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}$, specifying that $f$ has type of the \textit{polymorphic} identity. 
+\begin{align*}
+\W(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}; f~f) \defi ~ & 
+(R \circ S_2 \circ S_1, R(\beta_?) ) \\
+\where & (S_1, \tau_1) = \W(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}, f), \\
+       & (S_2, \tau_2) = \W(S_1(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}), f), \\
+       & R = \Mgu( S_2(\tau_1), \tau_2 \ar \beta_? ).\\
+\end{align*}
+
+You can see $\beta_?$ which is used to signify that it is not obvious what index the new fresh variable will have, since the two recursive calls to $\W$ may produce some new fresh variables before $\beta_?$ is introduced. Actually both calls produce one new type variable, thus $\beta_?$ will be $\beta_4$, as we will see.
+\begin{align*}
+\W(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}, f) \defi ~ & (\{\}, R(\beta_1 \ar \beta_1) ) 
+~ \where R = \{\beta_1 \mapsto \beta_2\} \\
+= ~ &  (\{\}, \beta_2 \ar \beta_2)
+\end{align*}
+
+Now we can continue with the second call:
+\begin{align*}
+\W(\{\}(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}), f) \defi ~ & (\{\}, R(\beta_1 \ar \beta_1) ) 
+~ \where R = \{\beta_1 \mapsto \beta_3\} \\
+= ~ &  (\{\}, \beta_3 \ar \beta_3)
+\end{align*}
+
+And finally we compute the \textit{most general unification} $R$:
+\begin{align*}
+R & = \Mgu(\beta_2 \ar \beta_2, (\beta_3 \ar \beta_3) \ar \beta_4 ) \\
+  & = \{ \beta_2 \mapsto (\beta_3 \ar \beta_3),~ \beta_4 \mapsto (\beta_3 \ar \beta_3) \}
+\end{align*}
+
+One can see that R really unifies $\beta_2 \ar \beta_2$ and $(\beta_3 \ar \beta_3) \ar \beta_4$,
+because $R(\beta_2 \ar \beta_2) = (\beta_3 \ar \beta_3) \ar (\beta_3 \ar \beta_3) = R((\beta_3 \ar \beta_3) \ar \beta_4)$. Now the computation of $\W(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}; f~f)$ can be finished:
+\begin{align*}
+\W(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}; f~f) 
+\defi ~ & (R \circ S_2 \circ S_1, R(\beta_4) ) \\
+    = ~ & (\{ \beta_2 \mapsto (\beta_3 \ar \beta_3), \beta_4 \mapsto (\beta_3 \ar \beta_3) \} \circ \{\} \circ \{\},~ \beta_3 \ar \beta_3 )\\ 
+    = ~ & (\{ \beta_2 \mapsto (\beta_3 \ar \beta_3), \beta_4 \mapsto (\beta_3 \ar \beta_3) \}, ~ \beta_3 \ar \beta_3 ) 
+\end{align*}
+
+Now we can compute the final result:
+\begin{align*}
+\W(\emptyset, \letin{f}{\lambda x . x}{f~f}) = ~ & (S_2 \circ S_1, \tau_2) \\
+\where & (S_1, \tau_1) = (\{\}, \beta_1 \ar \beta_1 ), \\
+       & (S_2, \tau_2) = (\{ \beta_2 \mapsto (\beta_3 \ar \beta_3), \beta_4 \mapsto (\beta_3 \ar \beta_3) \}, ~ \beta_3 \ar \beta_3 ).
+\end{align*}
+
+And therefore:
+\begin{align*}
+\W(\emptyset, \letin{f}{\lambda x . x}{f~f}) = ~ & (\{ \beta_2 \mapsto (\beta_3 \ar \beta_3), \beta_4 \mapsto (\beta_3 \ar \beta_3) \},~ \beta_3 \ar \beta_3)
+\end{align*}
+
+We get an unsurprising result:
+$$\emptyset \vdash (\letin{f}{\lambda x . x}{f~f}) : \beta_3 \ar \beta_3$$
+
+
+\section{Inference Rules}
+
+\texttt{TAUT} rule:
+
+$$\unaRule{(x : \sigma) \in \Gamma}{ \Gamma \vdash x : \sigma}$$
+
+\texttt{COMB} rule:
+
+$$\binRule{\Gamma \vdash e_1 : \tau_1 \ar \tau_2}{\Gamma \vdash e_2 : \tau_1}
+{\Gamma \vdash (e_1~e_2) : \tau_2}$$
+
+\texttt{ABS} rule:
+
+$$\unaRule{\Gamma_x,x:\tau_1 \vdash e : \tau_2}
+{\Gamma \vdash (\lambda x . e) :  \tau_1 \ar \tau_2}$$
+
+\texttt{LET} rule:
+
+$$\binRule{\Gamma \vdash e_1 : \sigma}{\Gamma_x,x:\sigma \vdash e_2 : \tau}
+{\Gamma \vdash (\letin{x}{e_1}{e_2}) :  \tau}$$
+
+\texttt{INST} rule:
+
+$$\binRule{\Gamma \vdash e : \sigma}{\sigma \sqsupseteq \sPr}
+{\Gamma \vdash e : \sPr}$$
+
+\texttt{GEN} rule:
+
+$$\binRule{\Gamma \vdash e : \sigma}{\alpha \notin \op{FTV}(\Gamma)}
+{\Gamma \vdash e : \forall \alpha . \sigma}$$
+
+$\sqsupseteq$ rule:
+
+$$\binRule{\beta_i \notin \op{FTV}(\forall \overline{\alpha}.\tau)}
+{\tauPr = \{\overline{\alpha} \mapsto \overline{\tau}\}(\tau)}
+{\forall \overline{\alpha}.\tau  ~ \sqsupseteq ~   \forall \overline{\beta}.\tauPr}$$
+
+The same $\sqsupseteq$ rule again, hopefully more readable:
+
+$$\triRule{\beta_i \notin \op{FTV}(\forall \alpha_1\dots\alpha_n.\tau) \text{ for } i \in \{1,\dots,k\}}
+{\tauPr = \{ \alpha_1 \mapsto \tau_1,  \dots, \alpha_n \mapsto \tau_n \}(\tau)}
+{n,k \geq 0}
+{\forall \alpha_1\dots\alpha_n.\tau  ~ \sqsupseteq ~   \forall \beta_1\dots\beta_k.\tauPr}$$
+
+
+
+\subsection{Correctness and Completeness of W}
+
+~
+
+\subsubsection{Correctness of W}
+
+If $\W(\Gamma, e) = (S, \tau)$, then exist derivation of the judgment $S(\Gamma) \vdash e : \tau$.
+
+~
+
+\subsubsection{Completeness of W}
+
+Let $\Gamma$ be a context and $e$ a program expression,
+and let $\SPr$ be a substitution and $\tauPr$ a type such that:
+$ \SPr(\Gamma) \vdash e : \tauPr $, 
+then:
+
+(1) $\W(\Gamma,e)$ succeeds (i.e. $\W(\Gamma,e) \neq \bot$), 
+let $\W(\Gamma,e) = (S, \tau)$,
+
+(2) there is a substitution $R$ such that $\SPr = R \circ S$ 
+and $R\overline{(S(\Gamma))}(\tau) \sqsupseteq \tauPr$. 
+
+~ 
+
+The correctness theorem states that if $\W$ finds a solution, then the solution is correct.
+The first part of the completeness theorem, states that if there is a solution, then $\W$ finds one. And the second part formally states that the found solution $(S,\tau)$ is the most general one, by comparing it with an arbitrary solution $(\SPr,\tauPr)$. The substitution $R$ acts as a witness of the fact that we can obtain $\SPr$ by making $S$ more specific ($\SPr = R \circ S$).  
+
+\red{Before it is possible to explain the second part of point two, it is necessary to introduce  the "closure overline" somewhere above.}
+
+
+\section{Unification Algorithm}
+\red{todo: Add some explanation here!}
+
+\Pseudokod{Algorithm finding the most general unification.}
+{\textbf{MGU}($\tau_1$, $\tau_2$)}{
+	
+	$result = \{\}$ \;
+	$agenda \la [(\tau_1$, $\tau_2)]$ \;	
+	$isOK \la True$ \;
+
+	\;	
+	
+	\While {agenda not empty $\wedge$ isOK}{
+		$(\tau_a, \tau_b) \la agenda.removeFirst()$ \;
+		$isOK = \textbf{process}(\tau_a, \tau_b, agenda, result)$			
+	}
+	\;
+	
+	\If {$isOK$} {
+		\Return $result$
+	} \Else {
+		\Return $\bot$				
+	}
+	
+}{mguAlg}
+
+\Pseudokod{Processes one type pair.}
+{\textbf{process}($\tau_1$, $\tau_2, agenda, result$)}{
+	\;
+	\If {$\tau_1$ and $\tau_2$ are the same \textbf{TypeVar}} {
+		\Return $True$
+	} \;
+
+	\If {$\tau_1$ and $\tau_2$ are the same \textbf{TypeSym}} {
+		\Return $True$
+	} \;
+
+	\If {$\tau_1$ and $\tau_2$ are both \textbf{TypeTerm} with the same length} {
+		$agenda.addAll(zip(\tau_1.args(), \tau_2.args()))$ \;
+		\Return $True$
+	} \;
+	
+	\If {$\tau_1$ is a \textbf{TypeVar}} {
+		\Return $\textbf{processTypeVar}(\tau_1$, $\tau_2, agenda, result)$
+	} \;
+	
+	\If {$\tau_2$ is a \textbf{TypeVar}} {
+		\Return $\textbf{processTypeVar}(\tau_2$, $\tau_1, agenda, result)$
+	} \;	
+	
+	\Return $False$
+	
+}{mguAlgProcess}
+
+\Pseudokod{Processes one $var \mapsto type$ binding.}
+{\textbf{processTypeVar}($var, type, agenda, result$)}{
+	\;
+	
+	\If {$type$ contains $var$} {
+		\Return $False$
+	} \;
+
+	$S \la \{var \mapsto type \}$\;\;
+
+	\For {$entry$ in $result$} {
+		$(v \mapsto \tau) \la entry$ \;
+		$entry.set_{\tau}( S(\tau) )$
+	} \;
+
+	\For {$entry$ in $agenda$} {
+		$(\tau_1, \tau_2) \la entry$ \;
+		$entry.set_{\tau_1}( S(\tau_1) )$ \;
+		$entry.set_{\tau_2}( S(\tau_2) )$
+	} \;
+
+	
+	$result.add(var \mapsto type)$ \;\;
+	
+	\Return $True$
+	
+}{mguAlgProcessTypeVar}
+
+
+
+
+
+
+
+
+
+%\chapter{i já it}
+%
+%\section{Osnova}
+%
+%\subsection{Mantry}
+%
+%\textbf{Jak to napsat?}
+%
+%- Jako bych psal TFGP blogísek, todle je trénink.
+%
+%- Tak aby se to z toho pěkně pochopilo, ne aby to bylo HC formální nečitelná píčovina.
+%
+%~\\
+%
+%\subsection{High-level osnova}
+%
+%\textbf{Problém popisu dagů} : 
+%
+%- workflows jsou dagy
+%
+%- dagy jde popsat operacema skladající jiný dagy
+%
+%\textbf{Parametricky polymorfní Typovej systém} : 
+%
+%- chceme konstruovat jen korektní dagy
+%
+%- chceme aby na sebe navazovali správně počty atd
+%
+%\textbf{Aplikativní notace}
+%
+%- klasicka představa je že funkce jsou ve vnitřních uzlech a jejich parametry jsou syni
+%
+%- aplikativní notace využívá toho, že každou funkci si díky curringu mužu chápat jako fci 1 proměný. 
+%
+%- pak mužu vzit stromovou reprezentaci explicitně zachycující jednotlivé aplikace
+%
+%\textbf{Generování}
+%
+%Dosud jsme popsali co je cílem tvořit, ted popíšem jak na to jdeme.
+%
+%- 1. základ našeho přístupu: generuje strom pro danou velikost stromu (počet symbolů).
+%  
+%  - což mimojiné umožnuje mnohem přímější kontrolu nad tím, z jakého rozložení taháme naše jhedince 
+%  - zde popsat to jak to děláme (32, 16,16, 8,8,8,8, ...)
+%
+%- 2. základ našeho přístupu: počítáme si počty stromů pro jednotlivý dotazy 
+%     - abychom byli schopný generovat (semi-)uniformě
+%
+%- 3. základ našeho přístupu: ex. sigma že z gamma de vyvodit že M je typu sigma(tau)
+%
+%  - k tomu je potřeba definovat prerekvizitní pojmy, minimálně tyto:
+%    - substituce
+%    - a to jakym způsobem vypadá dotaz (k,tau) - a že je teda obecnejší to tau než přímo typ že pak M:Tau
+%      - to by šlo snad názorně ukázat na příkladě generování stromu k>1:
+%      - Generujem Dag D LD, k>1 -> v kořeni stromu je aplikace tedy:
+%         - levej syn je funkce z něčeho do (Dag D LD), pravej syn je to něco
+%
+%  - to kulminuje v hodící se funkci subs, která pro danej dotaz (k,tau) vrátí substituce spolu s počtama stromů
+%
+%
+%- \textit{vygenerování jednoho jedince/stromu/programu}
+%
+% - (a) strom velikosti 1 - výběr symbolu z gammy aby to pasovalo
+% - (b) strom velikosti k>1 - tedy jde o aplikaci a
+%
+%- \textit{předpočítání pomocných dat pro generování}
+%
+%
+%- "semi-unfiromní" generování - poznámka o nedokonalosti v uniformitě
+%
+%~\\
+%
+%~\\
+%
+%\subsection{Low-level osnova}
+%
+%- Čim začít: 
+%Co je to ml workflow. 
+%ML workflows přirozeně tvoří graf. 
+%Natrénovat a vyhodnotit takový ensamble je to výpočetně náročný a tak chceme vyloučit cykly. 
+%Tedy budeme tvořit dagy. 
+%
+%Architektura našeho systému sestává ze dvou základních úkolů:
+%(1) Vytvořit DAG reprezentující daný workflow - pomocí evoluce by GP
+%(2) Natrénovat a vyhodnotit daný workflow
+%
+%Během evoluce však nepracujemes přímo s grafovou reprezentací ale nepřímo skrze stromovou reprezentaci programu, jehož výsledkem je DAG popisující daný workflow.
+%
+%Tedy jsou to 3 kroky: strom popisuje program který když se vyhodnotí tak jeho výsledek je graf podle kterého se postavý ML workflow který se natrénuje a vyhodnotí.
+%
+%
+%Základní stavební bloky jsou basic klasifikační metody.
+%Dálešími elementárními prvky jsou jedotlivé preprocessingy, clusteringy a votovací metody. 
+%Každou z elementárních metod můžeme chápat jako dag.
+%Tyto elementární prvky jsou kombinovány do větších pomocí operací skladajících dva a víc menších dagů do jednoho většího.
+%
+% 
+%
+%
+%Výsledkem prvního kroku je tedy graf. 
+%To jak zacházíme s Při vytváření daného , ten však může být výsledkem  
+%
+%My ale
+%Dagy reprezentujeme jako výrazy.
+%
+%- Co je jádro:
+%
+%- Jak to schrnout:
+%
+%~\\
+%
+%
+%
+%\section{Our approach}
 
 
 \newcommand{\Dlong}{unlabeled data\xspace}
@@ -288,137 +886,137 @@ Dagy reprezentujeme jako výrazy.
 \newcommand{\dvaPlus}[1]{\Suc{\Suc{#1}}}
 \newcommand{\dva}{\dvaPlus{\Zero}}
 
+%
+%\red{Nasleduje rozdelana verze our approache, jeste to budu dost menit, tak se nelekejte, nebude tam tolik nadpisu nebude tam nic cesky atd.}
 
-\red{Nasleduje rozdelana verze our approache, jeste to budu dost menit, tak se nelekejte, nebude tam tolik nadpisu nebude tam nic cesky atd.}
-
-\subsection{Individual representation}
-
-\subsubsection{What is a machine learning workflow?}
-Let us start with brief clarification of what we mean by term machine learning workflow. We can distinguish two kinds of machine learning methods: basic and combined. The basic methods are particular \textit{named} methods such as specific classification, regression, clustering, preprocessing or voting algorithms. On the other hand, the combined methods are \textit{anonymous} results of combining several basic methods into one compound by means of some specific ensemble method (such as stacking or boosting) or by simply putting outputs of one method as inputs to other ones. We call these combined method \textit{machine learning workflows}.
-
-\subsubsection{ML workflows as graphs}
-ML workflows are naturally representable as directed graphs; vertices represent basic methods and edges represent flows of data.
-Figure xxx. shows an example of such a workflow containing all above mentioned kinds of basic methods and ensembles.
-
-[Example picture with everything]
-
-Each edge has a type corresponding to the type of data flowing through it. 
-From the high level machine learning point of view we distinguish two basic types o data;
-input \Dlong ($\D$) and output \LDlong ($\LD$) containing the predictions.
-
-Workflow graphs are slightly different from standard graphs in that some of the edges may start nowhere (input edges) or end nowhere (output edges). 
-Alternatively we may add two special nodes, \textit{input} and \textit{output}, and let these special edges star or end in them.
-One way or another, the special edges determine a \textit{type} of a workflow.
-
-A workflow (such as the one on fig. xxx.) representing a classifier has one input edge of type $\D$ and one output edge of type $\LD$.
-
-To train and evaluate a significant number of such workflows - which may possibly be rather huge beasts -  presents a seriously time consuming task (thanks especially to nested cross-validations). Therefore we decided to take into account only workflows without cycles in their graph, i.e. directed acyclic graphs (DAGs). Doing so we limit the training and evaluation time by limiting the size of generated workflows, since the evaluation time of a DAG workflow is reasonably proportional to the number of basic methods.
-
-Consider a DAG with one input edge of type $a$ and with one output edge of type $b$, then we say that the dag has type $\DAG{a}{b}$. 
-For example the DAG from fig. xxx has type $\DAG{\D}{\LD}$ which is the type of a classifier.
-Type $\Dag$ is an example of a \textit{parametric type}, that is a type that takes two other types (e.g. $\D$ and $\LD$) as parameters to construct a specific type (e.g. $\DAG{\D}{\LD}$).
-Parametric types are extensively used and exploited in our approach.
-To deal with DAGs with multiple input or output edges is a slightly more complicated business explained below.
-
-\subsubsection{DAG combinators}
-
-During the evolution we need to generate and manipulate the workflow individuals. Rather than direct manipulation of the DAGs we prefer an indirect tree representation. From the evolution point of view the individuals are program expressions that may be  evaluated to give a value. This value is a JSON\footnote{Javascript object notation \red{jednou vetou popsat mozna}.} representation of the DAG encoding a ML workflow. This JSON value serves as a blueprint from which the actual ML workflow is build. Thus the DAG representation is an intermediate representation of a workflow.
-
-Our approach to constructing the workflow DAGs is based on strongly typed pure functional programming style. In the terms of classical genetic programming, one specifies a library from which the syntactic trees of program individuals are build by specifying a set of terminals (leaf node symbols) and a set of functions (interior node symbols). 
-
-Roughly speaking, we may say that our terminal set consists of basic machine learning methods and function set consists of dag combinators; operators that connect two or more smaller DAGs in a single more complicated one by some kind of serial or parallel composition. A careful reader may spot that some higher-orderism is in order here, since basic methods are basically functions, thus DAG combinators are functions over functions, i.e. higher-order functions.
-
-We see three major benefits of the tree representation of individuals in comparison with a more direct representation:
-
-(1) Trees are simple yet rich enough structures to support natural ways of substructure manipulation satisfying recombination needs of evolution driven search. Most notably in a cross-over operator. 
-
-(2) \red{Extensibility. Functional programming - simple yet powerful tool for writing extensible programs.}
-
-(3) Satisfaction of semantically imposed constraints. Because not all the possible DAGs are meaningful ML workflows. We manage to satisfy these constraints by transforming them onto type level in a way which we are going to demonstrate on the following simple example.
-
-\subsubsection{Generality and Correctness of the combinators}
-
-In the case of classical untyped genetic programming the terminal and function set consists only of the symbols accompanied with information about number of arguments that each function takes. In the typed situation we accompany the symbols with their types. Since the information whether a symbol is a terminal or function (and its arity) is already contained in the types, we can marge the terminal and function set into one library\footnote{\red{poznamka o tom ze v typový teorii se tomu řika context or basis a tak to pouzivame aby se propojila souvyslost.}} set $\Gamma$. This merge is also natural for applicative tree notation we use, which is described below.  
-
-Let us consider a small yet illustrative workflow depicted on figure \ref{simple_stacking} together with its tree representation, on which we demonstrate some of our combinators and why they have rather complicated types.
-
-\begin{figure}[th]
-\centerline{\includegraphics[width=10cm]{simple_stacking.jpg}}
-\vspace*{8pt}
-\caption{Simple stacking example.}
-\label{simple_stacking}
-\end{figure}
-
-Although we internally use more general applicative tree representation (with all the symbols in leaf nodes),
-here we present the tree as an S-expression with function symbols in the interior nodes.
-Let us start in the root of the tree, where is the $dia_0$ symbol standing for DAG combinator with type:
- 
-$\splitter{\D}{\LD}{n}{c} \ar \merger{\LD}{\LD}{n}{c} \ar \DAG{\D}{\LD}$
-  
-So it is a function taking two arguments\footnote{we use the functional convention for functions with multiple arguments discussed below in the subsection about applicative notation}, 
-first of type $\splitter{\D}{\LD}{n}{c}$ and second of type $\merger{\LD}{\LD}{n}{c}$, 
-and producing result of type $\DAG{\D}{\LD}$, that is a DAG with one input edge of type $\D$ and one output edge of type $\LD$ representing a classifier model.
-We use names starting with uppercase letter for specific (possibly parametric) types ($\Dag, \D, \LD, \V$) 
-and names starting with lowercase letter for \textit{type variables} ($n, c$).
-
-The result of the $dia_0$ combinator is a combined classifier workflow serially composing its two arguments, 
-which are again workflows but now with a slightly more complicated type in the middle; 
-the output type of the first and the input type of the second is the same type $\Ve{\LD}{n}{c}$. 
-
-- ! predvest nad prikladem s jednoduchym stackingem, kde muzeme ukazat jak zakladni kombinátory, tak distinction of disjoint and copy data vector.
-- Parametricky polymorfní Typovej systém
-- chceme konstruovat jen korektní dagy
-- chceme aby na sebe navazovali správně počty atd
-
-We may say that our approach balances two mutually counteractive tendencies: generality and correctness.
-
-
-\subsubsection{Applicative notation}
-
-- klasicka představa je že funkce jsou ve vnitřních uzlech a jejich parametry jsou syni
-- aplikativní notace využívá toho, že každou funkci si díky curringu mužu chápat jako fci 1 proměný. 
-- pak mužu vzit stromovou reprezentaci explicitně zachycující jednotlivé aplikace
-
-\subsection{Generating}
-
-- Dosud jsme popsali co je cílem tvořit a co to omezuje, aby to dávalo smysl. Ted popíšem jak na to jdeme. Nejprve to ilustrujem jednoduchym prikladem to provide a context, pak formalneji predstavime general notions on which the approach is based and after that we describe the algorithm together with techniques which make it fast enough for massive use in generating and mutation.
-
-\subsubsection{A simple example}
-
-- to by šlo snad názorně ukázat na příkladě generování stromu k>1:
-- Generujem Dag D LD, k>1 -> v kořeni stromu je aplikace tedy:
-- levej syn je funkce z něčeho do (Dag D LD), pravej syn je to něco
-… az se dostanem do listů (strom velikosti 1) - výběr symbolu z gammy aby to pasovalo..
-
-\subsubsection{Existential queries}
-
-- 1. základ našeho přístupu: ex. sigma že z gamma de vyvodit že M je typu sigma(tau)
-  - k tomu je potřeba definovat prerekvizitní pojmy, minimálně tyto:
-    - substituce
-    - a to jakym způsobem vypadá dotaz (k,tau) - a že je teda obecnejší to tau než přímo typ že pak M:Tau
-
-to kulminuje v hodící se funkci subs, která pro danej dotaz (k,tau) vrátí substituce spolu s počtama stromů
-
-
-\subsubsection{Generating based on sizes}
-
-- 2. základ našeho přístupu: generuje strom pro danou velikost stromu (počet symbolů).
-  - což mimojiné umožnuje mnohem přímější kontrolu nad tím, z jakého rozložení taháme naše jhedince 
-  - zde popsat to jak to děláme (32, 16,16, 8,8,8,8, ...)
-
-\subsubsection{Counting the trees}
-
-- 2. základ našeho přístupu: počítáme si počty stromů pro jednotlivý dotazy 
-     - abychom byli schopný generovat (semi-)uniformě
-
-\subsubsection{Final overview of generating}
-
-- pridáme skolemizaci aby to fungovalo
-- kesování aby se dalo generovat rychle
-    - předpočítání pomocných dat pro generování
-    - "semi-unfiromní" generování - pozn o nedokonalosti 
-- kulminující v pseudokódu
-
+%\subsection{Individual representation}
+%
+%\subsubsection{What is a machine learning workflow?}
+%Let us start with brief clarification of what we mean by term machine learning workflow. We can distinguish two kinds of machine learning methods: basic and combined. The basic methods are particular \textit{named} methods such as specific classification, regression, clustering, preprocessing or voting algorithms. On the other hand, the combined methods are \textit{anonymous} results of combining several basic methods into one compound by means of some specific ensemble method (such as stacking or boosting) or by simply putting outputs of one method as inputs to other ones. We call these combined method \textit{machine learning workflows}.
+%
+%\subsubsection{ML workflows as graphs}
+%ML workflows are naturally representable as directed graphs; vertices represent basic methods and edges represent flows of data.
+%Figure xxx. shows an example of such a workflow containing all above mentioned kinds of basic methods and ensembles.
+%
+%[Example picture with everything]
+%
+%Each edge has a type corresponding to the type of data flowing through it. 
+%From the high level machine learning point of view we distinguish two basic types o data;
+%input \Dlong ($\D$) and output \LDlong ($\LD$) containing the predictions.
+%
+%Workflow graphs are slightly different from standard graphs in that some of the edges may start nowhere (input edges) or end nowhere (output edges). 
+%Alternatively we may add two special nodes, \textit{input} and \textit{output}, and let these special edges star or end in them.
+%One way or another, the special edges determine a \textit{type} of a workflow.
+%
+%A workflow (such as the one on fig. xxx.) representing a classifier has one input edge of type $\D$ and one output edge of type $\LD$.
+%
+%To train and evaluate a significant number of such workflows - which may possibly be rather huge beasts -  presents a seriously time consuming task (thanks especially to nested cross-validations). Therefore we decided to take into account only workflows without cycles in their graph, i.e. directed acyclic graphs (DAGs). Doing so we limit the training and evaluation time by limiting the size of generated workflows, since the evaluation time of a DAG workflow is reasonably proportional to the number of basic methods.
+%
+%Consider a DAG with one input edge of type $a$ and with one output edge of type $b$, then we say that the dag has type $\DAG{a}{b}$. 
+%For example the DAG from fig. xxx has type $\DAG{\D}{\LD}$ which is the type of a classifier.
+%Type $\Dag$ is an example of a \textit{parametric type}, that is a type that takes two other types (e.g. $\D$ and $\LD$) as parameters to construct a specific type (e.g. $\DAG{\D}{\LD}$).
+%Parametric types are extensively used and exploited in our approach.
+%To deal with DAGs with multiple input or output edges is a slightly more complicated business explained below.
+%
+%\subsubsection{DAG combinators}
+%
+%During the evolution we need to generate and manipulate the workflow individuals. Rather than direct manipulation of the DAGs we prefer an indirect tree representation. From the evolution point of view the individuals are program expressions that may be  evaluated to give a value. This value is a JSON\footnote{Javascript object notation \red{jednou vetou popsat mozna}.} representation of the DAG encoding a ML workflow. This JSON value serves as a blueprint from which the actual ML workflow is build. Thus the DAG representation is an intermediate representation of a workflow.
+%
+%Our approach to constructing the workflow DAGs is based on strongly typed pure functional programming style. In the terms of classical genetic programming, one specifies a library from which the syntactic trees of program individuals are build by specifying a set of terminals (leaf node symbols) and a set of functions (interior node symbols). 
+%
+%Roughly speaking, we may say that our terminal set consists of basic machine learning methods and function set consists of dag combinators; operators that connect two or more smaller DAGs in a single more complicated one by some kind of serial or parallel composition. A careful reader may spot that some higher-orderism is in order here, since basic methods are basically functions, thus DAG combinators are functions over functions, i.e. higher-order functions.
+%
+%We see three major benefits of the tree representation of individuals in comparison with a more direct representation:
+%
+%(1) Trees are simple yet rich enough structures to support natural ways of substructure manipulation satisfying recombination needs of evolution driven search. Most notably in a cross-over operator. 
+%
+%(2) \red{Extensibility. Functional programming - simple yet powerful tool for writing extensible programs.}
+%
+%(3) Satisfaction of semantically imposed constraints. Because not all the possible DAGs are meaningful ML workflows. We manage to satisfy these constraints by transforming them onto type level in a way which we are going to demonstrate on the following simple example.
+%
+%\subsubsection{Generality and Correctness of the combinators}
+%
+%In the case of classical untyped genetic programming the terminal and function set consists only of the symbols accompanied with information about number of arguments that each function takes. In the typed situation we accompany the symbols with their types. Since the information whether a symbol is a terminal or function (and its arity) is already contained in the types, we can marge the terminal and function set into one library\footnote{\red{poznamka o tom ze v typový teorii se tomu řika context or basis a tak to pouzivame aby se propojila souvyslost.}} set $\Gamma$. This merge is also natural for applicative tree notation we use, which is described below.  
+%
+%Let us consider a small yet illustrative workflow depicted on figure \ref{simple_stacking} together with its tree representation, on which we demonstrate some of our combinators and why they have rather complicated types.
+%
+%\begin{figure}[th]
+%\centerline{\includegraphics[width=10cm]{simple_stacking.jpg}}
+%\vspace*{8pt}
+%\caption{Simple stacking example.}
+%\label{simple_stacking}
+%\end{figure}
+%
+%Although we internally use more general applicative tree representation (with all the symbols in leaf nodes),
+%here we present the tree as an S-expression with function symbols in the interior nodes.
+%Let us start in the root of the tree, where is the $dia_0$ symbol standing for DAG combinator with type:
+% 
+%$\splitter{\D}{\LD}{n}{c} \ar \merger{\LD}{\LD}{n}{c} \ar \DAG{\D}{\LD}$
+%  
+%So it is a function taking two arguments\footnote{we use the functional convention for functions with multiple arguments discussed below in the subsection about applicative notation}, 
+%first of type $\splitter{\D}{\LD}{n}{c}$ and second of type $\merger{\LD}{\LD}{n}{c}$, 
+%and producing result of type $\DAG{\D}{\LD}$, that is a DAG with one input edge of type $\D$ and one output edge of type $\LD$ representing a classifier model.
+%We use names starting with uppercase letter for specific (possibly parametric) types ($\Dag, \D, \LD, \V$) 
+%and names starting with lowercase letter for \textit{type variables} ($n, c$).
+%
+%The result of the $dia_0$ combinator is a combined classifier workflow serially composing its two arguments, 
+%which are again workflows but now with a slightly more complicated type in the middle; 
+%the output type of the first and the input type of the second is the same type $\Ve{\LD}{n}{c}$. 
+%
+%- ! predvest nad prikladem s jednoduchym stackingem, kde muzeme ukazat jak zakladni kombinátory, tak distinction of disjoint and copy data vector.
+%- Parametricky polymorfní Typovej systém
+%- chceme konstruovat jen korektní dagy
+%- chceme aby na sebe navazovali správně počty atd
+%
+%We may say that our approach balances two mutually counteractive tendencies: generality and correctness.
+%
+%
+%\subsubsection{Applicative notation}
+%
+%- klasicka představa je že funkce jsou ve vnitřních uzlech a jejich parametry jsou syni
+%- aplikativní notace využívá toho, že každou funkci si díky curringu mužu chápat jako fci 1 proměný. 
+%- pak mužu vzit stromovou reprezentaci explicitně zachycující jednotlivé aplikace
+%
+%\subsection{Generating}
+%
+%- Dosud jsme popsali co je cílem tvořit a co to omezuje, aby to dávalo smysl. Ted popíšem jak na to jdeme. Nejprve to ilustrujem jednoduchym prikladem to provide a context, pak formalneji predstavime general notions on which the approach is based and after that we describe the algorithm together with techniques which make it fast enough for massive use in generating and mutation.
+%
+%\subsubsection{A simple example}
+%
+%- to by šlo snad názorně ukázat na příkladě generování stromu k>1:
+%- Generujem Dag D LD, k>1 -> v kořeni stromu je aplikace tedy:
+%- levej syn je funkce z něčeho do (Dag D LD), pravej syn je to něco
+%… az se dostanem do listů (strom velikosti 1) - výběr symbolu z gammy aby to pasovalo..
+%
+%\subsubsection{Existential queries}
+%
+%- 1. základ našeho přístupu: ex. sigma že z gamma de vyvodit že M je typu sigma(tau)
+%  - k tomu je potřeba definovat prerekvizitní pojmy, minimálně tyto:
+%    - substituce
+%    - a to jakym způsobem vypadá dotaz (k,tau) - a že je teda obecnejší to tau než přímo typ že pak M:Tau
+%
+%to kulminuje v hodící se funkci subs, která pro danej dotaz (k,tau) vrátí substituce spolu s počtama stromů
+%
+%
+%\subsubsection{Generating based on sizes}
+%
+%- 2. základ našeho přístupu: generuje strom pro danou velikost stromu (počet symbolů).
+%  - což mimojiné umožnuje mnohem přímější kontrolu nad tím, z jakého rozložení taháme naše jhedince 
+%  - zde popsat to jak to děláme (32, 16,16, 8,8,8,8, ...)
+%
+%\subsubsection{Counting the trees}
+%
+%- 2. základ našeho přístupu: počítáme si počty stromů pro jednotlivý dotazy 
+%     - abychom byli schopný generovat (semi-)uniformě
+%
+%\subsubsection{Final overview of generating}
+%
+%- pridáme skolemizaci aby to fungovalo
+%- kesování aby se dalo generovat rychle
+%    - předpočítání pomocných dat pro generování
+%    - "semi-unfiromní" generování - pozn o nedokonalosti 
+%- kulminující v pseudokódu
+%
 
 \newcommand{\nv}     {v}
 \newcommand{\nvp}    {\nv^{\prime}}
@@ -428,42 +1026,43 @@ to kulminuje v hodící se funkci subs, která pro danej dotaz (k,tau) vrátí s
 \newcommand{\nvppppp}{\nv^{\prime\prime\prime\prime\prime}}
 \newcommand{\ball}{\op{treeID}}
 
-\Pseudokod{Get tree individual of size 1.}
-{\textbf{getTree$_1$}($\tau$, $\ball$, $\nv_0$)}{
-	\For {$(s,\tau_s) \in \Gamma$}{
-		$(\tau_s^{\prime},\nv_1) \la fresh_\tau(\tau_s,\nv_0)$ \;
-		\If {$\exists ~ \mu = \mgu{\tau,\tau_s^{\prime}}$} {
-			\If {$\ball = 0$} {
-				\Return $(s:\mu(\tau), \nv_1)$
-			} \Else {
-				$\ball \la \ball - 1$				
-			}
-		}	
-	}
-}{genOne1}
-
-\Pseudokod{Get tree individual of size $k > 1$.}
-{\textbf{getTree}($k$, $\tau$, $\ball$, $\nv_0$)}{
-	\For {$i \in \{1,\dots,k-1\}$}{
-		$j \la k - i$ \;
-		$(\alpha, \nv_1) \la newVar(\tau,\nv_0)$ \;
-		\For {$(n_F,\sigma_F,\nv_2) \in subs_i(\alpha \ar \tau, \nv_1 )$}{
-			\For {$(n_X,\sigma_X,\nv_3) \in subs_j(\sigma_F(\alpha), \nv_2 )$}{
-				$n_{FX} \la n_F \cdot n_X $ \;
-				\If {$\ball < n_{FX}$} {
-					\textbf{random} $\ball_F \in \{0,\dots,n_F - 1\}$ \;
-					\textbf{random} $\ball_X \in \{0,\dots,n_X - 1\}$ \;					
-					$(F, \nv_4)  \la getTree_i(\overline{\sigma_F(\alpha \ar \tau)}, \ball_F,\nv_3)$ \;
-					$(X, \nv_5) \la getTree_j(\overline{\sigma_X(\sigma_F(\alpha)}), \ball_X,\nv_4)$ \;
-					\Return $((F~X) : \sigma_X(\sigma_F(\tau)), \nv_5)$				
-				} \Else {
-					$\ball \la \ball - n_{FX}$				
-				}			
-			}
-		}	
-	}
-}{genOneK}
-
+%
+%\Pseudokod{Get tree individual of size 1.}
+%{\textbf{getTree$_1$}($\tau$, $\ball$, $\nv_0$)}{
+%	\For {$(s,\tau_s) \in \Gamma$}{
+%		$(\tau_s^{\prime},\nv_1) \la fresh_\tau(\tau_s,\nv_0)$ \;
+%		\If {$\exists ~ \mu = \mgu{\tau,\tau_s^{\prime}}$} {
+%			\If {$\ball = 0$} {
+%				\Return $(s:\mu(\tau), \nv_1)$
+%			} \Else {
+%				$\ball \la \ball - 1$				
+%			}
+%		}	
+%	}
+%}{genOne1}
+%
+%\Pseudokod{Get tree individual of size $k > 1$.}
+%{\textbf{getTree}($k$, $\tau$, $\ball$, $\nv_0$)}{
+%	\For {$i \in \{1,\dots,k-1\}$}{
+%		$j \la k - i$ \;
+%		$(\alpha, \nv_1) \la newVar(\tau,\nv_0)$ \;
+%		\For {$(n_F,\sigma_F,\nv_2) \in subs_i(\alpha \ar \tau, \nv_1 )$}{
+%			\For {$(n_X,\sigma_X,\nv_3) \in subs_j(\sigma_F(\alpha), \nv_2 )$}{
+%				$n_{FX} \la n_F \cdot n_X $ \;
+%				\If {$\ball < n_{FX}$} {
+%					\textbf{random} $\ball_F \in \{0,\dots,n_F - 1\}$ \;
+%					\textbf{random} $\ball_X \in \{0,\dots,n_X - 1\}$ \;					
+%					$(F, \nv_4)  \la getTree_i(\overline{\sigma_F(\alpha \ar \tau)}, \ball_F,\nv_3)$ \;
+%					$(X, \nv_5) \la getTree_j(\overline{\sigma_X(\sigma_F(\alpha)}), \ball_X,\nv_4)$ \;
+%					\Return $((F~X) : \sigma_X(\sigma_F(\tau)), \nv_5)$				
+%				} \Else {
+%					$\ball \la \ball - n_{FX}$				
+%				}			
+%			}
+%		}	
+%	}
+%}{genOneK}
+%
 
 
 \subsection{Formalization of our library}
@@ -471,19 +1070,19 @@ to kulminuje v hodící se funkci subs, která pro danej dotaz (k,tau) vrátí s
 - Ted když máme vybudovanou intuici pro to vo co tam de tak můžem na čtenář vyblít to co se na nějblije zhurta v ictai článku, s tim ze to muzem zestrucnit/zrychlit pac mnohe veci byly uz receny výše.
 
 
+	
+	
+%\chapter{Gecco}
+%
+%\textbf{Uniform Generating for Strongly Typed Genetic Programming with Parametric Polymorphism}
+%
+%In this paper we present a novel tree generating method for strongly typed genetic programming using a type system with parametric polymorphism. Our method is capable of uniform generating suitable both for a population initialization and a mutation operation. In order to perform this task effectively, the method utilizes type normalization and caching using dynamic programming. We concentrate on a deeper description of theoretical and technical aspects of our method to show its connection with logic programming. The method is demonstrated, analyzed and experimentally evaluated on a simple problem.
+%
 
 
-\chapter{Gecco}
-
-\textbf{Uniform Generating for Strongly Typed Genetic Programming with Parametric Polymorphism}
-
-In this paper we present a novel tree generating method for strongly typed genetic programming using a type system with parametric polymorphism. Our method is capable of uniform generating suitable both for a population initialization and a mutation operation. In order to perform this task effectively, the method utilizes type normalization and caching using dynamic programming. We concentrate on a deeper description of theoretical and technical aspects of our method to show its connection with logic programming. The method is demonstrated, analyzed and experimentally evaluated on a simple problem.
 
 
-
-
-
-\chapter{Generating}
+\chapter{Our Generating Approach}
 
 \section{General notions}
 
@@ -1107,399 +1706,25 @@ $ \subs{\tau_g}{1} = \{ \sigma_g \mid (s,\tau_s) \in \Gamma, \sigma_g = \MGU{\ta
 
 
 
-\chapter{Hindley-Milner type system}
 
-V 0.2
 
-\newcommand{\letin}[3]{\texttt{let} \, #1 = #2 \, \texttt{in} \, #3}
-\newcommand{\W}{\op{\textbf{W}}}
-\newcommand{\Mgu}{\op{\textbf{MGU}}}
-\newcommand{\where}{\op{\textbf{where~}}}
-\newcommand{\SPr}{S^\prime}
 
 
-\section{Introduction}
 
-\red{Why Hindley-Milner (= simplified system F capable of type inference in curry style)}
 
 
-\section{Language of type expressions}
 
-\red{Explain simple types and type schemes.}
 
-\section{Type substitutions}
 
-\red{definition} ; \red{informally explain: makes a type more specific} ; \red{as function} ; \red{can be composed by $\circ$}
 
-\section{Contexts}
-\red{building symbols}
 
-\red{def $\Gamma_x$} ; \red{def $\overline{\Gamma}(\tau)$}
 
 
 
 
-\section{Inference rules}
 
 
-\section{Hindley-Milner algorithm W}
 
-The Hindley-Milner algorithm $\W$ is used for type inference.
-Loosely speaking, we give to $\W$ as an input 
-a \textit{program expression} $e$ without type information 
-and it returns a \textit{type} $\tau$ of that expression as a result, 
-or it tells us that the expression cannot be typed correctly.
-
-From this simplified point of view we may see the algorithm usage as:
-
-(1) We have an expression $e$, for which we would like to know the type. 
-
-So we run $\W$ on $e$ and we may either get as a result:
-
-(2a) a type $\tau$, so we know that $e$ has type $\tau$,
-
-(2b) or the \textit{fail result} $\bot$ (usually called \textit{bottom}), so we know there is a type error inside $e$.
-
-~   
-
-The first simplification of this description lies in that we have omitted 
-the typing contexts (the "Gammas"). 
-All the inference rules deal with \textit{judgments} of the form:
-
-$$\Gamma \vdash e : \tau$$
-
-And so does the $\W$ algorithm.
-If $e$ is the top-level program expression,
-we can think of a context $\Gamma$ as a collection of type information about the "library"
-in which the program expression $e$ is written.
-Or, if $e$ is some local sub-expression, then its $\Gamma$ contains also type information about
-all the local variables defined in its scope.
-
-We can think of a judgment of the form $\Gamma \vdash e : \tau$ as: 
-\textit{From the building symbols described in the typing context $\Gamma$ we can build 
-a well-typed program expression $e$ which has type $\tau$.}
-Therefore it makes sense to provide a typing context $\Gamma$ to the $\W$ algorithm as another argument: $\W(\Gamma, e)$.
-
-But $\W$ algorithm is even stronger: We may use libraries for which we do not know the proper typing information yet.
-
-For example consider the following expression $e$:
-
-$$ \lambda x . ((+~((+~x)~1))~x) $$
-
-Or, in a more readable fashion, $e = \lambda x . (x+1)+x $.
-
-
-And let's pretend that the only thing we know is that $1 : \op{Int}$, 
-but we don't know the type of $+$. 
-$\W$ can deal with this situation and infer that $e$ has type $Int \ar Int$ and
-that $+$ has type $Int \ar Int \ar Int$. This can be achieved by calling $\W$ with
-typing context $\Gamma = \{ 1 : \op{Int}, + : \alpha \}$, 
-where $\alpha$ is a \textit{type variable}.
-
-But if the only result of the $\W(\Gamma,e)$ is the type $\tau$ of $e$, 
-how we get the information about the inferred type of $+$? 
-Well, $\W$ actually returns a pair $(S, \tau)$, where $S$ is a substitution
-containing the rest of the inferred type information. 
-More specifically, $S(\alpha) = Int \ar Int \ar Int$.  
-
-Now we can state the behavior of the $\W$ algorithm more formally:
-
-~
-
-Given context $\Gamma$ and expression $e$ the Hindley-Milner algorithm $\W$ 
-is looking for the substitution $S$ and type $\tau$ such that: 
-$$ S(\Gamma) \vdash e : \tau $$
-If there are no such $S$ and $\tau$, then the $\W$ algorithm fails.
-But if there are any, $\W$ finds the most general $S$ a $\tau$.
-
-
-\begin{align*}
-\W(\Gamma, e) = &
-\begin{cases*}
-  (S, \tau) 
-  & \textbf{if} there is any $\SPr$ and $\tauPr$ such that $S^\prime(\Gamma) \vdash e : \tauPr$  \\
-  \bot & \textbf{otherwise}
-\end{cases*}\\
-\end{align*}
-
-
-
-
-\subsection{Definition of W algorithm}
-
-Here we present a recursive definition of $\W$ algorithm based on case analysis of all possible patterns that program expression $e$ may have 
-(i.e. $e$ may be a \textit{variable}, an \textit{application}, an \textit{abstraction}, or a \textit{let-expression}). 
-
-~
-
-\red{need to comment the need for fresh type variables $\beta$s}
-
-\red{need to comment that when sub call fail, then also the calling computation fails}
-
-~
-
-\textbf{(1)} Expression $e$ is a \textit{variable}; $e = x$:
-
-\begin{align*}
-\W(\Gamma, x) \defi ~ &
-\begin{cases*}
-  (\{\}, R(\tauPr) ) 
-  & \textbf{if} $(x : \forall \alpha_1 \dots \alpha_n.\tauPr) \in \Gamma$  \\
-  \bot & \textbf{otherwise}
-\end{cases*}\\
-\where & R = \{\alpha_1 \mapsto \beta_1, \dots, \alpha_n \mapsto \beta_n\} \\
-\end{align*}
-
-
-\textbf{(2)} Expression $e$ is an \textit{application}; $e = (e_1~e_2)$:
-
-\begin{align*}
-\W(\Gamma, (e_1~e_2)) \defi ~ & 
-\begin{cases*}
-  (R \circ S_2 \circ S_1, R(\beta) ) & \textbf{if} $R \neq \bot$ \\
-  \bot & \textbf{if} $R = \bot$
-\end{cases*}\\
-\where & (S_1, \tau_1) = \W(\Gamma, e_1), \\
-       & (S_2, \tau_2) = \W(S_1(\Gamma), e_2), \\
-       & R = \Mgu( S_2(\tau_1), \tau_2 \ar \beta ).\\
-\end{align*}
-
-
-\textbf{(3)} Expression $e$ is an \textit{abstraction}; $e = \lambda x . e_1$:
-
-\begin{align*}
-\W(\Gamma, \lambda x .e_1) \defi ~ & (S_1, S_1(\beta) \ar \tau_1 ) \\
-\where & (S_1, \tau_1) = \W(\Gamma_x, x : \beta ~;~ e_1). \\
-\end{align*}
-
-
-
-\textbf{(4)} Expression $e$ is a \textit{let-expression}; $e = (\letin{x}{e_1}{e_2})$:
-
-\begin{align*}
-\W(\Gamma, \letin{x}{e_1}{e_2}) \defi ~ & (S_2 \circ S_1, \tau_2) \\
-\where & (S_1, \tau_1) = \W(\Gamma, e_1), \\
-       & (S_2, \tau_2) = \W(S_1(\Gamma_x),x:\overline{(S_1(\Gamma))}(\tau_1); e_2). \\
-\end{align*}
-
-\subsection{Example run of W algorithm}
-
-We demonstrate $\W$ algorithm on simple example which contains all four possible forms of expressions as sub-expressions:
-$$\letin{x}{\lambda x . x}{f~f}$$
-
-All the contained program variables
-($f$ and $x$) are locally defined variables, so we don't need to provide any further type
-information, therefore we call $\W$ with an empty typing context $\Gamma = \emptyset$. 
-
-$$\W(\emptyset, \letin{f}{\lambda x . x}{f~f})$$
-
-The expression matches the case \textbf{(4)}:
-\begin{align*}
-\W(\emptyset, \letin{f}{\lambda x . x}{f~f}) \defi ~ & (S_2 \circ S_1, \tau_2) \\
-\where & (S_1, \tau_1) = \W(\emptyset, \lambda x . x), \\
-       & (S_2, \tau_2) = \W(S_1(\emptyset_f),f:\overline{(S_1(\emptyset))}(\tau_1); f~f).
-\end{align*}
-
-So we need to first compute the type (and substitution) of the $e_1 = \lambda x . x$, matching the case \textbf{(3)}:
-\begin{align*}
-\W(\emptyset, \lambda x .x) \defi ~ & (S_1, S_1(\beta_1) \ar \tau_1 ) \\
-\where & (S_1, \tau_1) = \W(\{x : \beta_1 \}~,~ x).
-\end{align*}
-
-Finally we get to the first variable (case \textbf{(1)}), thus we will get our first result.
-\begin{align*}
-\W(\{x : \beta_1 \}~,~ x) \defi ~ & ( \{\}, R(\beta_1) ) \where  R = \{\} \\
-                              = ~ & ( \{\}, \beta_1 )
-\end{align*}
-
-Because $x$ has type $\beta_1$ in the context $\{x : \beta_1\}$, and $\beta_1$ has no universally quantified prefix head, the substitution $R$ is empty, therefore identity. With this information we can get back to computation of $\W(\emptyset, \lambda x .x)$ and finish it. 
-\begin{align*}
-\W(\emptyset, \lambda x . x) \defi ~ & (S_1, S_1(\beta_1) \ar \tau_1 ) \where (S_1, \tau_1) = ( \{\}, \beta_1 ) \\
- = ~ & (\{\}, \{\}(\beta_1) \ar \beta_1 ) = (\{\}, \beta_1 \ar \beta_1 )
-\end{align*}
-
-By this we have finished the first recursive call in computation of \\
-$\W(\emptyset, \letin{f}{\lambda x . x}{f~f})$. So we can compute the second recursive call:
-\begin{align*}
-& \W(S_1(\emptyset_f),f:\overline{(S_1(\emptyset))}(\tau_1); f~f) \where (S_1, \tau_1) = (\{\}, \beta_1 \ar \beta_1 ) \\
-= & \W(\{\}(\emptyset_f),f:\overline{(\{\}(\emptyset))}(\beta_1 \ar \beta_1); f~f) \\
-= & \W(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}; f~f)
-\end{align*}
-
-Now wee need to compute the type of expression $(f~f)$ which is an application (case \textbf{(2)}) from typing context $\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}$, specifying that $f$ has type of the \textit{polymorphic} identity. 
-\begin{align*}
-\W(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}; f~f) \defi ~ & 
-(R \circ S_2 \circ S_1, R(\beta_?) ) \\
-\where & (S_1, \tau_1) = \W(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}, f), \\
-       & (S_2, \tau_2) = \W(S_1(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}), f), \\
-       & R = \Mgu( S_2(\tau_1), \tau_2 \ar \beta_? ).\\
-\end{align*}
-
-You can see $\beta_?$ which is used to signify that it is not obvious what index the new fresh variable will have, since the two recursive calls to $\W$ may produce some new fresh variables before $\beta_?$ is introduced. Actually both calls produce one new type variable, thus $\beta_?$ will be $\beta_4$, as we will see.
-\begin{align*}
-\W(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}, f) \defi ~ & (\{\}, R(\beta_1 \ar \beta_1) ) 
-~ \where R = \{\beta_1 \mapsto \beta_2\} \\
-= ~ &  (\{\}, \beta_2 \ar \beta_2)
-\end{align*}
-
-Now we can continue with the second call:
-\begin{align*}
-\W(\{\}(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}), f) \defi ~ & (\{\}, R(\beta_1 \ar \beta_1) ) 
-~ \where R = \{\beta_1 \mapsto \beta_3\} \\
-= ~ &  (\{\}, \beta_3 \ar \beta_3)
-\end{align*}
-
-And finally we compute the \textit{most general unification} $R$:
-\begin{align*}
-R & = \Mgu(\beta_2 \ar \beta_2, (\beta_3 \ar \beta_3) \ar \beta_4 ) \\
-  & = \{ \beta_2 \mapsto (\beta_3 \ar \beta_3),~ \beta_4 \mapsto (\beta_3 \ar \beta_3) \}
-\end{align*}
-
-One can see that R really unifies $\beta_2 \ar \beta_2$ and $(\beta_3 \ar \beta_3) \ar \beta_4$,
-because $R(\beta_2 \ar \beta_2) = (\beta_3 \ar \beta_3) \ar (\beta_3 \ar \beta_3) = R((\beta_3 \ar \beta_3) \ar \beta_4)$. Now the computation of $\W(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}; f~f)$ can be finished:
-\begin{align*}
-\W(\{f:\forall \beta_1 . \beta_1 \ar \beta_1 \}; f~f) 
-\defi ~ & (R \circ S_2 \circ S_1, R(\beta_4) ) \\
-    = ~ & (\{ \beta_2 \mapsto (\beta_3 \ar \beta_3), \beta_4 \mapsto (\beta_3 \ar \beta_3) \} \circ \{\} \circ \{\},~ \beta_3 \ar \beta_3 )\\ 
-    = ~ & (\{ \beta_2 \mapsto (\beta_3 \ar \beta_3), \beta_4 \mapsto (\beta_3 \ar \beta_3) \}, ~ \beta_3 \ar \beta_3 ) 
-\end{align*}
-
-Now we can compute the final result:
-\begin{align*}
-\W(\emptyset, \letin{f}{\lambda x . x}{f~f}) = ~ & (S_2 \circ S_1, \tau_2) \\
-\where & (S_1, \tau_1) = (\{\}, \beta_1 \ar \beta_1 ), \\
-       & (S_2, \tau_2) = (\{ \beta_2 \mapsto (\beta_3 \ar \beta_3), \beta_4 \mapsto (\beta_3 \ar \beta_3) \}, ~ \beta_3 \ar \beta_3 ).
-\end{align*}
-
-And therefore:
-\begin{align*}
-\W(\emptyset, \letin{f}{\lambda x . x}{f~f}) = ~ & (\{ \beta_2 \mapsto (\beta_3 \ar \beta_3), \beta_4 \mapsto (\beta_3 \ar \beta_3) \},~ \beta_3 \ar \beta_3)
-\end{align*}
-
-We get an unsurprising result:
-$$\emptyset \vdash (\letin{f}{\lambda x . x}{f~f}) : \beta_3 \ar \beta_3$$
-~
-
-~
-
-\red{todo}
-
-
-
-
-
-\subsection{Correctness and completeness of W}
-
-~
-
-\subsubsection{Correctness of W}
-
-If $\W(\Gamma, e) = (S, \tau)$, then exist derivation of the judgment $S(\Gamma) \vdash e : \tau$.
-
-~
-
-\subsubsection{Completeness of W}
-
-Let $\Gamma$ be a context and $e$ a program expression,
-and let $\SPr$ be a substitution and $\tauPr$ a type such that:
-$ \SPr(\Gamma) \vdash e : \tauPr $, 
-then:
-
-(1) $\W(\Gamma,e)$ succeeds (i.e. $\W(\Gamma,e) \neq \bot$), 
-let $\W(\Gamma,e) = (S, \tau)$,
-
-(2) there is a substitution $R$ such that $\SPr = R \circ S$ 
-and $R\overline{(S(\Gamma))}(\tau) \sqsupseteq \tauPr$. 
-
-~ 
-
-The correctness theorem states that if $\W$ finds a solution, then the solution is correct.
-The first part of the completeness theorem, states that if there is a solution, then $\W$ finds one. And the second part formally states that the found solution $(S,\tau)$ is the most general one, by comparing it with an arbitrary solution $(\SPr,\tauPr)$. The substitution $R$ acts as a witness of the fact that we can obtain $\SPr$ by making $S$ more specific ($\SPr = R \circ S$).  
-
-\red{Než bude možno vysvětlit druhou část dvojky, je třeba zavést ten closure overline někde vejš}
-
-~
-
-\section{Unification algorithm}
-\red{todo: some comment}
-
-\Pseudokod{Algorithm finding the most general unification.}
-{\textbf{MGU}($\tau_1$, $\tau_2$)}{
-	
-	$result = \{\}$ \;
-	$agenda \la [(\tau_1$, $\tau_2)]$ \;	
-	$isOK \la True$ \;
-
-	\;	
-	
-	\While {agenda not empty $\wedge$ isOK}{
-		$(\tau_a, \tau_b) \la agenda.removeFirst()$ \;
-		$isOK = \textbf{process}(\tau_a, \tau_b, agenda, result)$			
-	}
-	\;
-	
-	\If {$isOK$} {
-		\Return $result$
-	} \Else {
-		\Return $\bot$				
-	}
-	
-}{mguAlg}
-
-\Pseudokod{Processes one type pair.}
-{\textbf{process}($\tau_1$, $\tau_2, agenda, result$)}{
-	\;
-	\If {$\tau_1$ and $\tau_2$ are the same \textbf{TypeVar}} {
-		\Return $True$
-	} \;
-
-	\If {$\tau_1$ and $\tau_2$ are the same \textbf{TypeSym}} {
-		\Return $True$
-	} \;
-
-	\If {$\tau_1$ and $\tau_2$ are both \textbf{TypeTerm} with the same length} {
-		$agenda.addAll(zip(\tau_1.args(), \tau_2.args()))$ \;
-		\Return $True$
-	} \;
-	
-	\If {$\tau_1$ is a \textbf{TypeVar}} {
-		\Return $\textbf{processTypeVar}(\tau_1$, $\tau_2, agenda, result)$
-	} \;
-	
-	\If {$\tau_2$ is a \textbf{TypeVar}} {
-		\Return $\textbf{processTypeVar}(\tau_2$, $\tau_1, agenda, result)$
-	} \;	
-	
-	\Return $False$
-	
-}{mguAlgProcess}
-
-\Pseudokod{Processes one $var \mapsto type$ binding.}
-{\textbf{processTypeVar}($var, type, agenda, result$)}{
-	\;
-	
-	\If {$type$ contains $var$} {
-		\Return $False$
-	} \;
-
-	$S \la \{var \mapsto type \}$\;\;
-
-	\For {$entry$ in $result$} {
-		$(v \mapsto \tau) \la entry$ \;
-		$entry.setValue( S(\tau) )$
-	} \;
-
-	\For {$entry$ in $agenda$} {
-		$(\tau_1, \tau_2) \la entry$ \;
-		$entry.setValue( S(\tau_1), S(\tau_2) )$
-	} \;
-
-	
-	$result.add(var \mapsto type)$ \;\;
-	
-	\Return $True$
-	
-}{mguAlgProcessTypeVar}
 
 
 
