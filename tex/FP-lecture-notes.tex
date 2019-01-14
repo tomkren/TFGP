@@ -41,12 +41,9 @@
 }
 
 
-
-
-
 %\usepackage{enumitem}
 
-\title{Some FP lecture notes (v0.4)}
+\title{Some FP lecture notes (v0.6)}
 
 \author{Tomáš Křen}
 
@@ -146,13 +143,6 @@
 
 
 
-
-
-
-
-
-
-
 \newcommand{\inhab}[1]{\op{I}(#1)}
 
 \newcommand{\tord}{\preccurlyeq}
@@ -202,20 +192,28 @@
 
 \chapter{Hindley-Milner Type System}
 
-\red{\textbf{Still work in progress... but the sections about Hindley-Milner algorithm W are almost OK now.}}
+\red{The text is not completely finished, but hopefully the sections dealing with the Hindley-Milner algorithm $\W$ are sufficiently understandable.}
 
 
+\section*{TODO list}
 
+\red{
+\begin{itemize}
+\item Define rest of the context stuff
+\item Textually describe unification algorithm
+\item In W comment for each case what is going on.
+\item write Intro
+\end{itemize}
+}
 
 \section{Introduction}
 
-\red{Why Hindley-Milner (= simplified system F capable of type inference in curry style)}
-
+\red{Todo: Why Hindley-Milner? (= simplified system F capable of type inference in curry style).}
 
 \section{Type Language}
 \label{sec:typelang}
 
-
+\red{TODO probably replace simple-type with mono-type}
 
 A type system connects a type language with a program language.
 In this section we present the type language (i.e. what are legal type expressions and what are they supposed to mean) used in Hindley-Milner type system.
@@ -259,9 +257,6 @@ type.
 In this text, type variables are written as Greek letters from the beginning of the alphabet ($\alpha$ and $\beta$ with possible index, e.g. $\beta_{42}$); 
 in Haskell a type variable is written as a single lowercase word, usually one character long.
 
-
-\red{TODO:  Explain properly simple types and type schemes.}
-
 We get the full type language by adding \textit{poly-types} (from \textit{polymorphic}). Poly-types  are created by use of the fourth type construct: the universal quantification using $\forall$. 
 
 More specifically we can take any type expression $\sigma$ (simple-type or poly-type) and make 
@@ -299,49 +294,19 @@ So what is the purpose of free type variables?
 
 We may say that in Hindley-Milner algorithm the type variables are used for two different purposes, depending on whether they are free or bound by $\forall$ quantifier.
 
+The bound variables act as we know them from Haskell, the tricky part are the free variables.
+
+\red{TODO specifiy the convetions regarding $\sigma$ for poly-types (well more precisely any-type) and  $\tau$ for mono-types}
 
 
-\red{Odtud to dál zprocesovat...}
-
-To avoid possible confusion, we demonstrate the difference 
-on an example type $\tau = (a \ar b)$:
+We demonstrate the difference 
+on an example type $\tau = (\alpha \ar \beta)$ and $\sigma = (\forall \alpha \beta . \alpha \ar \beta)$:
 \begin{itemize}
-\item We have a program expression $M$ having type $\tau$, i.e. $M : \tau$.
-This is a standard context for using types.  There is no program $M$ such that $M : a \ar b$.
-\item We have a program expression $M$ for a \textit{goal type query} $\tau$,
-such that there is a \textit{substitution} $\sigma$ for which $M : \sigma(\tau)$.
-For every program $N$ representing a function
-there is a substitution $\sigma$ such that $N : \sigma(a \ar b)$.
-If $N : \tau_1 \ar \tau_2$, then $\sigma = \{a \mapsto \tau_1, b \mapsto \tau_2\}$.
+\item There is no program expression $e$ such that $e : \forall \alpha \beta . \alpha \ar \beta$, because it would be a polymorphic function magically converting values between every pair of types.
+\item On the other hand statement $e : \alpha \ar \beta$ tells us only that $e$ is some function, we don't know yet, which specific types will stand for $\alpha$ and $\beta$. It corresponds to a more intermediate result.    
+
+\red{TODO: formulate more precisely...}
 \end{itemize}
-
-This example shows why the \textit{goal type queries} are so useful: 
-we can query creation of an expression before we know its
-exact type, we only need to know a \textit{pattern} of that type. 
-In this context, a type variable acts as a placeholder
-for a future---possibly more specific---type (given by the $\sigma$). 
-This is a different task than constructing a program with a specific type
-containing a type variable, where one wants to generate 
-a program having the specific polymorphic type.
-% TODO WTF
-
-But what if we want to generate a program having a specific polymorphic type $\tau$,
-what \textit{goal type query} $\tauPr$ should be used then?
-For example, let $\tau = ((a \ar b) \ar ((b \ar c) \ar (a \ar c)))$.
-We define an auxiliary type construct for this very purpose, we call it
-\textit{grounded type variables}. 
-Technically a grounded type variable is just a special type symbol
-representing a known type variable.
-Grounding can be seen as a~process on type variables, transforming
-a type variable into a type symbol. 
-A grounded type variable $a$ is denoted by an overline as $\overline{a}$.
-The operation can be generalized to arbitrary types by simply replacing all type variables
-by their grounded variants. This trick solves the problem of how to chose the
-\textit{goal type query} $\tauPr = \overline{\tau} 
-= ((\overline{a} \ar \overline{b}) 
-  \ar ((\overline{b} \ar \overline{c}) \ar (\overline{a} \ar \overline{c})))$.
-The grounding operation is used extensively in the bottom-up generation process.
-In a way, this operation is related to the skolemization in logic.
 
 
 
@@ -349,20 +314,50 @@ In a way, this operation is related to the skolemization in logic.
 
 \section{Type Substitutions}
 
-\red{definition} ; \red{informally explain: makes a type more specific} ; \red{as function} ; \red{can be composed by $\circ$}
+Generally speaking, a substitution is a function used for replacement 
+of variables in an expression by some other expression.
+Substitution is used both in program expressions 
+(e.g. it is the core of $\beta$-reduction) and type expressions.
+Here we will be dealing with substitutions on the type level. 
+
+A type substitution is a finite mapping from type variables to types.
+It is usually denoted as a collection of $key \mapsto value$ pairs.
+The general form is:
+
+$$\{ \alpha_1 \mapsto \tau_1, \alpha_2 \mapsto \tau_2, \dots, \alpha_n \mapsto \tau_n \}$$ 
+
+For example, let 
+
+$S = \{ \alpha_3 \mapsto \op{Int}, 
+\beta_3 \mapsto (\op{List}~\alpha_6),
+\alpha_5 \mapsto \beta_1, 
+\beta_{23} \mapsto (\alpha_3 \ar \beta_1) \}$ 
+and 
+
+$\tau = ((\alpha_3 \ar \alpha_5) \ar ( \beta_1  \ar (\op{List}~\alpha_6) ) )$,
+then 
+
+$\tauPr = S(\tau) = ((\op{Int} \ar \beta_1) \ar (\beta_1  \ar (\op{List}~\alpha_6) ) )$.
+
+Generally, by applying a substitution $S$ to type $\tau$, we get a \textit{more specific} type $\tauPr = S(\tau)$.
+
+A special (but often seen, e.g. in Hindley-Milner algorithm) case of substitution is an
+empty substitution, denoted as $\{\}$, having no effect when applied; 
+i.e. $\{\}(\tau) = \tau$.
+
+
+Because substitutions can be dealt with as with functions, we can compose them using composition operator $\circ$. Let $R = S_2 \circ S_1$, then 
+$R(\tau) = (S_2 \circ S_1)(\tau) = S_2 ( S_1(\tau) )$. 
 
 
 
-\section{Contexts}
+\section{Typing Contexts}
 
 \begin{definition}
 A $\mathit{term:type}$ statement $\mathit{M}:\mathit{\tau}$ states that (program) term $M$ has type $\tau$.   
 A \textit{declaration} is a statement $s : \tau$ where $s$ is a term symbol and $\tau$ is a type.
 A \textit{context} is set of declarations with distinct term symbols.\footnote{Interestingly, the definition of a \textit{context} and definition of a \textit{substitution} are almost the same. The difference is that "keys" in a context are term symbols/variables, whereas substitution "keys" are type variables. Maybe this fact could be utilized in an interesting way...}
 \end{definition}
-
-
-\red{building symbols}
 
 \red{def $\Gamma_x$} ; \red{def $\overline{\Gamma}(\tau)$}
 
@@ -458,9 +453,9 @@ Here we present a recursive definition of $\W$ algorithm based on case analysis 
 
 ~
 
-\red{need to comment the need for fresh type variables $\beta$s}
+Whenever there is a type variable $\beta$ (or $\beta_i$) it is meant to be a \textit{new fresh type variable}, that has not occurred anywhere in $\Gamma$ or during the computation of some other sub-expression. Namely, fresh type variables $\beta$ are introduced in cases \textbf{(1)}, \textbf{(2)} and \textbf{(3)}. 
 
-\red{need to comment that when sub call fail, then also the calling computation fails}
+During the computation of cases \textbf{(2)}, \textbf{(3)} and \textbf{(4)} there is a recursive call to $\W$ which can possibly fail; whenever a recursive call fails, then also the calling computation fails.
 
 ~
 
@@ -604,11 +599,6 @@ And therefore:
 
 We get an unsurprising result:
 $$\emptyset \vdash (\letin{f}{\lambda x . x}{f~f}) : \beta_3 \ar \beta_3$$
-~
-
-~
-
-\red{todo}
 
 
 \section{Inference Rules}
@@ -657,7 +647,6 @@ $$\triRule{\beta_i \notin \op{FTV}(\forall \alpha_1\dots\alpha_n.\tau) \text{ fo
 
 
 
-
 \subsection{Correctness and Completeness of W}
 
 ~
@@ -686,14 +675,11 @@ and $R\overline{(S(\Gamma))}(\tau) \sqsupseteq \tauPr$.
 The correctness theorem states that if $\W$ finds a solution, then the solution is correct.
 The first part of the completeness theorem, states that if there is a solution, then $\W$ finds one. And the second part formally states that the found solution $(S,\tau)$ is the most general one, by comparing it with an arbitrary solution $(\SPr,\tauPr)$. The substitution $R$ acts as a witness of the fact that we can obtain $\SPr$ by making $S$ more specific ($\SPr = R \circ S$).  
 
-\red{Než bude možno vysvětlit druhou část dvojky, je třeba zavést ten closure overline někde vejš}
-
-~
-
+\red{Before it is possible to explain the second part of point two, it is necessary to introduce  the "closure overline" somewhere above.}
 
 
 \section{Unification Algorithm}
-\red{todo: some comment}
+\red{todo: Add some explanation here!}
 
 \Pseudokod{Algorithm finding the most general unification.}
 {\textbf{MGU}($\tau_1$, $\tau_2$)}{

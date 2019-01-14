@@ -35,6 +35,15 @@
 /tex/readme.synctex.gz
 /tex/readme.toc
 
+/tex/FP-lecture-notes.pdf
+/tex/FP-lecture-notes.aux
+/tex/FP-lecture-notes.log
+/tex/FP-lecture-notes.out
+/tex/FP-lecture-notes.synctex.gz
+/tex/FP-lecture-notes.toc
+
+
+
 /results/A_*.plt
 /results/S_*.plt
 /results/R_*.txt
